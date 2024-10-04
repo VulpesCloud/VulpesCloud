@@ -1,13 +1,13 @@
 package io.github.thecguygithub.node
 
-import io.github.thecguygithub.api.CloudAPI
+import io.github.thecguygithub.api.JavaCloudAPI
 import io.github.thecguygithub.node.command.CommandProvider
 import io.github.thecguygithub.node.terminal.JLineTerminal
 import io.github.thecguygithub.node.util.Configurations.readContent
 import java.nio.file.Path
 
 
-class Node : CloudAPI() {
+abstract class Node: JavaCloudAPI() {
 
     companion object {
         var instance: Node? = null

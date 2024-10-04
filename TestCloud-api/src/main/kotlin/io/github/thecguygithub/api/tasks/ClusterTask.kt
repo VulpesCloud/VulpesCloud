@@ -1,11 +1,12 @@
 package io.github.thecguygithub.api.tasks
 
+import io.github.thecguygithub.api.Detail
 import io.github.thecguygithub.api.Named
 import io.github.thecguygithub.api.platforms.PlatformGroupDisplay
 import io.github.thecguygithub.api.services.ClusterService
 
 
-interface ClusterTask : Named{
+interface ClusterTask : Named, Detail {
 
     fun nodes(): Array<String?>?
 
