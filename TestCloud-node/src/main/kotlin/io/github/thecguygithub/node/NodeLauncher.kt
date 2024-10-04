@@ -14,7 +14,7 @@ class NodeLauncher {
                 println("setting startup")
                 System.setProperty("startup", System.currentTimeMillis().toString())
                 println("Starting Node!")
-                Node.instance?.init()
+                Node()
             } catch (exception: Exception) {
                 // check for remove
                 exception.printStackTrace()
