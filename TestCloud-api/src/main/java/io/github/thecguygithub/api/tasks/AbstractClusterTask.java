@@ -25,8 +25,8 @@ public abstract class AbstractClusterTask implements ClusterTask {
     private int maxMemory;
     private int maxPlayers;
     private boolean staticService;
-    private int minOnlineServerInstances;
-    private int maxOnlineServerInstances;
+    private int minOnlineCount;
+    private boolean maintenance;
 
     // private final PropertiesPool properties;
 

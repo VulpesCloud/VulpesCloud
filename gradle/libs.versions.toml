@@ -5,12 +5,14 @@ annotations = "25.0.0"
 
 # network
 netty5 = "5.0.0.Alpha5"
+jedis = "5.2.0"
 
 #logging
 log4j2 = "2.24.1"
 
 # configuration
 gson = "2.11.0"
+json = "20240303"
 
 # console
 jline = "3.27.0"
@@ -44,6 +46,7 @@ annotations = { group = "org.jetbrains", name = "annotations", version.ref = "an
 
 # network
 netty5 = { group = "io.netty", name = "netty5-all", version.ref = "netty5" }
+jedis = {group = "redis.clients", name = "jedis", version.ref = "jedis"}
 
 # logging
 log4j2 = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j2" }
@@ -51,6 +54,7 @@ log4j2-simple = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version
 
 # configuration
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
+json = { group = "org.json", name = "json", version.ref = "json"}
 
 # console
 jline = { group = "org.jline", name = "jline", version.ref = "jline" }

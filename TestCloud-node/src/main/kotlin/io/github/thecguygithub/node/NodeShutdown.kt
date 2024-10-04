@@ -14,6 +14,10 @@ object NodeShutdown {
 
         logger.info("Shutting down the Node!")
 
+        if (Node.redisController != null) {
+            Node.redisController!!.shutdown()
+        }
+
         Node.terminal!!.close()
 
         exitProcess(0)
