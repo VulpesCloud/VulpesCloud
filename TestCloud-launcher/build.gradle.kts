@@ -14,6 +14,7 @@ dependencies {
 
 tasks.jar {
     from(project(":TestCloud-node").tasks.jar)
+    from(project(":TestCloud-api").tasks.jar)
     manifest {
         attributes["Main-Class"] = "io.github.thecguygithub.launcher.Launcher"
     }
@@ -22,6 +23,7 @@ tasks.jar {
 
 tasks.shadowJar {
     from(project(":TestCloud-node").tasks.shadowJar)
+    from(project(":TestCloud-api").tasks.shadowJar)
     manifest {
         attributes["Main-Class"] = "io.github.thecguygithub.launcher.Launcher"
     }
