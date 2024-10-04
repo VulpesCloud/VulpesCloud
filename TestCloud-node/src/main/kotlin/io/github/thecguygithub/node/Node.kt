@@ -1,13 +1,15 @@
 package io.github.thecguygithub.node
 
-import io.github.thecguygithub.api.CloudAPI
+import io.github.thecguygithub.api.JavaCloudAPI
+import io.github.thecguygithub.api.services.ClusterServiceProvider
+import io.github.thecguygithub.api.tasks.ClusterTaskProvider
 import io.github.thecguygithub.node.command.CommandProvider
 import io.github.thecguygithub.node.terminal.JLineTerminal
 import io.github.thecguygithub.node.util.Configurations.readContent
 import java.nio.file.Path
 
 
-class Node : CloudAPI() {
+class Node: JavaCloudAPI() {
 
     companion object {
         var instance: Node? = null
@@ -34,5 +36,13 @@ class Node : CloudAPI() {
 
         terminal!!.allowInput()
 
+    }
+
+    override fun serviceProvider(): ClusterServiceProvider {
+        return getInstance().serviceProvider()
+    }
+
+    override fun taskProvider(): ClusterTaskProvider {
+        return getInstance().taskProvider()
     }
 }
