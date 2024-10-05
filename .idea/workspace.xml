@@ -4,25 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="[ci skip] Just Commiting some changes for later coding">
-      <change afterPath="$PROJECT_DIR$/TestCloud-api/src/main/java/io/github/thecguygithub/api/log/LogOutputStream.java" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/event/NodeEventListener.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.github/workflows/gradle.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/gradle.yml" afterDir="false" />
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="new: Implemented RedisController and fixed some things aswell as changed back to shadowJar beacuse of Redis">
+      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/config/LogLevels.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-api/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-api/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-launcher/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-launcher/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Boot.java" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Boot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Launcher.java" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Launcher.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/logging/Log4j2Stream.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/logging/Log4jColorTranslate.kt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/logging/LoggingCallback.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeConfig.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeConfig.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeShutdown.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeShutdown.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/event/NodeEventListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/event/NodeEventListener.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/logging/Logger.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/logging/Logger.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/networking/RedisController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/networking/RedisController.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineTerminal.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineTerminal.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/resources/log4j2.xml" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineTerminalColor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineTerminalColor.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,18 +112,18 @@
       <list>
         <option value="Kotlin Interface" />
         <option value="Interface" />
-        <option value="Kotlin Enum" />
         <option value="Enum" />
         <option value="Kotlin Class" />
         <option value="Class" />
         <option value="Kotlin Object" />
+        <option value="Kotlin Enum" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="dev/api_java_conversion" />
+        <entry key="$PROJECT_DIR$" value="dev/launcher" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -178,7 +169,7 @@
     "JAR Application.testcloud-node.jar.executor": "Run",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "dev/launcher",
+    "git-widget-placeholder": "development",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "D:/Christian/Development/test/Plan"
   }
@@ -363,7 +354,15 @@
       <option name="project" value="LOCAL" />
       <updated>1728061130379</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="new: Implemented RedisController and fixed some things aswell as changed back to shadowJar beacuse of Redis">
+      <option name="closed" value="true" />
+      <created>1728121253671</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1728121253671</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -386,7 +385,8 @@
     <MESSAGE value="fix: The Launcher now download all Dependencys that are required" />
     <MESSAGE value="fix: Changed shadowJar to jar" />
     <MESSAGE value="[ci skip] Just Commiting some changes for later coding" />
-    <option name="LAST_COMMIT_MESSAGE" value="[ci skip] Just Commiting some changes for later coding" />
+    <MESSAGE value="new: Implemented RedisController and fixed some things aswell as changed back to shadowJar beacuse of Redis" />
+    <option name="LAST_COMMIT_MESSAGE" value="new: Implemented RedisController and fixed some things aswell as changed back to shadowJar beacuse of Redis" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [

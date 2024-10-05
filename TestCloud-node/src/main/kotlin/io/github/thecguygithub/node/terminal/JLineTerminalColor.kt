@@ -12,6 +12,7 @@ import org.jline.jansi.Ansi
 @AllArgsConstructor
 enum class JLineTerminalColor(internal val key: Char, ansiCode: Ansi) {
 
+    MAGENTA('m', Ansi.ansi().reset().fg(Ansi.Color.MAGENTA)),
     GREEN('2', Ansi.ansi().reset().fg(Ansi.Color.GREEN)),
     GRAY('7', Ansi.ansi().reset().fg(Ansi.Color.WHITE)),
     DARK_GRAY('8', Ansi.ansi().reset().fg(Ansi.Color.BLACK).bold()),

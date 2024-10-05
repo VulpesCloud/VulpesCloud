@@ -1,6 +1,7 @@
 package io.github.thecguygithub.node
 
 
+import io.github.thecguygithub.node.config.LogLevels
 import io.github.thecguygithub.node.config.RedisEndpointData
 import io.github.thecguygithub.node.util.StringUtils
 import lombok.Getter
@@ -16,6 +17,7 @@ class NodeConfig {
     var clusterToken: String
     var localNode: String = null.toString()
     var redis: RedisEndpointData? = null
+    var logLevel: LogLevels? = null
     // private var nodes: Set<NodeEndpointData>
 
     // private var propertiesPool: PropertiesPool
@@ -26,6 +28,7 @@ class NodeConfig {
         //this.localNode = NodeEndpointData("node-" + StringUtils.randomString(4), "127.0.0.1", 9090)
         this.localNode = "Node-1"
         this.redis = RedisEndpointData("default", "0.0.0.0", 6379, "password",)
+        this.logLevel = LogLevels.INFO
         // this.nodes = HashSet<NodeEndpointData>()
 
         // this.propertiesPool = PropertiesPool()

@@ -4,20 +4,17 @@ import io.github.thecguygithub.api.JavaCloudAPI
 import io.github.thecguygithub.api.services.ClusterServiceProvider
 import io.github.thecguygithub.api.tasks.ClusterTaskProvider
 import io.github.thecguygithub.node.command.CommandProvider
+import io.github.thecguygithub.node.config.LogLevels
 import io.github.thecguygithub.node.event.NodeEventListener
 import io.github.thecguygithub.node.networking.RedisController
 import io.github.thecguygithub.node.terminal.JLineTerminal
 import io.github.thecguygithub.node.util.Configurations.readContent
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
+import io.github.thecguygithub.node.logging.Logger
 import java.nio.file.Path
+import kotlin.system.exitProcess
 
 
 class Node: JavaCloudAPI() {
-
-    private val logger: Logger = LoggerFactory.getLogger(Node::class.java)
-
-
 
     companion object {
         var instance: Node? = null
@@ -44,17 +41,30 @@ class Node: JavaCloudAPI() {
 
         terminal = JLineTerminal(nodeConfig!!)
 
+        if (!LogLevels.entries.contains(nodeConfig?.logLevel)) {
+            terminal!!.printLine("INVALID CONFIGURATION HAS BEEN FOUND! PLEASE CHECK YOUR CONFIG!")
+            exitProcess(1)
+        }
+
+        val logger   = Logger()
+
+        logger.debug("Terminal initialized! Continuing Startup!")
+
+        logger.debug("Loading Redis Controller")
+
         redisController = RedisController()
+
+        logger.debug("Loading Events!")
 
         NodeEventListener
 
-        redisController?.sendMessage("EVENT;NODE;${nodeConfig?.localNode};STATUS;STARTING", "testcloud-events-nodes-status")
+        redisController?.sendMessage("EVENT;NODE;${nodeConfig?.localNode};STATUS;&eSTARTING", "testcloud-events-nodes-status")
 
         commandProvider = CommandProvider()
 
         terminal!!.allowInput()
 
-        redisController?.sendMessage("EVENT;NODE;${nodeConfig?.localNode};STATUS;RUNNING", "testcloud-events-nodes-status")
+        redisController?.sendMessage("EVENT;NODE;${nodeConfig?.localNode};STATUS;&2RUNNING", "testcloud-events-nodes-status")
 
     }
 

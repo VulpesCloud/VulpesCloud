@@ -20,8 +20,11 @@ object NodeEventListener {
 
                 val splitMsg = message?.split(";")
 
-                Logger().info(splitMsg?.get(0).toString())
-
+                if (splitMsg!![1] == "NODE") {
+                    if (splitMsg[3] == "STATUS") {
+                        Logger().info("The Node ${splitMsg[2]} is ${splitMsg[4]}")
+                    }
+                }
             }
         }
 

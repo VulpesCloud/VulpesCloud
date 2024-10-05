@@ -12,15 +12,24 @@ object NodeShutdown {
 
     fun nodeShutdown(forceShutdown: Boolean) {
 
-        logger.info("Shutting down the Node!")
+        if (!forceShutdown) {
 
-        if (Node.redisController != null) {
-            Node.redisController!!.shutdown()
+            logger.info("Shutting down the Node!")
+
+            if (Node.redisController != null) {
+                Node.redisController!!.shutdown()
+            }
+
+            Node.terminal!!.close()
+
+            exitProcess(0)
+        } else {
+            logger.error("")
+            logger.error("STOPPING THE NODE IMMEDIATELY!")
+            logger.error("")
+            Node.terminal!!.close()
+            exitProcess(0)
         }
-
-        Node.terminal!!.close()
-
-        exitProcess(0)
 
     }
 }

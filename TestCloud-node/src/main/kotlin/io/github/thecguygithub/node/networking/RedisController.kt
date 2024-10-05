@@ -2,6 +2,7 @@ package io.github.thecguygithub.node.networking
 
 
 import io.github.thecguygithub.node.Node
+import io.github.thecguygithub.node.NodeShutdown
 import io.github.thecguygithub.node.logging.Logger
 import org.json.JSONObject
 // import org.slf4j.Logger
@@ -73,6 +74,7 @@ class RedisController : BinaryJedisPubSub(), Runnable {
             isConnecting.set(false)
             isConnectionBroken.set(true)
             logger.error("Connection to Redis server has failed! Please check your details in the configuration. $e")
+            NodeShutdown.nodeShutdown(true)
         }
     }
 
