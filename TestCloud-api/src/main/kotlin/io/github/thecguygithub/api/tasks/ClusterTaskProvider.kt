@@ -9,10 +9,10 @@ import java.util.concurrent.TimeUnit
 
 abstract class ClusterTaskProvider {
 
-    abstract fun groupsAsync(): CompletableFuture<Set<ClusterTask?>?>
+    abstract fun groupsAsync(): CompletableFuture<MutableSet<ClusterTask?>?>
 
     @SneakyThrows
-    fun groups(): Set<ClusterTask?>? {
+    fun groups(): MutableSet<ClusterTask?>? {
         return groupsAsync()[5, TimeUnit.SECONDS]
     }
 

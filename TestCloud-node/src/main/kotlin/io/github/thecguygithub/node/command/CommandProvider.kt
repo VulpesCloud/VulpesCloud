@@ -1,10 +1,7 @@
 package io.github.thecguygithub.node.command
 
 import io.github.thecguygithub.node.command.CommandParser.serializer
-import io.github.thecguygithub.node.commands.ClearCommand
-import io.github.thecguygithub.node.commands.HelpCommand
-import io.github.thecguygithub.node.commands.InfoCommand
-import io.github.thecguygithub.node.commands.ShutdownCommand
+import io.github.thecguygithub.node.commands.*
 import lombok.Getter
 import lombok.experimental.Accessors
 import org.jetbrains.annotations.Contract
@@ -22,6 +19,7 @@ class CommandProvider : CommandService {
         this.registerCommand(InfoCommand())
         this.registerCommand(ClearCommand())
         this.registerCommand(HelpCommand())
+        this.registerCommand(LogCommand())
     }
 
     override fun commands(): List<Command?> {

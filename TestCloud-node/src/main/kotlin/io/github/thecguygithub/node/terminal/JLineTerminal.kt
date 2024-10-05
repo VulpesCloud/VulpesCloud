@@ -2,6 +2,7 @@ package io.github.thecguygithub.node.terminal
 
 import io.github.thecguygithub.api.log.LogOutputStream
 import io.github.thecguygithub.node.NodeConfig
+import io.github.thecguygithub.node.terminal.setup.Setup
 import io.github.thecguygithub.node.terminal.util.TerminalColorUtil
 import lombok.Getter
 import lombok.experimental.Accessors
@@ -30,8 +31,8 @@ class JLineTerminal(config: NodeConfig) {
 
     private val commandReadingThread: JLineCommandReadingThread
 
-    //@Setter
-    //var setup: Setup? = null
+
+    var setup: Setup? = null
 
     init {
         terminal = TerminalBuilder.builder()
@@ -94,8 +95,7 @@ class JLineTerminal(config: NodeConfig) {
     }
 
     fun hasSetup(): Boolean {
-        return false
-        //return setup != null
+        return setup != null
     }
 
     fun print(terminal: JLineTerminal, config: NodeConfig) {
