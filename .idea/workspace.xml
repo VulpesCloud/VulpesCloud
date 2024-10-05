@@ -4,8 +4,25 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Added things">
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="[ci skip] Just Commiting some changes for later coding">
+      <change afterPath="$PROJECT_DIR$/TestCloud-api/src/main/java/io/github/thecguygithub/api/log/LogOutputStream.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/event/NodeEventListener.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/gradle.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/gradle.yml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-api/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-api/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-launcher/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-launcher/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Boot.java" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Boot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Launcher.java" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Launcher.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/logging/Log4j2Stream.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/logging/Log4jColorTranslate.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/logging/LoggingCallback.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/networking/RedisController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/networking/RedisController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineTerminal.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineTerminal.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/resources/log4j2.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -72,7 +89,7 @@
                 <item name="TestCloud" type="f1a62948:ProjectNode" />
                 <item name="TestCloud-launcher" type="2d1252cf:ModuleNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="shadow" type="c8890929:TasksNode$1" />
+                <item name="build" type="c8890929:TasksNode$1" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
@@ -102,28 +119,36 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Kotlin Enum" />
-        <option value="Kotlin Object" />
-        <option value="Kotlin Class" />
         <option value="Kotlin Interface" />
+        <option value="Interface" />
+        <option value="Kotlin Enum" />
+        <option value="Enum" />
+        <option value="Kotlin Class" />
+        <option value="Class" />
+        <option value="Kotlin Object" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="dev/api_java_conversion" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="GitHubPullRequestSearchHistory"><![CDATA[{
-  "lastFilter": {
-    "state": "OPEN",
-    "assignee": "TheCGuyGitHub"
+  <component name="GitHubPullRequestSearchHistory">{
+  &quot;lastFilter&quot;: {
+    &quot;state&quot;: &quot;OPEN&quot;,
+    &quot;assignee&quot;: &quot;TheCGuyGitHub&quot;
   }
-}]]></component>
-  <component name="GithubPullRequestsUISettings"><![CDATA[{
-  "selectedUrlAndAccountId": {
-    "url": "https://github.com/TheCGuyGitHub/TestCloud.git",
-    "accountId": "93dfb0da-9db8-4cd9-b91f-bf9ffb8a6a1a"
+}</component>
+  <component name="GithubPullRequestsUISettings">{
+  &quot;selectedUrlAndAccountId&quot;: {
+    &quot;url&quot;: &quot;https://github.com/TheCGuyGitHub/TestCloud.git&quot;,
+    &quot;accountId&quot;: &quot;93dfb0da-9db8-4cd9-b91f-bf9ffb8a6a1a&quot;
   }
-}]]></component>
+}</component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -133,36 +158,42 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-api [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-launcher [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [testClasses].executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.TestCloud-node-1.0.0-alpha-all.jar.executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.testcloud-launcher.jar.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Christian/Development/test/Plan&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.TestCloud [build].executor": "Run",
+    "Gradle.TestCloud [jar].executor": "Run",
+    "Gradle.TestCloud [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-api [jar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-launcher [:TestCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor": "Run",
+    "Gradle.TestCloud:TestCloud-launcher [jar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-launcher [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [build].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [jar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [testClasses].executor": "Run",
+    "JAR Application.TestCloud-node-1.0.0-alpha-all.jar.executor": "Run",
+    "JAR Application.testcloud-launcher.jar.executor": "Run",
+    "JAR Application.testcloud-node.jar.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "dev/launcher",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Christian/Development/test/Plan"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="D:\Christian\Development\TestCloud\TestCloud-node\src\main\kotlin\io\github\thecguygithub\node\networking" />
+    </key>
     <key name="MoveKotlinTopLevelDeclarationsDialog.RECENTS_KEY">
       <recent name="io.github.thecguygithub.node.terminal" />
       <recent name="io.github.thecguygithub.node" />
     </key>
   </component>
   <component name="RunManager" selected="Gradle.TestCloud [shadowJar]">
-    <configuration name="TestCloud [build]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="TestCloud [jar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -173,7 +204,7 @@
         </option>
         <option name="taskNames">
           <list>
-            <option value="build" />
+            <option value="jar" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -206,10 +237,10 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="TestCloud:TestCloud-api [jar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="TestCloud:TestCloud-launcher [jar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/TestCloud-api" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/TestCloud-launcher" />
         <option name="externalSystemIdString" value="GRADLE" />
         <option name="scriptParameters" />
         <option name="taskDescriptions">
@@ -228,30 +259,12 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="TestCloud:TestCloud-launcher [shadowJar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/TestCloud-launcher" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="shadowJar" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
     <configuration name="testcloud-launcher.jar" type="JarApplication" temporary="true">
       <option name="JAR_PATH" value="$PROJECT_DIR$/TestCloud-launcher/build/libs/testcloud-launcher.jar" />
+      <method v="2" />
+    </configuration>
+    <configuration name="testcloud-node.jar" type="JarApplication" temporary="true">
+      <option name="JAR_PATH" value="$PROJECT_DIR$/TestCloud-node/build/libs/testcloud-node.jar" />
       <method v="2" />
     </configuration>
     <configuration default="true" type="JetRunConfigurationType">
@@ -270,10 +283,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Gradle.TestCloud [shadowJar]" />
+        <item itemvalue="Gradle.TestCloud [jar]" />
+        <item itemvalue="Gradle.TestCloud:TestCloud-launcher [jar]" />
+        <item itemvalue="JAR Application.testcloud-node.jar" />
         <item itemvalue="JAR Application.testcloud-launcher.jar" />
-        <item itemvalue="Gradle.TestCloud:TestCloud-launcher [shadowJar]" />
-        <item itemvalue="Gradle.TestCloud:TestCloud-api [jar]" />
-        <item itemvalue="Gradle.TestCloud [build]" />
       </list>
     </recent_temporary>
   </component>
@@ -302,7 +315,55 @@
       <option name="project" value="LOCAL" />
       <updated>1728046390398</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Added an GitHub workflow">
+      <option name="closed" value="true" />
+      <created>1728047163488</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1728047163488</updated>
+    </task>
+    <task id="LOCAL-00004" summary="The API is now written in both Java and Kotlin">
+      <option name="closed" value="true" />
+      <created>1728050662782</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1728050662782</updated>
+    </task>
+    <task id="LOCAL-00005" summary="fix: The Cloud launches now">
+      <option name="closed" value="true" />
+      <created>1728052071786</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1728052071786</updated>
+    </task>
+    <task id="LOCAL-00006" summary="fix: The Launcher now download all Dependencys that are required">
+      <option name="closed" value="true" />
+      <created>1728053592364</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1728053592364</updated>
+    </task>
+    <task id="LOCAL-00007" summary="fix: Changed shadowJar to jar">
+      <option name="closed" value="true" />
+      <created>1728053756153</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1728053756153</updated>
+    </task>
+    <task id="LOCAL-00008" summary="[ci skip] Just Commiting some changes for later coding">
+      <option name="closed" value="true" />
+      <created>1728061130379</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1728061130379</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -319,18 +380,32 @@
   <component name="VcsManagerConfiguration">
     <MESSAGE value="Initial Commit" />
     <MESSAGE value="Added things" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added things" />
+    <MESSAGE value="Added an GitHub workflow" />
+    <MESSAGE value="The API is now written in both Java and Kotlin" />
+    <MESSAGE value="fix: The Cloud launches now" />
+    <MESSAGE value="fix: The Launcher now download all Dependencys that are required" />
+    <MESSAGE value="fix: Changed shadowJar to jar" />
+    <MESSAGE value="[ci skip] Just Commiting some changes for later coding" />
+    <option name="LAST_COMMIT_MESSAGE" value="[ci skip] Just Commiting some changes for later coding" />
   </component>
-  <component name="WfRunsListSearchHistory"><![CDATA[{
-  "history": [
+  <component name="WfRunsListSearchHistory">{
+  &quot;history&quot;: [
     {
-      "branch": "master",
-      "currentBranchFilter": true
+      &quot;branch&quot;: &quot;master&quot;,
+      &quot;currentBranchFilter&quot;: true
+    },
+    {
+      &quot;branch&quot;: &quot;dev/api_java_conversion&quot;,
+      &quot;currentBranchFilter&quot;: true
+    },
+    {
+      &quot;branch&quot;: &quot;dev/launcher&quot;,
+      &quot;currentBranchFilter&quot;: true
     }
   ],
-  "lastFilter": {
-    "branch": "master",
-    "currentBranchFilter": true
+  &quot;lastFilter&quot;: {
+    &quot;branch&quot;: &quot;dev/launcher&quot;,
+    &quot;currentBranchFilter&quot;: true
   }
-}]]></component>
+}</component>
 </project>

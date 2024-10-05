@@ -1,15 +1,16 @@
 plugins {
     kotlin("jvm") version "2.0.0"
+    id("com.github.johnrengelman.shadow") version "7.1.0"
 }
 
 dependencies {
-    compileOnly(libs.jline)
-    compileOnly(libs.netty5)
+    compileOnly(libs.slf4jApi)
 }
 
 tasks.jar {
-    manifest {
-        attributes["Main-Class"] = "io.github.thecguygithub.node.NodeLauncher"
-    }
-    archiveFileName.set("testcloud-node.jar")
+    archiveFileName.set("testcloud-api.jar")
+}
+
+tasks.shadowJar {
+    archiveFileName.set("testcloud-api.jar")
 }

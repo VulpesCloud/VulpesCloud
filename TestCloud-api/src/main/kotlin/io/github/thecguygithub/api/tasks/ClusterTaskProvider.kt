@@ -8,6 +8,7 @@ import java.util.concurrent.TimeUnit
 
 
 abstract class ClusterTaskProvider {
+
     abstract fun groupsAsync(): CompletableFuture<Set<ClusterTask?>?>
 
     @SneakyThrows
