@@ -11,7 +11,10 @@ dependencies {
     compileOnly(libs.jline)
     compileOnly(libs.netty5)
     compileOnly(libs.json)
-    compileOnly(libs.jedis)
+    implementation(libs.jedis)
+    compileOnly(libs.slf4jApi)
+    compileOnly(libs.logbackCore)
+    compileOnly(libs.logbackClassic)
     // implementation(libs.cloud)
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib:2.0.0")
 }

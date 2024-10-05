@@ -20,8 +20,8 @@ allprojects {
         "implementation"(rootProject.libs.lombok)
         "annotationProcessor"(rootProject.libs.lombok)
         "implementation"(rootProject.libs.annotations)
-        "implementation"(rootProject.libs.log4j2)
-        "implementation"(rootProject.libs.log4j2.simple)
+        // "implementation"(rootProject.libs.log4j2)
+        // "implementation"(rootProject.libs.log4j2.simple)
         "implementation"(rootProject.libs.gson)
     }
 

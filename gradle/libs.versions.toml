@@ -9,6 +9,8 @@ jedis = "5.2.0"
 
 #logging
 log4j2 = "2.24.1"
+slf4j = "2.0.16"
+logback = "1.5.8"
 
 # configuration
 gson = "2.11.0"
@@ -51,6 +53,10 @@ jedis = {group = "redis.clients", name = "jedis", version.ref = "jedis"}
 # logging
 log4j2 = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j2" }
 log4j2-simple = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j2" }
+
+slf4jApi = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
+logbackCore = { group = "ch.qos.logback", name = "logback-core", version.ref = "logback" }
+logbackClassic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
 
 # configuration
 gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }

@@ -17,7 +17,7 @@ public final class Boot {
     @SneakyThrows
     public @NotNull File bootFile() {
 
-        this.copyBootFiles("api",  "node");
+        // this.copyBootFiles("api",  "node");
 
         return DEPENDENCY_DIR.resolve("testcloud-node.jar").toFile();
     }

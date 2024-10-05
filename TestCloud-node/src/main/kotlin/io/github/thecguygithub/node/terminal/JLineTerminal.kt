@@ -1,7 +1,7 @@
 package io.github.thecguygithub.node.terminal
 
+import io.github.thecguygithub.api.log.LogOutputStream
 import io.github.thecguygithub.node.NodeConfig
-import io.github.thecguygithub.node.logging.Log4j2Stream
 import io.github.thecguygithub.node.terminal.util.TerminalColorUtil
 import lombok.Getter
 import lombok.experimental.Accessors
@@ -13,6 +13,7 @@ import org.jline.reader.impl.LineReaderImpl
 import org.jline.terminal.Terminal
 import org.jline.terminal.TerminalBuilder
 import org.jline.utils.InfoCmp
+import org.slf4j.LoggerFactory
 import java.nio.charset.StandardCharsets
 
 
@@ -21,7 +22,7 @@ import java.nio.charset.StandardCharsets
 @Log4j2
 class JLineTerminal(config: NodeConfig) {
 
-    //private val log = logger()
+    private val log = LoggerFactory.getLogger(JLineTerminal::class.java)
 
     var terminal: Terminal
 
@@ -51,10 +52,10 @@ class JLineTerminal(config: NodeConfig) {
             .variable(LineReader.BELL_STYLE, "none")
             .build() as LineReaderImpl
 
-        System.setOut(Log4j2Stream().printStream())
-        System.setErr(Log4j2Stream().printStream())
-
         commandReadingThread = JLineCommandReadingThread(config, this)
+
+        System.setErr(LogOutputStream.forWarn(log).toPrintStream())
+        System.setOut(LogOutputStream.forInfo(log).toPrintStream())
 
         clear()
         this.print(this, config)

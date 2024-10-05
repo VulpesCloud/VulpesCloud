@@ -4,6 +4,8 @@ package io.github.thecguygithub.node.networking
 import io.github.thecguygithub.node.Node
 import io.github.thecguygithub.node.logging.Logger
 import org.json.JSONObject
+// import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import redis.clients.jedis.BinaryJedisPubSub
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
@@ -14,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 class RedisController : BinaryJedisPubSub(), Runnable {
 
-    private val logger: Logger = Logger()
+    private val logger: Logger = Logger()  // LoggerFactory.getLogger(RedisController::class.java)
 
     private val jedisPool: JedisPool
     private var channelsInByte: Array<ByteArray>
@@ -22,6 +24,7 @@ class RedisController : BinaryJedisPubSub(), Runnable {
     private val isConnecting = AtomicBoolean(false)
 
     init {
+
         val jConfig = JedisPoolConfig()
         val maxConnections = 10
 
@@ -31,11 +34,11 @@ class RedisController : BinaryJedisPubSub(), Runnable {
         jConfig.blockWhenExhausted = true
 
         val password = Node.nodeConfig!!.redis?.password
-        jedisPool = if (password.isNullOrEmpty()) {
+        jedisPool = if (password?.isEmpty() == true) {
             JedisPool(
                 jConfig,
                 Node.nodeConfig!!.redis?.hostname,
-                Node.nodeConfig!!.redis?.port!!.toInt() ?: 6379,
+                Node.nodeConfig!!.redis?.port ?: 6379,
                 9000,
                 false
             )
@@ -43,7 +46,7 @@ class RedisController : BinaryJedisPubSub(), Runnable {
             JedisPool(
                 jConfig,
                 Node.nodeConfig!!.redis?.hostname,
-                Node.nodeConfig!!.redis?.port!!.toInt() ?: 6379,
+                Node.nodeConfig!!.redis?.port ?: 6379,
                 9000,
                 password,
                 false
@@ -69,14 +72,14 @@ class RedisController : BinaryJedisPubSub(), Runnable {
         } catch (e: Exception) {
             isConnecting.set(false)
             isConnectionBroken.set(true)
-            logger.error("Connection to Redis server has failed! Please check your details in the configuration.", e)
+            logger.error("Connection to Redis server has failed! Please check your details in the configuration. $e")
         }
     }
 
     fun sendMessage(message: String, channel: String) {
         val json = JSONObject()
         json.put("messages", message)
-        json.put("action", "ChromaMC")
+        json.put("action", "TestCloud")
         json.put("date", System.currentTimeMillis())
         finishSendMessage(json, channel)
     }
@@ -88,11 +91,11 @@ class RedisController : BinaryJedisPubSub(), Runnable {
                 try {
                     jedis.publish(channel.toByteArray(StandardCharsets.UTF_8), message)
                 } catch (e: Exception) {
-                    logger.error("Error sending redis message!", e)
+                    logger.error("Error sending redis message! $e")
                 }
             }
         } catch (exception: JedisConnectionException) {
-            logger.error("Jedis connection exception occurred", exception)
+            logger.error("Jedis connection exception occurred $exception")
         }
     }
 
@@ -312,7 +315,7 @@ class RedisController : BinaryJedisPubSub(), Runnable {
             try {
                 this.unsubscribe()
             } catch (e: Exception) {
-                logger.error("Something went wrong during unsubscribing...", e)
+                logger.error("Something went wrong during unsubscribing... $e")
             }
         }
         jedisPool.close()
