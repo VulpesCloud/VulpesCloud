@@ -22,7 +22,7 @@ class Logger {
     private val errorTemplate = "&8[&7${formattedDateTime}&8] &cERROR &8: &7 "
     private val debugTemplate = "&8[&7${formattedDateTime}&8] &mDEBUG &8: &7 "
 
-    fun debug(message: String) {
+    fun debug(message: Any) {
         if (Node.nodeConfig?.logLevel == LogLevels.DEBUG) {
             terminal.printLine(TerminalColorUtil.replaceColorCodes(debugTemplate + message))
         }

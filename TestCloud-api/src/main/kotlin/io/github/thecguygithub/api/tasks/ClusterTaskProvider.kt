@@ -9,11 +9,11 @@ import java.util.concurrent.TimeUnit
 
 abstract class ClusterTaskProvider {
 
-    abstract fun groupsAsync(): CompletableFuture<MutableSet<ClusterTask?>?>
+    abstract fun groupsAsync(): CompletableFuture<MutableSet<ClusterTask>>?
 
     @SneakyThrows
-    fun groups(): MutableSet<ClusterTask?>? {
-        return groupsAsync()[5, TimeUnit.SECONDS]
+    fun groups(): MutableSet<ClusterTask>? {
+        return groupsAsync()?.get(5, TimeUnit.SECONDS)
     }
 
     abstract fun existsAsync(group: String?): CompletableFuture<Boolean>
@@ -37,7 +37,7 @@ abstract class ClusterTaskProvider {
         maxMemory: Int,
         staticService: Boolean,
         minOnline: Int,
-        maxOnline: Int
+        maxOnline: Boolean
     ): CompletableFuture<Optional<String?>?>
 
     @SneakyThrows
@@ -48,9 +48,9 @@ abstract class ClusterTaskProvider {
         maxMemory: Int,
         staticService: Boolean,
         minOnline: Int,
-        maxOnline: Int
+        maintenance: Boolean
     ): Optional<String?>? {
-        return createAsync(name, nodes, platform, maxMemory, staticService, minOnline, maxOnline)[5, TimeUnit.SECONDS]
+        return createAsync(name, nodes, platform, maxMemory, staticService, minOnline, maintenance)[5, TimeUnit.SECONDS]
     }
 
     abstract fun findAsync(group: String): CompletableFuture<ClusterTask?>

@@ -23,6 +23,7 @@ import java.nio.charset.StandardCharsets
 @Log4j2
 class JLineTerminal(config: NodeConfig) {
 
+
     private val log = LoggerFactory.getLogger(JLineTerminal::class.java)
 
     var terminal: Terminal

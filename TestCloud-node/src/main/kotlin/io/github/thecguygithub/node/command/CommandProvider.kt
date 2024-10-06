@@ -20,6 +20,7 @@ class CommandProvider : CommandService {
         this.registerCommand(ClearCommand())
         this.registerCommand(HelpCommand())
         this.registerCommand(LogCommand())
+        this.registerCommand(TestCommand())
     }
 
     override fun commands(): List<Command?> {

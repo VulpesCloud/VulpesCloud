@@ -10,6 +10,7 @@ import io.github.thecguygithub.node.networking.RedisController
 import io.github.thecguygithub.node.terminal.JLineTerminal
 import io.github.thecguygithub.node.util.Configurations.readContent
 import io.github.thecguygithub.node.logging.Logger
+import io.github.thecguygithub.node.tasks.ClusterTaskProviderImpl
 import java.nio.file.Path
 import kotlin.system.exitProcess
 
@@ -31,6 +32,9 @@ class Node: JavaCloudAPI() {
 
         var redisController: RedisController? = null
             private set
+
+        var taskProvider: ClusterTaskProviderImpl? = null
+            private set
     }
 
     init {
@@ -46,7 +50,7 @@ class Node: JavaCloudAPI() {
             exitProcess(1)
         }
 
-        val logger   = Logger()
+        val logger = Logger()
 
         logger.debug("Terminal initialized! Continuing Startup!")
 
@@ -59,6 +63,9 @@ class Node: JavaCloudAPI() {
         NodeEventListener
 
         redisController?.sendMessage("EVENT;NODE;${nodeConfig?.localNode};STATUS;&eSTARTING", "testcloud-events-nodes-status")
+
+
+        taskProvider = ClusterTaskProviderImpl()
 
         commandProvider = CommandProvider()
 
