@@ -37,7 +37,7 @@ abstract class ClusterTaskProvider {
         maxMemory: Int,
         staticService: Boolean,
         minOnline: Int,
-        maxOnline: Boolean
+        maintenance: Boolean
     ): CompletableFuture<Optional<String?>?>
 
     @SneakyThrows
@@ -58,27 +58,5 @@ abstract class ClusterTaskProvider {
     @SneakyThrows
     fun find(group: String): ClusterTask? {
         return findAsync(group)[5, TimeUnit.SECONDS]
-    }
-
-    fun write(group: ClusterTask) {
-        // buffer.writeString(group.name())
-        // buffer.writeInt(group.maxMemory())
-        // buffer.writeInt(group.maxPlayers())
-        // buffer.writeInt(group.minOnlineCount())
-        // buffer.writeBoolean(group.staticService())
-
-        // buffer.writeString(group.platform()!!.platform)
-        // buffer.writeString(group.platform()!!.version)
-        // buffer.writeEnum(group.platform()!!.type)
-
-        // buffer.writeInt(group.nodes()!!.size)
-        // for (node in group.nodes()!!) {
-        //     buffer.writeString(node)
-        // }
-
-        // buffer.writeInt(group.templates()!!.size)
-        // for (template in group.templates()!!) {
-        //     buffer.writeString(template)
-        // }
     }
 }
