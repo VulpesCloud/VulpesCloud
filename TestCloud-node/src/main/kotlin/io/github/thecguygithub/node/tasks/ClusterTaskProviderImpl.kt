@@ -11,10 +11,9 @@ import io.github.thecguygithub.node.networking.RedisManager
 import org.json.JSONObject
 import java.util.*
 import java.util.concurrent.CompletableFuture
-import kotlin.math.log
 
 
-class ClusterTaskProviderImpl() : ClusterTaskProvider(), Reloadable {
+class ClusterTaskProviderImpl : ClusterTaskProvider(), Reloadable {
 
     private val groups: MutableSet<ClusterTask> = ClusterTaskFactory.readGroups().toMutableSet()
     private val redisManger = Node.instance?.getRC()?.let { RedisManager(it.getJedisPool()) }
@@ -22,16 +21,13 @@ class ClusterTaskProviderImpl() : ClusterTaskProvider(), Reloadable {
 
     init {
         logger.debug("Subscribing")
-        redisManger?.subscribe(mutableListOf("testcloud-events-group-create")) {_, channel, msg ->
+        redisManger?.subscribe(mutableListOf("testcloud-events-group-create")) { _, channel, msg ->
             logger.debug("Received a Message")
             if (channel == "testcloud-events-group-create") {
                 val message = msg?.let { RedisJsonParser.parseJson(it) }
                     ?.let { RedisJsonParser.getMessagesFromRedisJson(it) }
 
-                val splitMsg = message?.split(";")
-                logger.debug("Message split")
-
-                val json = RedisJsonParser.parseJson(splitMsg!![0])
+                val json = RedisJsonParser.parseJson(message!!)
                 logger.debug("Json is here!")
 
                 logger.warn(message)
@@ -73,7 +69,7 @@ class ClusterTaskProviderImpl() : ClusterTaskProvider(), Reloadable {
         maxMemory: Int,
         staticService: Boolean,
         minOnline: Int,
-        maintenance: Boolean
+        maintenance: Boolean,
     ): CompletableFuture<Optional<String?>?> {
         val taskFuture = CompletableFuture<Optional<String?>?>()
         val jsonTask = JSONObject()
