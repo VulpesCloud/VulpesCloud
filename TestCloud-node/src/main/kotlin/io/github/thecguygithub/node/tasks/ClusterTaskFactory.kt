@@ -5,6 +5,7 @@ import io.github.thecguygithub.api.platforms.PlatformTypes
 import io.github.thecguygithub.api.services.ClusterService
 import io.github.thecguygithub.api.tasks.ClusterTask
 import io.github.thecguygithub.api.tasks.ClusterTaskProvider
+import io.github.thecguygithub.node.Node
 import io.github.thecguygithub.node.logging.Logger
 import io.github.thecguygithub.node.util.JsonUtils
 import lombok.SneakyThrows
@@ -45,6 +46,7 @@ object ClusterTaskFactory {
             grouInfo.getBoolean("staticService"),
             grouInfo.getInt("minOnline"),
             grouInfo.getBoolean("maintenance"),
+            grouInfo.getInt("startPort")
         )
         logger.debug("Making dirs and Updating local storage")
 
@@ -53,7 +55,7 @@ object ClusterTaskFactory {
         updateLocalStorageGroup(group)
         logger.debug("Adding to Groups")
 
-        // Node.instance().templatesProvider().prepareTemplate(group.templates())
+        Node.templatesProvider?.prepareTemplate(group.templates()!!)
 
         clusterTaskProvider.groups()?.add(group)
     }
@@ -66,7 +68,7 @@ object ClusterTaskFactory {
         Files.deleteIfExists(groupFile)
 
         clusterGroup.services()?.forEach { obj: ClusterService? -> obj?.shutdown() }
-        clusterGroupProvider.groups()?.removeIf { it?.name().equals(name, true) }
+        clusterGroupProvider.groups()?.removeIf { it.name().equals(name, true) }
     }
 
     @SneakyThrows

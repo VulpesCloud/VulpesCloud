@@ -11,7 +11,7 @@ import java.util.Arrays
 
 
 @Slf4j
-class JLineCommandReadingThread(private val localNodeImpl: NodeConfig, private val terminal: JLineTerminal) : Thread() {
+class   JLineCommandReadingThread(private val localNodeImpl: NodeConfig, private val terminal: JLineTerminal) : Thread() {
 
 
     init {
@@ -36,9 +36,24 @@ class JLineCommandReadingThread(private val localNodeImpl: NodeConfig, private v
 
                         val line = rawLine.split(" ")
 
+                        if (line.size > 0) {
+                            if (terminal.setup != null) {
+                                if (rawLine.equals("exit", true)) {
+                                    terminal.setup!!.exit(false)
+                                    continue;
+                                }
 
+                                if (rawLine.equals("back", true)) {
+                                    terminal.setup!!.previousQuestion();
+                                    continue;
+                                }
 
-                        Node.commandProvider!!.call(line[0], Arrays.copyOfRange(line.toTypedArray(), 1, line.size))
+                                terminal.setup!!.answer(rawLine);
+
+                            } else {
+                                Node.commandProvider!!.call(line[0], Arrays.copyOfRange(line.toTypedArray(), 1, line.size))
+                            }
+                        }
 
                     } catch (ignore: EndOfFileException) {
 

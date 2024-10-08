@@ -1,0 +1,4 @@
+testcloud-events-group-create
+testcloud-service-actions
+testcloud-service-events
+testcloud-events-nodes-status

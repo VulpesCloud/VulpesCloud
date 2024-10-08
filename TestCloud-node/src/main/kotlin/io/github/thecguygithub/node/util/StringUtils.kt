@@ -1,6 +1,9 @@
 package io.github.thecguygithub.node.util
 
+import java.io.InputStream
+import java.net.URI
 import kotlin.random.Random
+
 
 object StringUtils {
 
@@ -19,6 +22,13 @@ object StringUtils {
 
     fun getRandomNumber(max: Int): Int {
         return RANDOM.nextInt(max)
+    }
+
+    fun downloadStringContext(link: String?): String {
+        val stream: InputStream? = link?.let { URI(it).toURL().openStream() }
+        val context: String = stream?.let { String(it.readAllBytes()) }.toString()
+        stream?.close()
+        return context
     }
 
 }
