@@ -30,7 +30,7 @@ class PlatformService @SneakyThrows constructor() {
             PlatformConfig::class.java
         ).platforms!!
 
-        logger.debug("Read Json Successfully! ")
+        logger.debug("Read Json Successfully! " )
         logger.info("Loading ${platforms.size} platforms with ${versionsAmount()} versions.")
     }
 
