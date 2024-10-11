@@ -7,9 +7,7 @@ import java.util.*
 data class CommandInfo(
     val name: String,
     val aliases: Set<String>,
-    val permission: String,
     val description: String,
-    val docsUrl: String?,
     val usage: List<String>
 )  {
     /**

@@ -5,7 +5,10 @@ import io.github.thecguygithub.api.players.ClusterPlayerProvider
 import io.github.thecguygithub.api.services.ClusterServiceProvider
 import io.github.thecguygithub.api.tasks.ClusterTaskProvider
 import io.github.thecguygithub.node.cluster.NodeSituation
-import io.github.thecguygithub.node.command.CommandProvider
+import io.github.thecguygithub.node.command.defaults.DefaultCommandManager
+import io.github.thecguygithub.node.command.provider.CommandProvider
+import io.github.thecguygithub.node.command.provider.CommandProviderImpl
+import io.github.thecguygithub.node.commands.ClearCommand
 import io.github.thecguygithub.node.config.LogLevels
 import io.github.thecguygithub.node.event.NodeEventListener
 import io.github.thecguygithub.node.networking.RedisController
@@ -72,11 +75,11 @@ class Node: JavaCloudAPI() {
 
         logger.debug("Loading Redis Controller")
 
-        redisController = RedisController()
+        // redisController = RedisController()
 
         logger.debug("Loading Events!")
 
-        NodeEventListener
+        // NodeEventListener
 
         redisController?.sendMessage("EVENT;NODE;${nodeConfig?.localNode};STATUS;&eSTARTING", "testcloud-events-nodes-status")
 
@@ -99,6 +102,14 @@ class Node: JavaCloudAPI() {
         logger.debug("Initializing CommandProvider")
 
         commandProvider = CommandProvider()
+
+        // commandProvider!!.register(ClearCommand())
+
+//        try {
+//            commandProvider = CommandProvider()
+//        } catch (e: Exception) {
+//            logger.error(e.toString())
+//        }
 
         terminal!!.allowInput()
 

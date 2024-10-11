@@ -4,11 +4,47 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="fix: Platforms didn't want to load">
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="feat: Added aerogel to the Dependency's to be able to use Dependency Injection because of Cloud">
+      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/CommandProvider.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/annotations/AliasAnnotation.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/annotations/Description.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/defaults/DefaultCommandManager.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/provider/CommandProvider.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/provider/CommandProviderImpl.java" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/source/CommandSource.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/source/ConsoleCommandSource.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/TasksCommand.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-api/src/main/kotlin/io/github/thecguygithub/api/command/CommandInfo.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-api/src/main/kotlin/io/github/thecguygithub/api/command/CommandInfo.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-launcher/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-launcher/build.gradle.kts" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/logging/Logger.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/logging/Logger.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskProviderImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskProviderImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/Command.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/CommandArgument.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/CommandArgumentType.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/CommandContext.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/CommandExecution.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/CommandMultiBindingArgument.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/CommandParser.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/CommandProvider.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/CommandService.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/CommandSyntax.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/specific/ServiceArgument.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/specific/TaskArgument.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/type/BooleanArgument.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/type/EnumArgument.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/type/IntArgument.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/type/KeywordArgument.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/type/StringArrayArgument.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/type/TextArgument.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/ClearCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/ClearCommand.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/HelpCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/HelpCommand.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/InfoCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/InfoCommand.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/LogCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/LogCommand.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/ShutdownCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/ShutdownCommand.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/TestCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/TestCommand.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineCommandReadingThread.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineCommandReadingThread.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -130,12 +166,12 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Interface" />
-        <option value="Kotlin Interface" />
         <option value="Kotlin Enum" />
         <option value="Enum" />
-        <option value="Kotlin Class" />
         <option value="Kotlin Object" />
+        <option value="Kotlin Class" />
+        <option value="Kotlin Interface" />
+        <option value="Interface" />
         <option value="Class" />
       </list>
     </option>
@@ -143,7 +179,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="dev/launcher" />
+        <entry key="$PROJECT_DIR$" value="development" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -160,6 +196,9 @@
     &quot;accountId&quot;: &quot;93dfb0da-9db8-4cd9-b91f-bf9ffb8a6a1a&quot;
   }
 }</component>
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -169,33 +208,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-api [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-api [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-launcher [:TestCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-launcher [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-launcher [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [testClasses].executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.TestCloud-node-1.0.0-alpha-all.jar.executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.testcloud-launcher.jar.executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.testcloud-node.jar.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;development&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Christian/Development/test/Plan&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;discord-project&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.TestCloud [build].executor": "Run",
+    "Gradle.TestCloud [check].executor": "Run",
+    "Gradle.TestCloud [jar].executor": "Run",
+    "Gradle.TestCloud [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-api [jar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-api [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-launcher [:TestCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor": "Run",
+    "Gradle.TestCloud:TestCloud-launcher [jar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-launcher [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [build].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [jar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [testClasses].executor": "Run",
+    "JAR Application.TestCloud-node-1.0.0-alpha-all.jar.executor": "Run",
+    "JAR Application.testcloud-launcher.jar.executor": "Run",
+    "JAR Application.testcloud-node.jar.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "dev/cloud2.0",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Christian/Development/test/Plan",
+    "settings.editor.selected.configurable": "discord-project"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Christian\Development\TestCloud\TestCloud-node\src\main\kotlin\io\github\thecguygithub\node\networking" />
@@ -206,6 +246,28 @@
     </key>
   </component>
   <component name="RunManager" selected="Gradle.TestCloud [shadowJar]">
+    <configuration name="TestCloud [check]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+      <ExternalSystemSettings>
+        <option name="executionName" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$" />
+        <option name="externalSystemIdString" value="GRADLE" />
+        <option name="scriptParameters" />
+        <option name="taskDescriptions">
+          <list />
+        </option>
+        <option name="taskNames">
+          <list>
+            <option value="check" />
+          </list>
+        </option>
+        <option name="vmOptions" />
+      </ExternalSystemSettings>
+      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
+      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
+      <DebugAllEnabled>false</DebugAllEnabled>
+      <RunAsTest>false</RunAsTest>
+      <method v="2" />
+    </configuration>
     <configuration name="TestCloud [shadowJar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
@@ -240,28 +302,6 @@
         <option name="taskNames">
           <list>
             <option value="shadowJar" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="TestCloud:TestCloud-launcher [jar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/TestCloud-launcher" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="jar" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -332,10 +372,10 @@
     <recent_temporary>
       <list>
         <item itemvalue="Gradle.TestCloud [shadowJar]" />
+        <item itemvalue="Gradle.TestCloud:TestCloud-api [shadowJar]" />
+        <item itemvalue="Gradle.TestCloud [check]" />
         <item itemvalue="Gradle.TestCloud:TestCloud-node [jar]" />
         <item itemvalue="Gradle.TestCloud:TestCloud-launcher [shadowJar]" />
-        <item itemvalue="Gradle.TestCloud:TestCloud-launcher [jar]" />
-        <item itemvalue="Gradle.TestCloud:TestCloud-api [shadowJar]" />
       </list>
     </recent_temporary>
   </component>
@@ -460,7 +500,31 @@
       <option name="project" value="LOCAL" />
       <updated>1728412329113</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="fix: The Nodes now doesn't crash due to some Json stuff">
+      <option name="closed" value="true" />
+      <created>1728413421126</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1728413421126</updated>
+    </task>
+    <task id="LOCAL-00016" summary="chore: Did some Cleanup in Logger and ClusterTaskProvider">
+      <option name="closed" value="true" />
+      <created>1728413630476</created>
+      <option name="number" value="00016" />
+      <option name="presentableId" value="LOCAL-00016" />
+      <option name="project" value="LOCAL" />
+      <updated>1728413630476</updated>
+    </task>
+    <task id="LOCAL-00017" summary="feat: Added aerogel to the Dependency's to be able to use Dependency Injection because of Cloud">
+      <option name="closed" value="true" />
+      <created>1728573829314</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1728573829314</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -489,7 +553,10 @@
     <MESSAGE value="feat: Tasks now can be created using Redis messages" />
     <MESSAGE value="feat: Implemented Services and more" />
     <MESSAGE value="fix: Platforms didn't want to load" />
-    <option name="LAST_COMMIT_MESSAGE" value="fix: Platforms didn't want to load" />
+    <MESSAGE value="fix: The Nodes now doesn't crash due to some Json stuff" />
+    <MESSAGE value="chore: Did some Cleanup in Logger and ClusterTaskProvider" />
+    <MESSAGE value="feat: Added aerogel to the Dependency's to be able to use Dependency Injection because of Cloud" />
+    <option name="LAST_COMMIT_MESSAGE" value="feat: Added aerogel to the Dependency's to be able to use Dependency Injection because of Cloud" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [

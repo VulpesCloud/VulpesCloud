@@ -4,7 +4,8 @@
 # Dependency Injection
 aerogel = "2.1.0"
 
-
+# google deps
+guava = "33.3.1-jre"
 
 # utils
 lombok = "1.18.34"
@@ -52,6 +53,10 @@ shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 
 # Dependency Injection
 aerogel = { group = "dev.derklaro.aerogel", name = "aerogel", version.ref = "aerogel" }
+
+# google libs
+
+guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 
 # utils
 lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
