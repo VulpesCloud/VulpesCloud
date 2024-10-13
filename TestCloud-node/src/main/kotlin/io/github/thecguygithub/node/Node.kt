@@ -9,20 +9,22 @@ import io.github.thecguygithub.node.command.provider.CommandProvider
 import io.github.thecguygithub.node.commands.ClearCommand
 import io.github.thecguygithub.node.commands.HelpCommand
 import io.github.thecguygithub.node.commands.InfoCommand
+import io.github.thecguygithub.node.commands.ShutdownCommand
 import io.github.thecguygithub.node.config.LogLevels
-import io.github.thecguygithub.node.networking.RedisController
-import io.github.thecguygithub.node.terminal.JLineTerminal
-import io.github.thecguygithub.node.util.Configurations.readContent
+import io.github.thecguygithub.node.event.NodeEventListener
 import io.github.thecguygithub.node.logging.Logger
+import io.github.thecguygithub.node.networking.RedisController
 import io.github.thecguygithub.node.platforms.PlatformService
 import io.github.thecguygithub.node.service.ClusterServiceProviderImpl
 import io.github.thecguygithub.node.tasks.ClusterTaskProviderImpl
 import io.github.thecguygithub.node.templates.TemplatesProvider
+import io.github.thecguygithub.node.terminal.JLineTerminal
+import io.github.thecguygithub.node.util.Configurations.readContent
 import java.nio.file.Path
 import kotlin.system.exitProcess
 
 
-class Node: JavaCloudAPI() {
+class Node : JavaCloudAPI() {
 
     companion object {
 
@@ -74,13 +76,16 @@ class Node: JavaCloudAPI() {
 
         logger.debug("Loading Redis Controller")
 
-        // redisController = RedisController()
+        redisController = RedisController()
 
         logger.debug("Loading Events!")
 
-        // NodeEventListener
+        NodeEventListener
 
-        redisController?.sendMessage("EVENT;NODE;${nodeConfig?.localNode};STATUS;&eSTARTING", "testcloud-events-nodes-status")
+        redisController?.sendMessage(
+            "EVENT;NODE;${nodeConfig?.localNode};STATUS;&eSTARTING",
+            "testcloud-events-nodes-status"
+        )
 
         logger.debug("Initializing PlatformService")
 
@@ -107,10 +112,14 @@ class Node: JavaCloudAPI() {
         ClearCommand()
         HelpCommand()
         InfoCommand()
+        ShutdownCommand()
 
         terminal!!.allowInput()
 
-        redisController?.sendMessage("EVENT;NODE;${nodeConfig?.localNode};STATUS;&2RUNNING", "testcloud-events-nodes-status")
+        redisController?.sendMessage(
+            "EVENT;NODE;${nodeConfig?.localNode};STATUS;&2RUNNING",
+            "testcloud-events-nodes-status"
+        )
 
     }
 
