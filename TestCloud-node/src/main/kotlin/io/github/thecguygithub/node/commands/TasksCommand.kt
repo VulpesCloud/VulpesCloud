@@ -1,9 +1,45 @@
 package io.github.thecguygithub.node.commands
 
+import io.github.thecguygithub.api.command.CommandInfo
 import io.github.thecguygithub.node.Node
 import io.github.thecguygithub.node.logging.Logger
-import io.github.thecguygithub.node.terminal.setup.impl.TaskSetup
-import kotlin.Unit
+import org.incendo.cloud.kotlin.extension.buildAndRegister
+
+class TasksCommand {
+    val logger = Logger()
+
+    init {
+        Node.commandProvider?.registeredCommands?.add(
+            CommandInfo(
+                "task",
+                setOf("tasks"),
+                "Clear the Terminal.",
+                listOf("")
+            )
+        )
+
+        Node.commandProvider!!.commandManager!!.buildAndRegister("task", aliases = arrayOf("tasks")) {
+            literal("list")
+
+            handler { _ ->
+                logger.info("Following &b${Node.taskProvider?.groups()?.size} &7groups are loaded&8:")
+                Node.taskProvider?.groups()
+                    ?.forEach { group -> logger.info("&8- &f${group.name()}&8: (&7${group.details()}&8)") }
+            }
+        }
+
+        Node.commandProvider!!.commandManager!!.buildAndRegister("task", aliases = arrayOf("tasks")) {
+            literal("register")
+
+            handler { _ ->
+                TODO("FIX TASK SETUP")
+                // TaskSetup().run()
+            }
+        }
+
+
+    }
+}
 
 
 //class TasksCommand : Command("group", "Manage or create your cluster groups", "groups") {
