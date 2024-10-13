@@ -5,12 +5,10 @@ import io.github.thecguygithub.api.players.ClusterPlayerProvider
 import io.github.thecguygithub.api.services.ClusterServiceProvider
 import io.github.thecguygithub.api.tasks.ClusterTaskProvider
 import io.github.thecguygithub.node.cluster.NodeSituation
-import io.github.thecguygithub.node.command.defaults.DefaultCommandManager
 import io.github.thecguygithub.node.command.provider.CommandProvider
-import io.github.thecguygithub.node.command.provider.CommandProviderImpl
 import io.github.thecguygithub.node.commands.ClearCommand
+import io.github.thecguygithub.node.commands.HelpCommand
 import io.github.thecguygithub.node.config.LogLevels
-import io.github.thecguygithub.node.event.NodeEventListener
 import io.github.thecguygithub.node.networking.RedisController
 import io.github.thecguygithub.node.terminal.JLineTerminal
 import io.github.thecguygithub.node.util.Configurations.readContent
@@ -103,13 +101,10 @@ class Node: JavaCloudAPI() {
 
         commandProvider = CommandProvider()
 
-        // commandProvider!!.register(ClearCommand())
+        logger.debug("Registering Commands!")
 
-//        try {
-//            commandProvider = CommandProvider()
-//        } catch (e: Exception) {
-//            logger.error(e.toString())
-//        }
+        ClearCommand()
+        HelpCommand()
 
         terminal!!.allowInput()
 

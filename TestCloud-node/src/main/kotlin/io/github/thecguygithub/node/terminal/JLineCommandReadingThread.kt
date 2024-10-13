@@ -3,7 +3,6 @@ package io.github.thecguygithub.node.terminal
 import io.github.thecguygithub.node.Node
 import io.github.thecguygithub.node.NodeConfig
 import io.github.thecguygithub.node.NodeShutdown
-import io.github.thecguygithub.node.command.defaults.DefaultCommandManager
 import io.github.thecguygithub.node.command.provider.CommandProvider
 import io.github.thecguygithub.node.command.source.CommandSource
 import io.github.thecguygithub.node.logging.Logger
@@ -51,8 +50,7 @@ class   JLineCommandReadingThread(private val localNodeImpl: NodeConfig, private
                                 terminal.setup!!.answer(rawLine);
 
                             } else {
-
-                                // Node.commandProvider?.execute(CommandSource.console(), rawLine)
+                                Node.commandProvider?.execute(CommandSource.console(), rawLine)
 //                                    .commandManager?.commandExecutor()?.executeCommand(CommandSource.console(), rawLine)
 
                             }

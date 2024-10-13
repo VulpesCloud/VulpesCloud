@@ -1,21 +1,21 @@
 package io.github.thecguygithub.node.command.provider
 
+import com.google.common.collect.Iterables
 import io.github.thecguygithub.api.command.CommandInfo
-import io.github.thecguygithub.node.Node
 import io.github.thecguygithub.node.Node.Companion.terminal
-import io.github.thecguygithub.node.command.annotations.AliasAnnotation
-import io.github.thecguygithub.node.command.annotations.Description
-import io.github.thecguygithub.node.command.defaults.DefaultCommandManager
+import io.github.thecguygithub.node.command.CloudCommandManager
 import io.github.thecguygithub.node.command.source.CommandSource
 import io.github.thecguygithub.node.logging.Logger
 import io.leangen.geantyref.TypeToken
 import org.incendo.cloud.Command
 import org.incendo.cloud.annotations.AnnotationParser
-import org.incendo.cloud.annotations.BuilderModifier
+import org.incendo.cloud.execution.CommandResult
+import org.incendo.cloud.execution.ExecutionCoordinator
 import org.incendo.cloud.key.CloudKey
 import org.incendo.cloud.meta.CommandMeta
 import org.incendo.cloud.parser.ParserParameters
 import java.util.*
+import java.util.concurrent.CompletableFuture
 import java.util.function.Function
 
 
@@ -30,74 +30,106 @@ class CommandProvider {
 
     val logger = Logger()
 
-    var commandManager: DefaultCommandManager<CommandSource>?
+    var commandManager: CloudCommandManager?
 
-    var registeredCommands: MutableList<CommandInfo>? = null
+    var registeredCommands: MutableList<CommandInfo>? = mutableListOf()
 
-    var annotationParser: AnnotationParser<CommandSource>? = null
+    private var annotationParser: AnnotationParser<CommandSource>? = null
 
     init {
-        terminal!!.printLine("WEPWOP")
 
-        this.commandManager = DefaultCommandManager()
+        this.commandManager = CloudCommandManager(ExecutionCoordinator.simpleCoordinator())
 
-        terminal!!.printLine("WOPWEP")
         this.annotationParser = AnnotationParser<CommandSource>(
             this.commandManager!!,
             CommandSource::class.java,
             Function<ParserParameters, CommandMeta> { CommandMeta.empty() }
         )
+//        this.annotationParser!!.registerBuilderModifier<AliasAnnotation>(
+//            AliasAnnotation::class.java,
+//            BuilderModifier<AliasAnnotation, CommandSource?> { alias: AliasAnnotation, builder: Command.Builder<CommandSource?> ->
+//                builder.meta<Set<String>>(
+//                    Node.commandProvider!!.ALIAS_KEY, HashSet<String>(
+//                        listOf<String>(*alias.value)
+//                    )
+//                )
+//            })
+//
+//        this.annotationParser!!.registerBuilderModifier<Description>(
+//            Description::class.java,
+//            BuilderModifier<Description, CommandSource?> registerBuilderModifier@{ description: Description, builder: Command.Builder<CommandSource?> ->
+//                if (description.value.trim { it <= ' ' }.isNotEmpty()) {
+//                    return@registerBuilderModifier builder.meta<String>(
+//                        Node.commandProvider!!.DESCRIPTION_KEY,
+//                        description.value
+//                    )
+//                }
+//                builder
+//            })
 
-        terminal!!.printLine("KRUEMEL MC")
+    }
 
-        this.annotationParser!!.registerBuilderModifier<AliasAnnotation>(
-            AliasAnnotation::class.java,
-            BuilderModifier<AliasAnnotation, CommandSource?> { alias: AliasAnnotation, builder: Command.Builder<CommandSource?> ->
-                builder.meta<Set<String>>(
-                    Node.commandProvider!!.ALIAS_KEY, HashSet<String>(
-                        listOf<String>(*alias.value)
-                    )
-                )
-            })
-        this.annotationParser!!.registerBuilderModifier<Description>(
-            Description::class.java,
-            BuilderModifier<Description, CommandSource?> registerBuilderModifier@{ description: Description, builder: Command.Builder<CommandSource?> ->
-                if (description.value.trim { it <= ' ' }.isNotEmpty()) {
-                    return@registerBuilderModifier builder.meta<String>(
-                        Node.commandProvider!!.DESCRIPTION_KEY,
-                        description.value
-                    )
-                }
-                builder
-            })
+    fun suggest(source: CommandSource, input: String): List<String> {
+        return listOf()
+    }
 
-        terminal!!.printLine("ALRAM!")
+    fun execute(source: CommandSource, input: String) : CompletableFuture<CommandResult<CommandSource>>? {
+        return commandManager?.commandExecutor()?.executeCommand(source, input)
 
-        this.registeredCommands = ArrayList()
+    }
 
+    fun register(command: Any) {
+        val cloudCommand = Iterables.getFirst(
+            annotationParser!!.parse(command), null
+        )
 
-//        try {
-//            logger.debug("Loading CommandManager")
-//            commandManager = DefaultCommandManager()
-//
-//            logger.debug("Making a list!")
-//
-//            registeredCommands = mutableListOf()
-//
-//            logger.debug("Registering Commands!")
-//
-//            ClearCommand()
-//
-//            logger.debug("loading help")
-//            HelpCommand()
-//
-//            logger.debug("loading shutdown")
-//            ShutdownCommand()
-//
-//            logger.debug("Success!")
-//        } catch (e: Exception) {
-//            Logger().error(e.toString())
-//        }
+        if (cloudCommand != null) {
+            if (cloudCommand.nonFlagArguments().isEmpty()) {
+                return
+            }
+
+            val permission = cloudCommand.commandPermission().permissionString()
+
+            val description = cloudCommand.nonFlagArguments()[1].description().toString()
+
+            val aliases = cloudCommand.nonFlagArguments()[1].aliases().toSet()
+
+            val name = cloudCommand.nonFlagArguments()[1].name().lowercase()
+
+            registeredCommands!!.add(
+                CommandInfo(name, aliases, description, this.commandUsageOfRoot(name))
+            )
+        }
+    }
+
+    fun command(name: String): CommandInfo? {
+        val lowerCaseInput = name.lowercase()
+        for (command in registeredCommands!!) {
+            if (command.name == lowerCaseInput || command.aliases.contains(lowerCaseInput)) {
+                return command
+            }
+        }
+        return null
+    }
+
+    fun commands(): MutableCollection<CommandInfo>? {
+        return this.registeredCommands?.let { Collections.unmodifiableCollection(it) }
+    }
+
+    private fun commandUsageOfRoot(root: String): List<String> {
+        val commandUsage: MutableList<String> = ArrayList()
+        for (command in commandManager!!.commands()) {
+            // the first argument is the root, check if it matches
+            val arguments = command.components()
+            if (arguments.isEmpty() || !arguments[1].name().equals(root, ignoreCase = true)) {
+                continue
+            }
+
+            commandUsage.add(commandManager!!.commandSyntaxFormatter().apply(null, arguments, null))
+        }
+
+        commandUsage.sort()
+        return commandUsage
     }
 
 
