@@ -15,12 +15,11 @@ class HelpCommand {
         Node.commandProvider?.commandManager!!.buildAndRegister(
             "help", Description.of("Get information about all Commands!"), aliases = arrayOf("?")) {
             handler { _ ->
+                    Logger().info("All registered Commands:")
                 commandInfo!!.forEach { commandInfo ->
                     Logger().info("&f${commandInfo.name}${commandInfo.aliases} &8- &7${commandInfo.description}&8.")
                 }
             }
         }
-
-        // Node.commandProvider?.commandManager!!.createHelpHandler()
     }
 }

@@ -8,6 +8,7 @@ import io.github.thecguygithub.node.cluster.NodeSituation
 import io.github.thecguygithub.node.command.provider.CommandProvider
 import io.github.thecguygithub.node.commands.ClearCommand
 import io.github.thecguygithub.node.commands.HelpCommand
+import io.github.thecguygithub.node.commands.InfoCommand
 import io.github.thecguygithub.node.config.LogLevels
 import io.github.thecguygithub.node.networking.RedisController
 import io.github.thecguygithub.node.terminal.JLineTerminal
@@ -105,6 +106,7 @@ class Node: JavaCloudAPI() {
 
         ClearCommand()
         HelpCommand()
+        InfoCommand()
 
         terminal!!.allowInput()
 
