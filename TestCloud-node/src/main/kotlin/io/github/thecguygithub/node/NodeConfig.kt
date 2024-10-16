@@ -18,9 +18,12 @@ class NodeConfig {
     var localNode: String = null.toString()
     var redis: RedisEndpointData? = null
     var logLevel: LogLevels? = null
-    // private var nodes: Set<NodeEndpointData>
-
-    // private var propertiesPool: PropertiesPool
+    var mysql_password: String? = null
+    var mysql_user: String? = null
+    var mysql_host: String? = null
+    var mysql_port: Int? = null
+    var mysql_use_ssl: Boolean? = null
+    var mysql_database: String? = null
 
     init {
         this.clusterId = "testCloud";
@@ -29,8 +32,13 @@ class NodeConfig {
         this.localNode = "Node-1"
         this.redis = RedisEndpointData("default", "0.0.0.0", 6379, "password",)
         this.logLevel = LogLevels.INFO
-        // this.nodes = HashSet<NodeEndpointData>()
 
-        // this.propertiesPool = PropertiesPool()
+        this.mysql_port = 25565
+        this.mysql_host = "127.0.0.1"
+        this.mysql_user = "cloud-system"
+        this.mysql_password = "pw"
+        this.mysql_use_ssl = false
+        this.mysql_database = "cloud-system"
+
     }
 }

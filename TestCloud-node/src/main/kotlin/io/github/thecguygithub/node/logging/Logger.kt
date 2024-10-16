@@ -27,7 +27,7 @@ class Logger {
         }
     }
 
-    fun info(message: String) {
+    fun info(message: Any) {
         if (Node.nodeConfig?.logLevel == LogLevels.INFO || Node.nodeConfig?.logLevel == LogLevels.DEBUG) {
             terminal.printLine(TerminalColorUtil.replaceColorCodes(infoTemplate + message))
         }

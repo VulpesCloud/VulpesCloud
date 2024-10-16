@@ -10,7 +10,8 @@ import io.github.thecguygithub.node.commands.*
 import io.github.thecguygithub.node.config.LogLevels
 import io.github.thecguygithub.node.event.NodeEventListener
 import io.github.thecguygithub.node.logging.Logger
-import io.github.thecguygithub.node.networking.RedisController
+import io.github.thecguygithub.node.networking.mysql.MySQLController
+import io.github.thecguygithub.node.networking.redis.RedisController
 import io.github.thecguygithub.node.platforms.PlatformService
 import io.github.thecguygithub.node.service.ClusterServiceProviderImpl
 import io.github.thecguygithub.node.tasks.ClusterTaskProviderImpl
@@ -52,11 +53,17 @@ class Node : JavaCloudAPI() {
             private set
 
         var serviceProvider: ClusterServiceProviderImpl? = null
+            private set
+
+        var mySQLController: MySQLController? = null
+            private set
+
+        lateinit var logger : Logger
+            private set
     }
 
     init {
         instance = this
-
 
         nodeConfig = readContent(Path.of("config.json"), NodeConfig())
 
@@ -67,7 +74,7 @@ class Node : JavaCloudAPI() {
             exitProcess(1)
         }
 
-        val logger = Logger()
+        logger = Logger()
 
         logger.debug("Terminal initialized! Continuing Startup!")
 
@@ -83,6 +90,10 @@ class Node : JavaCloudAPI() {
             "EVENT;NODE;${nodeConfig?.localNode};STATUS;&eSTARTING",
             "testcloud-events-nodes-status"
         )
+
+        logger.debug("Initializing MySQL Controller")
+
+        mySQLController = MySQLController()
 
         logger.debug("Initializing PlatformService")
 
@@ -111,6 +122,7 @@ class Node : JavaCloudAPI() {
         InfoCommand()
         ShutdownCommand()
         TasksCommand()
+        PlatformCommand()
 
         terminal!!.allowInput()
 

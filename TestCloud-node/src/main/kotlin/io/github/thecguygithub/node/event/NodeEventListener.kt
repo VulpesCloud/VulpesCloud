@@ -2,8 +2,8 @@ package io.github.thecguygithub.node.event
 
 import io.github.thecguygithub.node.Node
 import io.github.thecguygithub.node.logging.Logger
-import io.github.thecguygithub.node.networking.RedisJsonParser
-import io.github.thecguygithub.node.networking.RedisManager
+import io.github.thecguygithub.node.networking.redis.RedisJsonParser
+import io.github.thecguygithub.node.networking.redis.RedisManager
 
 object NodeEventListener {
 

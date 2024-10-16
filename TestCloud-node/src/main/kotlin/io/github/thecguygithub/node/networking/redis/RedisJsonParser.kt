@@ -1,4 +1,4 @@
-package io.github.thecguygithub.node.networking
+package io.github.thecguygithub.node.networking.redis
 
 import org.json.JSONObject
 

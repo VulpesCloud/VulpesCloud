@@ -23,6 +23,8 @@ dependencies {
     implementation("org.incendo:cloud-kotlin-extensions:2.0.0")
     implementation("org.incendo:cloud-annotations:2.0.0")
     compileOnly("org.jetbrains.kotlin:kotlin-stdlib:2.0.0")
+    compileOnly("com.zaxxer:HikariCP:5.1.0")
+    compileOnly("org.mariadb.jdbc:mariadb-java-client:3.4.0")
 }
 
 

@@ -27,11 +27,13 @@ public final class Launcher {
         var slf4jDependency = new Dependency("org.slf4j", "slf4j-api", "2.0.16");
         var logbackCoreDependency = new Dependency("ch.qos.logback", "logback-core", "1.5.8");
         var logbackClassicDependency = new Dependency("ch.qos.logback", "logback-classic", "1.5.8");
+        var hikariCP = new Dependency("com.zaxxer", "HikariCP", "5.1.0");
+        var mariaDB = new Dependency("org.mariadb.jdbc", "mariadb-java-client", "3.4.0");
 
         // add boot file to the current classpath
         CLASS_LOADER.addURL(boot.bootFile().toURI().toURL());
 
-        DependencyDownloader.download(jLineDependency, kotlinSTD, gsonDependency, jsonDependency, jedisDependency, slf4jDependency, logbackClassicDependency, logbackCoreDependency);
+        DependencyDownloader.download(mariaDB, hikariCP, jLineDependency, kotlinSTD, gsonDependency, jsonDependency, jedisDependency, slf4jDependency, logbackClassicDependency, logbackCoreDependency);
 
         Thread.currentThread().setContextClassLoader(CLASS_LOADER);
         Class.forName(boot.mainClass(), true, CLASS_LOADER).getMethod("main", String[].class).invoke(null, (Object) args);
