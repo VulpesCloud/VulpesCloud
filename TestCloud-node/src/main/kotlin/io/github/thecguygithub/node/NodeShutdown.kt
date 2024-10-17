@@ -20,6 +20,8 @@ object NodeShutdown {
                 Node.redisController!!.shutdown()
             }
 
+            Node.mySQLController!!.closedb()
+
             Node.terminal!!.close()
 
             exitProcess(0)

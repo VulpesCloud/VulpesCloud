@@ -6,8 +6,8 @@ import io.github.thecguygithub.api.tasks.ClusterTask
 import io.github.thecguygithub.api.tasks.ClusterTaskProvider
 import io.github.thecguygithub.node.Node
 import io.github.thecguygithub.node.logging.Logger
-import io.github.thecguygithub.node.networking.RedisJsonParser
-import io.github.thecguygithub.node.networking.RedisManager
+import io.github.thecguygithub.node.networking.redis.RedisJsonParser
+import io.github.thecguygithub.node.networking.redis.RedisManager
 import org.json.JSONObject
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -75,7 +75,7 @@ class ClusterTaskProviderImpl : ClusterTaskProvider(), Reloadable {
         val jsonTask = JSONObject()
         jsonTask.put("name", name)
         jsonTask.put("nodes", nodes)
-        jsonTask.put("platform", platform)
+        jsonTask.put("platforms", platform)
         jsonTask.put("maxMemory", maxMemory)
         jsonTask.put("staticService", staticService)
         jsonTask.put("minOnline", minOnline)

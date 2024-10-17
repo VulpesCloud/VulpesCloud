@@ -9,7 +9,6 @@ import lombok.experimental.Accessors;
 
 import java.util.*;
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 @Getter
 @Accessors(fluent = true)

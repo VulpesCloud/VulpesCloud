@@ -13,7 +13,7 @@ import java.nio.file.Path
 
 class PlatformService @SneakyThrows constructor() {
     val logger = Logger()
-    var platforms: List<Platform?>
+    var platforms: List<Platform>
 
     init {
 

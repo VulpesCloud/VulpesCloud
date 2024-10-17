@@ -13,6 +13,7 @@ class MySQLController {
     private var dataSource: HikariDataSource
 
     init {
+
         val nodeConfig = Node.nodeConfig!!
         val config = HikariConfig()
 

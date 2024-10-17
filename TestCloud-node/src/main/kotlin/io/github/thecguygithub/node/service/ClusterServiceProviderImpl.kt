@@ -5,8 +5,8 @@ import io.github.thecguygithub.api.platforms.PlatformTypes
 import io.github.thecguygithub.api.services.*
 import io.github.thecguygithub.node.Node
 import io.github.thecguygithub.node.logging.Logger
-import io.github.thecguygithub.node.networking.RedisJsonParser
-import io.github.thecguygithub.node.networking.RedisManager
+import io.github.thecguygithub.node.networking.redis.RedisJsonParser
+import io.github.thecguygithub.node.networking.redis.RedisManager
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CopyOnWriteArrayList
@@ -17,7 +17,7 @@ class ClusterServiceProviderImpl : ClusterServiceProvider(), Closeable {
     var serviceProxyToken: String? = null
     private val services: MutableList<ClusterService> = CopyOnWriteArrayList()
     private val factory: ClusterServiceFactory = ClusterServiceFactoryImpl()
-    private val clusterServiceQueue = ClusterServiceQueue()
+    val clusterServiceQueue = ClusterServiceQueue()
     private val logReadingThread = ClusterLocalServiceReadingThread()
 
     private val logger = Logger()

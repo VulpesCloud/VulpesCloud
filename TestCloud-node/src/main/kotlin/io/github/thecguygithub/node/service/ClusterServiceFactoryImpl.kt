@@ -28,6 +28,18 @@ class ClusterServiceFactoryImpl : ClusterServiceFactory {
     @SneakyThrows
     override fun runGroupService(task: ClusterTask) {
 
+        logger.debug("Making localService")
+
+        try {
+            logger.warn(task.name())
+            logger.warn(generateOrderedId(task).toString())
+            logger.warn(UUID.randomUUID().toString())
+            logger.warn(detectServicePort(task).toString())
+            logger.warn(Node.nodeConfig?.localNode.toString())
+        } catch (e: Exception) {
+            logger.error(e.toString())
+        }
+
         val localService = ClusterLocalServiceImpl(
             task,
             generateOrderedId(task),
@@ -36,6 +48,8 @@ class ClusterServiceFactoryImpl : ClusterServiceFactory {
             "0.0.0.0",
             Node.nodeConfig?.localNode
         )
+
+        logger.debug("setting platform")
 
         val platform = localService.platform()
 

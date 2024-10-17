@@ -21,16 +21,16 @@ public final class TaskSetup extends Setup {
 
         question("name", "What is the name of the group&8?", s -> !Objects.requireNonNull(Node.Companion.getTaskProvider()).exists(s.first()));
 
-        question("platform", "Which platform do you like to use&8?",
+        question("platforms", "Which platform do you like to use&8?",
                 it -> Objects.requireNonNull(Node.Companion.getPlatformService()).getPlatforms().stream().map(Platform::getId).toList(),
                 rawInput -> Objects.requireNonNull(Node.Companion.getPlatformService()).find(rawInput.first()) != null);
 
         question("version", "Select a version&8",
-                it -> Objects.requireNonNull(Objects.requireNonNull(Node.Companion.getPlatformService()).find(it.get("platform")))
+                it -> Objects.requireNonNull(Objects.requireNonNull(Node.Companion.getPlatformService()).find(it.get("platforms")))
                         .getVersions()
                         .stream().map(PlatformVersion::getVersion).toList(),
                 context -> {
-                    var platform = Objects.requireNonNull(Node.Companion.getPlatformService()).find(context.second().get("platform"));
+                    var platform = Objects.requireNonNull(Node.Companion.getPlatformService()).find(context.second().get("platforms"));
                     assert platform != null;
                     var proof = platform.getVersions().stream().anyMatch(it -> Objects.equals(it.getVersion(), context.first()));
 
@@ -60,7 +60,7 @@ public final class TaskSetup extends Setup {
     @Override
     public void complete(@NotNull Map<String, String> context) {
         var name = context.get("name");
-        var platform = Objects.requireNonNull(Node.Companion.getPlatformService()).find(context.get("platform"));
+        var platform = Objects.requireNonNull(Node.Companion.getPlatformService()).find(context.get("platforms"));
         assert platform != null;
         var version = platform.getVersions().stream().filter(it -> Objects.requireNonNull(it.getVersion()).equalsIgnoreCase(context.get("version"))).findFirst().orElseThrow();
         var maxMemory = Integer.parseInt(context.get("maxMemory"));
@@ -70,7 +70,7 @@ public final class TaskSetup extends Setup {
         var fallbackGroup = context.containsKey("fallback") && (Boolean.parseBoolean(context.get("fallback")));
         var startPort = Integer.parseInt(context.get("startPort"));
 
-        var json = TaskJson.INSTANCE.createGroupJson(name, platform, version, maxMemory, staticService, minOnlineServices, fallbackGroup, maintenance, startPort);
+        var json = TaskJson.INSTANCE.createGroupJson(name, platform, "version", maxMemory, staticService, minOnlineServices, fallbackGroup, maintenance, startPort);
 
         Objects.requireNonNull(Node.Companion.getRedisController()).sendMessage(json.toString(), "testcloud-events-group-create");
 

@@ -131,6 +131,10 @@ class Node : JavaCloudAPI() {
             "testcloud-events-nodes-status"
         )
 
+        logger.debug("Initializing clusterServiceQueue")
+
+        // serviceProvider!!.clusterServiceQueue.start()
+
     }
 
     fun getRC(): RedisController? {

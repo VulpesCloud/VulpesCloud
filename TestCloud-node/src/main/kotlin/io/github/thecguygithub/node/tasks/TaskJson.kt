@@ -9,10 +9,10 @@ import org.json.JSONObject
 
 object TaskJson {
 
-    fun createGroupJson(name:String, platform: Platform, version: PlatformVersion, maxMemory: Int, staticServices: Boolean, minOnlineCount: Int, fallbackGroup: Boolean, maintenance: Boolean, startPort: Int): JSONObject {
+    fun createGroupJson(name: String, platform: Platform, version: String, maxMemory: Int, staticServices: Boolean, minOnlineCount: Int, fallbackGroup: Boolean, maintenance: Boolean, startPort: Int): JSONObject {
         val platformGroupJson = JSONObject()
         platformGroupJson.put("name", platform.id)
-        platformGroupJson.put("version", version.version)
+        platformGroupJson.put("version", version)
         platformGroupJson.put("platformType", platform.type)
 
 

@@ -4,7 +4,7 @@ import io.github.thecguygithub.api.platforms.PlatformGroupDisplay
 import io.github.thecguygithub.api.tasks.AbstractClusterTask
 
 
-class ClusterGroupImpl(
+open class ClusterTaskImpl(
     name: String?,
     platform: PlatformGroupDisplay?,
     templates: Array<String?>?,

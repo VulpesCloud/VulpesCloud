@@ -36,7 +36,7 @@ object ClusterTaskFactory {
         }
 
         logger.debug("Setting group!")
-        val group = ClusterGroupImpl(
+        val group = ClusterTaskImpl(
             grouInfo.getString("name"),
             pGroup,
             nodesArray,

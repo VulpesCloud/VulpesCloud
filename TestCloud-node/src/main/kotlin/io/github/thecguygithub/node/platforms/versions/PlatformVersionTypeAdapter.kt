@@ -19,13 +19,15 @@ class PlatformVersionTypeAdapter : JsonSerializer<PlatformVersion?>,
         if (`object`.has("fileName")) {
             return PlatformPathVersion(version, `object`["fileName"].asString)
         }
+
         if (`object`.has("url")) {
             return PlatformUrlVersion(version, `object`["url"].asString)
         }
+
         return null
     }
 
-    override fun serialize(p0: PlatformVersion?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement? {
+    override fun serialize(p0: PlatformVersion?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement {
         val `object` = JsonObject()
 
         `object`.addProperty("version", p0?.version)

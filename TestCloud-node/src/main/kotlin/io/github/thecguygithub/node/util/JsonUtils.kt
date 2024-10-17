@@ -7,14 +7,16 @@ import io.github.thecguygithub.node.platforms.PlatformPatcherTypeAdapter
 import io.github.thecguygithub.node.platforms.patcher.PlatformPatcher
 import io.github.thecguygithub.node.platforms.versions.PlatformVersion
 import io.github.thecguygithub.node.platforms.versions.PlatformVersionTypeAdapter
+import io.github.thecguygithub.node.tasks.ClusterTaskFallbackImpl
+import io.github.thecguygithub.node.tasks.ClusterTaskTypeAdapter
 
 
 object JsonUtils {
 
     val GSON: Gson = GsonBuilder().setPrettyPrinting()
         // .registerTypeAdapter(PropertiesPool::class.java, PropertiesPoolSerializer())
-        // .registerTypeAdapter(ClusterTask::class.java, ClusterGroupTypeAdapter())
-        // .registerTypeAdapter(ClusterGroupFallbackImpl::class.java, ClusterGroupTypeAdapter())
+        .registerTypeAdapter(ClusterTask::class.java, ClusterTaskTypeAdapter())
+        .registerTypeAdapter(ClusterTaskFallbackImpl::class.java, ClusterTaskTypeAdapter())
         .registerTypeAdapter(PlatformVersion::class.java, PlatformVersionTypeAdapter())
         .registerTypeAdapter(PlatformPatcher::class.java, PlatformPatcherTypeAdapter())
         .create()
