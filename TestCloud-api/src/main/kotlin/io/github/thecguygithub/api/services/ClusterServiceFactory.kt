@@ -4,7 +4,7 @@ import io.github.thecguygithub.api.tasks.ClusterTask
 
 
 interface ClusterServiceFactory {
-    fun runGroupService(group: ClusterTask?)
+    fun runGroupService(task: ClusterTask)
 
-    fun shutdownGroupService(clusterService: ClusterService?)
+    fun shutdownGroupService(clusterService: ClusterService)
 }

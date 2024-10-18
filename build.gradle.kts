@@ -23,6 +23,7 @@ allprojects {
         // "implementation"(rootProject.libs.log4j2)
         // "implementation"(rootProject.libs.log4j2.simple)
         "implementation"(rootProject.libs.gson)
+        "implementation"(rootProject.libs.guava)
     }
 
 }

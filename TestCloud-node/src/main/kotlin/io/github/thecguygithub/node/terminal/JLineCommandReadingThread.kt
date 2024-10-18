@@ -3,6 +3,9 @@ package io.github.thecguygithub.node.terminal
 import io.github.thecguygithub.node.Node
 import io.github.thecguygithub.node.NodeConfig
 import io.github.thecguygithub.node.NodeShutdown
+import io.github.thecguygithub.node.command.provider.CommandProvider
+import io.github.thecguygithub.node.command.source.CommandSource
+import io.github.thecguygithub.node.logging.Logger
 import io.github.thecguygithub.node.terminal.util.TerminalColorUtil
 import lombok.extern.slf4j.Slf4j
 import org.jline.reader.EndOfFileException
@@ -11,7 +14,7 @@ import java.util.Arrays
 
 
 @Slf4j
-class JLineCommandReadingThread(private val localNodeImpl: NodeConfig, private val terminal: JLineTerminal) : Thread() {
+class   JLineCommandReadingThread(private val localNodeImpl: NodeConfig, private val terminal: JLineTerminal) : Thread() {
 
 
     init {
@@ -33,12 +36,24 @@ class JLineCommandReadingThread(private val localNodeImpl: NodeConfig, private v
                         if (rawLine.isEmpty()) {
                             continue
                         }
+                            if (terminal.setup != null) {
+                                if (rawLine.equals("exit", true)) {
+                                    terminal.setup!!.exit(false)
+                                    continue;
+                                }
 
-                        val line = rawLine.split(" ")
+                                if (rawLine.equals("back", true)) {
+                                    terminal.setup!!.previousQuestion();
+                                    continue;
+                                }
 
+                                terminal.setup!!.answer(rawLine);
 
+                            } else {
+                                Node.commandProvider?.execute(CommandSource.console(), rawLine)
+//                                    .commandManager?.commandExecutor()?.executeCommand(CommandSource.console(), rawLine)
 
-                        Node.commandProvider!!.call(line[0], Arrays.copyOfRange(line.toTypedArray(), 1, line.size))
+                            }
 
                     } catch (ignore: EndOfFileException) {
 

@@ -9,11 +9,11 @@ import java.util.concurrent.TimeUnit
 
 abstract class ClusterTaskProvider {
 
-    abstract fun groupsAsync(): CompletableFuture<Set<ClusterTask?>?>
+    abstract fun groupsAsync(): CompletableFuture<MutableSet<ClusterTask>>?
 
     @SneakyThrows
-    fun groups(): Set<ClusterTask?>? {
-        return groupsAsync()[5, TimeUnit.SECONDS]
+    fun groups(): MutableSet<ClusterTask>? {
+        return groupsAsync()?.get(5, TimeUnit.SECONDS)
     }
 
     abstract fun existsAsync(group: String?): CompletableFuture<Boolean>
@@ -37,7 +37,7 @@ abstract class ClusterTaskProvider {
         maxMemory: Int,
         staticService: Boolean,
         minOnline: Int,
-        maxOnline: Int
+        maintenance: Boolean
     ): CompletableFuture<Optional<String?>?>
 
     @SneakyThrows
@@ -48,9 +48,9 @@ abstract class ClusterTaskProvider {
         maxMemory: Int,
         staticService: Boolean,
         minOnline: Int,
-        maxOnline: Int
+        maintenance: Boolean
     ): Optional<String?>? {
-        return createAsync(name, nodes, platform, maxMemory, staticService, minOnline, maxOnline)[5, TimeUnit.SECONDS]
+        return createAsync(name, nodes, platform, maxMemory, staticService, minOnline, maintenance)[5, TimeUnit.SECONDS]
     }
 
     abstract fun findAsync(group: String): CompletableFuture<ClusterTask?>
@@ -58,27 +58,5 @@ abstract class ClusterTaskProvider {
     @SneakyThrows
     fun find(group: String): ClusterTask? {
         return findAsync(group)[5, TimeUnit.SECONDS]
-    }
-
-    fun write(group: ClusterTask) {
-        // buffer.writeString(group.name())
-        // buffer.writeInt(group.maxMemory())
-        // buffer.writeInt(group.maxPlayers())
-        // buffer.writeInt(group.minOnlineCount())
-        // buffer.writeBoolean(group.staticService())
-
-        // buffer.writeString(group.platform()!!.platform)
-        // buffer.writeString(group.platform()!!.version)
-        // buffer.writeEnum(group.platform()!!.type)
-
-        // buffer.writeInt(group.nodes()!!.size)
-        // for (node in group.nodes()!!) {
-        //     buffer.writeString(node)
-        // }
-
-        // buffer.writeInt(group.templates()!!.size)
-        // for (template in group.templates()!!) {
-        //     buffer.writeString(template)
-        // }
     }
 }

@@ -4,7 +4,7 @@ import io.github.thecguygithub.api.platforms.PlatformGroupDisplay
 import io.github.thecguygithub.api.tasks.AbstractClusterTask
 
 
-class ClusterGroupImpl(
+open class ClusterTaskImpl(
     name: String?,
     platform: PlatformGroupDisplay?,
     templates: Array<String?>?,
@@ -13,7 +13,8 @@ class ClusterGroupImpl(
     maxPlayers: Int,
     staticService: Boolean,
     minOnlineCount: Int,
-    maintenance: Boolean
+    maintenance: Boolean,
+    startPort: Int
 
 ) :
     AbstractClusterTask(
@@ -25,7 +26,8 @@ class ClusterGroupImpl(
         maxPlayers,
         staticService,
         minOnlineCount,
-        maintenance
+        maintenance,
+        startPort
     ) {
     override fun update() {
         //todo

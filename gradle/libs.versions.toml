@@ -1,4 +1,12 @@
 [versions]
+
+
+# Dependency Injection
+aerogel = "2.1.0"
+
+# google deps
+guava = "33.3.1-jre"
+
 # utils
 lombok = "1.18.34"
 annotations = "25.0.0"
@@ -42,6 +50,14 @@ shadow = "8.1.1"
 shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 
 [libraries]
+
+# Dependency Injection
+aerogel = { group = "dev.derklaro.aerogel", name = "aerogel", version.ref = "aerogel" }
+
+# google libs
+
+guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
+
 # utils
 lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
@@ -65,6 +81,8 @@ json = { group = "org.json", name = "json", version.ref = "json"}
 # console
 jline = { group = "org.jline", name = "jline", version.ref = "jline" }
 cloud = { group = "org.incendo", name = "cloud-core", version.ref = "cloud"}
+cloud-annotations = { group = "org.incendo", name = "cloud-annotations", version.ref = "cloud"}
+cloud-task = { group = "org.incendo", name = "cloud-task", version.ref = "cloud"}
 
 # platforms
 spigot = { group = "io.papermc.paper", name = "paper-api", version.ref = "spigot" }

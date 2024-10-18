@@ -28,6 +28,8 @@ interface ClusterTask : Named, Detail {
 
     fun maintenance(): Boolean
 
+    fun startPort(): Int
+
     fun fallback(): Boolean {
         return this is FallbackClusterTask
     }

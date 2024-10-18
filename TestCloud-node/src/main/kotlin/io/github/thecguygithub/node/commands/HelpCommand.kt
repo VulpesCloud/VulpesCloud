@@ -1,24 +1,25 @@
 package io.github.thecguygithub.node.commands
 
+import io.github.thecguygithub.api.command.CommandInfo
 import io.github.thecguygithub.node.Node
-import io.github.thecguygithub.node.command.Command
-import io.github.thecguygithub.node.command.CommandContext
-import io.github.thecguygithub.node.command.CommandExecution
 import io.github.thecguygithub.node.logging.Logger
+import org.incendo.cloud.description.Description
+import org.incendo.cloud.kotlin.extension.buildAndRegister
 
-class HelpCommand : Command("help", "Shows you all available Commands", "?") {
+class HelpCommand {
     init {
-        defaultExecution(object : CommandExecution {
-            override fun execute(commandContext: CommandContext) {
-                for (command in Node.commandProvider!!.commands()) {
-                    val aliases = if (command!!.aliases.isNotEmpty()) {
-                        " &8(&7" + command.aliases.joinToString("&8, &7") + "&8)"
-                    } else {
-                        ""
-                    }
-                    Logger().info("&f${command.name}${aliases} &8- &7${command.description}&8.")
+        Node.commandProvider?.registeredCommands?.add(CommandInfo("help", setOf("?"), "Get information about all Commands!", listOf("help | ?")))
+
+        val commandInfo = Node.commandProvider?.registeredCommands
+
+        Node.commandProvider?.commandManager!!.buildAndRegister(
+            "help", Description.of("Get information about all Commands!"), aliases = arrayOf("?")) {
+            handler { _ ->
+                    Logger().info("All registered Commands:")
+                commandInfo!!.forEach { commandInfo ->
+                    Logger().info("&f${commandInfo.name}${commandInfo.aliases} &8- &7${commandInfo.description}&8.")
                 }
             }
-        })
+        }
     }
 }

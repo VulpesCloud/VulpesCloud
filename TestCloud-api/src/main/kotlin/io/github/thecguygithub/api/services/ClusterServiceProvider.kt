@@ -8,11 +8,11 @@ import java.util.concurrent.TimeUnit
 
 abstract class ClusterServiceProvider {
     @SneakyThrows
-    fun services(): List<ClusterService?>? {
-        return servicesAsync()[5, TimeUnit.SECONDS]
+    fun services(): MutableList<ClusterService>? {
+        return servicesAsync()?.get(5, TimeUnit.SECONDS)
     }
 
-    abstract fun servicesAsync(): CompletableFuture<List<ClusterService?>?>
+    abstract fun servicesAsync(): CompletableFuture<MutableList<ClusterService>>?
 
 
     @SneakyThrows

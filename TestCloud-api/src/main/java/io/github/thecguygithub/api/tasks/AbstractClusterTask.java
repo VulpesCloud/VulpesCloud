@@ -27,6 +27,7 @@ public abstract class AbstractClusterTask implements ClusterTask {
     private boolean staticService;
     private int minOnlineCount;
     private boolean maintenance;
+    private int startPort;
 
     // private final PropertiesPool properties;
 

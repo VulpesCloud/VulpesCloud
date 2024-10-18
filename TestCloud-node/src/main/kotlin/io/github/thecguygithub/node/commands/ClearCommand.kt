@@ -1,17 +1,27 @@
 package io.github.thecguygithub.node.commands
 
+import io.github.thecguygithub.api.command.CommandInfo
 import io.github.thecguygithub.node.Node
-import io.github.thecguygithub.node.command.Command
-import io.github.thecguygithub.node.command.CommandContext
-import io.github.thecguygithub.node.command.CommandExecution
+import org.incendo.cloud.kotlin.extension.buildAndRegister
 
-
-class ClearCommand : Command("clear", "Clears the Terminal") {
+class ClearCommand {
     init {
-        defaultExecution(object : CommandExecution {
-            override fun execute(commandContext: CommandContext) {
+
+        Node.commandProvider?.registeredCommands?.add(
+            CommandInfo(
+                "clear",
+                setOf("cls"),
+                "Clear the Terminal.",
+                listOf("clear")
+            )
+        )
+
+        Node.commandProvider?.commandManager!!.buildAndRegister(
+            "clear", aliases = arrayOf("cls")
+        ) {
+            handler { _ ->
                 Node.terminal!!.clear()
             }
-        })
+        }
     }
 }

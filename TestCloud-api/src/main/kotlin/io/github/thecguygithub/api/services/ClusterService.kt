@@ -1,5 +1,6 @@
 package io.github.thecguygithub.api.services
 
+import io.github.thecguygithub.api.Detail
 import io.github.thecguygithub.api.Named
 import io.github.thecguygithub.api.players.ClusterPlayer
 import io.github.thecguygithub.api.tasks.ClusterTask
@@ -9,7 +10,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 
-interface ClusterService : Named {
+interface ClusterService : Named, Detail {
 
     fun group(): ClusterTask
 
@@ -27,9 +28,7 @@ interface ClusterService : Named {
 
     fun executeCommand(command: String?)
 
-    fun state(): ClusterServiceStates?
-
-    fun logs(): List<String?>?
+    fun state(starting: ClusterServiceStates): ClusterServiceStates?
 
     fun update()
 

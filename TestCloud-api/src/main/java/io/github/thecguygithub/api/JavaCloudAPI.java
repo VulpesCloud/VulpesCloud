@@ -1,5 +1,6 @@
 package io.github.thecguygithub.api;
 
+import io.github.thecguygithub.api.players.ClusterPlayerProvider;
 import io.github.thecguygithub.api.services.ClusterServiceProvider;
 import io.github.thecguygithub.api.tasks.ClusterTaskProvider;
 import lombok.Getter;
@@ -21,6 +22,6 @@ public abstract class JavaCloudAPI {
 
     // public abstract EventProvider eventProvider();
 
-    // public abstract ClusterPlayerProvider playerProvider();
+     public abstract ClusterPlayerProvider playerProvider();
 
 }

@@ -2,8 +2,11 @@ package io.github.thecguygithub.node.terminal
 
 import io.github.thecguygithub.api.log.LogOutputStream
 import io.github.thecguygithub.node.NodeConfig
+import io.github.thecguygithub.node.terminal.handler.ConsoleTabCompleteHandler
+import io.github.thecguygithub.node.terminal.setup.Setup
 import io.github.thecguygithub.node.terminal.util.TerminalColorUtil
 import lombok.Getter
+import lombok.NonNull
 import lombok.experimental.Accessors
 import lombok.extern.log4j.Log4j2
 import org.jline.jansi.Ansi
@@ -15,12 +18,15 @@ import org.jline.terminal.TerminalBuilder
 import org.jline.utils.InfoCmp
 import org.slf4j.LoggerFactory
 import java.nio.charset.StandardCharsets
+import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 
 @Getter
 @Accessors(fluent = true)
 @Log4j2
 class JLineTerminal(config: NodeConfig) {
+
 
     private val log = LoggerFactory.getLogger(JLineTerminal::class.java)
 
@@ -30,8 +36,11 @@ class JLineTerminal(config: NodeConfig) {
 
     private val commandReadingThread: JLineCommandReadingThread
 
-    //@Setter
-    //var setup: Setup? = null
+    private val tabCompleteHandler: Map<UUID, ConsoleTabCompleteHandler> =
+        ConcurrentHashMap<UUID, ConsoleTabCompleteHandler>()
+
+
+    var setup: Setup? = null
 
     init {
         terminal = TerminalBuilder.builder()
@@ -43,7 +52,9 @@ class JLineTerminal(config: NodeConfig) {
 
         lineReader = LineReaderBuilder.builder()
             .terminal(terminal)
-            // .completer(JLineTerminalCompleter())
+//            .completer(JLineCompleter())
+//            .completionMatcher(JLineCompletionMatcher())
+
             .option(LineReader.Option.AUTO_MENU_LIST, true)
             .variable(LineReader.COMPLETION_STYLE_LIST_SELECTION, "fg:cyan")
             .variable(LineReader.COMPLETION_STYLE_LIST_BACKGROUND, "bg:default")
@@ -94,8 +105,7 @@ class JLineTerminal(config: NodeConfig) {
     }
 
     fun hasSetup(): Boolean {
-        return false
-        //return setup != null
+        return setup != null
     }
 
     fun print(terminal: JLineTerminal, config: NodeConfig) {
@@ -105,5 +115,10 @@ class JLineTerminal(config: NodeConfig) {
             ("   &7Local node&8: &7" + config.localNode).toString()
         )
         terminal.printLine("")
+    }
+
+    @NonNull
+    fun tabCompleteHandlers(): Map<UUID, ConsoleTabCompleteHandler> {
+        return this.tabCompleteHandler
     }
 }
