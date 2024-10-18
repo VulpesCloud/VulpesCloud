@@ -1,11 +1,8 @@
 package io.github.thecguygithub.node
 
 import io.github.thecguygithub.node.logging.Logger
-import lombok.extern.log4j.Log4j2
 import kotlin.system.exitProcess
 
-
-@Log4j2
 object NodeShutdown {
 
     private val logger = Logger()

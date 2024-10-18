@@ -36,24 +36,26 @@ class   JLineCommandReadingThread(private val localNodeImpl: NodeConfig, private
                         if (rawLine.isEmpty()) {
                             continue
                         }
-                            if (terminal.setup != null) {
-                                if (rawLine.equals("exit", true)) {
-                                    terminal.setup!!.exit(false)
-                                    continue;
-                                }
 
-                                if (rawLine.equals("back", true)) {
-                                    terminal.setup!!.previousQuestion();
-                                    continue;
-                                }
-
-                                terminal.setup!!.answer(rawLine);
-
-                            } else {
-                                Node.commandProvider?.execute(CommandSource.console(), rawLine)
-//                                    .commandManager?.commandExecutor()?.executeCommand(CommandSource.console(), rawLine)
-
-                            }
+                        Node.commandProvider?.execute(CommandSource.console(), rawLine)
+//                            if (terminal.setup != null) {
+//                                if (rawLine.equals("exit", true)) {
+//                                    terminal.setup!!.exit(false)
+//                                    continue;
+//                                }
+//
+//                                if (rawLine.equals("back", true)) {
+//                                    terminal.setup!!.previousQuestion();
+//                                    continue;
+//                                }
+//
+//                                terminal.setup!!.answer(rawLine);
+//
+//                            } else {
+//                                Node.commandProvider?.execute(CommandSource.console(), rawLine)
+////                                    .commandManager?.commandExecutor()?.executeCommand(CommandSource.console(), rawLine)
+//
+//                            }
 
                     } catch (ignore: EndOfFileException) {
 

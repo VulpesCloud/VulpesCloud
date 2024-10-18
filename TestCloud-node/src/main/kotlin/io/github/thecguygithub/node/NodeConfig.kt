@@ -28,7 +28,6 @@ class NodeConfig {
     init {
         this.clusterId = "testCloud";
         this.clusterToken = StringUtils.randomString(8)
-        //this.localNode = NodeEndpointData("node-" + StringUtils.randomString(4), "127.0.0.1", 9090)
         this.localNode = "Node-1"
         this.redis = RedisEndpointData("default", "0.0.0.0", 6379, "password",)
         this.logLevel = LogLevels.INFO

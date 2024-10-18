@@ -3,7 +3,6 @@ package io.github.thecguygithub.node.terminal
 import io.github.thecguygithub.api.log.LogOutputStream
 import io.github.thecguygithub.node.NodeConfig
 import io.github.thecguygithub.node.terminal.handler.ConsoleTabCompleteHandler
-import io.github.thecguygithub.node.terminal.setup.Setup
 import io.github.thecguygithub.node.terminal.util.TerminalColorUtil
 import lombok.Getter
 import lombok.NonNull
@@ -38,9 +37,6 @@ class JLineTerminal(config: NodeConfig) {
 
     private val tabCompleteHandler: Map<UUID, ConsoleTabCompleteHandler> =
         ConcurrentHashMap<UUID, ConsoleTabCompleteHandler>()
-
-
-    var setup: Setup? = null
 
     init {
         terminal = TerminalBuilder.builder()
@@ -104,9 +100,9 @@ class JLineTerminal(config: NodeConfig) {
         lineReader.setPrompt(TerminalColorUtil.replaceColorCodes(prompt))
     }
 
-    fun hasSetup(): Boolean {
-        return setup != null
-    }
+//    fun hasSetup(): Boolean {
+//        return setup != null
+//    }
 
     fun print(terminal: JLineTerminal, config: NodeConfig) {
         terminal.printLine("")

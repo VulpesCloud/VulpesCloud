@@ -4,39 +4,58 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="chore: Uploading changes">
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/parser/PlatformParser.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/PlatformCommand.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskFallbackImpl.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskTypeAdapter.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineCompleter.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineCompletionMatcher.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/handler/ConsoleTabCompleteHandler.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/handler/Toggleable.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/Version.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/resources/platforms/purpur/server.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/resources/platforms/purpur/spigot.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/resources/platforms/velocity/velocity.toml" afterDir="false" />
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Removed almost everything for rewrite">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-launcher/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-launcher/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/java/io/github/thecguygithub/node/terminal/setup/Setup.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/java/io/github/thecguygithub/node/terminal/setup/SetupQuestion.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/java/io/github/thecguygithub/node/terminal/setup/impl/TaskSetup.java" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeConfig.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeConfig.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeShutdown.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeShutdown.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/cluster/ClusterProvider.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/cluster/LocalNode.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/cluster/NodeEndpoint.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/cluster/NodeEndpointData.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/cluster/NodeSituation.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/parser/PlatformParser.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/parser/PlatformParser.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/PlatformCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/PlatformCommand.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/TasksCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/TasksCommand.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/networking/mysql/MySQLController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/networking/mysql/MySQLController.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/PlatformService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/PlatformService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/versions/PlatformVersionTypeAdapter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/versions/PlatformVersionTypeAdapter.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterServiceFactoryImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterServiceFactoryImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterServiceProviderImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterServiceProviderImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterServiceQueue.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterServiceQueue.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskFactory.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskProviderImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskProviderImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/TaskJson.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/TaskJson.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/Platform.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/PlatformConfig.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/PlatformPatcherTypeAdapter.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/PlatformService.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/file/PlatformFile.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/file/PlatformFileReplacement.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/file/PlatformFileStrategy.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/parser/PaperBuildParser.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/patcher/PlatformPaperPatcher.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/patcher/PlatformPatcher.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/patcher/PlatformPatcherPool.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/versions/PlatformPathVersion.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/versions/PlatformURLVersion.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/versions/PlatformVersion.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/versions/PlatformVersionTypeAdapter.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterLocalServiceImpl.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterLocalServiceReadingThread.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterServiceFactoryImpl.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterServiceImpl.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterServiceProviderImpl.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterServiceQueue.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/utils/DefaultServiceArgs.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/utils/ServicePortDetector.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskFactory.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskFallbackImpl.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskImpl.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskProviderImpl.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskTypeAdapter.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/TaskJson.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/templates/Template.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/templates/TemplateFactory.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/templates/TemplateProvider.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineCommandReadingThread.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineCommandReadingThread.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineTerminal.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineTerminal.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/setup/Setup.java" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/java/io/github/thecguygithub/node/terminal/setup/Setup.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/setup/SetupQuestion.java" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/java/io/github/thecguygithub/node/terminal/setup/SetupQuestion.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/setup/impl/TaskSetup.java" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/java/io/github/thecguygithub/node/terminal/setup/impl/TaskSetup.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/JsonUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/JsonUtils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/Version.kt" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -111,7 +130,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="development" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -140,34 +159,34 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [check].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-api [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-api [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-launcher [:TestCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-launcher [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-launcher [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [testClasses].executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.TestCloud-node-1.0.0-alpha-all.jar.executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.testcloud-launcher.jar.executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.testcloud-node.jar.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;dev/cloud2.0&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Christian/Development/test/Plan&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;discord-project&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.TestCloud [build].executor": "Run",
+    "Gradle.TestCloud [check].executor": "Run",
+    "Gradle.TestCloud [jar].executor": "Run",
+    "Gradle.TestCloud [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-api [jar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-api [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-launcher [:TestCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor": "Run",
+    "Gradle.TestCloud:TestCloud-launcher [jar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-launcher [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [build].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [jar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [testClasses].executor": "Run",
+    "JAR Application.TestCloud-node-1.0.0-alpha-all.jar.executor": "Run",
+    "JAR Application.testcloud-launcher.jar.executor": "Run",
+    "JAR Application.testcloud-node.jar.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "dev/rewrite",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Christian/Development/test/Plan",
+    "settings.editor.selected.configurable": "discord-project"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Christian\Development\TestCloud\TestCloud-node\src\main\kotlin\io\github\thecguygithub\node\networking" />
@@ -535,7 +554,8 @@
     <MESSAGE value="chore: Implement Tasks command" />
     <MESSAGE value="feat: Added Simple MySQLController" />
     <MESSAGE value="chore: Uploading changes" />
-    <option name="LAST_COMMIT_MESSAGE" value="chore: Uploading changes" />
+    <MESSAGE value="Removed almost everything for rewrite" />
+    <option name="LAST_COMMIT_MESSAGE" value="Removed almost everything for rewrite" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [
