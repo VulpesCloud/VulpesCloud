@@ -5,6 +5,7 @@ enum class ClusterServiceStates {
     PREPARED,
     STARTING,
     ONLINE,
-    STOPPING;
+    STOPPING,
+    LOST;
 
 }

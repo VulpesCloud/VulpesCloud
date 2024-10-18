@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 
 interface ClusterService : Named, Detail {
 
-    fun group(): ClusterTask
+    fun task(): ClusterTask
 
     fun orderedId(): Int
 
@@ -26,9 +26,9 @@ interface ClusterService : Named, Detail {
 
     fun shutdown()
 
-    fun executeCommand(command: String?)
+    fun executeCommand(command: String)
 
-    fun state(starting: ClusterServiceStates): ClusterServiceStates?
+    fun state(starting: ClusterServiceStates): ClusterServiceStates
 
     fun update()
 
@@ -54,7 +54,7 @@ interface ClusterService : Named, Detail {
     }
 
     override fun name(): String {
-        return group().name() + "-" + orderedId()
+        return task().name() + "-" + orderedId()
     }
 
 }
