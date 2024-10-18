@@ -11,6 +11,8 @@ object NodeShutdown {
 
         if (!forceShutdown) {
 
+            Node.terminal!!.commandReadingThread.interrupt()
+
             logger.info("Shutting down the Node!")
 
             if (Node.redisController != null) {

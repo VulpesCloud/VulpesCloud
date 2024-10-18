@@ -31,4 +31,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-cloud
-          path: TestCloud-launcher/build/libs/testcloud-launcher.jar
+          path: FoxCloud-launcher/build/libs/foxcloud-launcher.jar

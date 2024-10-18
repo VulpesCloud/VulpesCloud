@@ -21,12 +21,12 @@ import java.util.function.Function
 
 class CommandProvider {
 
-    val ALIAS_KEY =
-        CloudKey.of("testcloud:alias", object : TypeToken<Set<String>?>() {})
-    val DESCRIPTION_KEY: CloudKey<String> = CloudKey.of(
-        "testcloud:description",
-        String::class.java
-    )
+//    val ALIAS_KEY =
+//        CloudKey.of("testcloud:alias", object : TypeToken<Set<String>?>() {})
+//    val DESCRIPTION_KEY: CloudKey<String> = CloudKey.of(
+//        "testcloud:description",
+//        String::class.java
+//    )
 
     val logger = Logger()
 

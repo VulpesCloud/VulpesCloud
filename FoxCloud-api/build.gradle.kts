@@ -8,9 +8,9 @@ dependencies {
 }
 
 tasks.jar {
-    archiveFileName.set("testcloud-api.jar")
+    archiveFileName.set("foxcloud-api.jar")
 }
 
 tasks.shadowJar {
-    archiveFileName.set("testcloud-api.jar")
+    archiveFileName.set("foxcloud-api.jar")
 }

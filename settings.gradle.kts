@@ -1,4 +1,4 @@
-rootProject.name = "TestCloud"
-include("TestCloud-api")
-include("TestCloud-node")
-include("TestCloud-launcher")
+rootProject.name = "FoxCloud"
+include("FoxCloud-api")
+include("FoxCloud-node")
+include("FoxCloud-launcher")

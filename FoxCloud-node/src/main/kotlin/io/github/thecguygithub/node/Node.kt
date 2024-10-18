@@ -1,11 +1,10 @@
 package io.github.thecguygithub.node
 
-import io.github.thecguygithub.api.JavaCloudAPI
-import io.github.thecguygithub.api.players.ClusterPlayerProvider
-import io.github.thecguygithub.api.services.ClusterServiceProvider
-import io.github.thecguygithub.api.tasks.ClusterTaskProvider
 import io.github.thecguygithub.node.command.provider.CommandProvider
-import io.github.thecguygithub.node.commands.*
+import io.github.thecguygithub.node.commands.ClearCommand
+import io.github.thecguygithub.node.commands.HelpCommand
+import io.github.thecguygithub.node.commands.InfoCommand
+import io.github.thecguygithub.node.commands.ShutdownCommand
 import io.github.thecguygithub.node.config.LogLevels
 import io.github.thecguygithub.node.event.NodeEventListener
 import io.github.thecguygithub.node.logging.Logger
@@ -41,7 +40,7 @@ class Node {
         var mySQLController: MySQLController? = null
             private set
 
-        lateinit var logger : Logger
+        lateinit var logger: Logger
             private set
     }
 
@@ -91,6 +90,8 @@ class Node {
         ShutdownCommand()
 //        TasksCommand()
 //        PlatformCommand()
+
+        Runtime.getRuntime().addShutdownHook(Thread())
 
         terminal!!.allowInput()
 

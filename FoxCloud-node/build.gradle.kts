@@ -1,13 +1,11 @@
-import org.jetbrains.kotlin.ir.backend.js.compile
-
 plugins {
     kotlin("jvm") version "2.0.0"
     id("com.github.johnrengelman.shadow") version "7.1.0"
 }
 
 dependencies {
-    compileOnly(project(":TestCloud-launcher"))
-    compileOnly(project(":TestCloud-api"))
+    compileOnly(project(":FoxCloud-launcher"))
+    compileOnly(project(":FoxCloud-api"))
     compileOnly(libs.jline)
     compileOnly(libs.json)
     implementation(libs.jedis)

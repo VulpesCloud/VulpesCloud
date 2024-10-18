@@ -33,7 +33,7 @@ class JLineTerminal(config: NodeConfig) {
 
     var lineReader: LineReaderImpl
 
-    private val commandReadingThread: JLineCommandReadingThread
+    val commandReadingThread: JLineCommandReadingThread
 
     private val tabCompleteHandler: Map<UUID, ConsoleTabCompleteHandler> =
         ConcurrentHashMap<UUID, ConsoleTabCompleteHandler>()
