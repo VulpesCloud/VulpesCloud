@@ -8,7 +8,7 @@ version = "1.0.0-alpha"
 
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.21")
     implementation(libs.jline)
     compileOnly(libs.jedis)
     implementation(libs.slf4jApi)
