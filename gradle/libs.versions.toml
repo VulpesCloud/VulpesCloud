@@ -41,7 +41,7 @@ sponge = "9.0.0"
 javalin = "6.3.0"
 ## token
 jwt = "4.4.0"
-javalin-jwt = "0.7.0"
+javalin-jwt = "6.0.0"
 ## hashing
 
 shadow = "8.1.1"
