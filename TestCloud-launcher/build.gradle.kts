@@ -22,7 +22,7 @@ dependencies {
     implementation("org.incendo:cloud-kotlin-extensions:2.0.0")
     implementation("org.incendo:cloud-annotations:2.0.0")
     implementation("com.zaxxer:HikariCP:6.0.0")
-    implementation("org.mariadb.jdbc:mariadb-java-client:3.4.0")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.4.1")
 
     implementation(project(":TestCloud-api"))
 }
