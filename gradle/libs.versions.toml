@@ -9,7 +9,7 @@ guava = "33.3.1-jre"
 
 # utils
 lombok = "1.18.34"
-annotations = "25.0.0"
+annotations = "26.0.1"
 
 # network
 netty5 = "5.0.0.Alpha5"
@@ -18,14 +18,14 @@ jedis = "5.2.0"
 #logging
 log4j2 = "2.24.1"
 slf4j = "2.0.16"
-logback = "1.5.8"
+logback = "1.5.11"
 
 # configuration
 gson = "2.11.0"
 json = "20240303"
 
 # console
-jline = "3.27.0"
+jline = "3.27.1"
 cloud = "2.0.0"
 
 # platforms
@@ -41,7 +41,7 @@ sponge = "9.0.0"
 javalin = "6.3.0"
 ## token
 jwt = "4.4.0"
-javalin-jwt = "0.7.0"
+javalin-jwt = "6.0.0"
 ## hashing
 
 shadow = "8.1.1"
