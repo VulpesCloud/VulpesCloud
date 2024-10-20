@@ -1,7 +1,7 @@
 import org.jetbrains.kotlin.ir.backend.js.compile
 
 plugins {
-    kotlin("jvm") version "2.0.0"
+    kotlin("jvm") version "2.0.21"
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
