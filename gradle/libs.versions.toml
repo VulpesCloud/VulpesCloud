@@ -9,7 +9,7 @@ guava = "33.3.1-jre"
 
 # utils
 lombok = "1.18.34"
-annotations = "25.0.0"
+annotations = "26.0.1"
 
 # network
 netty5 = "5.0.0.Alpha5"
