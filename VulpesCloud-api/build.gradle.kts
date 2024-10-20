@@ -8,9 +8,9 @@ dependencies {
 }
 
 tasks.jar {
-    archiveFileName.set("foxcloud-api.jar")
+    archiveFileName.set("vulpescloud-api.jar")
 }
 
 tasks.shadowJar {
-    archiveFileName.set("foxcloud-api.jar")
+    archiveFileName.set("vulpescloud-api.jar")
 }

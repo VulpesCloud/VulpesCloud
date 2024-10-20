@@ -9,25 +9,25 @@ import java.util.concurrent.TimeUnit
 
 abstract class ClusterTaskProvider {
 
-    abstract fun groupsAsync(): CompletableFuture<MutableSet<ClusterTask>>?
+    abstract fun tasksAsync(): CompletableFuture<MutableSet<ClusterTask>>?
 
     @SneakyThrows
-    fun groups(): MutableSet<ClusterTask>? {
-        return groupsAsync()?.get(5, TimeUnit.SECONDS)
+    fun tasks(): MutableSet<ClusterTask>? {
+        return tasksAsync()?.get(5, TimeUnit.SECONDS)
     }
 
-    abstract fun existsAsync(group: String?): CompletableFuture<Boolean>
+    abstract fun existsAsync(task: String?): CompletableFuture<Boolean>
 
     @SneakyThrows
-    fun exists(group: String?): Boolean {
-        return existsAsync(group)[5, TimeUnit.SECONDS]
+    fun exists(task: String?): Boolean {
+        return existsAsync(task)[5, TimeUnit.SECONDS]
     }
 
-    abstract fun deleteAsync(group: String?): CompletableFuture<Optional<String?>?>
+    abstract fun deleteAsync(task: String?): CompletableFuture<Optional<String?>?>
 
     @SneakyThrows
-    fun delete(group: String?): Optional<String?>? {
-        return deleteAsync(group)[5, TimeUnit.SECONDS]
+    fun delete(task: String?): Optional<String?>? {
+        return deleteAsync(task)[5, TimeUnit.SECONDS]
     }
 
     abstract fun createAsync(
@@ -53,10 +53,10 @@ abstract class ClusterTaskProvider {
         return createAsync(name, nodes, platform, maxMemory, staticService, minOnline, maintenance)[5, TimeUnit.SECONDS]
     }
 
-    abstract fun findAsync(group: String): CompletableFuture<ClusterTask?>
+    abstract fun findAsync(task: String): CompletableFuture<ClusterTask?>
 
     @SneakyThrows
-    fun find(group: String): ClusterTask? {
-        return findAsync(group)[5, TimeUnit.SECONDS]
+    fun findByName(task: String): ClusterTask? {
+        return findAsync(task)[5, TimeUnit.SECONDS]
     }
 }

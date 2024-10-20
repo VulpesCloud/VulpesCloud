@@ -4,8 +4,8 @@ plugins {
 }
 
 dependencies {
-    compileOnly(project(":FoxCloud-launcher"))
-    compileOnly(project(":FoxCloud-api"))
+    compileOnly(project(":VulpesCloud-launcher"))
+    compileOnly(project(":VulpesCloud-api"))
     compileOnly(libs.jline)
     compileOnly(libs.json)
     implementation(libs.jedis)
@@ -31,12 +31,12 @@ tasks.jar {
     manifest {
         attributes["Main-Class"] = "io.github.thecguygithub.node.NodeLauncher"
     }
-    archiveFileName.set("testcloud-node.jar")
+    archiveFileName.set("vulpescloud-node.jar")
 }
 
 tasks.shadowJar {
     manifest {
         attributes["Main-Class"] = "io.github.thecguygithub.node.NodeLauncher"
     }
-    archiveFileName.set("testcloud-node.jar")
+    archiveFileName.set("vulpescloud-node.jar")
 }

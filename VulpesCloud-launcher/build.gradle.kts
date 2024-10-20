@@ -24,23 +24,23 @@ dependencies {
     implementation("com.zaxxer:HikariCP:5.1.0")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.4.0")
 
-    implementation(project(":FoxCloud-api"))
+    implementation(project(":VulpesCloud-api"))
 }
 
 tasks.jar {
-    from(project(":FoxCloud-node").tasks.shadowJar)
-    from(project(":FoxCloud-api").tasks.jar)
+    from(project(":VulpesCloud-node").tasks.shadowJar)
+    from(project(":VulpesCloud-api").tasks.jar)
     manifest {
         attributes["Main-Class"] = "io.github.thecguygithub.launcher.Launcher"
     }
-    archiveFileName.set("foxcloud-launcher.jar")
+    archiveFileName.set("vulpescloud-launcher.jar")
 }
 
 tasks.shadowJar {
-    from(project(":FoxCloud-node").tasks.shadowJar)
-    from(project(":FoxCloud-api").tasks.shadowJar)
+    from(project(":VulpesCloud-node").tasks.shadowJar)
+    from(project(":VulpesCloud-api").tasks.shadowJar)
     manifest {
         attributes["Main-Class"] = "io.github.thecguygithub.launcher.Launcher"
     }
-    archiveFileName.set("foxcloud-launcher.jar")
+    archiveFileName.set("vulpescloud-launcher.jar")
 }

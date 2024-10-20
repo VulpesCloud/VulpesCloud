@@ -1,4 +1,4 @@
-rootProject.name = "FoxCloud"
-include("FoxCloud-api")
-include("FoxCloud-node")
-include("FoxCloud-launcher")
+rootProject.name = "VulpesCloud"
+include("VulpesCloud-api")
+include("VulpesCloud-node")
+include("VulpesCloud-launcher")

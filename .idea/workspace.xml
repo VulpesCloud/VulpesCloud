@@ -4,16 +4,91 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Added missing files">
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Edited parts of the API">
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskProvider.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/java/io/github/thecguygithub/api/JavaCloudAPI.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/java/io/github/thecguygithub/api/tasks/AbstractClusterTask.java" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/platforms/PlatformTypes.kt" beforeDir="false" afterPath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/platforms/PlatformTypes.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/players/ClusterPlayer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/players/ClusterPlayer.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceFactory.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceProvider.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceStates.kt" beforeDir="false" afterPath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceStates.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/java/io/github/thecguygithub/api/log/LogOutputStream.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/java/io/github/thecguygithub/api/log/LogOutputStream.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/Closable.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/Closable.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/Detail.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/Detail.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/Named.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/Named.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/Reloadable.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/Reloadable.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/command/CommandInfo.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/command/CommandInfo.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/platforms/PlatformGroupDisplay.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/platforms/PlatformGroupDisplay.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/platforms/PlatformTypes.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/platforms/PlatformTypes.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/players/AbstractClusterPlayer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/players/AbstractClusterPlayer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/players/ClusterPlayer.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/players/ClusterPlayer.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/players/ClusterPlayerProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/players/ClusterPlayerProvider.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceFactory.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceFilter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceFilter.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceProvider.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceStates.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceStates.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/ClusterTask.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/ClusterTask.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/ClusterTaskProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/ClusterTaskProvider.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/FallbackClusterTask.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/FallbackClusterTask.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-launcher/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Boot.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Boot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Launcher.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Launcher.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-launcher/src/main/java/io/github/thecguygithub/launcher/TestCloudClassLoader.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/TestCloudClassLoader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-launcher/src/main/java/io/github/thecguygithub/launcher/dependency/Dependency.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/dependency/Dependency.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-launcher/src/main/java/io/github/thecguygithub/launcher/dependency/DependencyDownloader.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/dependency/DependencyDownloader.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-launcher/src/main/java/io/github/thecguygithub/launcher/dependency/DependencyHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/dependency/DependencyHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-launcher/src/main/java/io/github/thecguygithub/launcher/dependency/Repository.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/dependency/Repository.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-launcher/src/main/java/io/github/thecguygithub/launcher/dependency/SubDependencyHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/dependency/SubDependencyHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-launcher/src/main/java/io/github/thecguygithub/launcher/util/FileSystemUtil.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/util/FileSystemUtil.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeConfig.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeConfig.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeLauncher.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeLauncher.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeShutdown.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeShutdown.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/CloudCommandManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/CloudCommandManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/CommandProvider.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/CommandProvider.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/PermissionFunction.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/PermissionFunction.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/annotations/AliasAnnotation.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/annotations/AliasAnnotation.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/annotations/Description.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/annotations/Description.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/parser/PlatformParser.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/parser/PlatformParser.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/provider/CommandProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/provider/CommandProvider.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/provider/CommandProviderImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/provider/CommandProviderImpl.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/source/CommandSource.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/source/CommandSource.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/source/ConsoleCommandSource.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/source/ConsoleCommandSource.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/ClearCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/ClearCommand.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/HelpCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/HelpCommand.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/InfoCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/InfoCommand.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/PlatformCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/PlatformCommand.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/ShutdownCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/ShutdownCommand.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/TasksCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/TasksCommand.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/config/LogLevels.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/config/LogLevels.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/config/RedisEndpointData.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/config/RedisEndpointData.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/event/NodeEventListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/event/NodeEventListener.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/logging/Logger.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/logging/Logger.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/networking/mysql/MySQLController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/networking/mysql/MySQLController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/networking/redis/RedisController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/networking/redis/RedisController.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/networking/redis/RedisJsonParser.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/networking/redis/RedisJsonParser.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/networking/redis/RedisManager.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/networking/redis/RedisManager.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineCommandReadingThread.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineCommandReadingThread.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineCompleter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineCompleter.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineCompletionMatcher.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineCompletionMatcher.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineTerminal.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineTerminal.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineTerminalColor.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineTerminalColor.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/handler/ConsoleTabCompleteHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/handler/ConsoleTabCompleteHandler.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/handler/Toggleable.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/handler/Toggleable.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/util/TerminalColorUtil.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/util/TerminalColorUtil.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/ConfigManipulator.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/ConfigManipulator.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/Configurations.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/Configurations.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/DirectoryActions.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/DirectoryActions.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/Downloader.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/Downloader.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/FileType.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/FileType.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/JavaFileAttach.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/JavaFileAttach.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/JsonUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/JsonUtils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/Pair.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/Pair.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/StringUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/StringUtils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/resources/platforms/purpur/server.properties" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/resources/platforms/purpur/server.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/resources/platforms/purpur/spigot.yml" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/resources/platforms/purpur/spigot.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FoxCloud-node/src/main/resources/platforms/velocity/velocity.toml" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/resources/platforms/velocity/velocity.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,22 +120,22 @@
             <expand>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="FoxCloud" type="f1a62948:ProjectNode" />
+                <item name="VulpesCloud" type="f1a62948:ProjectNode" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="FoxCloud" type="f1a62948:ProjectNode" />
+                <item name="VulpesCloud" type="f1a62948:ProjectNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="FoxCloud" type="f1a62948:ProjectNode" />
+                <item name="VulpesCloud" type="f1a62948:ProjectNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
                 <item name="build" type="c8890929:TasksNode$1" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="FoxCloud" type="f1a62948:ProjectNode" />
+                <item name="VulpesCloud" type="f1a62948:ProjectNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
                 <item name="shadow" type="c8890929:TasksNode$1" />
               </path>
@@ -499,7 +574,15 @@
       <option name="project" value="LOCAL" />
       <updated>1729264048053</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="Edited parts of the API">
+      <option name="closed" value="true" />
+      <created>1729265872314</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1729265872314</updated>
+    </task>
+    <option name="localTasksCounter" value="27" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -514,7 +597,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added things" />
     <MESSAGE value="Added an GitHub workflow" />
     <MESSAGE value="The API is now written in both Java and Kotlin" />
     <MESSAGE value="fix: The Cloud launches now" />
@@ -539,7 +621,8 @@
     <MESSAGE value="Removed almost everything for rewrite" />
     <MESSAGE value="Renamed the Cloud" />
     <MESSAGE value="Added missing files" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added missing files" />
+    <MESSAGE value="Edited parts of the API" />
+    <option name="LAST_COMMIT_MESSAGE" value="Edited parts of the API" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [
