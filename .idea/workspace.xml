@@ -4,10 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Removed unnecessary things from the command package">
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/VersionCommand.kt" afterDir="false" />
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Implement Version Command">
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/FallbackTask.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/version/VersionInfo.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskImpl.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterService.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceFactory.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/ClusterTask.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/Task.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/ClusterTaskProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/TaskProvider.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/FallbackClusterTask.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/PlatformCommand.kt" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskFactory.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskProvider.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/JsonUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/JsonUtils.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,7 +110,7 @@
   }
 }</component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="ProjectErrors" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
@@ -150,8 +160,8 @@
       <recent name="io.github.thecguygithub.node" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.TestCloud [shadowJar]">
-    <configuration name="TestCloud [check]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+  <component name="RunManager" selected="Gradle.TestCloud [jar]">
+    <configuration name="TestCloud [jar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -162,7 +172,7 @@
         </option>
         <option name="taskNames">
           <list>
-            <option value="check" />
+            <option value="jar" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -276,11 +286,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.TestCloud [jar]" />
         <item itemvalue="Gradle.TestCloud [shadowJar]" />
         <item itemvalue="Gradle.TestCloud:TestCloud-node [jar]" />
         <item itemvalue="Gradle.TestCloud:TestCloud-launcher [shadowJar]" />
         <item itemvalue="Gradle.TestCloud:TestCloud-api [shadowJar]" />
-        <item itemvalue="Gradle.TestCloud [check]" />
       </list>
     </recent_temporary>
   </component>
@@ -557,7 +567,15 @@
       <option name="project" value="LOCAL" />
       <updated>1729516398595</updated>
     </task>
-    <option name="localTasksCounter" value="34" />
+    <task id="LOCAL-00034" summary="Implement Version Command">
+      <option name="closed" value="true" />
+      <created>1729518497388</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1729518497388</updated>
+    </task>
+    <option name="localTasksCounter" value="35" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -572,7 +590,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="[ci skip] Just Commiting some changes for later coding" />
     <MESSAGE value="new: Implemented RedisController and fixed some things aswell as changed back to shadowJar beacuse of Redis" />
     <MESSAGE value="Added a new Terminal Color, added new Log level and Config Option" />
     <MESSAGE value="Upload" />
@@ -597,7 +614,8 @@
     <MESSAGE value="Implement VersionProvider" />
     <MESSAGE value="Cleaned up libs.versions.toml" />
     <MESSAGE value="Removed unnecessary things from the command package" />
-    <option name="LAST_COMMIT_MESSAGE" value="Removed unnecessary things from the command package" />
+    <MESSAGE value="Implement Version Command" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implement Version Command" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [

@@ -1,14 +1,14 @@
 package io.github.thecguygithub.node.task
 
 import io.github.thecguygithub.api.platforms.PlatformGroupDisplay
-import io.github.thecguygithub.api.tasks.ClusterTask
-import io.github.thecguygithub.api.tasks.ClusterTaskProvider
+import io.github.thecguygithub.api.tasks.Task
+import io.github.thecguygithub.api.tasks.TaskProvider
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
-class TaskProvider : ClusterTaskProvider() {
+class TaskProvider : TaskProvider() {
 
-    private val tasks: MutableSet<ClusterTask> = mutableSetOf()
+    private val tasks: MutableSet<Task> = mutableSetOf()
 
     override fun createAsync(
         name: String?,
@@ -30,11 +30,11 @@ class TaskProvider : ClusterTaskProvider() {
         return CompletableFuture.completedFuture(tasks.stream().anyMatch { it.name().equals(task, true) })
     }
 
-    override fun findAsync(task: String): CompletableFuture<ClusterTask?> {
+    override fun findAsync(task: String): CompletableFuture<Task?> {
         return CompletableFuture.completedFuture(tasks.stream().filter {it -> it.name().equals(task, true)}.findFirst().orElse(null))
     }
 
-    override fun tasksAsync(): CompletableFuture<MutableSet<ClusterTask>>? {
+    override fun tasksAsync(): CompletableFuture<MutableSet<Task>>? {
         return CompletableFuture.completedFuture(tasks)
     }
 }

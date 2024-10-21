@@ -7,12 +7,12 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 
-abstract class ClusterTaskProvider {
+abstract class TaskProvider {
 
-    abstract fun tasksAsync(): CompletableFuture<MutableSet<ClusterTask>>?
+    abstract fun tasksAsync(): CompletableFuture<MutableSet<Task>>?
 
     @SneakyThrows
-    fun tasks(): MutableSet<ClusterTask>? {
+    fun tasks(): MutableSet<Task>? {
         return tasksAsync()?.get(5, TimeUnit.SECONDS)
     }
 
@@ -53,10 +53,10 @@ abstract class ClusterTaskProvider {
         return createAsync(name, nodes, platform, maxMemory, staticService, minOnline, maintenance)[5, TimeUnit.SECONDS]
     }
 
-    abstract fun findAsync(task: String): CompletableFuture<ClusterTask?>
+    abstract fun findAsync(task: String): CompletableFuture<Task?>
 
     @SneakyThrows
-    fun findByName(task: String): ClusterTask? {
+    fun findByName(task: String): Task? {
         return findAsync(task)[5, TimeUnit.SECONDS]
     }
 }

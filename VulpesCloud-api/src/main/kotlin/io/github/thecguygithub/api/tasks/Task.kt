@@ -2,15 +2,16 @@ package io.github.thecguygithub.api.tasks
 
 import io.github.thecguygithub.api.Detail
 import io.github.thecguygithub.api.Named
-import io.github.thecguygithub.api.platforms.PlatformGroupDisplay
 import io.github.thecguygithub.api.services.ClusterService
+import io.github.thecguygithub.api.version.VersionInfo
 
 
-interface ClusterTask : Named, Detail {
 
-    fun nodes(): Array<String?>?
+interface Task : Named, Detail {
 
-    fun templates(): Array<String?>?
+    fun nodes(): List<String?>
+
+    fun templates(): List<String?>
 
     fun maxMemory(): Int
 
@@ -20,19 +21,15 @@ interface ClusterTask : Named, Detail {
 
     fun minOnlineCount(): Int
 
-    fun serviceCount(): Long
+    fun serviceCount(): Long?
 
     fun services(): List<ClusterService?>?
 
-    fun platform(): PlatformGroupDisplay?
+    fun version(): VersionInfo
 
     fun maintenance(): Boolean
 
     fun startPort(): Int
-
-    fun fallback(): Boolean {
-        return this is FallbackClusterTask
-    }
 
     fun update()
 

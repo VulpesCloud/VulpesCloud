@@ -3,7 +3,7 @@ package io.github.thecguygithub.api.services
 import io.github.thecguygithub.api.Detail
 import io.github.thecguygithub.api.Named
 import io.github.thecguygithub.api.players.ClusterPlayer
-import io.github.thecguygithub.api.tasks.ClusterTask
+import io.github.thecguygithub.api.tasks.Task
 import lombok.SneakyThrows
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -12,7 +12,7 @@ import java.util.concurrent.TimeUnit
 
 interface ClusterService : Named, Detail {
 
-    fun task(): ClusterTask
+    fun task(): Task
 
     fun orderedId(): Int
 
