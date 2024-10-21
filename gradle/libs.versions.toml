@@ -1,8 +1,5 @@
 [versions]
-
-
 # Dependency Injection
-aerogel = "2.1.0"
 
 # google deps
 guava = "33.3.1-jre"
@@ -12,11 +9,9 @@ lombok = "1.18.34"
 annotations = "26.0.1"
 
 # network
-netty5 = "5.0.0.Alpha5"
 jedis = "5.2.0"
 
 #logging
-log4j2 = "2.24.1"
 slf4j = "2.0.16"
 logback = "1.5.11"
 
@@ -31,31 +26,15 @@ cloud = "2.0.0"
 # platforms
 spigot = "1.20.4-R0.1-SNAPSHOT"
 velocity = "3.3.0-SNAPSHOT"
-bungeecord = "1.20-R0.2"
-waterdogpe = "1.2.4"
-nukkit = "1.0-SNAPSHOT"
-fabric = "0.16.5"
-sponge = "9.0.0"
 
-# rest
-javalin = "6.3.0"
-## token
-jwt = "4.4.0"
-javalin-jwt = "6.0.0"
-## hashing
-
+# shadowJar
 shadow = "8.1.1"
 
 [plugins]
 shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 
 [libraries]
-
-# Dependency Injection
-aerogel = { group = "dev.derklaro.aerogel", name = "aerogel", version.ref = "aerogel" }
-
 # google libs
-
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 
 # utils
@@ -63,12 +42,7 @@ lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" 
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
 
 # network
-netty5 = { group = "io.netty", name = "netty5-all", version.ref = "netty5" }
 jedis = {group = "redis.clients", name = "jedis", version.ref = "jedis"}
-
-# logging
-log4j2 = { module = "org.apache.logging.log4j:log4j-core", version.ref = "log4j2" }
-log4j2-simple = { module = "org.apache.logging.log4j:log4j-slf4j2-impl", version.ref = "log4j2" }
 
 slf4jApi = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 logbackCore = { group = "ch.qos.logback", name = "logback-core", version.ref = "logback" }
@@ -87,16 +61,3 @@ cloud-task = { group = "org.incendo", name = "cloud-task", version.ref = "cloud"
 # platforms
 spigot = { group = "io.papermc.paper", name = "paper-api", version.ref = "spigot" }
 velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
-bungeecord = { group = "net.md-5", name = "bungeecord-api", version.ref = "bungeecord" }
-waterdogpe = { group = "dev.waterdog.waterdogpe", name = "waterdog", version.ref = "waterdogpe" }
-nukkit = { group = "cn.nukkit", name = "nukkit", version.ref = "nukkit" }
-fabric = { group = "net.fabricmc", name = "fabric-loader", version.ref = "fabric" }
-sponge = { group = "org.spongepowered", name = "spongeapi", version.ref = "sponge" }
-
-# rest
-javalin = { group = "io.javalin", name = "javalin", version.ref = "javalin" }
-java-jwt = { group = "com.auth0", name = "java-jwt", version.ref = "jwt" }
-javalin-jwt = { group = "com.github.kmehrunes", name = "javalin-jwt", version.ref = "javalin-jwt" }
-
-[bundles]
-jwt = [ "java-jwt", "javalin-jwt" ]
