@@ -4,7 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Update .gitignore">
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Implement VersionProvider">
       <change afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/version/VersionType.kt" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/version/Versions.kt" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskFactory.kt" afterDir="false" />
@@ -539,7 +539,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix: The Cloud launches now" />
     <MESSAGE value="fix: The Launcher now download all Dependencys that are required" />
     <MESSAGE value="fix: Changed shadowJar to jar" />
     <MESSAGE value="[ci skip] Just Commiting some changes for later coding" />
@@ -564,7 +563,8 @@
     <MESSAGE value="Edited parts of the API" />
     <MESSAGE value="Another rename" />
     <MESSAGE value="Update .gitignore" />
-    <option name="LAST_COMMIT_MESSAGE" value="Update .gitignore" />
+    <MESSAGE value="Implement VersionProvider" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implement VersionProvider" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [
