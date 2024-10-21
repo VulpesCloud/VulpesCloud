@@ -16,7 +16,6 @@ dependencies {
     implementation(libs.logbackClassic)
 
     implementation(libs.cloud)
-    implementation(libs.aerogel)
     implementation("org.incendo:cloud-kotlin-coroutines:2.0.0")
     implementation("org.incendo:cloud-kotlin-coroutines-annotations:2.0.0")
     implementation("org.incendo:cloud-kotlin-extensions:2.0.0")
