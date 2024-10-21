@@ -1,10 +1,7 @@
 package io.github.thecguygithub.node
 
 import io.github.thecguygithub.node.command.provider.CommandProvider
-import io.github.thecguygithub.node.commands.ClearCommand
-import io.github.thecguygithub.node.commands.HelpCommand
-import io.github.thecguygithub.node.commands.InfoCommand
-import io.github.thecguygithub.node.commands.ShutdownCommand
+import io.github.thecguygithub.node.commands.*
 import io.github.thecguygithub.node.config.LogLevels
 import io.github.thecguygithub.node.event.NodeEventListener
 import io.github.thecguygithub.node.logging.Logger
@@ -40,6 +37,8 @@ class Node {
 
         var mySQLController: MySQLController? = null
             private set
+
+        lateinit var versionProvider: VersionProvider
 
         lateinit var logger: Logger
             private set
@@ -78,6 +77,10 @@ class Node {
 
         mySQLController = MySQLController()
 
+        logger.debug("Initializing VersionProvider")
+
+        versionProvider = VersionProvider()
+
 
         logger.debug("Initializing CommandProvider")
 
@@ -89,8 +92,9 @@ class Node {
         HelpCommand()
         InfoCommand()
         ShutdownCommand()
+        VersionCommand()
 //        TasksCommand()
-//        PlatformCommand()
+
 
         Runtime.getRuntime().addShutdownHook(Thread())
 
@@ -100,8 +104,6 @@ class Node {
             "EVENT;NODE;${nodeConfig?.localNode};STATUS;&2RUNNING",
             "testcloud-events-nodes-status"
         )
-
-        VersionProvider()
 
     }
 
