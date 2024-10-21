@@ -13,7 +13,6 @@ dependencies {
     compileOnly(libs.logbackCore)
     compileOnly(libs.logbackClassic)
     implementation(libs.cloud)
-    implementation(libs.aerogel)
     // implementation(libs.cloud.annotations)
     // implementation(libs.cloud.task)
     implementation("org.incendo:cloud-kotlin-coroutines:2.0.0")

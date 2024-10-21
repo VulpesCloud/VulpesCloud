@@ -4,9 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Implement VersionProvider">
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Cleaned up libs.versions.toml">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/CommandProvider.java" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/provider/CommandProviderImpl.java" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -532,7 +534,23 @@
       <option name="project" value="LOCAL" />
       <updated>1729514224898</updated>
     </task>
-    <option name="localTasksCounter" value="31" />
+    <task id="LOCAL-00031" summary="Cleaned up libs.versions.toml">
+      <option name="closed" value="true" />
+      <created>1729515606462</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1729515606462</updated>
+    </task>
+    <task id="LOCAL-00032" summary="Cleaned up libs.versions.toml">
+      <option name="closed" value="true" />
+      <created>1729515611839</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1729515611839</updated>
+    </task>
+    <option name="localTasksCounter" value="33" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -547,7 +565,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="fix: The Launcher now download all Dependencys that are required" />
     <MESSAGE value="fix: Changed shadowJar to jar" />
     <MESSAGE value="[ci skip] Just Commiting some changes for later coding" />
     <MESSAGE value="new: Implemented RedisController and fixed some things aswell as changed back to shadowJar beacuse of Redis" />
@@ -572,7 +589,8 @@
     <MESSAGE value="Another rename" />
     <MESSAGE value="Update .gitignore" />
     <MESSAGE value="Implement VersionProvider" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implement VersionProvider" />
+    <MESSAGE value="Cleaned up libs.versions.toml" />
+    <option name="LAST_COMMIT_MESSAGE" value="Cleaned up libs.versions.toml" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [
