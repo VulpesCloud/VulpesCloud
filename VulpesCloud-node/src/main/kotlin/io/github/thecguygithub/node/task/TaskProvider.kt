@@ -17,7 +17,7 @@ class TaskProvider : ClusterTaskProvider() {
         maxMemory: Int,
         staticService: Boolean,
         minOnline: Int,
-        maintenance: Boolean,
+        maintenance: Boolean
     ): CompletableFuture<Optional<String?>?> {
         TODO("Not yet implemented")
     }

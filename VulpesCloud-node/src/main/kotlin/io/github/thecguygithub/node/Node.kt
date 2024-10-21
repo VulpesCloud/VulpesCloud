@@ -12,6 +12,7 @@ import io.github.thecguygithub.node.networking.mysql.MySQLController
 import io.github.thecguygithub.node.networking.redis.RedisController
 import io.github.thecguygithub.node.terminal.JLineTerminal
 import io.github.thecguygithub.node.util.Configurations.readContent
+import io.github.thecguygithub.node.version.VersionProvider
 import java.nio.file.Path
 import kotlin.system.exitProcess
 
@@ -99,6 +100,9 @@ class Node {
             "EVENT;NODE;${nodeConfig?.localNode};STATUS;&2RUNNING",
             "testcloud-events-nodes-status"
         )
+
+        VersionProvider()
+
     }
 
     fun getRC(): RedisController? {

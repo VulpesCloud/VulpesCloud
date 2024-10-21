@@ -9,10 +9,8 @@ class PlatformGroupDisplay(val platform: String, val version: String, val type: 
     override fun details(): String {
         return "$platform-$version"
     }
-
     @Contract(pure = true)
     fun platformJarName(): String {
         return details() + ".jar"
     }
-
 }
