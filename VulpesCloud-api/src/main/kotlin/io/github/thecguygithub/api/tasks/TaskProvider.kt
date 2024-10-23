@@ -1,6 +1,6 @@
 package io.github.thecguygithub.api.tasks
 
-import io.github.thecguygithub.api.platforms.PlatformGroupDisplay
+import io.github.thecguygithub.api.version.VersionInfo
 import lombok.SneakyThrows
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -33,7 +33,7 @@ abstract class TaskProvider {
     abstract fun createAsync(
         name: String?,
         nodes: Array<String?>?,
-        platform: PlatformGroupDisplay?,
+        platform: VersionInfo?,
         maxMemory: Int,
         staticService: Boolean,
         minOnline: Int,
@@ -44,7 +44,7 @@ abstract class TaskProvider {
     fun create(
         name: String?,
         nodes: Array<String?>?,
-        platform: PlatformGroupDisplay?,
+        platform: VersionInfo?,
         maxMemory: Int,
         staticService: Boolean,
         minOnline: Int,

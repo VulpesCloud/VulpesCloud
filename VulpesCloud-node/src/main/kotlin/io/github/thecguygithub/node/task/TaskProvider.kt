@@ -1,8 +1,8 @@
 package io.github.thecguygithub.node.task
 
-import io.github.thecguygithub.api.platforms.PlatformGroupDisplay
 import io.github.thecguygithub.api.tasks.Task
 import io.github.thecguygithub.api.tasks.TaskProvider
+import io.github.thecguygithub.api.version.VersionInfo
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
@@ -13,7 +13,7 @@ class TaskProvider : TaskProvider() {
     override fun createAsync(
         name: String?,
         nodes: Array<String?>?,
-        platform: PlatformGroupDisplay?,
+        platform: VersionInfo?,
         maxMemory: Int,
         staticService: Boolean,
         minOnline: Int,
