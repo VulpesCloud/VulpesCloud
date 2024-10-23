@@ -7,6 +7,7 @@ import io.github.thecguygithub.node.event.NodeEventListener
 import io.github.thecguygithub.node.logging.Logger
 import io.github.thecguygithub.node.networking.mysql.MySQLController
 import io.github.thecguygithub.node.networking.redis.RedisController
+import io.github.thecguygithub.node.task.TaskProvider
 import io.github.thecguygithub.node.terminal.JLineTerminal
 import io.github.thecguygithub.node.util.Configurations.readContent
 import io.github.thecguygithub.node.version.VersionProvider
@@ -39,6 +40,8 @@ class Node {
             private set
 
         lateinit var versionProvider: VersionProvider
+
+        lateinit var taskProvider: TaskProvider
 
         lateinit var logger: Logger
             private set
@@ -81,6 +84,9 @@ class Node {
 
         versionProvider = VersionProvider()
 
+        logger.debug("Initializing TaskProvider")
+
+        taskProvider = TaskProvider()
 
         logger.debug("Initializing CommandProvider")
 
@@ -93,7 +99,7 @@ class Node {
         InfoCommand()
         ShutdownCommand()
         VersionCommand()
-//        TasksCommand()
+        TasksCommand()
 
 
         Runtime.getRuntime().addShutdownHook(Thread())

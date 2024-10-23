@@ -18,7 +18,7 @@ open class TaskImpl(
 ) : Task {
 
     override fun details(): String? {
-        TODO("Not yet implemented")
+        return ""
     }
 
     override fun maintenance(): Boolean {

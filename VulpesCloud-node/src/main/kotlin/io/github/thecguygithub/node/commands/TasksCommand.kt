@@ -1,120 +1,113 @@
 package io.github.thecguygithub.node.commands
-//
-//import io.github.thecguygithub.api.command.CommandInfo
-//import io.github.thecguygithub.node.Node
-//import io.github.thecguygithub.node.logging.Logger
-//import io.github.thecguygithub.node.platforms.Platform
-//import io.github.thecguygithub.node.platforms.versions.PlatformVersion
-//import io.github.thecguygithub.node.tasks.TaskJson
-//import io.github.thecguygithub.node.terminal.setup.impl.TaskSetup
-//import org.incendo.cloud.kotlin.extension.buildAndRegister
-//import org.incendo.cloud.parser.standard.StringParser
-//
-//class TasksCommand {
-//    val logger = Logger()
-//
-//    init {
-//        Node.commandProvider?.registeredCommands?.add(
-//            CommandInfo(
-//                "task",
-//                setOf("tasks"),
-//                "Clear the Terminal.",
-//                listOf("")
-//            )
-//        )
-//
-//        Node.commandProvider!!.commandManager!!.buildAndRegister("task", aliases = arrayOf("tasks")) {
-//            literal("list")
-//
-//            handler { _ ->
-//                logger.info("Following &b${Node.taskProvider?.groups()?.size} &7groups are loaded&8:")
-//                Node.taskProvider?.groups()
-//                    ?.forEach { group -> logger.info("&8- &f${group.name()}&8: (&7${group.details()}&8)") }
-//            }
-//        }
-//
-//        Node.commandProvider!!.commandManager!!.buildAndRegister("task", aliases = arrayOf("tasks")) {
-//            literal("task")
-//            required("task", StringParser.stringParser(StringParser.StringMode.SINGLE))
-//            literal("start")
-//
-//            handler { ctx ->
-//                val task = Node.taskProvider!!.find(ctx.get<String>("task").toString())
-//
-//                if (task != null) {
-//                    logger.info("Staring a Service!")
-//                    Node.serviceProvider!!.factory().runGroupService(task)
-//
-//                } else {
-//                    logger.info("The Task that has been entered is not valid!")
-//                }
-//            }
-//
-//        }
-//
-//        Node.commandProvider!!.commandManager!!.buildAndRegister("task", aliases = arrayOf("tasks")) {
-//            literal("create")
-//            flag("default")
-//
-//            handler { ctx ->
-//
-//                logger.debug(ctx.flags().get("default")!!)
-//
-//                if (ctx.flags().isPresent("default")) {
-//
-//                    try {
-//                        logger.debug("--default is present!")
-//                        logger.debug("searching Platform")
-//
-//                        val platform = Node.platformService!!.find("paper")
-//                        if (platform == null) {
-//                            logger.error("The Platform is null!")
-//                            return@handler
-//                        }
-//
-//                        logger.debug("found platform, looking for version!")
-//                        val version = platform.versions.stream().filter { it.version.equals("1.21.1", true)}.findFirst().orElse(null)
-//
-//                        if (version == null) {
-//                            logger.error("version is empty!")
-//                        }
-//
-//                        logger.debug("Version found! Creating json!")
-//
-//                        val json  = TaskJson.createGroupJson(
-//                            "Test",
-//                            platform,
-//                            "1.21.1",
-//                            512,
-//                            false,
-//                            1,
-//                            false,
-//                            false,
-//                            25565
-//                        )
-//                        logger.debug("JSON created! sending redis message!")
-//
-//                        Node.instance!!.getRC()?.sendMessage(json.toString(), "testcloud-events-group-create")
-//
-//                        logger.debug("Redis message sent successfully!")
-//                    } catch (e: Exception) {
-//                        logger.error("HEWWE IS A  EWWOWRS" + e.toString())
-//                    }
-//                } else {
-//                    // TODO("FIX TASK SETUP")
-//                    TaskSetup().run()
-//                    Logger().info("test")
-//                }
-//            }
-//        }
-//
-//
-//
-//
-//    }
-//}
-//
-//
+
+import io.github.thecguygithub.api.command.CommandInfo
+import io.github.thecguygithub.api.version.VersionInfo
+import io.github.thecguygithub.api.version.VersionType
+import io.github.thecguygithub.node.Node
+import io.github.thecguygithub.node.logging.Logger
+import io.github.thecguygithub.node.task.TaskFactory
+import io.github.thecguygithub.node.task.TaskImpl
+import io.github.thecguygithub.node.version.Version
+import org.incendo.cloud.kotlin.extension.buildAndRegister
+import org.incendo.cloud.parser.standard.StringParser
+import org.json.JSONObject
+
+class TasksCommand {
+    val logger = Logger()
+
+    init {
+        Node.commandProvider?.registeredCommands?.add(
+            CommandInfo(
+                "task",
+                setOf("tasks"),
+                "Clear the Terminal.",
+                listOf("")
+            )
+        )
+
+        Node.commandProvider!!.commandManager!!.buildAndRegister("task", aliases = arrayOf("tasks")) {
+            literal("list")
+
+            handler { _ ->
+                logger.info("Following &b${Node.taskProvider.tasks()?.size} &7groups are loaded&8:")
+                Node.taskProvider.tasks()
+                    ?.forEach { task -> logger.info("&8- &f${task.name()}&8: (&7${task.details()}&8)") }
+            }
+        }
+
+        Node.commandProvider!!.commandManager!!.buildAndRegister("task", aliases = arrayOf("tasks")) {
+            literal("task")
+            required("task", StringParser.stringParser(StringParser.StringMode.SINGLE))
+            literal("start")
+
+            handler { ctx ->
+                val task = Node.taskProvider.findByName(ctx.get<String>("task").toString())
+
+                if (task != null) {
+                    logger.info("Staring a Service!")
+                    // Node.serviceProvider!!.factory().runGroupService(task)
+
+                } else {
+                    logger.info("The Task that has been entered is not valid!")
+                }
+            }
+
+        }
+
+        Node.commandProvider!!.commandManager!!.buildAndRegister("task", aliases = arrayOf("tasks")) {
+            literal("create")
+            flag("default")
+
+            handler { ctx ->
+
+                logger.debug(ctx.flags().get("default")!!)
+
+                if (ctx.flags().isPresent("default")) {
+
+                    try {
+                        logger.debug("--default is present!")
+                        logger.debug("searching Platform")
+
+                        val task = TaskImpl(
+                            "Test",
+                            1024,
+                            VersionInfo("velocity", VersionType.PROXY, "3.4.0-SNAPSHOT"),
+                            listOf(),
+                            listOf(),
+                            69,
+                            true,
+                            1,
+                            false,
+                            25565
+                        )
+
+                        logger.warn(JSONObject(task).toString(4))
+
+                        logger.debug("JSON created! sending redis message!")
+
+                        TaskFactory.createNewTask(JSONObject(task))
+
+                        Node.instance!!.getRC()?.sendMessage(JSONObject(task).toString(), "testcloud-events-group-create")
+
+                        logger.debug("Redis message sent successfully!")
+                    } catch (e: Exception) {
+                        logger.error("HEWE IS A  SCREWWORM $e")
+                    }
+                } else {
+                    // TODO("FIX TASK SETUP")
+                    // TaskSetup().run()
+                    Logger().info("test")
+                }
+            }
+        }
+
+
+
+
+    }
+}
+
+
 ////class TasksCommand : Command("group", "Manage or create your cluster groups", "groups") {
 ////
 ////    val logger = Logger()

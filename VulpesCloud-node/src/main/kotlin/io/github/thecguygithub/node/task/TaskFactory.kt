@@ -2,8 +2,10 @@ package io.github.thecguygithub.node.task
 
 import io.github.thecguygithub.api.version.VersionInfo
 import io.github.thecguygithub.api.version.VersionType
+import io.github.thecguygithub.node.Node
 import io.github.thecguygithub.node.logging.Logger
 import org.json.JSONObject
+import java.nio.file.Files
 import java.nio.file.Path
 
 object TaskFactory {
@@ -13,12 +15,12 @@ object TaskFactory {
 
     fun createNewTask(taskInformation: JSONObject) {
 
-        val versionJson = taskInformation.getJSONObject("versionInfo")
+        val versionJson = taskInformation.getJSONObject("version")
 
         val version = VersionInfo(
             versionJson.getString("name"),
-            VersionType.valueOf(versionJson.getString("type")),
-            versionJson.getString("version")
+            VersionType.valueOf(versionJson.get("type").toString()),
+            versionJson.getString("versions")
         )
 
         val nodesJson = taskInformation.getJSONArray("nodes")
@@ -48,6 +50,13 @@ object TaskFactory {
         )
 
         GROUP_DIR.toFile().mkdirs()
+        val taskFile: Path = GROUP_DIR.resolve(task.name() + ".json")
+        Files.writeString(taskFile, JSONObject(task).toString(4))
+
+        logger.debug("Adding to Groups")
+
+        Node.taskProvider.tasks()!!.add(task)
+
 
     }
 
