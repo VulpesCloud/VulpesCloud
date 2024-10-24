@@ -5,6 +5,7 @@ enum class LogLevels {
     ERROR,
     WARN,
     INFO,
-    DEBUG;
+    DEBUG,
+    ALL;
 
 }

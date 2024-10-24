@@ -4,7 +4,9 @@ import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import io.github.thecguygithub.node.Node
 import io.github.thecguygithub.node.logging.Logger
+import io.github.thecguygithub.node.util.StringUtils
 import java.sql.ResultSet
+import java.util.*
 
 class MySQLController {
 
@@ -25,13 +27,13 @@ class MySQLController {
 
         config.jdbcUrl = String.format(
             CONNECT_URL_FORMAT,
-            nodeConfig.mysql_host,
-            nodeConfig.mysql_port,
-            nodeConfig.mysql_database
+            nodeConfig.mysql!!.host,
+            nodeConfig.mysql!!.port,
+            nodeConfig.mysql!!.database
         )
 
-        config.username = nodeConfig.mysql_user
-        config.password = nodeConfig.mysql_password
+        config.username = nodeConfig.mysql!!.user
+        config.password = nodeConfig.mysql!!.password
         config.driverClassName = "org.mariadb.jdbc.Driver"
         config.maxLifetime = 9223372036854775807
 
@@ -40,6 +42,18 @@ class MySQLController {
         dataSource = HikariDataSource(config)
 
         logger.info("Successfully established Database connection!")
+
+    }
+
+    fun createDefaultTables() {
+
+        logger.warn(UUID.randomUUID())
+
+        try {
+            dbExecute("CREATE TABLE IF NOT EXISTS nodes (id SERIAL PRIMARY KEY, name TEXT, uuid VARCHAR(36))")
+        } catch (e: Exception) {
+            logger.error(e)
+        }
 
     }
 

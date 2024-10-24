@@ -1,5 +1,6 @@
 package io.github.thecguygithub.node
 
+import io.github.thecguygithub.node.cluster.ClusterProvider
 import io.github.thecguygithub.node.command.provider.CommandProvider
 import io.github.thecguygithub.node.commands.*
 import io.github.thecguygithub.node.config.LogLevels
@@ -36,12 +37,17 @@ class Node {
         var redisController: RedisController? = null
             private set
 
-        var mySQLController: MySQLController? = null
+        lateinit var mySQLController: MySQLController
             private set
 
         lateinit var versionProvider: VersionProvider
+            private set
 
         lateinit var taskProvider: TaskProvider
+            private set
+
+        lateinit var clusterProvider: ClusterProvider
+            private set
 
         lateinit var logger: Logger
             private set
@@ -65,20 +71,28 @@ class Node {
 
         logger.debug("Loading Redis Controller")
 
-        redisController = RedisController()
+//        redisController = RedisController()
+
+        logger.debug("Initializing ClusterProvider")
+
+        clusterProvider = ClusterProvider()
 
         logger.debug("Loading Events!")
 
         NodeEventListener
 
-        redisController?.sendMessage(
-            "EVENT;NODE;${nodeConfig?.localNode};STATUS;&eSTARTING",
+        getRC()?.sendMessage(
+            "EVENT;NODE;${nodeConfig?.name};STATUS;&eSTARTING",
             "testcloud-events-nodes-status"
         )
 
         logger.debug("Initializing MySQL Controller")
 
         mySQLController = MySQLController()
+
+        logger.debug("Creating MySQL Tables")
+
+        mySQLController.createDefaultTables()
 
         logger.debug("Initializing VersionProvider")
 
@@ -101,13 +115,12 @@ class Node {
         VersionCommand()
         TasksCommand()
 
-
         Runtime.getRuntime().addShutdownHook(Thread())
 
         terminal!!.allowInput()
 
-        redisController?.sendMessage(
-            "EVENT;NODE;${nodeConfig?.localNode};STATUS;&2RUNNING",
+        getRC()?.sendMessage(
+            "EVENT;NODE;${nodeConfig?.name};STATUS;&2RUNNING",
             "testcloud-events-nodes-status"
         )
 

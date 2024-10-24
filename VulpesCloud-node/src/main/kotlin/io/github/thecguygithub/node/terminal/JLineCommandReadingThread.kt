@@ -73,7 +73,7 @@ class   JLineCommandReadingThread(private val localNodeImpl: NodeConfig, private
 
     private fun prompt(): String {
 
-        return ("&9" + localNodeImpl.localNode).toString() + "&8@&7cloud &8» &7"
+        return ("&9" + localNodeImpl.name) + "&8@&7cloud &8» &7"
 
     }
 }

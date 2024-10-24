@@ -22,7 +22,7 @@ class VersionProvider {
 
     init {
 
-        Files.writeString(VERISON_PATH, String(URI(VERSIONS_URL).toURL().openStream().readAllBytes()))
+        // Files.writeString(VERISON_PATH, String(URI(VERSIONS_URL).toURL().openStream().readAllBytes()))
 
         val json = RedisJsonParser.parseJson(Files.readString(VERISON_PATH))
 

@@ -108,7 +108,7 @@ class JLineTerminal(config: NodeConfig) {
         terminal.printLine("")
         terminal.printLine("   &fTestCloud &8- &71.0.0-alpha")
         terminal.printLine(
-            ("   &7Local node&8: &7" + config.localNode).toString()
+            ("   &7Local node&8: &7" + config.nodes)
         )
         terminal.printLine("")
     }
