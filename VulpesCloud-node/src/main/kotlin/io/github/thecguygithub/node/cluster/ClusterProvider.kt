@@ -1,6 +1,7 @@
 package io.github.thecguygithub.node.cluster
 
 import io.github.thecguygithub.api.cluster.NodeInformation
+import io.github.thecguygithub.api.cluster.NodeStates
 import io.github.thecguygithub.node.Node
 import io.github.thecguygithub.node.logging.Logger
 import java.util.*
@@ -16,8 +17,14 @@ class ClusterProvider {
     private lateinit var rowSetFactory: RowSetFactory
     val nodes: MutableList<NodeInformation> = mutableListOf()
 
+    companion object {
+        lateinit var instance: ClusterProvider
+    }
+
 
     init {
+
+        instance = this
 
         try {
             rowSetFactory = RowSetProvider.newFactory()
@@ -27,7 +34,7 @@ class ClusterProvider {
 
         val redisNodes = redis?.getAllHashFields("VulpesCloud-Nodes")
 
-        if (redisNodes == null) {
+        if (redisNodes.isNullOrEmpty()) {
 
             try {
                 val result = mySQL.dbExecWithRs("SELECT * FROM nodes")
@@ -67,14 +74,27 @@ class ClusterProvider {
                     }
                 }
 
-                nodes.forEach { logger.debug(it.name + "Name | UUID" + it.uuid) }
+                if (Node.nodeConfig!!.nodes != nodes) {
+                    logger.warn("The Nodes Configuration is not what is stored in the MySQL Database!")
+                    logger.warn("Please do NOT remove through the Config! Use The cluster Command instead!")
+                    logger.warn("The Config will be set to the Data in the Database!")
+
+                    Node.nodeConfig!!.nodes = nodes
+                    Node.nodeConfig!!.nodes.remove(NodeInformation(Node.nodeConfig!!.name, Node.nodeConfig!!.uuid))
+                    Node.instance!!.updateConfig()
+                }
+
+                nodes.forEach { redis?.setHashField("VulpesCloud-Nodes", it.name, NodeStates.OFFLINE.name) }
+
+                redis?.setHashField("VulpesCloud-Nodes", Node.nodeConfig!!.name, NodeStates.STARTING.name)
 
             } catch (e: Exception) {
                 logger.error(e)
             }
-
         }
-
     }
+
+
+    fun findByName(node: String) {}
 
 }

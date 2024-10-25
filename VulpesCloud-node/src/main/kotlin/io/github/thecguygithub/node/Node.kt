@@ -11,6 +11,7 @@ import io.github.thecguygithub.node.networking.redis.RedisController
 import io.github.thecguygithub.node.task.TaskProvider
 import io.github.thecguygithub.node.terminal.JLineTerminal
 import io.github.thecguygithub.node.util.Configurations.readContent
+import io.github.thecguygithub.node.util.Configurations.writeContent
 import io.github.thecguygithub.node.version.VersionProvider
 import java.nio.file.Path
 import kotlin.system.exitProcess
@@ -71,11 +72,7 @@ class Node {
 
         logger.debug("Loading Redis Controller")
 
-//        redisController = RedisController()
-
-        logger.debug("Initializing ClusterProvider")
-
-        clusterProvider = ClusterProvider()
+        redisController = RedisController()
 
         logger.debug("Loading Events!")
 
@@ -93,6 +90,14 @@ class Node {
         logger.debug("Creating MySQL Tables")
 
         mySQLController.createDefaultTables()
+
+        logger.debug("Initializing ClusterProvider")
+
+        try {
+            clusterProvider = ClusterProvider()
+        } catch (e: Exception) {
+            logger.error(e)
+        }
 
         logger.debug("Initializing VersionProvider")
 
@@ -114,6 +119,7 @@ class Node {
         ShutdownCommand()
         VersionCommand()
         TasksCommand()
+        ClusterCommand()
 
         Runtime.getRuntime().addShutdownHook(Thread())
 
@@ -124,6 +130,10 @@ class Node {
             "testcloud-events-nodes-status"
         )
 
+    }
+
+    fun updateConfig() {
+        writeContent(Path.of("config.json"), nodeConfig)
     }
 
     fun getRC(): RedisController? {

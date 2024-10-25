@@ -5,16 +5,10 @@ import io.github.thecguygithub.api.cluster.NodeInformation
 import io.github.thecguygithub.node.config.LogLevels
 import io.github.thecguygithub.node.config.RedisEndpointData
 import io.github.thecguygithub.node.networking.mysql.MySQLEndpointData
-import lombok.Getter
-import lombok.Setter
-import lombok.experimental.Accessors
 import java.util.*
 
-
-@Getter
-@Setter
-@Accessors(fluent = true)
 class NodeConfig {
+
     var uuid: UUID
     var name: String
     var redis: RedisEndpointData?
