@@ -31,26 +31,32 @@ abstract class TaskProvider {
     }
 
     abstract fun createAsync(
-        name: String?,
-        nodes: Array<String?>?,
-        platform: VersionInfo?,
+        name: String,
+        templates: List<String?>,
+        nodes: List<String?>,
+        version: VersionInfo,
         maxMemory: Int,
         staticService: Boolean,
-        minOnline: Int,
-        maintenance: Boolean
+        minOnlineCount: Int,
+        maintenance: Boolean,
+        maxPlayers: Int,
+        startPort: Int
     ): CompletableFuture<Optional<String?>?>
 
     @SneakyThrows
     fun create(
-        name: String?,
-        nodes: Array<String?>?,
-        platform: VersionInfo?,
+        name: String,
+        templates: List<String?>,
+        nodes: List<String?>,
+        version: VersionInfo,
         maxMemory: Int,
         staticService: Boolean,
-        minOnline: Int,
-        maintenance: Boolean
+        minOnlineCount: Int,
+        maintenance: Boolean,
+        maxPlayers: Int,
+        startPort: Int
     ): Optional<String?>? {
-        return createAsync(name, nodes, platform, maxMemory, staticService, minOnline, maintenance)[5, TimeUnit.SECONDS]
+        return createAsync(name, templates, nodes, version, maxMemory, staticService, minOnlineCount, maintenance, maxPlayers, startPort)[5, TimeUnit.SECONDS]
     }
 
     abstract fun findAsync(task: String): CompletableFuture<Task?>

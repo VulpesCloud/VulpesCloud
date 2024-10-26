@@ -5,15 +5,15 @@ import io.github.thecguygithub.node.cluster.ClusterProvider
 import io.github.thecguygithub.node.command.provider.CommandProvider
 import io.github.thecguygithub.node.commands.*
 import io.github.thecguygithub.node.config.LogLevels
-import io.github.thecguygithub.node.event.NodeEventListener
 import io.github.thecguygithub.node.event.events.NodeStateChangeEvent
+import io.github.thecguygithub.node.event.events.TaskUpdateEvent
 import io.github.thecguygithub.node.logging.Logger
 import io.github.thecguygithub.node.networking.mysql.MySQLController
+import io.github.thecguygithub.node.networking.redis.RedisConnectionChecker
 import io.github.thecguygithub.node.networking.redis.RedisController
 import io.github.thecguygithub.node.task.TaskProvider
 import io.github.thecguygithub.node.terminal.JLineTerminal
 import io.github.thecguygithub.node.util.Configurations.readContent
-import io.github.thecguygithub.node.util.Configurations.writeContent
 import io.github.thecguygithub.node.version.VersionProvider
 import java.nio.file.Path
 import kotlin.system.exitProcess
@@ -87,6 +87,7 @@ class Node {
         logger.debug("Loading Events!")
 
         NodeStateChangeEvent
+        TaskUpdateEvent
 
         logger.debug("Initializing ClusterProvider")
 
@@ -116,15 +117,17 @@ class Node {
 
         Runtime.getRuntime().addShutdownHook(Thread())
 
+        RedisConnectionChecker().schedule()
+
         terminal!!.allowInput()
 
         clusterProvider.updateLocalNodeState(NodeStates.ONLINE)
 
     }
 
-    fun updateConfig() {
-        writeContent(Path.of("config.json"), nodeConfig)
-    }
+//    fun updateConfig() {
+//        writeContent(Path.of("config.json"), nodeConfig)
+//    }
 
     fun getRC(): RedisController? {
         return redisController

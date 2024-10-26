@@ -27,8 +27,8 @@ class RedisConnectionChecker : CoroutineScope {
 
     fun schedule() = launch {
         while (true) {
-            redis?.setHashField("VulpesCloud-HeartBeat", Node.nodeConfig!!.name, "$runtime")
             runtime += 1
+            redis?.setHashField("VulpesCloud-HeartBeat", Node.nodeConfig!!.name, "$runtime")
             if (redis?.getHashField("VulpesCloud-HeartBeat", Node.nodeConfig!!.name)?.toInt() != runtime) {
                 Logger.instance.error("REDIS CONNECTION SEEMS TO BE LOST!")
                 Logger.instance.error("REDIS CONNECTION SEEMS TO BE LOST!")

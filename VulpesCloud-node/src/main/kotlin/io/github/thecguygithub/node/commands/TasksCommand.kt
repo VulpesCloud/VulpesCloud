@@ -5,9 +5,7 @@ import io.github.thecguygithub.api.version.VersionInfo
 import io.github.thecguygithub.api.version.VersionType
 import io.github.thecguygithub.node.Node
 import io.github.thecguygithub.node.logging.Logger
-import io.github.thecguygithub.node.task.TaskFactory
 import io.github.thecguygithub.node.task.TaskImpl
-import io.github.thecguygithub.node.version.Version
 import org.incendo.cloud.kotlin.extension.buildAndRegister
 import org.incendo.cloud.parser.standard.StringParser
 import org.json.JSONObject
@@ -51,7 +49,23 @@ class TasksCommand {
                     logger.info("The Task that has been entered is not valid!")
                 }
             }
+        }
 
+        Node.commandProvider!!.commandManager!!.buildAndRegister("task", aliases = arrayOf("tasks")) {
+            literal("task")
+            required("task", StringParser.stringParser(StringParser.StringMode.SINGLE))
+            literal("stop")
+
+            handler { ctx ->
+                val task = Node.taskProvider.findByName(ctx.get<String>("task").toString())
+
+                if (Node.taskProvider.exists(ctx.get<String>("task").toString())) {
+                    Node.taskProvider.delete(task!!.name())
+                    logger.info("Deleting the Task!")
+                } else {
+                    logger.info("The Task that has been entered is not valid!")
+                }
+            }
         }
 
         Node.commandProvider!!.commandManager!!.buildAndRegister("task", aliases = arrayOf("tasks")) {
@@ -85,9 +99,8 @@ class TasksCommand {
 
                         logger.debug("JSON created! sending redis message!")
 
-                        TaskFactory.createNewTask(JSONObject(task))
-
-                        Node.instance!!.getRC()?.sendMessage(JSONObject(task).toString(), "testcloud-events-group-create")
+                        Node.instance!!.getRC()
+                            ?.sendMessage(JSONObject(task).toString(), "testcloud-events-group-create")
 
                         logger.debug("Redis message sent successfully!")
                     } catch (e: Exception) {
@@ -100,8 +113,6 @@ class TasksCommand {
                 }
             }
         }
-
-
 
 
     }

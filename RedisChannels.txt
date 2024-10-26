@@ -1,2 +1,5 @@
 vulpescloud-event-node-state
     -> NODE;<node>;STATE;<state>
+vulpescloud-event-task-update
+    -> TASK;CREATE;<task info in Json>
+    -> TASK;DELETE;<task name>

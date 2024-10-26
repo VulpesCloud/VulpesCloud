@@ -1,5 +1,6 @@
 package io.github.thecguygithub.node.task
 
+import io.github.thecguygithub.api.tasks.Task
 import io.github.thecguygithub.api.version.VersionInfo
 import io.github.thecguygithub.api.version.VersionType
 import io.github.thecguygithub.node.Node
@@ -7,6 +8,8 @@ import io.github.thecguygithub.node.logging.Logger
 import org.json.JSONObject
 import java.nio.file.Files
 import java.nio.file.Path
+import java.util.*
+import kotlin.collections.HashSet
 
 object TaskFactory {
 
@@ -56,8 +59,46 @@ object TaskFactory {
         logger.debug("Adding to Groups")
 
         Node.taskProvider.tasks()!!.add(task)
+    }
 
+    fun readGroups(): Set<Task> {
+        val groups: HashSet<Task> = HashSet()
 
+        if (!Files.exists(GROUP_DIR)) {
+            return groups
+        }
+
+        for (file in Objects.requireNonNull(GROUP_DIR.toFile().listFiles())) {
+            val taskInformation = JSONObject(Files.readString(file.toPath()))
+            val versionJson = taskInformation.getJSONObject("version")
+            val version = VersionInfo(
+                versionJson.getString("name"),
+                VersionType.valueOf(versionJson.get("type").toString()),
+                versionJson.getString("versions")
+            )
+            val nodesJson = taskInformation.getJSONArray("nodes")
+            val nodes: Array<String?> = Array(nodesJson.length()) {
+                if (nodesJson.isNull(it)) null else nodesJson.getString(it)
+            }
+            val templatesJson = taskInformation.getJSONArray("nodes")
+            val templates: Array<String?> = Array(templatesJson.length()) {
+                if (templatesJson.isNull(it)) null else templatesJson.getString(it)
+            }
+
+            groups.add(TaskImpl(
+                taskInformation.getString("name"),
+                taskInformation.getInt("maxMemory"),
+                version,
+                templates.toList(),
+                nodes.toList(),
+                taskInformation.getInt("maxPlayers"),
+                taskInformation.getBoolean("staticServices"),
+                taskInformation.getInt("minOnlineCount"),
+                taskInformation.getBoolean("maintenance"),
+                taskInformation.getInt("startPort")
+            ))
+        }
+        return groups
     }
 
 }
