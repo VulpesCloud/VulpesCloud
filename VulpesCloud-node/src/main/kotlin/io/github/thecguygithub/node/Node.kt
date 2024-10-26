@@ -1,10 +1,12 @@
 package io.github.thecguygithub.node
 
+import io.github.thecguygithub.api.cluster.NodeStates
 import io.github.thecguygithub.node.cluster.ClusterProvider
 import io.github.thecguygithub.node.command.provider.CommandProvider
 import io.github.thecguygithub.node.commands.*
 import io.github.thecguygithub.node.config.LogLevels
 import io.github.thecguygithub.node.event.NodeEventListener
+import io.github.thecguygithub.node.event.events.NodeStateChangeEvent
 import io.github.thecguygithub.node.logging.Logger
 import io.github.thecguygithub.node.networking.mysql.MySQLController
 import io.github.thecguygithub.node.networking.redis.RedisController
@@ -74,15 +76,6 @@ class Node {
 
         redisController = RedisController()
 
-        logger.debug("Loading Events!")
-
-        NodeEventListener
-
-        getRC()?.sendMessage(
-            "EVENT;NODE;${nodeConfig?.name};STATUS;&eSTARTING",
-            "testcloud-events-nodes-status"
-        )
-
         logger.debug("Initializing MySQL Controller")
 
         mySQLController = MySQLController()
@@ -91,13 +84,13 @@ class Node {
 
         mySQLController.createDefaultTables()
 
+        logger.debug("Loading Events!")
+
+        NodeStateChangeEvent
+
         logger.debug("Initializing ClusterProvider")
 
-        try {
-            clusterProvider = ClusterProvider()
-        } catch (e: Exception) {
-            logger.error(e)
-        }
+        clusterProvider = ClusterProvider()
 
         logger.debug("Initializing VersionProvider")
 
@@ -125,10 +118,7 @@ class Node {
 
         terminal!!.allowInput()
 
-        getRC()?.sendMessage(
-            "EVENT;NODE;${nodeConfig?.name};STATUS;&2RUNNING",
-            "testcloud-events-nodes-status"
-        )
+        clusterProvider.updateLocalNodeState(NodeStates.ONLINE)
 
     }
 

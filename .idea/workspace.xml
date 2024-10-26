@@ -4,12 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Partially implemented ClusterProvider as well as a new Config and Node stuff">
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/ClusterCommand.kt" afterDir="false" />
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Added Part of Cluster Command">
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/event/events/NodeStateChangeEvent.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RedisChannels.txt" beforeDir="false" afterPath="$PROJECT_DIR$/RedisChannels.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeConfig.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeConfig.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/cluster/ClusterProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/cluster/ClusterProvider.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/event/NodeEventListener.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/event/NodeEventListener.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,10 +76,10 @@
         <option value="Interface" />
         <option value="Class" />
         <option value="Kotlin Annotation" />
-        <option value="Kotlin Interface" />
         <option value="Kotlin Enum" />
         <option value="Kotlin Data Class" />
         <option value="Kotlin Class" />
+        <option value="Kotlin Interface" />
       </list>
     </option>
   </component>
@@ -600,7 +601,15 @@
       <option name="project" value="LOCAL" />
       <updated>1729786048634</updated>
     </task>
-    <option name="localTasksCounter" value="39" />
+    <task id="LOCAL-00039" summary="Added Part of Cluster Command">
+      <option name="closed" value="true" />
+      <created>1729874583100</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1729874583100</updated>
+    </task>
+    <option name="localTasksCounter" value="40" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -615,7 +624,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: Implemented Services and more" />
     <MESSAGE value="fix: Platforms didn't want to load" />
     <MESSAGE value="fix: The Nodes now doesn't crash due to some Json stuff" />
     <MESSAGE value="chore: Did some Cleanup in Logger and ClusterTaskProvider" />
@@ -640,7 +648,8 @@
     <MESSAGE value="Added Task Command and some TaskFactory stuff" />
     <MESSAGE value="fix: Fixed stuff in the Task Provider" />
     <MESSAGE value="Partially implemented ClusterProvider as well as a new Config and Node stuff" />
-    <option name="LAST_COMMIT_MESSAGE" value="Partially implemented ClusterProvider as well as a new Config and Node stuff" />
+    <MESSAGE value="Added Part of Cluster Command" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added Part of Cluster Command" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [

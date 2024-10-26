@@ -73,25 +73,31 @@ class ClusterProvider {
                         )
                     }
                 }
-
-                if (Node.nodeConfig!!.nodes != nodes) {
-                    logger.warn("The Nodes Configuration is not what is stored in the MySQL Database!")
-                    logger.warn("Please do NOT remove through the Config! Use The cluster Command instead!")
-                    logger.warn("The Config will be set to the Data in the Database!")
-
-                    Node.nodeConfig!!.nodes = nodes
-                    Node.nodeConfig!!.nodes.remove(NodeInformation(Node.nodeConfig!!.name, Node.nodeConfig!!.uuid))
-                    Node.instance!!.updateConfig()
-                }
+//
+//                if (Node.nodeConfig!!.nodes != nodes) {
+//                    logger.warn("The Nodes Configuration is not what is stored in the MySQL Database!")
+//                    logger.warn("Please do NOT remove through the Config! Use The cluster Command instead!")
+//                    logger.warn("The Config will be set to the Data in the Database!")
+//
+//                    Node.nodeConfig!!.nodes = nodes
+//                    Node.nodeConfig!!.nodes.remove(NodeInformation(Node.nodeConfig!!.name, Node.nodeConfig!!.uuid))
+//                    Node.instance!!.updateConfig()
+//                }
 
                 nodes.forEach { redis?.setHashField("VulpesCloud-Nodes", it.name, NodeStates.OFFLINE.name) }
 
-                redis?.setHashField("VulpesCloud-Nodes", Node.nodeConfig!!.name, NodeStates.STARTING.name)
+                updateLocalNodeState(NodeStates.STARTING)
 
             } catch (e: Exception) {
                 logger.error(e)
             }
         }
+    }
+
+
+    fun updateLocalNodeState(state: NodeStates) {
+        redis?.setHashField("VulpesCloud-Nodes", Node.nodeConfig!!.name, state.name)
+        redis?.sendMessage("NODE;${Node.nodeConfig!!.name};STATE;${state.name}", "vulpescloud-event-node-state")
     }
 
 
