@@ -3,3 +3,13 @@ vulpescloud-event-node-state
 vulpescloud-event-task-update
     -> TASK;CREATE;<task info in Json>
     -> TASK;DELETE;<task name>
+vulpescloud-action-service
+    -> SERVICE;<service id/uuid>;ACTION;<action>;[<parameter>]
+    -> SERVICE;<service id/uuid>;ACTION;STOP
+    -> SERVICE;<service id/uuid>;ACTION;COMMAND;[<parameter>]
+vulpescloud-event-service
+    -> SERVICE;<service name>;EVENT;<event>;[<parameter>]
+    -> SERVICE;<service name>;EVENT;PREPARE
+    -> SERVICE;<service name>;EVENT;CONNECTING
+    -> SERVICE;<service name>;EVENT;ONLINE
+    -> SERVICE;<service name>;EVENT;STOPPING
