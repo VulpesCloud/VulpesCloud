@@ -11,7 +11,7 @@ import java.nio.file.Path
 
 class VersionProvider {
 
-    public var FORWARDING_SECRET: String = StringUtils.randomString(8)
+    var FORWARDING_SECRET: String = StringUtils.randomString(8)
 
     private val VERSIONS_URL =
         "https://raw.githubusercontent.com/VulpesCloud/VulpesCloud-meta/refs/heads/main/versions.json"
