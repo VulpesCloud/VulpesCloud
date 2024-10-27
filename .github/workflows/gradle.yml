@@ -15,7 +15,7 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up JDK 21
+      - name: Set up JDK 17
         uses: actions/setup-java@v4.4.0
         with:
           java-version: '17'
@@ -30,5 +30,5 @@ jobs:
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: test-cloud
-          path: FoxCloud-launcher/build/libs/foxcloud-launcher.jar
+          name: VulpesCloud
+          path: VulpesCloud-launcher/build/libs/vulpescloud-launcher.jar
