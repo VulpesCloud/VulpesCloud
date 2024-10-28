@@ -4,25 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Implement Task Creation and loading of tasks">
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/LocalService.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/Service.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceFactory.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceProvider.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/template/Template.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/template/TemplateFactory.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/template/TemplateProvider.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/files/VersionFile.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/files/VersionFileReplacement.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/files/VersionFileStrategy.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/patcher/PaperPatcher.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/patcher/VersionPatcher.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/patcher/VersionPatcherPool.kt" afterDir="false" />
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Implement some service and template stuff">
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/files/strat/PaperStrategy.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RedisChannels.txt" beforeDir="false" afterPath="$PROJECT_DIR$/RedisChannels.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/Version.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/Version.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/VersionProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/VersionProvider.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/files/VersionFile.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/files/VersionFile.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -292,10 +279,10 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.TestCloud [shadowJar]" />
         <item itemvalue="Gradle.TestCloud:TestCloud-node [jar]" />
         <item itemvalue="Gradle.TestCloud:TestCloud-launcher [shadowJar]" />
         <item itemvalue="Gradle.TestCloud:TestCloud-api [shadowJar]" />
-        <item itemvalue="Gradle.TestCloud [shadowJar]" />
         <item itemvalue="Gradle.TestCloud [jar]" />
       </list>
     </recent_temporary>
@@ -645,7 +632,23 @@
       <option name="project" value="LOCAL" />
       <updated>1729983741960</updated>
     </task>
-    <option name="localTasksCounter" value="43" />
+    <task id="LOCAL-00043" summary="Implement Version related stuff">
+      <option name="closed" value="true" />
+      <created>1730067364574</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1730067364575</updated>
+    </task>
+    <task id="LOCAL-00044" summary="Implement some service and template stuff">
+      <option name="closed" value="true" />
+      <created>1730067411330</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1730067411330</updated>
+    </task>
+    <option name="localTasksCounter" value="45" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -660,8 +663,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: Added aerogel to the Dependency's to be able to use Dependency Injection because of Cloud" />
-    <MESSAGE value="feat: Cloud v2 is implemented successfully!" />
     <MESSAGE value="chore: Implemented Info Command" />
     <MESSAGE value="chore: Implemented Shutdown Command and uncommented redis controller" />
     <MESSAGE value="chore: Implement Tasks command" />
@@ -685,7 +686,9 @@
     <MESSAGE value="Implement New EventListener" />
     <MESSAGE value="Implement Redis Connection Checker" />
     <MESSAGE value="Implement Task Creation and loading of tasks" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implement Task Creation and loading of tasks" />
+    <MESSAGE value="Implement Version related stuff" />
+    <MESSAGE value="Implement some service and template stuff" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implement some service and template stuff" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [

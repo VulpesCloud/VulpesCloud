@@ -18,7 +18,7 @@ class Version(
     val name: String,
     val type: VersionType,
     val pluginDir: String,
-    val arguments: List<String>? = null,
+    val arguments: List<String>,
     val patchers: List<VersionPatcher>,
     val files: List<VersionFile>,
     val versions: List<Versions>

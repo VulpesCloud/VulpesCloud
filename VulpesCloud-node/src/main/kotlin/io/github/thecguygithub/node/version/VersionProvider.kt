@@ -5,6 +5,8 @@ import io.github.thecguygithub.api.version.Versions
 import io.github.thecguygithub.node.logging.Logger
 import io.github.thecguygithub.node.networking.redis.RedisJsonParser
 import io.github.thecguygithub.node.util.StringUtils
+import io.github.thecguygithub.node.version.files.strat.PaperStrategy
+import io.github.thecguygithub.node.version.patcher.PaperPatcher
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
@@ -46,9 +48,11 @@ class VersionProvider {
 
             }
 
-            versions.add(
-                Version(name, VersionType.valueOf(versionType), "plugins", listOf("-nogui"), vers)
-            )
+            if (name == "Purpur" || name == "Paper") {
+                versions.add(
+                    Version(name, VersionType.valueOf(versionType), "plugins", listOf("-nogui"), listOf(PaperPatcher()), PaperStrategy.files, vers)
+                )
+            }
 
         }
 

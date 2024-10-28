@@ -1,8 +1,8 @@
 package io.github.thecguygithub.node.version.files
 
-class VersionFile {
-    val file: String? = null
-    internal val strategy: VersionFileStrategy? = null
-    val replacements: List<VersionFileReplacement>? = null
-    val appends: List<String>? = null
-}
+class VersionFile(
+    val file: String?,
+    val strategy: VersionFileStrategy?,
+    val replacements: List<VersionFileReplacement>?,
+    val appends: List<String>?
+)
