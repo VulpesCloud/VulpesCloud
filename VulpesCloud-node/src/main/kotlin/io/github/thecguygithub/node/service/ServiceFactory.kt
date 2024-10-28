@@ -5,6 +5,7 @@ import io.github.thecguygithub.api.services.ClusterServiceFactory
 import io.github.thecguygithub.api.services.ClusterServiceStates
 import io.github.thecguygithub.api.tasks.Task
 import io.github.thecguygithub.node.Node
+import io.github.thecguygithub.node.logging.Logger
 import io.github.thecguygithub.node.template.TemplateFactory
 import io.github.thecguygithub.node.util.JavaFileAttach
 import java.net.InetSocketAddress
@@ -26,51 +27,81 @@ class ServiceFactory : ClusterServiceFactory {
     }
 
     override fun startServiceOnTask(task: Task) {
+
         val localService = LocalService(
-            task,
-            generateOrderedId(task),
-            UUID.randomUUID(),
-            detectServicePort(task),
-            "0.0.0.0", // todo Make it pull the hostname from the Node's Config
-            Node.nodeConfig?.name!!
-        )
+                task,
+                generateOrderedId(task),
+                UUID.randomUUID(),
+                detectServicePort(task),
+                "0.0.0.0", // todo Make it pull the hostname from the Node's Config
+                Node.nodeConfig?.name!!
+            )
 
         val version = localService.version()
 
-        Node.instance!!.getRC()?.sendMessage("SERVICE;${localService.name()};EVENT;PREPARE", "vulpescloud-event-service")
+        Node.instance!!.getRC()?.sendMessage("SERVICE;${localService.name()};EVENT;STATE;PREPARE", "vulpescloud-event-service")
 
-        Node.serviceProvider.services()!!.add(localService)
+        try {
 
-        TemplateFactory.cloneTemplate(localService)
+            Logger().debug("Adding to services")
 
-        version?.prepare(task.version(), localService)
+            Node.serviceProvider.services()!!.add(localService)
 
-        val arguments = generateServiceArguments(localService)
+            Logger().debug("Cloning Template")
 
-        val processBuilder = ProcessBuilder(*arguments.toTypedArray()).directory(
-            localService.runningDir.toFile()
-        ).redirectErrorStream(true)
+            TemplateFactory.cloneTemplate(localService)
 
-        processBuilder.environment()["bootstrapFile"] = "${task.version().name}-${task.version().versions}.jar"
-        processBuilder.environment()["redis_user"] = Node.nodeConfig?.redis?.user
-        processBuilder.environment()["redis_hostname"] = Node.nodeConfig?.redis?.hostname
-        processBuilder.environment()["redis_password"] = Node.nodeConfig?.redis?.password
-        processBuilder.environment()["redis_port"] = Node.nodeConfig?.redis?.port.toString()
-        processBuilder.environment()["serviceId"] = localService.id().toString()
-        processBuilder.environment()["forwarding_secret"] = Node.versionProvider.FORWARDING_SECRET
-        processBuilder.environment()["hostname"] = localService.hostname()
-        processBuilder.environment()["port"] = localService.port().toString()
+            Logger().debug("Prepairing Version")
 
-        val pluginDir = localService.runningDir.resolve(version?.pluginDir!!)
-        pluginDir.toFile().mkdirs()
+            try {
+                version?.prepare(task.version(), localService)
+            } catch (e: Exception) {
+                Logger.instance.error(e.printStackTrace())
+            }
 
-        // todo copy the vulpescloud plugin
+            Logger().debug("generate args")
 
+            val arguments = generateServiceArguments(localService)
 
-        localService.state(ClusterServiceStates.STARTING)
-        localService.update()
+            Logger().debug("Making processBuilder")
 
-        localService.start(processBuilder)
+            val processBuilder = ProcessBuilder(*arguments.toTypedArray()).directory(
+                localService.runningDir.toFile()
+            ).redirectErrorStream(true)
+
+            Logger().debug("Adding Environment vars")
+
+            processBuilder.environment()["bootstrapFile"] = "${task.version().name}-${task.version().versions}.jar"
+            processBuilder.environment()["redis_user"] = Node.nodeConfig?.redis?.user
+            processBuilder.environment()["redis_hostname"] = Node.nodeConfig?.redis?.hostname
+            processBuilder.environment()["redis_password"] = Node.nodeConfig?.redis?.password
+            processBuilder.environment()["redis_port"] = Node.nodeConfig?.redis?.port.toString()
+            processBuilder.environment()["serviceId"] = localService.id().toString()
+            processBuilder.environment()["forwarding_secret"] = Node.versionProvider.FORWARDING_SECRET
+            processBuilder.environment()["hostname"] = localService.hostname()
+            processBuilder.environment()["port"] = localService.port().toString()
+
+            Logger().debug("Making PluginDir")
+
+            val pluginDir = localService.runningDir.resolve(version?.pluginDir!!)
+
+            pluginDir.toFile().mkdirs()
+
+            Logger.instance.debug("here is a todo")
+
+            // todo copy the vulpescloud plugin
+
+            Logger().debug("Calling update")
+
+            // localService.state() // todo Update the Service state
+            localService.update()
+
+            Logger().debug("Starting Service")
+
+            localService.start(processBuilder)
+        } catch (e: Exception) {
+            Logger().error(e)
+        }
     }
 
 
@@ -84,7 +115,10 @@ class ServiceFactory : ClusterServiceFactory {
     }
 
     private fun isIdPresent(task: Task, id: Int): Boolean {
-        return task.services()!!.stream().anyMatch { it -> it?.orderedId() == id }
+        val services = task.services() ?: return false // Check if services is null
+        return services.stream()
+            .filter { it != null } // Filter out null elements in the list
+            .anyMatch { it!!.orderedId() == id }
     }
 
     private fun detectServicePort(task: Task): Int {

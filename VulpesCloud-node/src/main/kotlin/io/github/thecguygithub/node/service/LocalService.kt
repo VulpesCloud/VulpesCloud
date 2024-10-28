@@ -38,6 +38,10 @@ class LocalService(
         runningDir.toFile().mkdirs()
     }
 
+    fun updateLocalServiceState(status: ClusterServiceStates) {
+
+    }
+
     override fun shutdown() {
         Node.serviceProvider.factory().shutdownService(this)
     }
@@ -53,9 +57,8 @@ class LocalService(
                 }
             } catch (ignore: InterruptedException) {
             }
-            if (state(ClusterServiceStates.STARTING) != ClusterServiceStates.STOPPING) {
+            if (state() != ClusterServiceStates.STOPPING) {
                 Node.instance?.getRC()?.sendMessage("SERVICE;${this.name()};EVENT;STOP", "testcloud-service-events")
-                state(ClusterServiceStates.STOPPING)
                 if (process != null) {
                     process!!.exitValue()
                 }
@@ -78,7 +81,7 @@ class LocalService(
 
     fun destroyService() {
         if (process != null) {
-            state(ClusterServiceStates.STOPPING)
+            state()
             process!!.toHandle().destroyForcibly()
             this.postShutdownProcess()
         }

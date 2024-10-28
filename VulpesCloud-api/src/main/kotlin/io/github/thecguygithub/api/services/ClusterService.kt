@@ -28,7 +28,7 @@ interface ClusterService : Named, Detail {
 
     fun executeCommand(command: String)
 
-    fun state(starting: ClusterServiceStates): ClusterServiceStates
+    fun state(): ClusterServiceStates
 
     fun update()
 

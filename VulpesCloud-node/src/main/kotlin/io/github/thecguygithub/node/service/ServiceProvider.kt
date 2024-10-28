@@ -33,7 +33,7 @@ class ServiceProvider : ClusterServiceProvider() {
     override fun findAsync(filter: ClusterServiceFilter?): CompletableFuture<List<ClusterService?>?> {
         return CompletableFuture.completedFuture(
             when (filter) {
-                ClusterServiceFilter.ONLINE_SERVICES -> services.filter { it.state(ClusterServiceStates.STARTING) == ClusterServiceStates.ONLINE }
+                ClusterServiceFilter.ONLINE_SERVICES -> services.filter { it.state() == ClusterServiceStates.ONLINE }
                 ClusterServiceFilter.EMPTY_SERVICES -> services.filter { it.isEmpty() }
                 ClusterServiceFilter.PLAYERS_PRESENT_SERVERS -> services.filter { !it.isEmpty() }
                 ClusterServiceFilter.SAME_NODE_SERVICES -> services.filter {

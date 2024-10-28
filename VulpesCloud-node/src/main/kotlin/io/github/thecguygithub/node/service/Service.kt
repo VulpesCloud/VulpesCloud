@@ -57,7 +57,7 @@ open class Service(
         Node.instance?.getRC()?.sendMessage("SERVICE;$id;ACTION;COMMAND;$command", "vulpescloud-action-service")
     }
 
-    override fun state(starting: ClusterServiceStates): ClusterServiceStates {
+    override fun state(): ClusterServiceStates {
         return state
     }
 

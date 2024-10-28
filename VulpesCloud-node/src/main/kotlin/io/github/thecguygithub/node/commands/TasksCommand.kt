@@ -43,7 +43,7 @@ class TasksCommand {
 
                 if (task != null) {
                     logger.info("Staring a Service!")
-                    // Node.serviceProvider!!.factory().runGroupService(task)
+                    Node.serviceProvider.factory().startServiceOnTask(task)
 
                 } else {
                     logger.info("The Task that has been entered is not valid!")

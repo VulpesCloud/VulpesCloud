@@ -9,7 +9,7 @@ vulpescloud-action-service
     -> SERVICE;<service id/uuid>;ACTION;COMMAND;[<parameter>]
 vulpescloud-event-service
     -> SERVICE;<service name>;EVENT;<event>;[<parameter>]
-    -> SERVICE;<service name>;EVENT;PREPARE
-    -> SERVICE;<service name>;EVENT;CONNECTING
-    -> SERVICE;<service name>;EVENT;ONLINE
-    -> SERVICE;<service name>;EVENT;STOPPING
+    -> SERVICE;<service name>;EVENT;STATE;PREPARE
+    -> SERVICE;<service name>;EVENT;STATE;CONNECTING
+    -> SERVICE;<service name>;EVENT;STATE;ONLINE
+    -> SERVICE;<service name>;EVENT;STATE;STOPPING

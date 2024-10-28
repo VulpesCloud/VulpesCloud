@@ -50,7 +50,11 @@ class VersionProvider {
 
             if (name == "Purpur" || name == "Paper") {
                 versions.add(
-                    Version(name, VersionType.valueOf(versionType), "plugins", listOf("-nogui"), listOf(PaperPatcher()), PaperStrategy.files, vers)
+                    Version(name, VersionType.valueOf(versionType), "plugins", listOf("-nogui"), listOf(PaperPatcher()), listOf(), vers)
+                )
+            } else {
+                versions.add(
+                    Version(name, VersionType.valueOf(versionType), "plugins", listOf("-nogui"), listOf(), listOf(), vers)
                 )
             }
 
