@@ -12,6 +12,7 @@
             <option value="$PROJECT_DIR$/VulpesCloud-api" />
             <option value="$PROJECT_DIR$/VulpesCloud-launcher" />
             <option value="$PROJECT_DIR$/VulpesCloud-node" />
+            <option value="$PROJECT_DIR$/VulpesCloud-wrapper" />
           </set>
         </option>
       </GradleProjectSettings>

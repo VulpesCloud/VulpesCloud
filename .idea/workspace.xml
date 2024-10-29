@@ -4,18 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Implement Service Command">
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/files/strat/VelocityStrategy.kt" afterDir="false" />
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Move dependency's from build.gradle.kts to libs.versions.toml">
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/WrapperLauncher.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Boot.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Boot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Launcher.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Launcher.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/LocalService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/LocalService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceFactory.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/VersionProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/VersionProvider.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/resources/platforms/velocity/velocity.toml" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/resources/platforms/Velocity/velocity.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -83,8 +77,8 @@
         <option value="Kotlin Enum" />
         <option value="Kotlin Data Class" />
         <option value="Kotlin Interface" />
-        <option value="Kotlin Class" />
         <option value="Kotlin Object" />
+        <option value="Kotlin Class" />
       </list>
     </option>
   </component>
@@ -645,7 +639,15 @@
       <option name="project" value="LOCAL" />
       <updated>1730141693369</updated>
     </task>
-    <option name="localTasksCounter" value="47" />
+    <task id="LOCAL-00047" summary="Move dependency's from build.gradle.kts to libs.versions.toml">
+      <option name="closed" value="true" />
+      <created>1730206075214</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1730206075214</updated>
+    </task>
+    <option name="localTasksCounter" value="48" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -660,7 +662,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="chore: Implement Tasks command" />
     <MESSAGE value="feat: Added Simple MySQLController" />
     <MESSAGE value="chore: Uploading changes" />
     <MESSAGE value="Removed almost everything for rewrite" />
@@ -685,7 +686,8 @@
     <MESSAGE value="Implement some service and template stuff" />
     <MESSAGE value="temp-fix: Created a File Temporarily to fix the issue" />
     <MESSAGE value="Implement Service Command" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implement Service Command" />
+    <MESSAGE value="Move dependency's from build.gradle.kts to libs.versions.toml" />
+    <option name="LAST_COMMIT_MESSAGE" value="Move dependency's from build.gradle.kts to libs.versions.toml" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [
