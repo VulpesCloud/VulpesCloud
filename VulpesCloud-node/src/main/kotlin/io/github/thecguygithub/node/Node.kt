@@ -119,7 +119,9 @@ class Node {
 
         logger.debug("Initializing CommandProvider")
 
+
         commandProvider = CommandProvider()
+
 
         logger.debug("Registering Commands!")
 

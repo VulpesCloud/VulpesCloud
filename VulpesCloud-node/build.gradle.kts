@@ -13,15 +13,13 @@ dependencies {
     compileOnly(libs.logbackCore)
     compileOnly(libs.logbackClassic)
     implementation(libs.cloud)
-    // implementation(libs.cloud.annotations)
-    // implementation(libs.cloud.task)
-    implementation("org.incendo:cloud-kotlin-coroutines:2.0.0")
-    implementation("org.incendo:cloud-kotlin-coroutines-annotations:2.0.0")
-    implementation("org.incendo:cloud-kotlin-extensions:2.0.0")
-    implementation("org.incendo:cloud-annotations:2.0.0")
-    compileOnly("org.jetbrains.kotlin:kotlin-stdlib:2.0.21")
-    compileOnly("com.zaxxer:HikariCP:6.0.0")
-    compileOnly("org.mariadb.jdbc:mariadb-java-client:3.4.1")
+    implementation(libs.cloud.kotlin.coroutines)
+    implementation(libs.cloud.kotlin.coroutines.annotations)
+    implementation(libs.cloud.extension)
+    implementation(libs.cloud.annotations)
+    compileOnly(libs.kotlin.stdlib)
+    compileOnly(libs.hikariCP)
+    compileOnly(libs.mariadb.java.client)
 }
 
 

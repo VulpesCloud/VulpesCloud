@@ -17,9 +17,9 @@ public final class Boot {
     @SneakyThrows
     public @NotNull File bootFile() {
 
-        // this.copyBootFiles("api",  "node");
+        this.copyBootFiles("api",  "node");
 
-        return DEPENDENCY_DIR.resolve("testcloud-node.jar").toFile();
+        return DEPENDENCY_DIR.resolve("vulpescloud-node.jar").toFile();
     }
 
     public String mainClass() {
@@ -37,7 +37,7 @@ public final class Boot {
     }
 
     private void copyBootFile(String name) {
-        FileSystemUtil.copyClassPathFile(ClassLoader.getSystemClassLoader(), "testcloud-" + name + ".jar", Path.of("local/dependencies/testcloud-" + name + ".jar").toString());
+        FileSystemUtil.copyClassPathFile(ClassLoader.getSystemClassLoader(), "vulpescloud-" + name + ".jar", Path.of("local/dependencies/vulpescloud-" + name + ".jar").toString());
     }
 
     private void copyBootFiles(String @NotNull ... names) {

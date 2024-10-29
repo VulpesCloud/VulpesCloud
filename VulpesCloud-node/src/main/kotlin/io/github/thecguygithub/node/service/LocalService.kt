@@ -49,21 +49,31 @@ class LocalService(
     fun start(builder: ProcessBuilder) {
         this.process = builder.start()
 
+        Thread {
+            process?.inputStream?.bufferedReader()?.use { reader ->
+                reader.forEachLine { line ->
+                    Logger().debug("[Minecraft Server] $line")
+                }
+            }
+        }.start()
+
         this.processTracking = Thread {
             // if player send a stop command from game command system
             try {
                 synchronized(this) {
                     process?.waitFor()
                 }
-            } catch (ignore: InterruptedException) {
+                Logger().warn("uhm yhea")
+            } catch (e: InterruptedException) {
+                Logger().debug("Exception: ${e.printStackTrace()}")
             }
-            if (state() != ClusterServiceStates.STOPPING) {
-                Node.instance?.getRC()?.sendMessage("SERVICE;${this.name()};EVENT;STOP", "testcloud-service-events")
-                if (process != null) {
-                    process!!.exitValue()
-                }
-                this.postShutdownProcess()
-            }
+//            if (state() != ClusterServiceStates.STOPPING) {
+//                Node.instance?.getRC()?.sendMessage("SERVICE;${this.name()};EVENT;STOP", "testcloud-service-events")
+//                if (process != null) {
+//                    process!!.exitValue()
+//                }
+//                this.postShutdownProcess()
+//            }
         }
 
         processTracking!!.start()
