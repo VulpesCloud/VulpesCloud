@@ -4,12 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Move dependency's from build.gradle.kts to libs.versions.toml">
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/WrapperLauncher.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Copy networking stuff to Wrapper">
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/Premain.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/Wrapper.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/networking/redis/RedisController.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/networking/redis/RedisJsonParser.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/networking/redis/RedisManager.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RedisChannels.txt" beforeDir="false" afterPath="$PROJECT_DIR$/RedisChannels.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-launcher/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Boot.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Boot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeShutdown.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeShutdown.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceFactory.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-wrapper/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-wrapper/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/WrapperLauncher.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/WrapperLauncher.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,6 +44,9 @@
         <task path="$PROJECT_DIR$/TestCloud-launcher">
           <activation />
         </task>
+        <task path="$PROJECT_DIR$/VulpesCloud-launcher">
+          <activation />
+        </task>
         <projects_view>
           <tree_state>
             <expand>
@@ -46,19 +57,20 @@
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="VulpesCloud" type="f1a62948:ProjectNode" />
+                <item name="VulpesCloud-launcher" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="VulpesCloud" type="f1a62948:ProjectNode" />
+                <item name="VulpesCloud-launcher" type="2d1252cf:ModuleNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="VulpesCloud" type="f1a62948:ProjectNode" />
+                <item name="VulpesCloud-launcher" type="2d1252cf:ModuleNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
                 <item name="build" type="c8890929:TasksNode$1" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="VulpesCloud" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="shadow" type="c8890929:TasksNode$1" />
               </path>
             </expand>
             <select />
@@ -132,6 +144,7 @@
     "Gradle.TestCloud:TestCloud-node [shadowJar].executor": "Run",
     "Gradle.TestCloud:TestCloud-node [testClasses].executor": "Run",
     "Gradle.TestCloud:VulpesCloud-launcher [:VulpesCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor": "Debug",
+    "Gradle.TestCloud:VulpesCloud-launcher [jar].executor": "Run",
     "JAR Application.TestCloud-node-1.0.0-alpha-all.jar.executor": "Run",
     "JAR Application.testcloud-launcher.jar.executor": "Run",
     "JAR Application.testcloud-node.jar.executor": "Run",
@@ -140,12 +153,15 @@
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
     "git-widget-placeholder": "dev/rewrite",
     "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/Christian/Development/test/Plan",
+    "last_opened_file_path": "D:/Christian/Development/TestCloud/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/networking",
     "run.code.analysis.last.selected.profile": "pProject Default",
     "settings.editor.selected.configurable": "discord-project"
   }
 }]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Christian\Development\TestCloud\VulpesCloud-wrapper\src\main\kotlin\io\github\thecguygithub\wrapper\networking" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Christian\Development\TestCloud\TestCloud-node\src\main\kotlin\io\github\thecguygithub\node\networking" />
     </key>
@@ -155,7 +171,7 @@
       <recent name="io.github.thecguygithub.node" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.TestCloud [jar]">
+  <component name="RunManager" selected="Gradle.TestCloud:VulpesCloud-launcher [jar]">
     <configuration name="Launcher" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="io.github.thecguygithub.launcher.Launcher" />
       <module name="VulpesCloud.VulpesCloud-launcher.main" />
@@ -213,10 +229,10 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="TestCloud:TestCloud-node [jar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="TestCloud:VulpesCloud-launcher [jar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/TestCloud-node" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/VulpesCloud-launcher" />
         <option name="externalSystemIdString" value="GRADLE" />
         <option name="scriptParameters" />
         <option name="taskDescriptions">
@@ -254,11 +270,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.TestCloud:VulpesCloud-launcher [jar]" />
         <item itemvalue="Gradle.TestCloud [jar]" />
         <item itemvalue="JAR Application.vulpescloud-launcher.jar" />
         <item itemvalue="Application.Launcher" />
         <item itemvalue="Gradle.TestCloud [shadowJar]" />
-        <item itemvalue="Gradle.TestCloud:TestCloud-node [jar]" />
       </list>
     </recent_temporary>
   </component>
@@ -647,7 +663,23 @@
       <option name="project" value="LOCAL" />
       <updated>1730206075214</updated>
     </task>
-    <option name="localTasksCounter" value="48" />
+    <task id="LOCAL-00048" summary="Add Wrapper project">
+      <option name="closed" value="true" />
+      <created>1730208501430</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1730208501430</updated>
+    </task>
+    <task id="LOCAL-00049" summary="fix: Add build.gradle.kts to VCS">
+      <option name="closed" value="true" />
+      <created>1730208533569</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1730208533569</updated>
+    </task>
+    <option name="localTasksCounter" value="50" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -662,9 +694,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="feat: Added Simple MySQLController" />
-    <MESSAGE value="chore: Uploading changes" />
-    <MESSAGE value="Removed almost everything for rewrite" />
     <MESSAGE value="Renamed the Cloud" />
     <MESSAGE value="Added missing files" />
     <MESSAGE value="Edited parts of the API" />
@@ -687,7 +716,10 @@
     <MESSAGE value="temp-fix: Created a File Temporarily to fix the issue" />
     <MESSAGE value="Implement Service Command" />
     <MESSAGE value="Move dependency's from build.gradle.kts to libs.versions.toml" />
-    <option name="LAST_COMMIT_MESSAGE" value="Move dependency's from build.gradle.kts to libs.versions.toml" />
+    <MESSAGE value="Add Wrapper project" />
+    <MESSAGE value="fix: Add build.gradle.kts to VCS" />
+    <MESSAGE value="Copy networking stuff to Wrapper" />
+    <option name="LAST_COMMIT_MESSAGE" value="Copy networking stuff to Wrapper" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [

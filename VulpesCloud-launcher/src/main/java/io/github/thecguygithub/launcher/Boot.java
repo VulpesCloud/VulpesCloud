@@ -17,7 +17,7 @@ public final class Boot {
     @SneakyThrows
     public @NotNull File bootFile() {
 
-        this.copyBootFiles("api",  "node");
+        this.copyBootFiles("api",  "node", "wrapper");
 
         return DEPENDENCY_DIR.resolve("vulpescloud-node.jar").toFile();
     }

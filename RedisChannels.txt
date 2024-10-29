@@ -13,3 +13,5 @@ vulpescloud-event-service
     -> SERVICE;<service name>;EVENT;STATE;CONNECTING
     -> SERVICE;<service name>;EVENT;STATE;ONLINE
     -> SERVICE;<service name>;EVENT;STATE;STOPPING
+vulpescloud-auth-service
+    -> SERVICE;<service name>;AUTH;<service uuid>

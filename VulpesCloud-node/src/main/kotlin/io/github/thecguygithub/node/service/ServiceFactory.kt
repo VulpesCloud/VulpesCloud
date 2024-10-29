@@ -78,9 +78,14 @@ class ServiceFactory : ClusterServiceFactory {
             processBuilder.environment()["redis_password"] = Node.nodeConfig?.redis?.password
             processBuilder.environment()["redis_port"] = Node.nodeConfig?.redis?.port.toString()
             processBuilder.environment()["serviceId"] = localService.id().toString()
+            processBuilder.environment()["serviceName"] = localService.name()
             processBuilder.environment()["forwarding_secret"] = Node.versionProvider.FORWARDING_SECRET
             processBuilder.environment()["hostname"] = localService.hostname()
             processBuilder.environment()["port"] = localService.port().toString()
+
+            if (localService.version()?.name == "Velocity")
+                processBuilder.environment()["separateClassLoader"] = false.toString()
+            else processBuilder.environment()["separateClassLoader"] = true.toString()
 
             Logger().debug("Making PluginDir")
 
@@ -183,7 +188,8 @@ class ServiceFactory : ClusterServiceFactory {
                 "-Djline.terminal=jline.UnsupportedTerminal",
                 "-Dfile.encoding=UTF-8",
                 "-Dclient.encoding.override=UTF-8",
-                "-DIReallyKnowWhatIAmDoingISwear=true"
+                "-DIReallyKnowWhatIAmDoingISwear=true",
+                "-Djava.util.logging.ConsoleHandler.level=FINE"
             )
         )
 
@@ -204,6 +210,9 @@ class ServiceFactory : ClusterServiceFactory {
                 neededDependencies.stream().map { it: String -> path + it }.toList()
             )
         )
+
+        arguments.add("-javaagent:../../local/dependencies/vulpescloud-wrapper.jar")
+        arguments.add("io.github.thecguygithub.wrapper.WrapperLauncher")
 
         return arguments
     }

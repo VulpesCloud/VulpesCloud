@@ -17,6 +17,8 @@ object NodeShutdown {
 
             logger.info("Shutting down the Node!")
 
+            Node.serviceProvider.services()?.forEach { Node.instance?.getRC()?.sendMessage("SERVICE;${it.id()};ACTION;STOP", "vulpescloud-action-service") }
+
             RedisConnectionChecker.instance.cancel()
             Node.instance!!.getRC()?.setHashField("VulpesCloud-HeartBeat", Node.nodeConfig!!.name, "0")
             Node.clusterProvider.updateLocalNodeState(NodeStates.OFFLINE)
