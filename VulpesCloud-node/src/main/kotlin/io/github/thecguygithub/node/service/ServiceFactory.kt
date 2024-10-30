@@ -90,8 +90,9 @@ class ServiceFactory : ClusterServiceFactory {
             Logger().debug("Making PluginDir")
 
             val pluginDir = localService.runningDir.resolve(version?.pluginDir!!)
-
             pluginDir.toFile().mkdirs()
+
+            Files.copy(Path.of("local/dependencies/vulpescloud-connector.jar"), pluginDir.resolve("vulpescloud-connector.jar"), StandardCopyOption.REPLACE_EXISTING)
 
             Logger.instance.debug("here is a todo")
 

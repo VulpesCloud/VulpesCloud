@@ -20,9 +20,16 @@ class Wrapper(args: Array<String>) {
 
     var redisController: RedisController? = null
 
+    lateinit var service: LocalServiceInformation
+
     init {
 
         instance = this
+
+        service = LocalServiceInformation(
+            UUID.fromString(System.getenv("serviceId")),
+            System.getenv("serviceName")
+        )
 
         redisController = RedisController()
 

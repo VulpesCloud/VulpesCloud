@@ -1,0 +1,9 @@
+{
+  "id": "vulpescloud",
+  "name": "VulpesCloud-Connector",
+  "version": "1.0.0",
+  "authors": [
+    "TheCGuy"
+  ],
+  "main": "io.github.thecguygithub.connector.velocity.VelocityConnector"
+}

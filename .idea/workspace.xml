@@ -4,14 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Finished with the Wrapper for now and services can be started">
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-connector/build.gradle.kts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityConnector.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Prepared implementation of Vulpescloud Connector plugin">
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityRedisSubscribe.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-connector/src/main/resources/velocity-plugin.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/LocalServiceInformation.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceStates.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceStates.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gradle/libs.versions.toml" beforeDir="false" afterPath="$PROJECT_DIR$/gradle/libs.versions.toml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RedisChannels.txt" beforeDir="false" afterPath="$PROJECT_DIR$/RedisChannels.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-connector/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-connector/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityConnector.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityConnector.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-launcher/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Boot.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Boot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/ServiceCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/ServiceCommand.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceFactory.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/Wrapper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/Wrapper.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -47,17 +52,6 @@
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
                 <item name="VulpesCloud" type="f1a62948:ProjectNode" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="VulpesCloud" type="f1a62948:ProjectNode" />
-                <item name="VulpesCloud-connector" type="2d1252cf:ModuleNode" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="VulpesCloud" type="f1a62948:ProjectNode" />
-                <item name="VulpesCloud-connector" type="2d1252cf:ModuleNode" />
-                <item name="Dependencies" type="6de06a37:ExternalSystemViewDefaultContributor$MyDependenciesNode" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
@@ -163,7 +157,7 @@
     "project.structure.proportion": "0.0",
     "project.structure.side.proportion": "0.0",
     "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "discord-project"
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
 }]]></component>
   <component name="RecentsManager">
@@ -294,14 +288,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1727720247871</updated>
-    </task>
-    <task id="LOCAL-00002" summary="Added things">
-      <option name="closed" value="true" />
-      <created>1728046390398</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1728046390398</updated>
     </task>
     <task id="LOCAL-00003" summary="Added an GitHub workflow">
       <option name="closed" value="true" />
@@ -687,7 +673,15 @@
       <option name="project" value="LOCAL" />
       <updated>1730225222335</updated>
     </task>
-    <option name="localTasksCounter" value="51" />
+    <task id="LOCAL-00051" summary="Prepared implementation of Vulpescloud Connector plugin">
+      <option name="closed" value="true" />
+      <created>1730235651945</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1730235651946</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -702,7 +696,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Added missing files" />
     <MESSAGE value="Edited parts of the API" />
     <MESSAGE value="Another rename" />
     <MESSAGE value="Update .gitignore" />
@@ -727,7 +720,8 @@
     <MESSAGE value="fix: Add build.gradle.kts to VCS" />
     <MESSAGE value="Copy networking stuff to Wrapper" />
     <MESSAGE value="Finished with the Wrapper for now and services can be started" />
-    <option name="LAST_COMMIT_MESSAGE" value="Finished with the Wrapper for now and services can be started" />
+    <MESSAGE value="Prepared implementation of Vulpescloud Connector plugin" />
+    <option name="LAST_COMMIT_MESSAGE" value="Prepared implementation of Vulpescloud Connector plugin" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [
