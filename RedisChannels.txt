@@ -1,4 +1,18 @@
-testcloud-events-group-create
-testcloud-service-actions
-testcloud-service-events
-testcloud-events-nodes-status
+vulpescloud-event-node-state
+    -> NODE;<node>;STATE;<state>
+vulpescloud-event-task-update
+    -> TASK;CREATE;<task info in Json>
+    -> TASK;DELETE;<task name>
+vulpescloud-action-service
+    -> SERVICE;<service id/uuid>;ACTION;<action>;[<parameter>]
+    -> SERVICE;<service id/uuid>;ACTION;STOP
+    -> SERVICE;<service id/uuid>;ACTION;COMMAND;[<parameter>]
+vulpescloud-event-service
+    -> SERVICE;<service name>;EVENT;<event>;[<parameter>]
+    -> SERVICE;<service name>;EVENT;STATE;PREPARE
+    -> SERVICE;<service name>;EVENT;STATE;CONNECTING
+    -> SERVICE;<service name>;EVENT;STATE;STARTING
+    -> SERVICE;<service name>;EVENT;STATE;ONLINE
+    -> SERVICE;<service name>;EVENT;STATE;STOPPING
+vulpescloud-auth-service
+    -> SERVICE;<service name>;AUTH;<service uuid>

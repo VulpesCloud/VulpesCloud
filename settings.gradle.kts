@@ -1,4 +1,6 @@
-rootProject.name = "TestCloud"
-include("TestCloud-api")
-include("TestCloud-node")
-include("TestCloud-launcher")
+rootProject.name = "VulpesCloud"
+include("VulpesCloud-api")
+include("VulpesCloud-node")
+include("VulpesCloud-launcher")
+include("VulpesCloud-wrapper")
+include("VulpesCloud-connector")

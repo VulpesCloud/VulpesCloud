@@ -4,39 +4,19 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="chore: Uploading changes">
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/command/parser/PlatformParser.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/PlatformCommand.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskFallbackImpl.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskTypeAdapter.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineCompleter.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineCompletionMatcher.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/handler/ConsoleTabCompleteHandler.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/handler/Toggleable.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/version/Version.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/resources/platforms/purpur/server.properties" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/resources/platforms/purpur/spigot.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/TestCloud-node/src/main/resources/platforms/velocity/velocity.toml" afterDir="false" />
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Prepared implementation of Vulpescloud Connector plugin">
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityRedisSubscribe.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-connector/src/main/resources/velocity-plugin.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/LocalServiceInformation.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-launcher/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-launcher/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeShutdown.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/NodeShutdown.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/TasksCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/TasksCommand.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/networking/mysql/MySQLController.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/networking/mysql/MySQLController.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/PlatformService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/PlatformService.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/versions/PlatformVersionTypeAdapter.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/platforms/versions/PlatformVersionTypeAdapter.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterServiceFactoryImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterServiceFactoryImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterServiceProviderImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterServiceProviderImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterServiceQueue.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ClusterServiceQueue.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskFactory.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskProviderImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/ClusterTaskProviderImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/TaskJson.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/tasks/TaskJson.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineTerminal.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/JLineTerminal.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/setup/Setup.java" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/java/io/github/thecguygithub/node/terminal/setup/Setup.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/setup/SetupQuestion.java" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/java/io/github/thecguygithub/node/terminal/setup/SetupQuestion.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/terminal/setup/impl/TaskSetup.java" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/java/io/github/thecguygithub/node/terminal/setup/impl/TaskSetup.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/JsonUtils.kt" beforeDir="false" afterPath="$PROJECT_DIR$/TestCloud-node/src/main/kotlin/io/github/thecguygithub/node/util/JsonUtils.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RedisChannels.txt" beforeDir="false" afterPath="$PROJECT_DIR$/RedisChannels.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-connector/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-connector/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityConnector.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityConnector.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-launcher/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Boot.java" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/src/main/java/io/github/thecguygithub/launcher/Boot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/ServiceCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/ServiceCommand.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceFactory.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/Wrapper.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/Wrapper.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,29 +43,33 @@
         <task path="$PROJECT_DIR$/TestCloud-launcher">
           <activation />
         </task>
+        <task path="$PROJECT_DIR$/VulpesCloud-launcher">
+          <activation />
+        </task>
         <projects_view>
           <tree_state>
             <expand>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="TestCloud" type="f1a62948:ProjectNode" />
+                <item name="VulpesCloud" type="f1a62948:ProjectNode" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="TestCloud" type="f1a62948:ProjectNode" />
+                <item name="VulpesCloud" type="f1a62948:ProjectNode" />
+                <item name="VulpesCloud-launcher" type="2d1252cf:ModuleNode" />
+              </path>
+              <path>
+                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
+                <item name="VulpesCloud" type="f1a62948:ProjectNode" />
+                <item name="VulpesCloud-launcher" type="2d1252cf:ModuleNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
               </path>
               <path>
                 <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="TestCloud" type="f1a62948:ProjectNode" />
+                <item name="VulpesCloud" type="f1a62948:ProjectNode" />
+                <item name="VulpesCloud-launcher" type="2d1252cf:ModuleNode" />
                 <item name="Tasks" type="e4a08cd1:TasksNode" />
                 <item name="build" type="c8890929:TasksNode$1" />
-              </path>
-              <path>
-                <item name="" type="6a2764b6:ExternalProjectsStructure$RootNode" />
-                <item name="TestCloud" type="f1a62948:ProjectNode" />
-                <item name="Tasks" type="e4a08cd1:TasksNode" />
-                <item name="shadow" type="c8890929:TasksNode$1" />
               </path>
             </expand>
             <select />
@@ -97,13 +81,14 @@
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Kotlin Enum" />
         <option value="Enum" />
-        <option value="Kotlin Object" />
         <option value="Interface" />
         <option value="Class" />
         <option value="Kotlin Annotation" />
+        <option value="Kotlin Enum" />
+        <option value="Kotlin Data Class" />
         <option value="Kotlin Interface" />
+        <option value="Kotlin Object" />
         <option value="Kotlin Class" />
       </list>
     </option>
@@ -111,7 +96,7 @@
   <component name="Git.Settings">
     <option name="RECENT_BRANCH_BY_REPOSITORY">
       <map>
-        <entry key="$PROJECT_DIR$" value="development" />
+        <entry key="$PROJECT_DIR$" value="master" />
       </map>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -124,7 +109,7 @@
 }</component>
   <component name="GithubPullRequestsUISettings">{
   &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/TheCGuyGitHub/TestCloud.git&quot;,
+    &quot;url&quot;: &quot;https://github.com/VulpesCloud/VulpesCloud.git&quot;,
     &quot;accountId&quot;: &quot;93dfb0da-9db8-4cd9-b91f-bf9ffb8a6a1a&quot;
   }
 }</component>
@@ -140,35 +125,45 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [check].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-api [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-api [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-launcher [:TestCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-launcher [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-launcher [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [testClasses].executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.TestCloud-node-1.0.0-alpha-all.jar.executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.testcloud-launcher.jar.executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.testcloud-node.jar.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;dev/cloud2.0&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Christian/Development/test/Plan&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;discord-project&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.TestCloud [build].executor": "Run",
+    "Gradle.TestCloud [check].executor": "Run",
+    "Gradle.TestCloud [jar].executor": "Run",
+    "Gradle.TestCloud [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-api [jar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-api [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-launcher [:TestCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor": "Run",
+    "Gradle.TestCloud:TestCloud-launcher [jar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-launcher [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [build].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [jar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [testClasses].executor": "Run",
+    "Gradle.TestCloud:VulpesCloud-launcher [:VulpesCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor": "Debug",
+    "Gradle.TestCloud:VulpesCloud-launcher [jar].executor": "Run",
+    "JAR Application.TestCloud-node-1.0.0-alpha-all.jar.executor": "Run",
+    "JAR Application.testcloud-launcher.jar.executor": "Run",
+    "JAR Application.testcloud-node.jar.executor": "Run",
+    "JAR Application.vulpescloud-launcher.jar.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "dev/rewrite",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Christian/Development/TestCloud/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/networking",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "preferences.pluginManager"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="D:\Christian\Development\TestCloud\VulpesCloud-wrapper\src\main\kotlin\io\github\thecguygithub\wrapper\networking" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="D:\Christian\Development\TestCloud\TestCloud-node\src\main\kotlin\io\github\thecguygithub\node\networking" />
     </key>
@@ -178,8 +173,21 @@
       <recent name="io.github.thecguygithub.node" />
     </key>
   </component>
-  <component name="RunManager" selected="Gradle.TestCloud [shadowJar]">
-    <configuration name="TestCloud [check]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+  <component name="RunManager" selected="Gradle.TestCloud:VulpesCloud-launcher [jar]">
+    <configuration name="Launcher" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
+      <option name="MAIN_CLASS_NAME" value="io.github.thecguygithub.launcher.Launcher" />
+      <module name="VulpesCloud.VulpesCloud-launcher.main" />
+      <extension name="coverage">
+        <pattern>
+          <option name="PATTERN" value="io.github.thecguygithub.launcher.*" />
+          <option name="ENABLED" value="true" />
+        </pattern>
+      </extension>
+      <method v="2">
+        <option name="Make" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="TestCloud [jar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
@@ -190,7 +198,7 @@
         </option>
         <option name="taskNames">
           <list>
-            <option value="check" />
+            <option value="jar" />
           </list>
         </option>
         <option name="vmOptions" />
@@ -223,54 +231,10 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
-    <configuration name="TestCloud:TestCloud-api [shadowJar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
+    <configuration name="TestCloud:VulpesCloud-launcher [jar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
       <ExternalSystemSettings>
         <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/TestCloud-api" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="shadowJar" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="TestCloud:TestCloud-launcher [shadowJar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/TestCloud-launcher" />
-        <option name="externalSystemIdString" value="GRADLE" />
-        <option name="scriptParameters" />
-        <option name="taskDescriptions">
-          <list />
-        </option>
-        <option name="taskNames">
-          <list>
-            <option value="shadowJar" />
-          </list>
-        </option>
-        <option name="vmOptions" />
-      </ExternalSystemSettings>
-      <ExternalSystemDebugServerProcess>true</ExternalSystemDebugServerProcess>
-      <ExternalSystemReattachDebugProcess>true</ExternalSystemReattachDebugProcess>
-      <DebugAllEnabled>false</DebugAllEnabled>
-      <RunAsTest>false</RunAsTest>
-      <method v="2" />
-    </configuration>
-    <configuration name="TestCloud:TestCloud-node [jar]" type="GradleRunConfiguration" factoryName="Gradle" temporary="true">
-      <ExternalSystemSettings>
-        <option name="executionName" />
-        <option name="externalProjectPath" value="$PROJECT_DIR$/TestCloud-node" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/VulpesCloud-launcher" />
         <option name="externalSystemIdString" value="GRADLE" />
         <option name="scriptParameters" />
         <option name="taskDescriptions">
@@ -289,6 +253,10 @@
       <RunAsTest>false</RunAsTest>
       <method v="2" />
     </configuration>
+    <configuration name="vulpescloud-launcher.jar" type="JarApplication" temporary="true">
+      <option name="JAR_PATH" value="$PROJECT_DIR$/VulpesCloud-launcher/build/libs/vulpescloud-launcher.jar" />
+      <method v="2" />
+    </configuration>
     <configuration default="true" type="JetRunConfigurationType">
       <module name="TestCloud" />
       <method v="2">
@@ -304,11 +272,11 @@
     </configuration>
     <recent_temporary>
       <list>
+        <item itemvalue="Gradle.TestCloud:VulpesCloud-launcher [jar]" />
+        <item itemvalue="Gradle.TestCloud [jar]" />
+        <item itemvalue="JAR Application.vulpescloud-launcher.jar" />
+        <item itemvalue="Application.Launcher" />
         <item itemvalue="Gradle.TestCloud [shadowJar]" />
-        <item itemvalue="Gradle.TestCloud:TestCloud-node [jar]" />
-        <item itemvalue="Gradle.TestCloud:TestCloud-launcher [shadowJar]" />
-        <item itemvalue="Gradle.TestCloud:TestCloud-api [shadowJar]" />
-        <item itemvalue="Gradle.TestCloud [check]" />
       </list>
     </recent_temporary>
   </component>
@@ -320,22 +288,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1727720247871</updated>
-    </task>
-    <task id="LOCAL-00001" summary="Initial Commit">
-      <option name="closed" value="true" />
-      <created>1728046368934</created>
-      <option name="number" value="00001" />
-      <option name="presentableId" value="LOCAL-00001" />
-      <option name="project" value="LOCAL" />
-      <updated>1728046368934</updated>
-    </task>
-    <task id="LOCAL-00002" summary="Added things">
-      <option name="closed" value="true" />
-      <created>1728046390398</created>
-      <option name="number" value="00002" />
-      <option name="presentableId" value="LOCAL-00002" />
-      <option name="project" value="LOCAL" />
-      <updated>1728046390398</updated>
     </task>
     <task id="LOCAL-00003" summary="Added an GitHub workflow">
       <option name="closed" value="true" />
@@ -497,7 +449,239 @@
       <option name="project" value="LOCAL" />
       <updated>1729094312155</updated>
     </task>
-    <option name="localTasksCounter" value="23" />
+    <task id="LOCAL-00023" summary="Removed almost everything for rewrite">
+      <option name="closed" value="true" />
+      <created>1729260028734</created>
+      <option name="number" value="00023" />
+      <option name="presentableId" value="LOCAL-00023" />
+      <option name="project" value="LOCAL" />
+      <updated>1729260028734</updated>
+    </task>
+    <task id="LOCAL-00024" summary="Renamed the Cloud">
+      <option name="closed" value="true" />
+      <created>1729263895441</created>
+      <option name="number" value="00024" />
+      <option name="presentableId" value="LOCAL-00024" />
+      <option name="project" value="LOCAL" />
+      <updated>1729263895441</updated>
+    </task>
+    <task id="LOCAL-00025" summary="Added missing files">
+      <option name="closed" value="true" />
+      <created>1729264048053</created>
+      <option name="number" value="00025" />
+      <option name="presentableId" value="LOCAL-00025" />
+      <option name="project" value="LOCAL" />
+      <updated>1729264048053</updated>
+    </task>
+    <task id="LOCAL-00026" summary="Edited parts of the API">
+      <option name="closed" value="true" />
+      <created>1729265872314</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1729265872314</updated>
+    </task>
+    <task id="LOCAL-00027" summary="Another rename">
+      <option name="closed" value="true" />
+      <created>1729413215694</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1729413215694</updated>
+    </task>
+    <task id="LOCAL-00028" summary="Update .gitignore">
+      <option name="closed" value="true" />
+      <created>1729416546529</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1729416546529</updated>
+    </task>
+    <task id="LOCAL-00029" summary="Implement VersionProvider">
+      <option name="closed" value="true" />
+      <created>1729514081166</created>
+      <option name="number" value="00029" />
+      <option name="presentableId" value="LOCAL-00029" />
+      <option name="project" value="LOCAL" />
+      <updated>1729514081166</updated>
+    </task>
+    <task id="LOCAL-00030" summary="Implement VersionProvider">
+      <option name="closed" value="true" />
+      <created>1729514224898</created>
+      <option name="number" value="00030" />
+      <option name="presentableId" value="LOCAL-00030" />
+      <option name="project" value="LOCAL" />
+      <updated>1729514224898</updated>
+    </task>
+    <task id="LOCAL-00031" summary="Cleaned up libs.versions.toml">
+      <option name="closed" value="true" />
+      <created>1729515606462</created>
+      <option name="number" value="00031" />
+      <option name="presentableId" value="LOCAL-00031" />
+      <option name="project" value="LOCAL" />
+      <updated>1729515606462</updated>
+    </task>
+    <task id="LOCAL-00032" summary="Cleaned up libs.versions.toml">
+      <option name="closed" value="true" />
+      <created>1729515611839</created>
+      <option name="number" value="00032" />
+      <option name="presentableId" value="LOCAL-00032" />
+      <option name="project" value="LOCAL" />
+      <updated>1729515611839</updated>
+    </task>
+    <task id="LOCAL-00033" summary="Removed unnecessary things from the command package">
+      <option name="closed" value="true" />
+      <created>1729516398595</created>
+      <option name="number" value="00033" />
+      <option name="presentableId" value="LOCAL-00033" />
+      <option name="project" value="LOCAL" />
+      <updated>1729516398595</updated>
+    </task>
+    <task id="LOCAL-00034" summary="Implement Version Command">
+      <option name="closed" value="true" />
+      <created>1729518497388</created>
+      <option name="number" value="00034" />
+      <option name="presentableId" value="LOCAL-00034" />
+      <option name="project" value="LOCAL" />
+      <updated>1729518497388</updated>
+    </task>
+    <task id="LOCAL-00035" summary="Implement Task factory and more">
+      <option name="closed" value="true" />
+      <created>1729527056828</created>
+      <option name="number" value="00035" />
+      <option name="presentableId" value="LOCAL-00035" />
+      <option name="project" value="LOCAL" />
+      <updated>1729527056828</updated>
+    </task>
+    <task id="LOCAL-00036" summary="Added Task Command and some TaskFactory stuff">
+      <option name="closed" value="true" />
+      <created>1729691912525</created>
+      <option name="number" value="00036" />
+      <option name="presentableId" value="LOCAL-00036" />
+      <option name="project" value="LOCAL" />
+      <updated>1729691912525</updated>
+    </task>
+    <task id="LOCAL-00037" summary="fix: Fixed stuff in the Task Provider">
+      <option name="closed" value="true" />
+      <created>1729692207721</created>
+      <option name="number" value="00037" />
+      <option name="presentableId" value="LOCAL-00037" />
+      <option name="project" value="LOCAL" />
+      <updated>1729692207721</updated>
+    </task>
+    <task id="LOCAL-00038" summary="Partially implemented ClusterProvider as well as a new Config and Node stuff">
+      <option name="closed" value="true" />
+      <created>1729786048634</created>
+      <option name="number" value="00038" />
+      <option name="presentableId" value="LOCAL-00038" />
+      <option name="project" value="LOCAL" />
+      <updated>1729786048634</updated>
+    </task>
+    <task id="LOCAL-00039" summary="Added Part of Cluster Command">
+      <option name="closed" value="true" />
+      <created>1729874583100</created>
+      <option name="number" value="00039" />
+      <option name="presentableId" value="LOCAL-00039" />
+      <option name="project" value="LOCAL" />
+      <updated>1729874583100</updated>
+    </task>
+    <task id="LOCAL-00040" summary="Implement New EventListener">
+      <option name="closed" value="true" />
+      <created>1729948274186</created>
+      <option name="number" value="00040" />
+      <option name="presentableId" value="LOCAL-00040" />
+      <option name="project" value="LOCAL" />
+      <updated>1729948274186</updated>
+    </task>
+    <task id="LOCAL-00041" summary="Implement Redis Connection Checker">
+      <option name="closed" value="true" />
+      <created>1729981150806</created>
+      <option name="number" value="00041" />
+      <option name="presentableId" value="LOCAL-00041" />
+      <option name="project" value="LOCAL" />
+      <updated>1729981150807</updated>
+    </task>
+    <task id="LOCAL-00042" summary="Implement Task Creation and loading of tasks">
+      <option name="closed" value="true" />
+      <created>1729983741960</created>
+      <option name="number" value="00042" />
+      <option name="presentableId" value="LOCAL-00042" />
+      <option name="project" value="LOCAL" />
+      <updated>1729983741960</updated>
+    </task>
+    <task id="LOCAL-00043" summary="Implement Version related stuff">
+      <option name="closed" value="true" />
+      <created>1730067364574</created>
+      <option name="number" value="00043" />
+      <option name="presentableId" value="LOCAL-00043" />
+      <option name="project" value="LOCAL" />
+      <updated>1730067364575</updated>
+    </task>
+    <task id="LOCAL-00044" summary="Implement some service and template stuff">
+      <option name="closed" value="true" />
+      <created>1730067411330</created>
+      <option name="number" value="00044" />
+      <option name="presentableId" value="LOCAL-00044" />
+      <option name="project" value="LOCAL" />
+      <updated>1730067411330</updated>
+    </task>
+    <task id="LOCAL-00045" summary="temp-fix: Created a File Temporarily to fix the issue">
+      <option name="closed" value="true" />
+      <created>1730109238553</created>
+      <option name="number" value="00045" />
+      <option name="presentableId" value="LOCAL-00045" />
+      <option name="project" value="LOCAL" />
+      <updated>1730109238553</updated>
+    </task>
+    <task id="LOCAL-00046" summary="Implement Service Command">
+      <option name="closed" value="true" />
+      <created>1730141693369</created>
+      <option name="number" value="00046" />
+      <option name="presentableId" value="LOCAL-00046" />
+      <option name="project" value="LOCAL" />
+      <updated>1730141693369</updated>
+    </task>
+    <task id="LOCAL-00047" summary="Move dependency's from build.gradle.kts to libs.versions.toml">
+      <option name="closed" value="true" />
+      <created>1730206075214</created>
+      <option name="number" value="00047" />
+      <option name="presentableId" value="LOCAL-00047" />
+      <option name="project" value="LOCAL" />
+      <updated>1730206075214</updated>
+    </task>
+    <task id="LOCAL-00048" summary="Add Wrapper project">
+      <option name="closed" value="true" />
+      <created>1730208501430</created>
+      <option name="number" value="00048" />
+      <option name="presentableId" value="LOCAL-00048" />
+      <option name="project" value="LOCAL" />
+      <updated>1730208501430</updated>
+    </task>
+    <task id="LOCAL-00049" summary="fix: Add build.gradle.kts to VCS">
+      <option name="closed" value="true" />
+      <created>1730208533569</created>
+      <option name="number" value="00049" />
+      <option name="presentableId" value="LOCAL-00049" />
+      <option name="project" value="LOCAL" />
+      <updated>1730208533569</updated>
+    </task>
+    <task id="LOCAL-00050" summary="Finished with the Wrapper for now and services can be started">
+      <option name="closed" value="true" />
+      <created>1730225222334</created>
+      <option name="number" value="00050" />
+      <option name="presentableId" value="LOCAL-00050" />
+      <option name="project" value="LOCAL" />
+      <updated>1730225222335</updated>
+    </task>
+    <task id="LOCAL-00051" summary="Prepared implementation of Vulpescloud Connector plugin">
+      <option name="closed" value="true" />
+      <created>1730235651945</created>
+      <option name="number" value="00051" />
+      <option name="presentableId" value="LOCAL-00051" />
+      <option name="project" value="LOCAL" />
+      <updated>1730235651946</updated>
+    </task>
+    <option name="localTasksCounter" value="52" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -512,30 +696,32 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Initial Commit" />
-    <MESSAGE value="Added things" />
-    <MESSAGE value="Added an GitHub workflow" />
-    <MESSAGE value="The API is now written in both Java and Kotlin" />
-    <MESSAGE value="fix: The Cloud launches now" />
-    <MESSAGE value="fix: The Launcher now download all Dependencys that are required" />
-    <MESSAGE value="fix: Changed shadowJar to jar" />
-    <MESSAGE value="[ci skip] Just Commiting some changes for later coding" />
-    <MESSAGE value="new: Implemented RedisController and fixed some things aswell as changed back to shadowJar beacuse of Redis" />
-    <MESSAGE value="Added a new Terminal Color, added new Log level and Config Option" />
-    <MESSAGE value="Upload" />
-    <MESSAGE value="feat: Tasks now can be created using Redis messages" />
-    <MESSAGE value="feat: Implemented Services and more" />
-    <MESSAGE value="fix: Platforms didn't want to load" />
-    <MESSAGE value="fix: The Nodes now doesn't crash due to some Json stuff" />
-    <MESSAGE value="chore: Did some Cleanup in Logger and ClusterTaskProvider" />
-    <MESSAGE value="feat: Added aerogel to the Dependency's to be able to use Dependency Injection because of Cloud" />
-    <MESSAGE value="feat: Cloud v2 is implemented successfully!" />
-    <MESSAGE value="chore: Implemented Info Command" />
-    <MESSAGE value="chore: Implemented Shutdown Command and uncommented redis controller" />
-    <MESSAGE value="chore: Implement Tasks command" />
-    <MESSAGE value="feat: Added Simple MySQLController" />
-    <MESSAGE value="chore: Uploading changes" />
-    <option name="LAST_COMMIT_MESSAGE" value="chore: Uploading changes" />
+    <MESSAGE value="Edited parts of the API" />
+    <MESSAGE value="Another rename" />
+    <MESSAGE value="Update .gitignore" />
+    <MESSAGE value="Implement VersionProvider" />
+    <MESSAGE value="Cleaned up libs.versions.toml" />
+    <MESSAGE value="Removed unnecessary things from the command package" />
+    <MESSAGE value="Implement Version Command" />
+    <MESSAGE value="Implement Task factory and more" />
+    <MESSAGE value="Added Task Command and some TaskFactory stuff" />
+    <MESSAGE value="fix: Fixed stuff in the Task Provider" />
+    <MESSAGE value="Partially implemented ClusterProvider as well as a new Config and Node stuff" />
+    <MESSAGE value="Added Part of Cluster Command" />
+    <MESSAGE value="Implement New EventListener" />
+    <MESSAGE value="Implement Redis Connection Checker" />
+    <MESSAGE value="Implement Task Creation and loading of tasks" />
+    <MESSAGE value="Implement Version related stuff" />
+    <MESSAGE value="Implement some service and template stuff" />
+    <MESSAGE value="temp-fix: Created a File Temporarily to fix the issue" />
+    <MESSAGE value="Implement Service Command" />
+    <MESSAGE value="Move dependency's from build.gradle.kts to libs.versions.toml" />
+    <MESSAGE value="Add Wrapper project" />
+    <MESSAGE value="fix: Add build.gradle.kts to VCS" />
+    <MESSAGE value="Copy networking stuff to Wrapper" />
+    <MESSAGE value="Finished with the Wrapper for now and services can be started" />
+    <MESSAGE value="Prepared implementation of Vulpescloud Connector plugin" />
+    <option name="LAST_COMMIT_MESSAGE" value="Prepared implementation of Vulpescloud Connector plugin" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [
@@ -545,6 +731,10 @@
     },
     {
       &quot;branch&quot;: &quot;dev/api_java_conversion&quot;,
+      &quot;currentBranchFilter&quot;: true
+    },
+    {
+      &quot;branch&quot;: &quot;dev/launcher&quot;,
       &quot;currentBranchFilter&quot;: true
     },
     {
