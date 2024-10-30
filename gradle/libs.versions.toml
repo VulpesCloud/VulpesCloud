@@ -13,7 +13,7 @@ annotations = "26.0.1"
 # network
 jedis = "5.2.0"
 hikariCP = "6.0.0"
-mariadb = "3.4.1"
+mariadb = "3.5.0"
 
 #logging
 slf4j = "2.0.16"
