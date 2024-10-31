@@ -4,4 +4,4 @@
 
 ## Links
 
-- [Discord](https://discord.gg/8v4f2DuMpJ)
+- [Discord](https://discord.gg/dcFSujWqfw)
