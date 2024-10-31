@@ -4,14 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Implement Velocity connector plugin and service stop and command commands">
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityRegistrationHandler.kt" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/DevCommand.kt" afterDir="false" />
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Implement Velocity Registration Handler and Dev command for sending redis messages">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/RedisChannels.txt" beforeDir="false" afterPath="$PROJECT_DIR$/RedisChannels.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityConnector.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityConnector.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityRedisSubscribe.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityRedisSubscribe.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/Node.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityRegistrationHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityRegistrationHandler.kt" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -109,7 +104,7 @@
   }
 }</component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="CurrentFile" />
+    <option name="selectedTabId" value="DEPENDENCY_CHECKER_PROBLEMS_TAB" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
@@ -120,41 +115,41 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">{
-  &quot;keyToString&quot;: {
-    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [check].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-api [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-api [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-launcher [:TestCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-launcher [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-launcher [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [build].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [jar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [shadowJar].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:TestCloud-node [testClasses].executor&quot;: &quot;Run&quot;,
-    &quot;Gradle.TestCloud:VulpesCloud-launcher [:VulpesCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor&quot;: &quot;Debug&quot;,
-    &quot;Gradle.TestCloud:VulpesCloud-launcher [jar].executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.TestCloud-node-1.0.0-alpha-all.jar.executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.testcloud-launcher.jar.executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.testcloud-node.jar.executor&quot;: &quot;Run&quot;,
-    &quot;JAR Application.vulpescloud-launcher.jar.executor&quot;: &quot;Run&quot;,
-    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
-    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;dev/rewrite&quot;,
-    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
-    &quot;last_opened_file_path&quot;: &quot;D:/Christian/Development/TestCloud/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/networking&quot;,
-    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
-    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
-    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
-    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
-    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.pluginManager&quot;
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "Gradle.Download Sources.executor": "Run",
+    "Gradle.TestCloud [build].executor": "Run",
+    "Gradle.TestCloud [check].executor": "Run",
+    "Gradle.TestCloud [jar].executor": "Run",
+    "Gradle.TestCloud [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-api [jar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-api [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-launcher [:TestCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor": "Run",
+    "Gradle.TestCloud:TestCloud-launcher [jar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-launcher [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [build].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [jar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [shadowJar].executor": "Run",
+    "Gradle.TestCloud:TestCloud-node [testClasses].executor": "Run",
+    "Gradle.TestCloud:VulpesCloud-launcher [:VulpesCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor": "Debug",
+    "Gradle.TestCloud:VulpesCloud-launcher [jar].executor": "Run",
+    "JAR Application.TestCloud-node-1.0.0-alpha-all.jar.executor": "Run",
+    "JAR Application.testcloud-launcher.jar.executor": "Run",
+    "JAR Application.testcloud-node.jar.executor": "Run",
+    "JAR Application.vulpescloud-launcher.jar.executor": "Run",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "git-widget-placeholder": "dev/rewrite",
+    "kotlin-language-version-configured": "true",
+    "last_opened_file_path": "D:/Christian/Development/TestCloud/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/networking",
+    "project.structure.last.edited": "Modules",
+    "project.structure.proportion": "0.0",
+    "project.structure.side.proportion": "0.0",
+    "run.code.analysis.last.selected.profile": "pProject Default",
+    "settings.editor.selected.configurable": "code-screenshots"
   }
-}</component>
+}]]></component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\Christian\Development\TestCloud\VulpesCloud-wrapper\src\main\kotlin\io\github\thecguygithub\wrapper\networking" />
@@ -283,14 +278,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1727720247871</updated>
-    </task>
-    <task id="LOCAL-00003" summary="Added an GitHub workflow">
-      <option name="closed" value="true" />
-      <created>1728047163488</created>
-      <option name="number" value="00003" />
-      <option name="presentableId" value="LOCAL-00003" />
-      <option name="project" value="LOCAL" />
-      <updated>1728047163488</updated>
     </task>
     <task id="LOCAL-00004" summary="The API is now written in both Java and Kotlin">
       <option name="closed" value="true" />
@@ -676,7 +663,15 @@
       <option name="project" value="LOCAL" />
       <updated>1730235651946</updated>
     </task>
-    <option name="localTasksCounter" value="52" />
+    <task id="LOCAL-00052" summary="Implement Velocity Registration Handler and Dev command for sending redis messages">
+      <option name="closed" value="true" />
+      <created>1730378285498</created>
+      <option name="number" value="00052" />
+      <option name="presentableId" value="LOCAL-00052" />
+      <option name="project" value="LOCAL" />
+      <updated>1730378285500</updated>
+    </task>
+    <option name="localTasksCounter" value="53" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -691,7 +686,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Edited parts of the API" />
     <MESSAGE value="Another rename" />
     <MESSAGE value="Update .gitignore" />
     <MESSAGE value="Implement VersionProvider" />
@@ -716,7 +710,8 @@
     <MESSAGE value="Copy networking stuff to Wrapper" />
     <MESSAGE value="Finished with the Wrapper for now and services can be started" />
     <MESSAGE value="Prepared implementation of Vulpescloud Connector plugin" />
-    <option name="LAST_COMMIT_MESSAGE" value="Prepared implementation of Vulpescloud Connector plugin" />
+    <MESSAGE value="Implement Velocity Registration Handler and Dev command for sending redis messages" />
+    <option name="LAST_COMMIT_MESSAGE" value="Implement Velocity Registration Handler and Dev command for sending redis messages" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [
