@@ -30,6 +30,7 @@ class VelocityConnector @Inject constructor(
     fun start(event: ProxyInitializeEvent) {
         proxyServer.consoleCommandSource.sendMessage(MiniMessage.miniMessage().deserialize("<grey>[<aqua>VulpesCloud-Connector</aqua>]</grey> <yellow>Initializing</yellow>"))
         wrapper.getRC()?.sendMessage("SERVICE;${wrapper.service.name};EVENT;STATE;STARTING", "vulpescloud-event-service")
+        VelocityRegistrationHandler
         VelocityRedisSubscribe()
     }
 

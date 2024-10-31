@@ -16,3 +16,7 @@ vulpescloud-event-service
     -> SERVICE;<service name>;EVENT;STATE;STOPPING
 vulpescloud-auth-service
     -> SERVICE;<service name>;AUTH;<service uuid>
+vulpescloud-register-service
+    -> SERVICE;<service name>;ADDRESS;<service address>;PORT;<service port>;REGISTER
+vulpescloud-unregister-service
+    -> SERVICE;<service name>;UNREGISTER

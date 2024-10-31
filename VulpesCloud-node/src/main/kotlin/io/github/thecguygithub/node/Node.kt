@@ -133,6 +133,7 @@ class Node {
         TasksCommand()
         ClusterCommand()
         ServiceCommand()
+        DevCommand()
 
         Runtime.getRuntime().addShutdownHook(Thread())
 
