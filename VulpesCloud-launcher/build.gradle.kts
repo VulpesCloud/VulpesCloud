@@ -31,6 +31,7 @@ tasks.jar {
     from(project(":VulpesCloud-api").tasks.jar)
     from(project(":VulpesCloud-wrapper").tasks.shadowJar)
     from(project(":VulpesCloud-connector").tasks.jar)
+    from(project(":VulpesCloud-bridge").tasks.jar)
     manifest {
         attributes["Main-Class"] = "io.github.thecguygithub.launcher.Launcher"
     }

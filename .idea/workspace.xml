@@ -4,9 +4,23 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Implement Velocity Registration Handler and Dev command for sending redis messages">
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Remove unused values and Imports in VelocityRegistrationHandler">
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-bridge/build.gradle.kts" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityEventListener.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityRegistrationHandler.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityRegistrationHandler.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceProvider.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/Task.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/Task.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/TaskProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/TaskProvider.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-launcher/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/build.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/TasksCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/TasksCommand.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/Service.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/Service.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceFactory.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceProvider.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskFactory.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskImpl.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskProvider.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -115,41 +129,41 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "Gradle.Download Sources.executor": "Run",
-    "Gradle.TestCloud [build].executor": "Run",
-    "Gradle.TestCloud [check].executor": "Run",
-    "Gradle.TestCloud [jar].executor": "Run",
-    "Gradle.TestCloud [shadowJar].executor": "Run",
-    "Gradle.TestCloud:TestCloud-api [jar].executor": "Run",
-    "Gradle.TestCloud:TestCloud-api [shadowJar].executor": "Run",
-    "Gradle.TestCloud:TestCloud-launcher [:TestCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor": "Run",
-    "Gradle.TestCloud:TestCloud-launcher [jar].executor": "Run",
-    "Gradle.TestCloud:TestCloud-launcher [shadowJar].executor": "Run",
-    "Gradle.TestCloud:TestCloud-node [build].executor": "Run",
-    "Gradle.TestCloud:TestCloud-node [jar].executor": "Run",
-    "Gradle.TestCloud:TestCloud-node [shadowJar].executor": "Run",
-    "Gradle.TestCloud:TestCloud-node [testClasses].executor": "Run",
-    "Gradle.TestCloud:VulpesCloud-launcher [:VulpesCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor": "Debug",
-    "Gradle.TestCloud:VulpesCloud-launcher [jar].executor": "Run",
-    "JAR Application.TestCloud-node-1.0.0-alpha-all.jar.executor": "Run",
-    "JAR Application.testcloud-launcher.jar.executor": "Run",
-    "JAR Application.testcloud-node.jar.executor": "Run",
-    "JAR Application.vulpescloud-launcher.jar.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "dev/rewrite",
-    "kotlin-language-version-configured": "true",
-    "last_opened_file_path": "D:/Christian/Development/TestCloud/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/networking",
-    "project.structure.last.edited": "Modules",
-    "project.structure.proportion": "0.0",
-    "project.structure.side.proportion": "0.0",
-    "run.code.analysis.last.selected.profile": "pProject Default",
-    "settings.editor.selected.configurable": "code-screenshots"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;Gradle.Download Sources.executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TestCloud [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TestCloud [check].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TestCloud [jar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TestCloud [shadowJar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TestCloud:TestCloud-api [jar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TestCloud:TestCloud-api [shadowJar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TestCloud:TestCloud-launcher [:TestCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TestCloud:TestCloud-launcher [jar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TestCloud:TestCloud-launcher [shadowJar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TestCloud:TestCloud-node [build].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TestCloud:TestCloud-node [jar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TestCloud:TestCloud-node [shadowJar].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TestCloud:TestCloud-node [testClasses].executor&quot;: &quot;Run&quot;,
+    &quot;Gradle.TestCloud:VulpesCloud-launcher [:VulpesCloud-launcher:io.github.thecguygithub.launcher.Launcher.main()].executor&quot;: &quot;Debug&quot;,
+    &quot;Gradle.TestCloud:VulpesCloud-launcher [jar].executor&quot;: &quot;Run&quot;,
+    &quot;JAR Application.TestCloud-node-1.0.0-alpha-all.jar.executor&quot;: &quot;Run&quot;,
+    &quot;JAR Application.testcloud-launcher.jar.executor&quot;: &quot;Run&quot;,
+    &quot;JAR Application.testcloud-node.jar.executor&quot;: &quot;Run&quot;,
+    &quot;JAR Application.vulpescloud-launcher.jar.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;dev/rewrite&quot;,
+    &quot;kotlin-language-version-configured&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;D:/Christian/Development/TestCloud/VulpesCloud-wrapper/src/main/kotlin/io/github/thecguygithub/wrapper/networking&quot;,
+    &quot;project.structure.last.edited&quot;: &quot;Modules&quot;,
+    &quot;project.structure.proportion&quot;: &quot;0.0&quot;,
+    &quot;project.structure.side.proportion&quot;: &quot;0.0&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;code-screenshots&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="D:\Christian\Development\TestCloud\VulpesCloud-wrapper\src\main\kotlin\io\github\thecguygithub\wrapper\networking" />
@@ -278,14 +292,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1727720247871</updated>
-    </task>
-    <task id="LOCAL-00004" summary="The API is now written in both Java and Kotlin">
-      <option name="closed" value="true" />
-      <created>1728050662782</created>
-      <option name="number" value="00004" />
-      <option name="presentableId" value="LOCAL-00004" />
-      <option name="project" value="LOCAL" />
-      <updated>1728050662782</updated>
     </task>
     <task id="LOCAL-00005" summary="fix: The Cloud launches now">
       <option name="closed" value="true" />
@@ -671,7 +677,15 @@
       <option name="project" value="LOCAL" />
       <updated>1730378285500</updated>
     </task>
-    <option name="localTasksCounter" value="53" />
+    <task id="LOCAL-00053" summary="Remove unused values and Imports in VelocityRegistrationHandler">
+      <option name="closed" value="true" />
+      <created>1730413257866</created>
+      <option name="number" value="00053" />
+      <option name="presentableId" value="LOCAL-00053" />
+      <option name="project" value="LOCAL" />
+      <updated>1730413257867</updated>
+    </task>
+    <option name="localTasksCounter" value="54" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -686,7 +700,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Another rename" />
     <MESSAGE value="Update .gitignore" />
     <MESSAGE value="Implement VersionProvider" />
     <MESSAGE value="Cleaned up libs.versions.toml" />
@@ -711,7 +724,8 @@
     <MESSAGE value="Finished with the Wrapper for now and services can be started" />
     <MESSAGE value="Prepared implementation of Vulpescloud Connector plugin" />
     <MESSAGE value="Implement Velocity Registration Handler and Dev command for sending redis messages" />
-    <option name="LAST_COMMIT_MESSAGE" value="Implement Velocity Registration Handler and Dev command for sending redis messages" />
+    <MESSAGE value="Remove unused values and Imports in VelocityRegistrationHandler" />
+    <option name="LAST_COMMIT_MESSAGE" value="Remove unused values and Imports in VelocityRegistrationHandler" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [
