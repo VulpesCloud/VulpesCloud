@@ -40,7 +40,8 @@ abstract class TaskProvider {
         minOnlineCount: Int,
         maintenance: Boolean,
         maxPlayers: Int,
-        startPort: Int
+        startPort: Int,
+        fallback: Boolean
     ): CompletableFuture<Optional<String?>?>
 
     @SneakyThrows
@@ -54,9 +55,10 @@ abstract class TaskProvider {
         minOnlineCount: Int,
         maintenance: Boolean,
         maxPlayers: Int,
-        startPort: Int
+        startPort: Int,
+        fallback: Boolean
     ): Optional<String?>? {
-        return createAsync(name, templates, nodes, version, maxMemory, staticService, minOnlineCount, maintenance, maxPlayers, startPort)[5, TimeUnit.SECONDS]
+        return createAsync(name, templates, nodes, version, maxMemory, staticService, minOnlineCount, maintenance, maxPlayers, startPort, fallback)[5, TimeUnit.SECONDS]
     }
 
     abstract fun findAsync(task: String): CompletableFuture<Task?>

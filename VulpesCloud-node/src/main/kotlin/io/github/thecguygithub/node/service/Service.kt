@@ -16,7 +16,7 @@ open class Service(
     val hostname: String,
     val runningNode: String,
     var maxPlayers: Int = 0,  // Optional setter for maxPlayers
-    var state: ClusterServiceStates = ClusterServiceStates.PREPARED  // Default value for state
+    var state: ClusterServiceStates = ClusterServiceStates.PREPARED,  // Default value for state
 ) : ClusterService {
 
     override fun details(): String {

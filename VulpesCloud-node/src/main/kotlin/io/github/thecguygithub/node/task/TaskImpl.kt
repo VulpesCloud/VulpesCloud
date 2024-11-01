@@ -14,7 +14,8 @@ open class TaskImpl(
     val staticServices: Boolean,
     val minOnlineCount: Int,
     val maintenance: Boolean,
-    val startPort: Int
+    val startPort: Int,
+    val fallback: Boolean
 ) : Task {
 
     override fun details(): String? {
@@ -71,5 +72,9 @@ open class TaskImpl(
 
     override fun update() {
         TODO("Not yet implemented")
+    }
+
+    override fun fallback(): Boolean {
+        return fallback
     }
 }

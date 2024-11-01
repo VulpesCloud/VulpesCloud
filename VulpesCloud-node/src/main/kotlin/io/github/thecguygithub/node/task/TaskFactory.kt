@@ -49,7 +49,8 @@ object TaskFactory {
             taskInformation.getBoolean("staticServices"),
             taskInformation.getInt("minOnlineCount"),
             taskInformation.getBoolean("maintenance"),
-            taskInformation.getInt("startPort")
+            taskInformation.getInt("startPort"),
+            taskInformation.getBoolean("fallback")
         )
 
         GROUP_DIR.toFile().mkdirs()
@@ -95,7 +96,8 @@ object TaskFactory {
                 taskInformation.getBoolean("staticServices"),
                 taskInformation.getInt("minOnlineCount"),
                 taskInformation.getBoolean("maintenance"),
-                taskInformation.getInt("startPort")
+                taskInformation.getInt("startPort"),
+                taskInformation.getBoolean("fallback")
             ))
         }
         return groups

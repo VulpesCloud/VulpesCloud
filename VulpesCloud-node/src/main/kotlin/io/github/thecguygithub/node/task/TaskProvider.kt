@@ -21,7 +21,8 @@ class TaskProvider : TaskProvider() {
         minOnlineCount: Int,
         maintenance: Boolean,
         maxPlayers: Int,
-        startPort: Int
+        startPort: Int,
+        fallback: Boolean
     ): CompletableFuture<Optional<String?>?> {
         val taskFuture = CompletableFuture<Optional<String?>?>()
         val task = TaskImpl(
@@ -34,7 +35,8 @@ class TaskProvider : TaskProvider() {
             staticService,
             minOnlineCount,
             maintenance,
-            startPort
+            startPort,
+            fallback
         )
         Node.instance?.getRC()?.sendMessage("TASK;CREATE;${task}", "vulpescloud-event-task-update")
         return taskFuture

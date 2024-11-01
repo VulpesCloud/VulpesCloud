@@ -101,7 +101,7 @@ class ServiceFactory : ClusterServiceFactory {
             Logger().debug("Calling update")
 
             // localService.state() // todo Update the Service state
-            localService.update()
+            // localService.update()
 
             Logger().debug("Starting Service")
 

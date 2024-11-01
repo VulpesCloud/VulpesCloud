@@ -92,7 +92,8 @@ class TasksCommand {
                             true,
                             1,
                             false,
-                            25565
+                            25565,
+                            false
                         )
 
                         logger.warn(JSONObject(task).toString(4))

@@ -30,22 +30,18 @@ class ServiceProvider : ClusterServiceProvider() {
         return CompletableFuture.completedFuture(services.find { it.name() == name })
     }
 
-    override fun findAsync(filter: ClusterServiceFilter?): CompletableFuture<List<ClusterService?>?> {
+    override fun findAsync(filter: ClusterServiceFilter): CompletableFuture<List<ClusterService?>?> {
         return CompletableFuture.completedFuture(
             when (filter) {
                 ClusterServiceFilter.ONLINE_SERVICES -> services.filter { it.state() == ClusterServiceStates.ONLINE }
                 ClusterServiceFilter.EMPTY_SERVICES -> services.filter { it.isEmpty() }
                 ClusterServiceFilter.PLAYERS_PRESENT_SERVERS -> services.filter { !it.isEmpty() }
-                ClusterServiceFilter.SAME_NODE_SERVICES -> services.filter {
-                    Node.nodeConfig?.name == it.runningNode()
-                }
+                ClusterServiceFilter.SAME_NODE_SERVICES -> services.filter { Node.nodeConfig?.name == it.runningNode() }
                 ClusterServiceFilter.PROXIES -> services.filter { it.task().version().type == VersionType.PROXY }
                 ClusterServiceFilter.SERVERS -> services.filter { it.task().version().type == VersionType.SERVER }
-
-                null -> null
                 ClusterServiceFilter.FALLBACKS -> null
-                ClusterServiceFilter.LOWEST_FALLBACK -> null
-            }
+                ClusterServiceFilter.LOWEST_FALLBACK -> services.stream().filter { it.task().fallback() }.min(Comparator.comparingInt(ClusterService::onlinePlayersCount)).stream().toList()
+            }?.toList()
         )
     }
 

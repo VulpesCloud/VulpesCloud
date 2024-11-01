@@ -33,4 +33,6 @@ interface Task : Named, Detail {
 
     fun update()
 
+    fun fallback(): Boolean
+
 }

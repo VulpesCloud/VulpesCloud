@@ -31,11 +31,11 @@ abstract class ClusterServiceProvider {
     abstract fun findAsync(name: String?): CompletableFuture<ClusterService?>?
 
     @SneakyThrows
-    fun findByFilter(filter: ClusterServiceFilter?): List<ClusterService?>? {
+    fun findByFilter(filter: ClusterServiceFilter): List<ClusterService?>? {
         return findAsync(filter)[5, TimeUnit.SECONDS]
     }
 
-    abstract fun findAsync(filter: ClusterServiceFilter?): CompletableFuture<List<ClusterService?>?>
+    abstract fun findAsync(filter: ClusterServiceFilter): CompletableFuture<List<ClusterService?>?>
 
     abstract fun factory(): ClusterServiceFactory?
 
