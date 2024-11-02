@@ -8,6 +8,7 @@ import io.github.thecguygithub.node.Node
 import io.github.thecguygithub.node.logging.Logger
 import io.github.thecguygithub.node.template.TemplateFactory
 import io.github.thecguygithub.node.util.JavaFileAttach
+import org.json.JSONObject
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.nio.file.Files
@@ -41,6 +42,8 @@ class ServiceFactory : ClusterServiceFactory {
         val version = localService.version()
 
         Node.instance!!.getRC()?.sendMessage("SERVICE;${localService.name()};EVENT;STATE;PREPARE", "vulpescloud-event-service")
+
+        Node.instance!!.getRC()?.setHashField("VulpesCloud-Services", localService.name(), JSONObject(localService).toString())
 
         try {
 

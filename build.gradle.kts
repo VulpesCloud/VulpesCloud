@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.0.21"
+
 }
 
 group = "io.github.thecguygithub"
@@ -24,10 +24,5 @@ allprojects {
         "implementation"(rootProject.libs.guava)
     }
 
-}
-
-
-tasks.test {
-    useJUnitPlatform()
 }
 

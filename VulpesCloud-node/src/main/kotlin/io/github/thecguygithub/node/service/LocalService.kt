@@ -22,7 +22,7 @@ class LocalService(
 ) :
     Service(task, orderedId, id, port, hostname!!, runningNode!!) {
 
-    val logger = Logger()
+    private val logger = Logger()
 
     private var process: Process? = null
     private var processTracking: Thread? = null

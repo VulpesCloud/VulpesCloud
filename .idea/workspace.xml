@@ -4,23 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Remove unused values and Imports in VelocityRegistrationHandler">
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-bridge/build.gradle.kts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityEventListener.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/gradle.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/gradle.xml" afterDir="false" />
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Added fallback variable to Tasks">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/ClusterServiceProvider.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/Task.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/Task.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/TaskProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/tasks/TaskProvider.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-launcher/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-launcher/build.gradle.kts" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/TasksCommand.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/commands/TasksCommand.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/Service.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/Service.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceFactory.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceProvider.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskFactory.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskImpl.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskImpl.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/task/TaskProvider.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/settings.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/settings.gradle.kts" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -118,7 +105,7 @@
   }
 }</component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="DEPENDENCY_CHECKER_PROBLEMS_TAB" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
@@ -292,22 +279,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1727720247871</updated>
-    </task>
-    <task id="LOCAL-00005" summary="fix: The Cloud launches now">
-      <option name="closed" value="true" />
-      <created>1728052071786</created>
-      <option name="number" value="00005" />
-      <option name="presentableId" value="LOCAL-00005" />
-      <option name="project" value="LOCAL" />
-      <updated>1728052071786</updated>
-    </task>
-    <task id="LOCAL-00006" summary="fix: The Launcher now download all Dependencys that are required">
-      <option name="closed" value="true" />
-      <created>1728053592364</created>
-      <option name="number" value="00006" />
-      <option name="presentableId" value="LOCAL-00006" />
-      <option name="project" value="LOCAL" />
-      <updated>1728053592364</updated>
     </task>
     <task id="LOCAL-00007" summary="fix: Changed shadowJar to jar">
       <option name="closed" value="true" />
@@ -685,7 +656,23 @@
       <option name="project" value="LOCAL" />
       <updated>1730413257867</updated>
     </task>
-    <option name="localTasksCounter" value="54" />
+    <task id="LOCAL-00054" summary="Add bridge subProject">
+      <option name="closed" value="true" />
+      <created>1730498978882</created>
+      <option name="number" value="00054" />
+      <option name="presentableId" value="LOCAL-00054" />
+      <option name="project" value="LOCAL" />
+      <updated>1730498978883</updated>
+    </task>
+    <task id="LOCAL-00055" summary="Added fallback variable to Tasks">
+      <option name="closed" value="true" />
+      <created>1730499150748</created>
+      <option name="number" value="00055" />
+      <option name="presentableId" value="LOCAL-00055" />
+      <option name="project" value="LOCAL" />
+      <updated>1730499150748</updated>
+    </task>
+    <option name="localTasksCounter" value="56" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -700,8 +687,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Update .gitignore" />
-    <MESSAGE value="Implement VersionProvider" />
     <MESSAGE value="Cleaned up libs.versions.toml" />
     <MESSAGE value="Removed unnecessary things from the command package" />
     <MESSAGE value="Implement Version Command" />
@@ -725,7 +710,9 @@
     <MESSAGE value="Prepared implementation of Vulpescloud Connector plugin" />
     <MESSAGE value="Implement Velocity Registration Handler and Dev command for sending redis messages" />
     <MESSAGE value="Remove unused values and Imports in VelocityRegistrationHandler" />
-    <option name="LAST_COMMIT_MESSAGE" value="Remove unused values and Imports in VelocityRegistrationHandler" />
+    <MESSAGE value="Add bridge subProject" />
+    <MESSAGE value="Added fallback variable to Tasks" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added fallback variable to Tasks" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [
