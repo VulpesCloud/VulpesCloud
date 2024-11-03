@@ -4,10 +4,16 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Added fallback variable to Tasks">
+    <list default="true" id="40a84747-dc27-4a6f-be34-700f2ed4f5b1" name="Changes" comment="Add some Redis related Enums to prepare for a redis rewrite">
+      <change afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/services/builder/ServiceEventMessageBuilder.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/filegetter.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/RedisChannels.txt" beforeDir="false" afterPath="$PROJECT_DIR$/RedisChannels.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/network/redis/RedisHashNames.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-api/src/main/kotlin/io/github/thecguygithub/api/network/redis/RedisHashNames.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityConnector.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-connector/src/main/kotlin/io/github/thecguygithub/connector/velocity/VelocityConnector.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/cluster/ClusterProvider.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/cluster/ClusterProvider.kt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/LocalService.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/LocalService.kt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceFactory.kt" beforeDir="false" afterPath="$PROJECT_DIR$/VulpesCloud-node/src/main/kotlin/io/github/thecguygithub/node/service/ServiceFactory.kt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle.kts" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle.kts" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,11 +82,11 @@
         <option value="Interface" />
         <option value="Class" />
         <option value="Kotlin Annotation" />
-        <option value="Kotlin Enum" />
         <option value="Kotlin Data Class" />
-        <option value="Kotlin Interface" />
         <option value="Kotlin Object" />
         <option value="Kotlin Class" />
+        <option value="Kotlin Interface" />
+        <option value="Kotlin Enum" />
       </list>
     </option>
   </component>
@@ -279,14 +285,6 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1727720247871</updated>
-    </task>
-    <task id="LOCAL-00007" summary="fix: Changed shadowJar to jar">
-      <option name="closed" value="true" />
-      <created>1728053756153</created>
-      <option name="number" value="00007" />
-      <option name="presentableId" value="LOCAL-00007" />
-      <option name="project" value="LOCAL" />
-      <updated>1728053756153</updated>
     </task>
     <task id="LOCAL-00008" summary="[ci skip] Just Commiting some changes for later coding">
       <option name="closed" value="true" />
@@ -672,7 +670,15 @@
       <option name="project" value="LOCAL" />
       <updated>1730499150748</updated>
     </task>
-    <option name="localTasksCounter" value="56" />
+    <task id="LOCAL-00056" summary="Add some Redis related Enums to prepare for a redis rewrite">
+      <option name="closed" value="true" />
+      <created>1730584260690</created>
+      <option name="number" value="00056" />
+      <option name="presentableId" value="LOCAL-00056" />
+      <option name="project" value="LOCAL" />
+      <updated>1730584260692</updated>
+    </task>
+    <option name="localTasksCounter" value="57" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
@@ -687,8 +693,6 @@
     </option>
   </component>
   <component name="VcsManagerConfiguration">
-    <MESSAGE value="Cleaned up libs.versions.toml" />
-    <MESSAGE value="Removed unnecessary things from the command package" />
     <MESSAGE value="Implement Version Command" />
     <MESSAGE value="Implement Task factory and more" />
     <MESSAGE value="Added Task Command and some TaskFactory stuff" />
@@ -712,7 +716,9 @@
     <MESSAGE value="Remove unused values and Imports in VelocityRegistrationHandler" />
     <MESSAGE value="Add bridge subProject" />
     <MESSAGE value="Added fallback variable to Tasks" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added fallback variable to Tasks" />
+    <MESSAGE value="Added @Suppress to many classes" />
+    <MESSAGE value="Add some Redis related Enums to prepare for a redis rewrite" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add some Redis related Enums to prepare for a redis rewrite" />
   </component>
   <component name="WfRunsListSearchHistory">{
   &quot;history&quot;: [

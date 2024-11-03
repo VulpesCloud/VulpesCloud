@@ -8,7 +8,7 @@ import java.util.*
 import javax.sql.rowset.RowSetFactory
 import javax.sql.rowset.RowSetProvider
 
-
+// todo fully implement cluster stuff and redis builder
 class ClusterProvider {
 
     private val redis = Node.instance!!.getRC()

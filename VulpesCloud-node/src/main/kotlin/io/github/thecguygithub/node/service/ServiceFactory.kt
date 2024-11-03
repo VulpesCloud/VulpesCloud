@@ -7,7 +7,6 @@ import io.github.thecguygithub.api.tasks.Task
 import io.github.thecguygithub.node.Node
 import io.github.thecguygithub.node.logging.Logger
 import io.github.thecguygithub.node.template.TemplateFactory
-import io.github.thecguygithub.node.util.JavaFileAttach
 import org.json.JSONObject
 import java.net.InetSocketAddress
 import java.net.ServerSocket
@@ -103,8 +102,7 @@ class ServiceFactory : ClusterServiceFactory {
 
             Logger().debug("Calling update")
 
-            // localService.state() // todo Update the Service state
-            // localService.update()
+            localService.updateLocalServiceState(ClusterServiceStates.CONNECTING)
 
             Logger().debug("Starting Service")
 
@@ -114,7 +112,7 @@ class ServiceFactory : ClusterServiceFactory {
         }
     }
 
-
+    // todo Fix broken id generation
     private fun generateOrderedId(task: Task): Int {
         return IntStream.iterate(1) { i: Int -> i + 1 }.filter { id: Int ->
             !isIdPresent(

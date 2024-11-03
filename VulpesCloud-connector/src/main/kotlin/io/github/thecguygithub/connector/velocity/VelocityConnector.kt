@@ -8,6 +8,9 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.proxy.ProxyServer
+import io.github.thecguygithub.api.network.redis.RedisPubSubChannels
+import io.github.thecguygithub.api.services.ClusterServiceStates
+import io.github.thecguygithub.api.services.builder.ServiceEventMessageBuilder
 import io.github.thecguygithub.wrapper.Wrapper
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.slf4j.Logger
@@ -29,7 +32,14 @@ class VelocityConnector @Inject constructor(
     @Subscribe(order = PostOrder.FIRST)
     fun start(event: ProxyInitializeEvent) {
         proxyServer.consoleCommandSource.sendMessage(MiniMessage.miniMessage().deserialize("<grey>[<aqua>VulpesCloud-Connector</aqua>]</grey> <yellow>Initializing</yellow>"))
-        wrapper.getRC()?.sendMessage("SERVICE;${wrapper.service.name};EVENT;STATE;STARTING", "vulpescloud-event-service")
+
+        wrapper.getRC()?.sendMessage(
+            ServiceEventMessageBuilder.StateEventBuilder()
+                //.setServiceName(null)
+                .setState(ClusterServiceStates.STARTING)
+                .build(),
+            RedisPubSubChannels.VULPESCLOUD_EVENT_SERVICE.name)
+
         VelocityRegistrationHandler
         VelocityRedisSubscribe()
     }

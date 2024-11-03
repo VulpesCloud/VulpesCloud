@@ -1,17 +1,22 @@
 package io.github.thecguygithub.node.service
 
+import io.github.thecguygithub.api.network.redis.RedisHashNames
+import io.github.thecguygithub.api.network.redis.RedisPubSubChannels
 import io.github.thecguygithub.api.services.ClusterServiceStates
+import io.github.thecguygithub.api.services.builder.ServiceEventMessageBuilder
 import io.github.thecguygithub.api.tasks.Task
 import io.github.thecguygithub.node.Node
 import io.github.thecguygithub.node.logging.Logger
 import io.github.thecguygithub.node.util.DirectoryActions
 import io.github.thecguygithub.node.version.Version
+import org.json.JSONObject
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 
+@Suppress("EmptyMethod")
 class LocalService(
     task: Task,
     orderedId: Int,
@@ -39,7 +44,15 @@ class LocalService(
     }
 
     fun updateLocalServiceState(status: ClusterServiceStates) {
-
+        state = status
+        Node.instance!!.getRC()?.sendMessage(
+            ServiceEventMessageBuilder.stateEventBuilder()
+                .setService(this)
+                .setState(status)
+                .build(),
+            RedisPubSubChannels.VULPESCLOUD_EVENT_SERVICE.name
+        )
+        Node.instance!!.getRC()?.setHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, name(), JSONObject(this).toString())
     }
 
     override fun shutdown() {
