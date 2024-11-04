@@ -11,9 +11,9 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.0.21")
     implementation(libs.jline)
     compileOnly(libs.jedis)
-    implementation(libs.slf4jApi)
-    implementation(libs.logbackCore)
-    implementation(libs.logbackClassic)
+//    implementation(libs.slf4jApi)
+//    implementation(libs.logbackCore)
+//    implementation(libs.logbackClassic)
 
     implementation(libs.cloud)
     implementation("org.incendo:cloud-kotlin-coroutines:2.0.0")

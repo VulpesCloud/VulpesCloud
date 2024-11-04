@@ -25,8 +25,6 @@ class Node {
 
     companion object {
 
-        // var nodeStatus: NodeSituation = NodeSituation.INITIALIZING
-
         var instance: Node? = null
             private set
 
@@ -119,9 +117,7 @@ class Node {
 
         logger.debug("Initializing CommandProvider")
 
-
         commandProvider = CommandProvider()
-
 
         logger.debug("Registering Commands!")
 
@@ -142,7 +138,6 @@ class Node {
         terminal!!.allowInput()
 
         clusterProvider.updateLocalNodeState(NodeStates.ONLINE)
-
     }
 
 //    fun updateConfig() {

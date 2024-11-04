@@ -25,8 +25,8 @@ public final class Launcher {
         var jsonDependency = new Dependency("org.json", "json", "20240303");
         var jedisDependency = new Dependency("redis.clients", "jedis", "5.2.0");
         var slf4jDependency = new Dependency("org.slf4j", "slf4j-api", "2.0.16");
-        var logbackCoreDependency = new Dependency("ch.qos.logback", "logback-core", "1.5.8");
-        var logbackClassicDependency = new Dependency("ch.qos.logback", "logback-classic", "1.5.8");
+        var logbackCoreDependency = new Dependency("ch.qos.logback", "logback-core", "1.5.11");
+        var logbackClassicDependency = new Dependency("ch.qos.logback", "logback-classic", "1.5.11");
         var hikariCP = new Dependency("com.zaxxer", "HikariCP", "5.1.0");
         var mariaDB = new Dependency("org.mariadb.jdbc", "mariadb-java-client", "3.4.0");
         var cloud = new Dependency("org.incendo", "cloud-core", "2.0.0");
