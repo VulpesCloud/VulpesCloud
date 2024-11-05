@@ -4,7 +4,7 @@ plugins {
     // id("java")
 }
 
-group = "io.github.thecguygithub"
+group = "de.vulpescloud"
 version = "1.0.0-alpha"
 
 repositories {
@@ -20,16 +20,16 @@ dependencies {
 
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "io.github.thecguygithub.wrapper.WrapperLauncher"
-        attributes["Premain-Class"] = "io.github.thecguygithub.wrapper.Premain"
+        attributes["Main-Class"] = "de.vulpescloud.wrapper.WrapperLauncher"
+        attributes["Premain-Class"] = "de.vulpescloud.wrapper.Premain"
     }
     archiveFileName.set("vulpescloud-wrapper.jar")
 }
 
 tasks.shadowJar {
     manifest {
-        attributes["Main-Class"] = "io.github.thecguygithub.wrapper.WrapperLauncher"
-        attributes["Premain-Class"] = "io.github.thecguygithub.wrapper.Premain"
+        attributes["Main-Class"] = "de.vulpescloud.wrapper.WrapperLauncher"
+        attributes["Premain-Class"] = "de.vulpescloud.wrapper.Premain"
     }
     archiveFileName.set("vulpescloud-wrapper.jar")
 }

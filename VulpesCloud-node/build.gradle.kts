@@ -26,14 +26,14 @@ dependencies {
 
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "io.github.thecguygithub.node.NodeLauncher"
+        attributes["Main-Class"] = "de.vulpescloud.node.NodeLauncher"
     }
     archiveFileName.set("vulpescloud-node.jar")
 }
 
 tasks.shadowJar {
     manifest {
-        attributes["Main-Class"] = "io.github.thecguygithub.node.NodeLauncher"
+        attributes["Main-Class"] = "de.vulpescloud.node.NodeLauncher"
     }
     archiveFileName.set("vulpescloud-node.jar")
 }

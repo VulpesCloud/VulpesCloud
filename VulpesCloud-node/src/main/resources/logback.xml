@@ -1,5 +1,5 @@
 <configuration>
-    <import class="io.github.thecguygithub.node.terminal.ConsoleAppender"/>
+    <import class="de.vulpescloud.node.terminal.ConsoleAppender"/>
     <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"/>
     <import class="ch.qos.logback.core.rolling.RollingFileAppender"/>
     <import class="ch.qos.logback.classic.filter.ThresholdFilter"/>

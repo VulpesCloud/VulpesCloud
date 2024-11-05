@@ -5,5 +5,5 @@
   "authors": [
     "TheCGuy"
   ],
-  "main": "io.github.thecguygithub.connector.velocity.VelocityConnector"
+  "main": "de.vulpescloud.connector.velocity.VelocityConnector"
 }
