@@ -13,6 +13,7 @@ repositories {
 
 dependencies {
     compileOnly(project(":VulpesCloud-api"))
+    compileOnly(project(":VulpesCloud-bridge"))
     implementation(libs.kotlin.stdlib)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
     implementation(libs.jedis)

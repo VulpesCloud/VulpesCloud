@@ -1,6 +1,7 @@
 package de.vulpescloud.wrapper
 
 import de.vulpescloud.wrapper.redis.RedisController
+import dev.vulpescloud.bridge.service.ServiceProvider
 import java.io.IOException
 import java.lang.instrument.Instrumentation
 import java.net.URLClassLoader
@@ -18,9 +19,9 @@ class Wrapper(args: Array<String>) {
         lateinit var instance: Wrapper
     }
 
-    var redisController: RedisController? = null
+    private var redisController: RedisController? = null
 
-    lateinit var service: LocalServiceInformation
+    var service: LocalServiceInformation
 
     init {
 
@@ -34,6 +35,10 @@ class Wrapper(args: Array<String>) {
         redisController = RedisController()
 
         redisController?.sendMessage("SERVICE;${System.getenv("serviceName")};AUTH;${System.getenv("serviceId")}", "vulpescloud-auth-service")
+
+        // Initialize the Bridge Stuff for this service to use
+        ServiceProvider().getAllServiceFromRedis()
+
 
         //
         // Actually start the Service
