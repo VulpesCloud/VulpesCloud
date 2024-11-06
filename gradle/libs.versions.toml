@@ -12,7 +12,7 @@ annotations = "26.0.1"
 
 # network
 jedis = "5.2.0"
-hikariCP = "6.0.0"
+hikariCP = "6.1.0"
 mariadb = "3.5.0"
 
 #logging
