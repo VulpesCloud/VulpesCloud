@@ -78,6 +78,18 @@ open class ServiceProvider {
         }?.toList()
     }
 
+    /*
+    /   This fun returns the Service that it is being called from
+    */
+    fun getLocalService(): ClusterService {
+        val localService = findById(Wrapper.instance.service.id)
+        if (localService == null) {
+            throw NullPointerException()
+        } else {
+            return localService
+        }
+    }
+
     private fun getTaskFromJson(json: JSONObject): TaskImpl {
         val versionJson = json.getJSONObject("version")
 
