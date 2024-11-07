@@ -1,4 +1,4 @@
-package dev.vulpescloud.bridge.service
+package de.vulpescloud.bridge.service
 
 import de.vulpescloud.api.network.redis.RedisHashNames
 import de.vulpescloud.api.services.ClusterService
@@ -6,12 +6,11 @@ import de.vulpescloud.api.services.ClusterServiceFilter
 import de.vulpescloud.api.services.ClusterServiceStates
 import de.vulpescloud.api.version.VersionInfo
 import de.vulpescloud.api.version.VersionType
-import dev.vulpescloud.bridge.service.impl.ServiceImpl
-import dev.vulpescloud.bridge.task.impl.TaskImpl
-import io.github.thecguygithub.wrapper.Wrapper
+import de.vulpescloud.bridge.service.impl.ServiceImpl
+import de.vulpescloud.bridge.task.impl.TaskImpl
+import de.vulpescloud.wrapper.Wrapper
 import org.json.JSONObject
 import java.util.*
-import java.util.concurrent.CompletableFuture
 
 open class ServiceProvider {
 
@@ -41,19 +40,30 @@ open class ServiceProvider {
         }
         services = futureServices.toList()
     }
-
+    /*
+    /   This fun is used to retrieve a List of all Services that are stored in the Redis Hash
+    */
     fun services(): List<ClusterService> {
         return services
     }
 
+    /*
+    /   This fun is used to retrieve a specific service by its name
+    */
     fun findByName(name: String): ClusterService? {
         return services.find { it.name() == name }
     }
 
+    /*
+    /   This fun is used to retrieve a specific service by its id/UUID
+    */
     fun findById(id: UUID): ClusterService? {
         return services.find { it.id() == id }
     }
 
+    /*
+    /   This fun is used to retrieve services by a ServiceFilter
+    */
     fun findByFilter(filter: ClusterServiceFilter): List<ClusterService>? {
         return when (filter) {
             ClusterServiceFilter.ONLINE_SERVICES -> services.filter { it.state() == ClusterServiceStates.ONLINE }

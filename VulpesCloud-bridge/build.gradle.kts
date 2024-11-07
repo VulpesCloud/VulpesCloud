@@ -13,6 +13,7 @@ dependencies {
     compileOnly(project(":VulpesCloud-api"))
     compileOnly(project(":VulpesCloud-wrapper"))
     compileOnly(rootProject.libs.annotations)
+    compileOnly(libs.jedis)
 }
 
 tasks.jar {

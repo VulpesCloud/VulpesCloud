@@ -1,4 +1,4 @@
-package dev.vulpescloud.bridge.service.impl
+package de.vulpescloud.bridge.service.impl
 
 import de.vulpescloud.api.players.ClusterPlayer
 import de.vulpescloud.api.services.ClusterService

@@ -1,4 +1,4 @@
-package dev.vulpescloud.bridge.task.impl
+package de.vulpescloud.bridge.task.impl
 
 import de.vulpescloud.api.services.ClusterService
 import de.vulpescloud.api.tasks.Task
