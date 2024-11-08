@@ -1,5 +1,8 @@
 package de.vulpescloud.api.network.redis
 
+/**
+ * This enum class contains all different redis channel names, that are used by VulpesCloud.
+ */
 enum class RedisPubSubChannels {
 
     VULPESCLOUD_EVENT_NODE_STATE,
