@@ -12,14 +12,17 @@ import de.vulpescloud.wrapper.Wrapper
 import org.json.JSONObject
 import java.util.*
 
+/**
+ *   The ServiceProvider is used to manage the Services
+ */
 open class ServiceProvider {
 
     private var services: List<ClusterService> = listOf()
 
-    /*
-    /   This fun is used internally by Vulpescloud to get all Services from the Redis Hash.
-    /   This fun should NOT be used by ANYTHING except the Wrapper!!!
-    */
+    /**
+     *  This fun is used internally by Vulpescloud to get all Services from the Redis Hash.
+     *  This fun should NOT be used by ANYTHING except the Wrapper!!!
+     */
     fun getAllServiceFromRedis() {
         val futureServices: MutableList<ClusterService> = mutableListOf()
         Wrapper.instance.getRC()?.getAllHashFields(RedisHashNames.VULPESCLOUD_SERVICES.name)?.forEach {
@@ -40,29 +43,29 @@ open class ServiceProvider {
         }
         services = futureServices.toList()
     }
-    /*
-    /   This fun is used to retrieve a List of all Services that are stored in the Redis Hash
+    /**
+       This fun is used to retrieve a List of all Services that are stored in the Redis Hash
     */
     fun services(): List<ClusterService> {
         return services
     }
 
-    /*
-    /   This fun is used to retrieve a specific service by its name
+    /**
+       This fun is used to retrieve a specific service by its name
     */
     fun findByName(name: String): ClusterService? {
         return services.find { it.name() == name }
     }
 
-    /*
-    /   This fun is used to retrieve a specific service by its id/UUID
+    /**
+       This fun is used to retrieve a specific service by its id/UUID
     */
     fun findById(id: UUID): ClusterService? {
         return services.find { it.id() == id }
     }
 
-    /*
-    /   This fun is used to retrieve services by a ServiceFilter
+    /**
+       This fun is used to retrieve services by a ServiceFilter
     */
     fun findByFilter(filter: ClusterServiceFilter): List<ClusterService>? {
         return when (filter) {
@@ -78,8 +81,8 @@ open class ServiceProvider {
         }?.toList()
     }
 
-    /*
-    /   This fun returns the Service that it is being called from
+    /**
+       This fun returns the Service that it is being called from
     */
     fun getLocalService(): ClusterService {
         val localService = findById(Wrapper.instance.service.id)

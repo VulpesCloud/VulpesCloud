@@ -24,3 +24,12 @@ dependencies {
 tasks.jar {
     archiveFileName.set("vulpescloud-connector.jar")
 }
+
+tasks.dokkaHtmlPartial {
+    dokkaSourceSets {
+        create("main") {
+            includeNonPublic.set(true)
+            sourceRoots.from(file("src/main/kotlin"))
+        }
+    }
+}

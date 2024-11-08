@@ -1,5 +1,6 @@
 plugins {
     kotlin("jvm") version "2.0.21"
+    id("org.jetbrains.dokka") version "1.9.20"
 }
 
 group = "de.vulpescloud"
@@ -19,3 +20,14 @@ dependencies {
 tasks.jar {
     archiveFileName.set("vulpescloud-bridge.jar")
 }
+
+tasks.dokkaHtmlPartial {
+    dokkaSourceSets {
+        create("main") {
+            includeNonPublic.set(true)
+            sourceRoots.from(file("src/main/kotlin"))
+        }
+    }
+}
+
+// todo Add the tasks.dokkaHtmlPartial to Launcher when rewritten

@@ -11,6 +11,7 @@ import com.velocitypowered.api.proxy.ProxyServer
 import de.vulpescloud.api.network.redis.RedisPubSubChannels
 import de.vulpescloud.api.services.ClusterServiceStates
 import de.vulpescloud.api.services.builder.ServiceEventMessageBuilder
+import de.vulpescloud.connector.Connector
 import de.vulpescloud.wrapper.Wrapper
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.slf4j.Logger
@@ -22,7 +23,7 @@ class VelocityConnector @Inject constructor(
     val logger: Logger,
     val eventManager: EventManager,
     val proxyServer: ProxyServer
-){
+) : Connector() {
     val wrapper = Wrapper.instance
 
     init {
