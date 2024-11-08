@@ -8,11 +8,7 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.proxy.ProxyServer
-import de.vulpescloud.api.network.redis.RedisPubSubChannels
-import de.vulpescloud.api.services.ClusterServiceStates
-import de.vulpescloud.api.services.builder.ServiceEventMessageBuilder
 import de.vulpescloud.connector.Connector
-import de.vulpescloud.wrapper.Wrapper
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.slf4j.Logger
 
@@ -22,9 +18,8 @@ import org.slf4j.Logger
 class VelocityConnector @Inject constructor(
     val logger: Logger,
     val eventManager: EventManager,
-    val proxyServer: ProxyServer
+    val proxyServer: ProxyServer,
 ) : Connector() {
-    val wrapper = Wrapper.instance
 
     init {
         instance = this
@@ -32,28 +27,26 @@ class VelocityConnector @Inject constructor(
 
     @Subscribe(order = PostOrder.FIRST)
     fun start(event: ProxyInitializeEvent) {
-        proxyServer.consoleCommandSource.sendMessage(MiniMessage.miniMessage().deserialize("<grey>[<aqua>VulpesCloud-Connector</aqua>]</grey> <yellow>Initializing</yellow>"))
-
-        wrapper.getRC()?.sendMessage(
-            ServiceEventMessageBuilder.StateEventBuilder()
-                //.setServiceName(null)
-                .setState(ClusterServiceStates.STARTING)
-                .build(),
-            RedisPubSubChannels.VULPESCLOUD_EVENT_SERVICE.name)
-
+        proxyServer.consoleCommandSource.sendMessage(
+            MiniMessage.miniMessage()
+                .deserialize("<grey>[<aqua>VulpesCloud-Connector</aqua>]</grey> <yellow>Initializing</yellow>")
+        )
+        init()
         VelocityRegistrationHandler
         VelocityRedisSubscribe()
     }
 
     @Subscribe(order = PostOrder.LAST)
     fun finishStart(event: ProxyInitializeEvent) {
-        wrapper.getRC()?.sendMessage("SERVICE;${wrapper.service.name};EVENT;STATE;ONLINE", "vulpescloud-event-service")
+        finishStart()
     }
 
     @Subscribe(order = PostOrder.FIRST)
     fun stop(event: ProxyShutdownEvent) {
-        proxyServer.consoleCommandSource.sendMessage(MiniMessage.miniMessage().deserialize("<gray>Stopping VulpesCloud-Connector!</gray>"))
-        wrapper.getRC()?.sendMessage("SERVICE;${wrapper.service.name};EVENT;STATE;STOPPING", "vulpescloud-event-service")
+        proxyServer.consoleCommandSource.sendMessage(
+            MiniMessage.miniMessage().deserialize("<gray>Stopping VulpesCloud-Connector!</gray>")
+        )
+        shutdown()
     }
 
     companion object {

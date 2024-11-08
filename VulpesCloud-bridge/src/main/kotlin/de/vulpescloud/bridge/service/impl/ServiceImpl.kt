@@ -1,10 +1,12 @@
 package de.vulpescloud.bridge.service.impl
 
+import de.vulpescloud.api.network.redis.RedisHashNames
 import de.vulpescloud.api.players.ClusterPlayer
 import de.vulpescloud.api.services.ClusterService
 import de.vulpescloud.api.services.ClusterServiceStates
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.wrapper.Wrapper
+import org.json.JSONObject
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
@@ -62,7 +64,7 @@ open class ServiceImpl(
     }
 
     override fun update() {
-        // Call head node and broadcast this to all nodes
+        Wrapper.instance.getRC()?.setHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, name(), JSONObject(this).toString())
     }
 
     override fun maxPlayers(): Int {
