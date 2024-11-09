@@ -1,6 +1,7 @@
 plugins {
     id("java")
     kotlin("jvm") version "2.0.21"
+    id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 group = "de.vulpescloud"
@@ -12,9 +13,9 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(":VulpesCloud-api"))
+    implementation(project(":VulpesCloud-api"))
+    implementation(project(":VulpesCloud-bridge"))
     compileOnly(project(":VulpesCloud-wrapper"))
-    compileOnly(project(":VulpesCloud-bridge"))
 
     compileOnly(libs.velocity)
     annotationProcessor(libs.velocity)
@@ -22,6 +23,9 @@ dependencies {
 }
 
 tasks.jar {
+    archiveFileName.set("vulpescloud-connector.jar")
+}
+tasks.shadowJar {
     archiveFileName.set("vulpescloud-connector.jar")
 }
 

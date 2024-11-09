@@ -8,6 +8,7 @@ import de.vulpescloud.node.Node
 import de.vulpescloud.node.logging.Logger
 import de.vulpescloud.node.template.TemplateFactory
 import org.json.JSONObject
+import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.nio.file.Files
@@ -32,8 +33,7 @@ class ServiceFactory : ClusterServiceFactory {
                 task,
                 generateOrderedId(task),
                 UUID.randomUUID(),
-            25565,
-                //detectServicePort(task),
+                detectServicePort(task),
                 "127.0.0.1", // todo Make it pull the hostname from the Node's Config
                 Node.nodeConfig?.name!!
             )
@@ -113,7 +113,7 @@ class ServiceFactory : ClusterServiceFactory {
     }
 
     // todo Fix broken id generation
-    private fun generateOrderedId(task: Task): Int {
+    fun generateOrderedId(task: Task): Int {
         return IntStream.iterate(1) { i: Int -> i + 1 }.filter { id: Int ->
             !isIdPresent(
                 task,
@@ -122,14 +122,19 @@ class ServiceFactory : ClusterServiceFactory {
         }.findFirst().orElseThrow()
     }
 
-    private fun isIdPresent(task: Task, id: Int): Boolean {
+    fun isIdPresent(task: Task, id: Int): Boolean {
         val services = task.services() ?: return false // Check if services is null
+
+        services.forEach {
+            Logger().debug(it!!.name())
+            Logger().debug(it.orderedId())
+        }
+
         return services.stream()
-            .filter { it != null } // Filter out null elements in the list
             .anyMatch { it!!.orderedId() == id }
     }
 
-    private fun detectServicePort(task: Task): Int {
+    fun detectServicePort(task: Task): Int {
         var serverPort: Int = task.startPort()
 
 
@@ -214,7 +219,7 @@ class ServiceFactory : ClusterServiceFactory {
         )
 
         arguments.add("-javaagent:../../local/dependencies/vulpescloud-wrapper.jar")
-        arguments.add("io.github.thecguygithub.wrapper.WrapperLauncher")
+        arguments.add("de.vulpescloud.wrapper.WrapperLauncher")
 
         return arguments
     }

@@ -3,6 +3,7 @@ package de.vulpescloud.node.task
 import de.vulpescloud.api.services.ClusterService
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.api.version.VersionInfo
+import de.vulpescloud.node.Node
 
 open class TaskImpl(
     val name: String,
@@ -55,7 +56,7 @@ open class TaskImpl(
     }
 
     override fun services(): List<ClusterService?>? {
-        return null
+        return Node.serviceProvider.services()?.stream()?.filter { it.task() == this }?.toList()
     }
 
     override fun startPort(): Int {
