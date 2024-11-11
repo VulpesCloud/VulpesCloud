@@ -2,7 +2,6 @@ package de.vulpescloud.node.service.config
 
 import com.electronwill.nightconfig.core.file.FileConfig
 import com.electronwill.nightconfig.toml.TomlFormat
-import de.vulpescloud.node.logging.Logger
 import de.vulpescloud.node.service.LocalService
 import io.github.thecguygithub.launcher.util.FileSystemUtil
 import java.nio.file.Files

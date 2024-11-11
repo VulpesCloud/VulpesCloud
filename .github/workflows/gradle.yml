@@ -25,7 +25,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew shadowJar
+        run: ./gradlew :VulpesCloud-launcher:jar
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
