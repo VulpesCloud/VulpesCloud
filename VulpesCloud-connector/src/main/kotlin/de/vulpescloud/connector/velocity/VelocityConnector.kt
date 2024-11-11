@@ -11,6 +11,7 @@ import com.velocitypowered.api.proxy.ProxyServer
 import de.vulpescloud.connector.Connector
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.slf4j.Logger
+import java.net.InetSocketAddress
 
 
 @Plugin(id = "vulpescloud", name = "VulpesCloud-Connector", authors = ["TheCGuy"])

@@ -49,7 +49,6 @@ class Version(
                     target.parent.toFile().mkdirs()
                     Files.createFile(target)
                 }
-
                 null -> Logger().error("Version.kt Strategy is null!")
             }
 
@@ -92,7 +91,6 @@ class Version(
         }
 
         val file = platformDir.resolve("${display.name}-${display.versions}.jar")
-
         if (!Files.exists(file)) {
             if (version is Versions) {
                 Downloader.download(version.link, file)

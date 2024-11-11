@@ -5,6 +5,9 @@ plugins {
 
 dependencies {
     compileOnly(libs.slf4jApi)
+    compileOnly(libs.nightConfig.json)
+    compileOnly(libs.nightConfig.toml)
+    compileOnly(libs.nightConfig.yaml)
 }
 
 tasks.jar {

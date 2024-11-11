@@ -31,6 +31,10 @@ cloud = "2.0.0"
 spigot = "1.20.4-R0.1-SNAPSHOT"
 velocity = "3.4.0-SNAPSHOT"
 
+# config
+
+night-config = "3.6.0"
+
 # shadowJar
 shadow = "8.1.1"
 
@@ -74,3 +78,9 @@ cloud-kotlin-coroutines-annotations = { group = "org.incendo", name = "cloud-kot
 # platforms
 spigot = { group = "io.papermc.paper", name = "paper-api", version.ref = "spigot" }
 velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
+
+# config
+
+nightConfig-toml = { group = "com.electronwill.night-config", name = "toml", version.ref = "night-config" }
+nightConfig-json = { group = "com.electronwill.night-config", name = "json", version.ref = "night-config" }
+nightConfig-yaml = { group = "com.electronwill.night-config", name = "yaml", version.ref = "night-config" }

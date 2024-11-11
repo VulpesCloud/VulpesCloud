@@ -34,12 +34,15 @@ public final class Launcher {
         var cloudAnnotations = new Dependency("org.incendo", "cloud-annotations", "2.0.0");
         var cloudKotlinCoroutines = new Dependency("org.incendo", "cloud-kotlin-coroutines", "2.0.0");
         var cloudKotlinCoroutinesAnnotations = new Dependency("org.incendo", "cloud-kotlin-coroutines-annotations", "2.0.0");
-
+        var jsonConfig = new Dependency("com.electronwill.night-config", "json", "3.6.0");
+        var yamlConfig = new Dependency("com.electronwill.night-config", "yaml", "3.6.0");
+        var tomlConfig = new Dependency("com.electronwill.night-config", "toml", "3.6.0");
+        var coreConfig = new Dependency("com.electronwill.night-config", "core", "3.6.0");
 
         // add boot file to the current classpath
         CLASS_LOADER.addURL(boot.bootFile().toURI().toURL());
 
-        DependencyDownloader.download(cloud, cloudExtension, cloudAnnotations, cloudKotlinCoroutines, cloudKotlinCoroutinesAnnotations, mariaDB, hikariCP, jLineDependency, kotlinSTD, gsonDependency, jsonDependency, jedisDependency, slf4jDependency, logbackClassicDependency, logbackCoreDependency);
+        DependencyDownloader.download(coreConfig, jsonConfig, yamlConfig, tomlConfig, cloud, cloudExtension, cloudAnnotations, cloudKotlinCoroutines, cloudKotlinCoroutinesAnnotations, mariaDB, hikariCP, jLineDependency, kotlinSTD, gsonDependency, jsonDependency, jedisDependency, slf4jDependency, logbackClassicDependency, logbackCoreDependency);
 
         Thread.currentThread().setContextClassLoader(CLASS_LOADER);
         Class.forName(boot.mainClass(), true, CLASS_LOADER).getMethod("main", String[].class).invoke(null, (Object) args);

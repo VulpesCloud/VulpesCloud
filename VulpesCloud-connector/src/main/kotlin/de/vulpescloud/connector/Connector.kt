@@ -5,6 +5,7 @@ import de.vulpescloud.api.services.ClusterServiceStates
 import de.vulpescloud.api.services.builder.ServiceEventMessageBuilder
 import de.vulpescloud.bridge.service.ServiceProvider
 import de.vulpescloud.wrapper.Wrapper
+import java.util.concurrent.TimeUnit
 
 open class Connector {
 
@@ -14,6 +15,8 @@ open class Connector {
 
     fun init() {
         serviceProvider.getAllServiceFromRedis()
+
+        TimeUnit.SECONDS.sleep(1)
 
         wrapper.getRC()?.sendMessage(
             ServiceEventMessageBuilder.stateEventBuilder()

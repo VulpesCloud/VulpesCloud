@@ -27,8 +27,9 @@ open class ServiceProvider {
     @ApiStatus.Internal
     fun getAllServiceFromRedis() {
         val futureServices: MutableList<ClusterService> = mutableListOf()
-        Wrapper.instance.getRC()?.getAllHashFields(RedisHashNames.VULPESCLOUD_SERVICES.name)?.forEach {
+        Wrapper.instance.getRC()?.getAllHashValues(RedisHashNames.VULPESCLOUD_SERVICES.name)?.forEach {
             val service = JSONObject(it)
+
             val taskJson = service.getJSONObject("task")
             futureServices.add(
                 ServiceImpl(

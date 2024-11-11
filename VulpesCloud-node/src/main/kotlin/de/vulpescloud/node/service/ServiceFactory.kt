@@ -1,11 +1,13 @@
 package de.vulpescloud.node.service
 
+import de.vulpescloud.api.network.redis.RedisHashNames
 import de.vulpescloud.api.services.ClusterService
 import de.vulpescloud.api.services.ClusterServiceFactory
 import de.vulpescloud.api.services.ClusterServiceStates
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.logging.Logger
+import de.vulpescloud.node.service.config.ServiceConfig
 import de.vulpescloud.node.template.TemplateFactory
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
@@ -40,9 +42,9 @@ class ServiceFactory : ClusterServiceFactory {
 
         val version = localService.version()
 
-        Node.instance!!.getRC()?.sendMessage("SERVICE;${localService.name()};EVENT;STATE;PREPARE", "vulpescloud-event-service")
+        localService.updateLocalServiceState(ClusterServiceStates.PREPARED)
 
-        Node.instance!!.getRC()?.setHashField("VulpesCloud-Services", localService.name(), JSONObject(localService).toString())
+        Node.instance!!.getRC()?.setHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, localService.name(), JSONObject(localService).toString())
 
         try {
 
@@ -96,9 +98,7 @@ class ServiceFactory : ClusterServiceFactory {
 
             Files.copy(Path.of("local/dependencies/vulpescloud-connector.jar"), pluginDir.resolve("vulpescloud-connector.jar"), StandardCopyOption.REPLACE_EXISTING)
 
-            Logger.instance.debug("here is a todo")
-
-            // todo copy the vulpescloud plugin
+            ServiceConfig.makeServiceConfigs(localService)
 
             Logger().debug("Calling update")
 

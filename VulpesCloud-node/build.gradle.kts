@@ -20,6 +20,9 @@ dependencies {
     compileOnly(libs.kotlin.stdlib)
     compileOnly(libs.hikariCP)
     compileOnly(libs.mariadb.java.client)
+    compileOnly(libs.nightConfig.json)
+    compileOnly(libs.nightConfig.toml)
+    compileOnly(libs.nightConfig.yaml)
 }
 
 
