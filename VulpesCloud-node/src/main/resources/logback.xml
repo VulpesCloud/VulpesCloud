@@ -1,0 +1,35 @@
+<configuration>
+    <import class="de.vulpescloud.node.terminal.ConsoleAppender"/>
+    <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"/>
+    <import class="ch.qos.logback.core.rolling.RollingFileAppender"/>
+    <import class="ch.qos.logback.classic.filter.ThresholdFilter"/>
+    <import class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy"/>
+
+    <property name="LINE_PATTERN" value="%gray([%boldWhite(%d{dd.MM HH:mm:ss.SSS}%gray(]))) %gray(%-5level) %msg%n"/>
+
+    <appender name="ConsoleAppender" class="ConsoleAppender">
+        <filter class="ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+        <encoder class="PatternLayoutEncoder">
+            <pattern>${LINE_PATTERN}</pattern>
+        </encoder>
+    </appender>
+    <appender name="Rolling" class="RollingFileAppender">
+        <file>local/logs/latest.log</file>
+        <rollingPolicy class="SizeAndTimeBasedRollingPolicy">
+            <fileNamePattern>local/logs/vulpescloud-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <maxFileSize>15MB</maxFileSize>
+            <maxHistory>5</maxHistory>
+            <totalSizeCap>2GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="PatternLayoutEncoder">
+            <pattern>[%d{dd.MM HH:mm:ss.SSS}] %-5level: %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <root level="DEBUG">
+        <appender-ref ref="ConsoleAppender"/>
+        <appender-ref ref="Rolling"/>
+    </root>
+</configuration>

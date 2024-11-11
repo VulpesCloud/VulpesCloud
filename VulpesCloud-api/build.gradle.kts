@@ -5,6 +5,9 @@ plugins {
 
 dependencies {
     compileOnly(libs.slf4jApi)
+    compileOnly(libs.nightConfig.json)
+    compileOnly(libs.nightConfig.toml)
+    compileOnly(libs.nightConfig.yaml)
 }
 
 tasks.jar {
@@ -13,4 +16,13 @@ tasks.jar {
 
 tasks.shadowJar {
     archiveFileName.set("vulpescloud-api.jar")
+}
+
+tasks.dokkaHtmlPartial {
+    dokkaSourceSets {
+        create("main") {
+            includeNonPublic.set(true)
+            sourceRoots.from(file("src/main/kotlin"))
+        }
+    }
 }

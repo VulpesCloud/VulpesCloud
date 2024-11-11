@@ -9,6 +9,7 @@ build/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea/discord.xml
 *.iws
 *.iml
 *.ipr
@@ -41,5 +42,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
-.idea/workspace.xml
+
+filegetter.py
 

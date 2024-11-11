@@ -8,7 +8,7 @@ vulpescloud-action-service
     -> SERVICE;<service id/uuid>;ACTION;STOP
     -> SERVICE;<service id/uuid>;ACTION;COMMAND;[<parameter>]
 vulpescloud-event-service
-    -> SERVICE;<service name>;EVENT;<event>;[<parameter>]
+    -> SERVICE;<service name>;EVENT;<event>;<parameter>
     -> SERVICE;<service name>;EVENT;STATE;PREPARE
     -> SERVICE;<service name>;EVENT;STATE;CONNECTING
     -> SERVICE;<service name>;EVENT;STATE;STARTING
@@ -16,3 +16,12 @@ vulpescloud-event-service
     -> SERVICE;<service name>;EVENT;STATE;STOPPING
 vulpescloud-auth-service
     -> SERVICE;<service name>;AUTH;<service uuid>
+vulpescloud-register-service
+    -> SERVICE;<service name>;ADDRESS;<service address>;PORT;<service port>;REGISTER
+vulpescloud-unregister-service
+    -> SERVICE;<service name>;UNREGISTER
+
+
+RedisPubSubChannels.VULPESCLOUD_EVENT_SERVICE.name
+
+vulpescloud-event-service

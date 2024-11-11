@@ -10,6 +10,7 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/VulpesCloud-api" />
+            <option value="$PROJECT_DIR$/VulpesCloud-bridge" />
             <option value="$PROJECT_DIR$/VulpesCloud-connector" />
             <option value="$PROJECT_DIR$/VulpesCloud-launcher" />
             <option value="$PROJECT_DIR$/VulpesCloud-node" />
