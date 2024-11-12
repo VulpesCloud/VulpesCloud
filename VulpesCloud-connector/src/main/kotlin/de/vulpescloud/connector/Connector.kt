@@ -42,7 +42,7 @@ open class Connector {
         serviceProvider.getLocalService().update()
     }
 
-    fun shutdown() {
+    fun shutdownLocal() {
         wrapper.getRC()?.sendMessage(
             ServiceEventMessageBuilder.stateEventBuilder()
                 .setService(serviceProvider.getLocalService())

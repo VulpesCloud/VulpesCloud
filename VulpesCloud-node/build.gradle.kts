@@ -25,6 +25,14 @@ dependencies {
     compileOnly(libs.nightConfig.yaml)
 }
 
+sourceSets {
+    getByName("main") {
+        kotlin {
+            srcDir("src/main/kotlin")
+        }
+    }
+}
+
 
 
 tasks.jar {

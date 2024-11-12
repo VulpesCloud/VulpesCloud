@@ -28,7 +28,8 @@ jline = "3.27.1"
 cloud = "2.0.0"
 
 # platforms
-spigot = "1.20.4-R0.1-SNAPSHOT"
+kSpigot = "1.21.0"
+paper = "1.21.1-R0.1-SNAPSHOT"
 velocity = "3.4.0-SNAPSHOT"
 
 # config
@@ -76,7 +77,8 @@ cloud-kotlin-coroutines = { group = "org.incendo", name = "cloud-kotlin-coroutin
 cloud-kotlin-coroutines-annotations = { group = "org.incendo", name = "cloud-kotlin-coroutines-annotations", version.ref = "cloud"}
 
 # platforms
-spigot = { group = "io.papermc.paper", name = "paper-api", version.ref = "spigot" }
+kSpigot = { group = "net.axay", name = "kspigot", version.ref = "kSpigot" }
+paper = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
 velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
 
 # config

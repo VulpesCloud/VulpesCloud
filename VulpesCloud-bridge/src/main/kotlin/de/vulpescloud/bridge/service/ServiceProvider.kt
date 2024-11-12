@@ -80,7 +80,7 @@ open class ServiceProvider {
             ClusterServiceFilter.SAME_NODE_SERVICES -> null // services.filter { Node.nodeConfig?.name == it.runningNode() } todo Get the Node of the Service and then check this
             ClusterServiceFilter.PROXIES -> services.filter { it.task().version().type == VersionType.PROXY }
             ClusterServiceFilter.SERVERS -> services.filter { it.task().version().type == VersionType.SERVER }
-            ClusterServiceFilter.FALLBACKS -> null
+            ClusterServiceFilter.FALLBACKS -> services.filter { it.task().fallback() }
             ClusterServiceFilter.LOWEST_FALLBACK -> services.stream().filter { it.task().fallback() }.min(Comparator.comparingInt(
                 ClusterService::onlinePlayersCount)).stream().toList()
         }?.toList()
