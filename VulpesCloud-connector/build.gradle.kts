@@ -25,7 +25,7 @@ dependencies {
     compileOnly(libs.jedis)
 
     compileOnly(libs.paper)
-    compileOnly(libs.kSpigot)
+    implementation(libs.kSpigot)
 
 }
 
