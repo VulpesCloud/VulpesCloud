@@ -2,13 +2,17 @@ package de.vulpescloud.node.service.config
 
 import com.electronwill.nightconfig.core.file.FileConfig
 import com.electronwill.nightconfig.toml.TomlFormat
+import de.vulpescloud.node.logging.Logger
 import de.vulpescloud.node.service.LocalService
 import io.github.thecguygithub.launcher.util.FileSystemUtil
+import org.slf4j.LoggerFactory
 import java.nio.file.Files
+import java.util.Properties
 
 object ServiceConfig {
 
     fun makeServiceConfigs(service: LocalService) {
+        Logger().debug("Service software:" + service.task.version().name)
         when (service.task.version().name) {
             "velocity" -> {
                 // Copy the Config
@@ -29,6 +33,70 @@ object ServiceConfig {
 
                 // save the config
                 velocityConfig.save()
+            }
+            "purpur" -> {
+                // Copy the Config
+                if (!Files.exists(service.runningDir.resolve("server.properties"))) {
+                    FileSystemUtil.copyClassPathFile(this::class.java.classLoader, "platforms/purpur/server.properties", "${service.runningDir.resolve("server.properties")}")
+                }
+
+                val properties = Properties()
+                val logger = LoggerFactory.getLogger(ServiceConfig::class.java)
+                try {
+                    logger.info("Loading Properties")
+                    properties.load(this::class.java.classLoader.getResourceAsStream("platforms/purpur/server.properties"))
+
+                    logger.info("Setting server stugg")
+                    properties.setProperty("server-ip", service.hostname())
+                    properties.setProperty("server-port", service.port().toString())
+                    properties.setProperty("motd", "A VulpesCloud Service!")
+
+                    logger.info("Writing out the File to {}", service.runningDir.resolve("server.properties"))
+                    val out = Files.newOutputStream(service.runningDir.resolve("server.properties"))
+                    properties.store(out, "Minecraft server properties - edited by VulpesCloud")
+
+                    properties.clear();
+
+                    properties.setProperty("eula", "true")
+
+                    val outEula = Files.newOutputStream(service.runningDir.resolve("eula.txt"))
+                    properties.store(outEula, "Auto Eula by VulpesCloud (https://account.mojang.com/documents/minecraft_eula)")
+                } catch (e: Exception) {
+                    Logger().error("Unable to edit server.properties or eula.txt in ${service.runningDir}")
+                    Logger().error(e)
+                }
+            }
+            "paper" -> {
+                // Copy the Config
+                if (!Files.exists(service.runningDir.resolve("server.properties"))) {
+                    FileSystemUtil.copyClassPathFile(this::class.java.classLoader, "platforms/purpur/server.properties", "${service.runningDir.resolve("server.properties")}")
+                }
+
+                val properties = Properties()
+                val logger = LoggerFactory.getLogger(ServiceConfig::class.java)
+                try {
+                    logger.info("Loading Properties")
+                    properties.load(this::class.java.classLoader.getResourceAsStream("platforms/purpur/server.properties"))
+
+                    logger.info("Setting server stugg")
+                    properties.setProperty("server-ip", service.hostname())
+                    properties.setProperty("server-port", service.port().toString())
+                    properties.setProperty("motd", "A VulpesCloud Service!")
+
+                    logger.info("Writing out the File to {}", service.runningDir.resolve("server.properties"))
+                    val out = Files.newOutputStream(service.runningDir.resolve("server.properties"))
+                    properties.store(out, "Minecraft server properties - edited by VulpesCloud")
+
+                    properties.clear();
+
+                    properties.setProperty("eula", "true")
+
+                    val outEula = Files.newOutputStream(service.runningDir.resolve("eula.txt"))
+                    properties.store(outEula, "Auto Eula by VulpesCloud (https://account.mojang.com/documents/minecraft_eula)")
+                } catch (e: Exception) {
+                    Logger().error("Unable to edit server.properties or eula.txt in ${service.runningDir}")
+                    Logger().error(e)
+                }
             }
         }
     }
