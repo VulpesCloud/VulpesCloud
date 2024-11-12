@@ -1,9 +1,9 @@
 plugins {
     id("java")
     kotlin("jvm") version "2.0.21"
+    //id("io.papermc.paperweight.userdev") version "1.7.4"
     id("com.github.johnrengelman.shadow") version "8.1.1"
     //id("io.github.goooler.shadow") version "8.1.8"
-    id("io.papermc.paperweight.userdev") version "1.7.4"
 }
 
 group = "de.vulpescloud"
@@ -15,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
+    //paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
     implementation(project(":VulpesCloud-api"))
     implementation(project(":VulpesCloud-bridge"))
     compileOnly(project(":VulpesCloud-wrapper"))
@@ -37,14 +37,14 @@ sourceSets {
     }
 }
 
-paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
+//paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
 tasks.jar {
     archiveFileName.set("vulpescloud-connector.jar")
 }
-//tasks.shadowJar {
-//    archiveFileName.set("vulpescloud-connector.jar")
-//}
+tasks.shadowJar {
+    archiveFileName.set("vulpescloud-connector.jar")
+}
 
 tasks.dokkaHtmlPartial {
     dokkaSourceSets {
