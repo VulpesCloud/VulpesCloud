@@ -11,7 +11,7 @@ class BukkitConnector : KSpigot() {
     private val miniMessages = MiniMessage.miniMessage()
     private val logger = LocalLogger()
 
-    class LocalLogger() {
+    class LocalLogger {
         private val miniMessages = MiniMessage.miniMessage()
         fun info(message: String) {
             server.consoleSender.sendMessage(miniMessages.deserialize("<gray>[</gray><color:#C800FF>VulpesCloud-Connector</color><gray>]</gray>  <white>$message</white>"))

@@ -17,8 +17,8 @@ open class ServiceImpl(
     val port: Int,
     val hostname: String,
     val runningNode: String,
-    var maxPlayers: Int = 0,  // Optional setter for maxPlayers
-    var state: ClusterServiceStates = ClusterServiceStates.PREPARED,  // Default value for state
+    var maxPlayers: Int = 0,
+    var state: ClusterServiceStates = ClusterServiceStates.PREPARED,
 ) : ClusterService {
 
     override fun details(): String {
@@ -81,5 +81,9 @@ open class ServiceImpl(
 //            JavaCloudAPI.getInstance().playerProvider().players()
 //                ?.filter { it?.currentServer()?.id() == id || it?.currentProxy()?.id() == id }
         )
+    }
+
+    fun updateServiceState(state: ClusterServiceStates) {
+        this.state = state
     }
 }
