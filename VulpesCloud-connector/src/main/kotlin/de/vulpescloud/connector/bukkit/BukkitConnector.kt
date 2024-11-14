@@ -37,11 +37,13 @@ class BukkitConnector : KSpigot() {
         // Register Events
         MapInitializeEvent
         PlayerJoinEvent
+        connector.registerLocalService()
         connector.finishStart()
     }
 
     override fun shutdown() {
         logger.info("Goodbye!")
+        connector.unregisterLocalService()
         connector.shutdownLocal()
     }
 

@@ -7,17 +7,8 @@ vulpescloud-action-service
     -> SERVICE;<service id/uuid>;ACTION;<action>;[<parameter>]
     -> SERVICE;<service id/uuid>;ACTION;STOP
     -> SERVICE;<service id/uuid>;ACTION;COMMAND;[<parameter>]
-vulpescloud-event-service
-    -> SERVICE;<service name>;EVENT;<event>;<parameter>
-    -> SERVICE;<service name>;EVENT;STATE;PREPARE
-    -> SERVICE;<service name>;EVENT;STATE;CONNECTING
-    -> SERVICE;<service name>;EVENT;STATE;STARTING
-    -> SERVICE;<service name>;EVENT;STATE;ONLINE
-    -> SERVICE;<service name>;EVENT;STATE;STOPPING
 vulpescloud-auth-service
     -> SERVICE;<service name>;AUTH;<service uuid>
-vulpescloud-register-service
-    -> SERVICE;<service name>;ADDRESS;<service address>;PORT;<service port>;REGISTER
 vulpescloud-unregister-service
     -> SERVICE;<service name>;UNREGISTER
 
@@ -25,3 +16,14 @@ vulpescloud-unregister-service
 RedisPubSubChannels.VULPESCLOUD_EVENT_SERVICE.name
 
 vulpescloud-event-service
+
+
+vulpescloud-event-service // implemented builder
+    -> SERVICE;<service name>;EVENT;<event>;<parameter> // implemented builder
+    -> SERVICE;<service name>;EVENT;STATE;PREPARE // implemented builder
+    -> SERVICE;<service name>;EVENT;STATE;CONNECTING // implemented builder
+    -> SERVICE;<service name>;EVENT;STATE;STARTING // implemented builder
+    -> SERVICE;<service name>;EVENT;STATE;ONLINE // implemented builder
+    -> SERVICE;<service name>;EVENT;STATE;STOPPING // implemented builder
+vulpescloud-register-service // implemented builder
+    -> SERVICE;<service name>;REGISTER;ADDRESS;<service address>;PORT;<service port> // implemented builder

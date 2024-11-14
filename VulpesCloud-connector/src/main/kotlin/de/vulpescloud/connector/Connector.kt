@@ -3,6 +3,7 @@ package de.vulpescloud.connector
 import de.vulpescloud.api.network.redis.RedisHashNames
 import de.vulpescloud.api.network.redis.RedisPubSubChannels
 import de.vulpescloud.api.services.ClusterServiceStates
+import de.vulpescloud.api.services.ServiceMessageBuilder
 import de.vulpescloud.api.services.builder.ServiceEventMessageBuilder
 import de.vulpescloud.bridge.service.ServiceProvider
 import de.vulpescloud.bridge.service.impl.ServiceImpl
@@ -33,11 +34,21 @@ open class Connector {
     }
 
     fun registerLocalService() {
-
+        wrapper.getRC()?.sendMessage(
+            ServiceMessageBuilder.registrationMessageBuilder().serviceRegisterBuilder()
+                .setService(serviceProvider.getLocalService())
+                .build(),
+            RedisPubSubChannels.VULPESCLOUD_REGISTER_SERVICE.name
+        )
     }
 
     fun unregisterLocalService() {
-
+        wrapper.getRC()?.sendMessage(
+            ServiceMessageBuilder.registrationMessageBuilder().serviceUnregisterBuilder()
+                .setService(serviceProvider.getLocalService())
+                .build(),
+            RedisPubSubChannels.VULPESCLOUD_UNREGISTER_SERVICE.name
+        )
     }
 
     private fun updateLocalState(state: ClusterServiceStates) {
