@@ -34,7 +34,7 @@ velocity = "3.4.0-SNAPSHOT"
 
 # config
 
-night-config = "3.6.0"
+night-config = "3.8.1"
 
 # shadowJar
 shadow = "8.1.1"
