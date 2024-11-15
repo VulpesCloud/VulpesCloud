@@ -1,5 +1,6 @@
 package de.vulpescloud.api.services
 
+import de.vulpescloud.api.services.builder.ServiceActionMessageBuilder
 import de.vulpescloud.api.services.builder.ServiceEventMessageBuilder
 import de.vulpescloud.api.services.builder.ServiceRegistrationMessageBuilder
 
@@ -12,6 +13,9 @@ class ServiceMessageBuilder {
 
         fun registrationMessageBuilder(): ServiceRegistrationMessageBuilder.Companion {
             return ServiceRegistrationMessageBuilder
+        }
+        fun actionMessageBuilder(): ServiceActionMessageBuilder.Companion {
+            return ServiceActionMessageBuilder
         }
     }
 

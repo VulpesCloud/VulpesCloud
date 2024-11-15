@@ -2,6 +2,8 @@ package de.vulpescloud.connector.bukkit
 
 import de.vulpescloud.connector.Connector
 import de.vulpescloud.connector.bukkit.events.*
+import de.vulpescloud.connector.velocity.VelocityConnector
+import de.vulpescloud.connector.velocity.VelocityConnector.Companion
 import net.axay.kspigot.extensions.server
 import net.axay.kspigot.main.KSpigot
 import net.kyori.adventure.text.minimessage.MiniMessage
@@ -26,19 +28,24 @@ class BukkitConnector : KSpigot() {
         }
     }
 
-    override fun load() {
+    init {
         instance = this
+    }
+
+    override fun load() {
         logger.info("Loading Connector")
         connector.init()
     }
 
     override fun startup() {
-        logger.info("Started Connector")
+        BukkitRedisSubscribe()
         // Register Events
         MapInitializeEvent
         PlayerJoinEvent
         connector.registerLocalService()
         connector.finishStart()
+
+        logger.info("Started Connector")
     }
 
     override fun shutdown() {

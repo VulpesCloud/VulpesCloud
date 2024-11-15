@@ -3,10 +3,6 @@ vulpescloud-event-node-state
 vulpescloud-event-task-update
     -> TASK;CREATE;<task info in Json>
     -> TASK;DELETE;<task name>
-vulpescloud-action-service
-    -> SERVICE;<service id/uuid>;ACTION;<action>;[<parameter>]
-    -> SERVICE;<service id/uuid>;ACTION;STOP
-    -> SERVICE;<service id/uuid>;ACTION;COMMAND;[<parameter>]
 vulpescloud-auth-service
     -> SERVICE;<service name>;AUTH;<service uuid>
 
@@ -27,3 +23,7 @@ vulpescloud-register-service // implemented builder
     -> SERVICE;<service name>;REGISTER;ADDRESS;<service address>;PORT;<service port> // implemented builder
 vulpescloud-unregister-service // implemented builder
     -> SERVICE;<service name>;UNREGISTER // implemented builder
+vulpescloud-action-service // implemented builder
+    -> SERVICE;<service id/uuid>;ACTION;<action>;[<parameter>] // implemented builder
+    -> SERVICE;<service id/uuid>;ACTION;STOP // implemented builder
+    -> SERVICE;<service id/uuid>;ACTION;COMMAND;[<parameter>] // implemented builder

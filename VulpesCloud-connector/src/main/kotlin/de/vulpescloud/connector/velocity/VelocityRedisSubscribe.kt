@@ -1,5 +1,6 @@
 package de.vulpescloud.connector.velocity
 
+import de.vulpescloud.api.network.redis.RedisPubSubChannels
 import de.vulpescloud.wrapper.redis.RedisManager
 import de.vulpescloud.wrapper.redis.RedisJsonParser
 
@@ -7,49 +8,52 @@ class VelocityRedisSubscribe {
 
     private val redis = VelocityConnector.instance.wrapper.getRC()
     private val redisManager = redis?.let { RedisManager(it.getJedisPool()) }
-    private val redisChannels = listOf("vulpescloud-action-service", "vulpescloud-event-service", "vulpescloud-register-service")
-    /*vulpescloud-action-service
-    *-> SERVICE;<service id/uuid>;ACTION;<action>;[<parameter>]
-    *-> SERVICE;<service id/uuid>;ACTION;STOP
-    *-> SERVICE;<service id/uuid>;ACTION;COMMAND;[<parameter>]
-    */
+    private val redisChannels = listOf(
+        RedisPubSubChannels.VULPESCLOUD_ACTION_SERVICE.name,
+        RedisPubSubChannels.VULPESCLOUD_EVENT_SERVICE.name,
+        RedisPubSubChannels.VULPESCLOUD_REGISTER_SERVICE.name,
+        RedisPubSubChannels.VULPESCLOUD_UNREGISTER_SERVICE.name
+    )
+
     init {
 
         redisManager?.subscribe(redisChannels) { _,  channel, msg ->
             when (channel) {
-                "vulpescloud-action-service" -> {
+                RedisPubSubChannels.VULPESCLOUD_ACTION_SERVICE.name -> {
                     val message = msg?.let { RedisJsonParser.parseJson(it) }
                         ?.let { RedisJsonParser.getMessagesFromRedisJson(it) }
 
                     val splitMSG = message!!.split(";")
 
-                    if (splitMSG[0] == "SERVICE") {
-                        if (splitMSG[2] == "ACTION") {
-                            if (splitMSG[3] == "STOP") {
-                                VelocityConnector.instance.proxyServer.shutdown()
-                            } else if (splitMSG[3] == "COMMAND") {
-                                VelocityConnector.instance.proxyServer.commandManager.executeAsync(
-                                    VelocityConnector.instance.proxyServer.consoleCommandSource,
-                                    splitMSG[4]
-                                )
+                    if (splitMSG[1] == VelocityConnector.instance.wrapper.service.name) {
+                        if (splitMSG[0] == "SERVICE") {
+                            if (splitMSG[2] == "ACTION") {
+                                if (splitMSG[3] == "STOP") {
+                                    VelocityConnector.instance.proxyServer.shutdown()
+                                } else if (splitMSG[3] == "COMMAND") {
+                                    VelocityConnector.instance.proxyServer.commandManager.executeAsync(
+                                        VelocityConnector.instance.proxyServer.consoleCommandSource,
+                                        splitMSG[4]
+                                    )
+                                }
                             }
                         }
                     }
                 }
-                "vulpescloud-register-service" -> {
+                RedisPubSubChannels.VULPESCLOUD_REGISTER_SERVICE.name -> {
                     val message = msg?.let { RedisJsonParser.parseJson(it) }
                         ?.let { RedisJsonParser.getMessagesFromRedisJson(it) }
 
                     val splitMSG = message!!.split(";")
-                    // SERVICE;<service name>;ADDRESS;<service address>;PORT;<service port>;REGISTER
+                    // SERVICE;<service name>;REGISTER;ADDRESS;<service address>;PORT;<service port>
                     if (splitMSG[0] == "SERVICE") {
-                        if (splitMSG[2] == "ADDRESS") {
-                            if (splitMSG[4] == "PORT") {
-                                if (splitMSG[6] == "REGISTER") {
+                        if (splitMSG[2] == "REGISTER") {
+                            if (splitMSG[3] == "ADDRESS") {
+                                if (splitMSG[5] == "PORT") {
                                     VelocityRegistrationHandler.registerServer(
                                         splitMSG[1],
-                                        splitMSG[3],
-                                        splitMSG[5].toInt()
+                                        splitMSG[4],
+                                        splitMSG[6].toInt()
                                     )
                                 }
                             }

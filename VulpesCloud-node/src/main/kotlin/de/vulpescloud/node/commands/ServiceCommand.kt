@@ -1,6 +1,9 @@
 package de.vulpescloud.node.commands
 
 import de.vulpescloud.api.command.CommandInfo
+import de.vulpescloud.api.network.redis.RedisPubSubChannels
+import de.vulpescloud.api.services.ServiceMessageBuilder
+import de.vulpescloud.api.services.action.ServiceActions
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.logging.Logger
 import org.incendo.cloud.kotlin.extension.buildAndRegister
@@ -42,7 +45,14 @@ class ServiceCommand {
                         if (ctx.flags().isPresent("force")) {
                             service.executeCommand(ctx.get("command"))
                         } else {
-                            Node.instance!!.getRC()?.sendMessage("SERVICE;${service.name()};ACTION;COMMAND;" + ctx.get("command"), "vulpescloud-action-service")
+                            Node.instance!!.getRC()?.sendMessage(
+                                ServiceMessageBuilder.actionMessageBuilder()
+                                    .setService(service)
+                                    .setAction(ServiceActions.COMMAND)
+                                    .setParameter(ctx.get("command"))
+                                    .build(),
+                                RedisPubSubChannels.VULPESCLOUD_ACTION_SERVICE.name
+                            )
                         }
                     } catch (e: Exception) {
                         logger.error(e)
@@ -62,7 +72,13 @@ class ServiceCommand {
 
                 if (service != null) {
                     try {
-                        Node.instance!!.getRC()?.sendMessage("SERVICE;${service.name()};ACTION;STOP", "vulpescloud-action-service")
+                        Node.instance!!.getRC()?.sendMessage(
+                            ServiceMessageBuilder.actionMessageBuilder()
+                                .setService(service)
+                                .setAction(ServiceActions.STOP)
+                                .build(),
+                            RedisPubSubChannels.VULPESCLOUD_ACTION_SERVICE.name
+                        )
                     } catch (e: Exception) {
                         logger.error(e)
                     }
