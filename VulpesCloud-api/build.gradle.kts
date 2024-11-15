@@ -8,6 +8,7 @@ dependencies {
     compileOnly(libs.nightConfig.json)
     compileOnly(libs.nightConfig.toml)
     compileOnly(libs.nightConfig.yaml)
+    compileOnly(libs.json)
 }
 
 tasks.jar {

@@ -1,6 +1,7 @@
 package de.vulpescloud.node
 
 import de.vulpescloud.api.cluster.NodeStates
+import de.vulpescloud.api.language.LanguageProvider
 import de.vulpescloud.node.cluster.ClusterProvider
 import de.vulpescloud.node.command.provider.CommandProvider
 import de.vulpescloud.node.commands.*
@@ -17,6 +18,8 @@ import de.vulpescloud.node.template.TemplateProvider
 import de.vulpescloud.node.terminal.JLineTerminal
 import de.vulpescloud.node.util.Configurations.readContent
 import de.vulpescloud.node.version.VersionProvider
+import org.slf4j.LoggerFactory
+import java.net.URI
 import java.nio.file.Path
 import kotlin.system.exitProcess
 
@@ -58,7 +61,10 @@ class Node {
         lateinit var templateProvider: TemplateProvider
             private set
 
-        lateinit var logger: Logger
+        lateinit var logger: org.slf4j.Logger
+            private set
+
+        lateinit var languageProvider: LanguageProvider
             private set
     }
 
@@ -74,7 +80,15 @@ class Node {
             exitProcess(1)
         }
 
-        logger = Logger()
+        languageProvider = LanguageProvider()
+
+        languageProvider.setLang(nodeConfig!!.language)
+
+        languageProvider.loadLangFilesFromClassPath()
+
+        // logger = Logger()
+
+        logger = LoggerFactory.getLogger(Node::class.java)
 
         logger.debug("Terminal initialized! Continuing Startup!")
 
@@ -114,6 +128,8 @@ class Node {
         logger.debug("Initializing ServiceProvider")
 
         serviceProvider = ServiceProvider()
+
+        serviceProvider.getAllServiceFromRedis()
 
         logger.debug("Initializing CommandProvider")
 

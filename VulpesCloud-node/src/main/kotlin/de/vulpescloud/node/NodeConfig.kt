@@ -2,6 +2,7 @@ package de.vulpescloud.node
 
 
 import de.vulpescloud.api.cluster.NodeInformation
+import de.vulpescloud.api.language.Languages
 import de.vulpescloud.node.config.LogLevels
 import de.vulpescloud.node.config.RedisEndpointData
 import de.vulpescloud.node.networking.mysql.MySQLEndpointData
@@ -15,6 +16,7 @@ class NodeConfig {
     var logLevel: LogLevels?
     var mysql: MySQLEndpointData?
     var nodes: MutableList<NodeInformation>
+    var language: Languages
 
 
     init {
@@ -24,5 +26,6 @@ class NodeConfig {
         this.logLevel = LogLevels.INFO
         this.mysql = MySQLEndpointData("vulpescloud", "", "vulpescloud", "127.0.0.1", 3306, false)
         this.nodes = mutableListOf()
+        this.language = Languages.en_US
     }
 }

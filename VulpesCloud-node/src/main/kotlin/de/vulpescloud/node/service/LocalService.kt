@@ -65,7 +65,7 @@ class LocalService(
         Thread {
             process?.inputStream?.bufferedReader()?.use { reader ->
                 reader.forEachLine { line ->
-                    Logger().debug("[Minecraft Server] $line")
+                    Logger().debug("[${name()}] $line")
                 }
             }
         }.start()
@@ -76,7 +76,6 @@ class LocalService(
                 synchronized(this) {
                     process?.waitFor()
                 }
-                Logger().warn("uhm yhea")
             } catch (e: InterruptedException) {
                 Logger().debug("Exception: ${e.printStackTrace()}")
             }

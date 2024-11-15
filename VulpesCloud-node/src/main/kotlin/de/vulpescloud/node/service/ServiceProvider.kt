@@ -1,14 +1,21 @@
 package de.vulpescloud.node.service
 
+import de.vulpescloud.api.network.redis.RedisHashNames
+import de.vulpescloud.api.network.redis.RedisPubSubChannels
 import de.vulpescloud.api.services.ClusterService
 import de.vulpescloud.api.services.ClusterServiceFactory
 import de.vulpescloud.api.services.ClusterServiceFilter
 import de.vulpescloud.api.services.ClusterServiceProvider
 import de.vulpescloud.api.services.ClusterServiceStates
+import de.vulpescloud.api.version.VersionInfo
 import de.vulpescloud.api.version.VersionType
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.logging.Logger
+import de.vulpescloud.node.networking.redis.RedisJsonParser
 import de.vulpescloud.node.networking.redis.RedisManager
+import de.vulpescloud.node.task.TaskImpl
+import org.json.JSONObject
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.CopyOnWriteArrayList
@@ -17,9 +24,44 @@ class ServiceProvider : ClusterServiceProvider() {
 
     private val services: MutableList<ClusterService> = CopyOnWriteArrayList()
     private val factory = ServiceFactory()
-    private val logger = Logger()
-    private val channels = mutableListOf("testcloud-service-actions", "testcloud-service-events")
+    private val logger = LoggerFactory.getLogger(ServiceProvider::class.java)
+    private val channels = mutableListOf(
+        RedisPubSubChannels.VULPESCLOUD_EVENT_SERVICE.name,
+        RedisPubSubChannels.VULPESCLOUD_AUTH_SERVICE.name)
     private val redisManger = Node.instance?.getRC()?.let { RedisManager(it.getJedisPool()) }
+
+    init {
+        redisManger?.subscribe(channels) { _, channel, msg ->
+            if (channel == RedisPubSubChannels.VULPESCLOUD_EVENT_SERVICE.name) {
+                val message = msg?.let { RedisJsonParser.parseJson(it) }
+                    ?.let { RedisJsonParser.getMessagesFromRedisJson(it) }
+
+                val splitMsg = message?.split(";")
+
+                if (splitMsg!![0] == "SERVICE") {
+                    if (splitMsg[2] == "EVENT") {
+                        if (splitMsg[3] == "STATE") {
+                            getAllServiceFromRedis()
+                            logger.info(
+                                Node.languageProvider.translate("service.event.state.message")
+                                .replace("%name%", splitMsg[1])
+                                .replace("%state%", splitMsg[4])
+                            )
+                            if (splitMsg[4] == "STOPPING") {
+                                val service = Node.serviceProvider.findByName(splitMsg[1])
+                                if (service != null) {
+                                    Node.serviceProvider.services.remove(service)
+                                    if (service.runningNode() == Node.nodeConfig!!.name) {
+                                        Node.instance!!.getRC()?.deleteHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, service.name())
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 
     override fun factory(): ClusterServiceFactory {
@@ -52,6 +94,70 @@ class ServiceProvider : ClusterServiceProvider() {
 
     override fun servicesAsync(): CompletableFuture<MutableList<ClusterService>>? {
         return CompletableFuture.completedFuture(services)
+    }
+
+    fun getAllServiceFromRedis() {
+        val futureServices: MutableList<ClusterService> = mutableListOf()
+        Node.instance!!.getRC()?.getAllHashValues(RedisHashNames.VULPESCLOUD_SERVICES.name)?.forEach {
+            val service = JSONObject(it)
+
+            val taskJson = service.getJSONObject("task")
+            futureServices.add(
+                Service(
+                    getTaskFromJson(taskJson),
+                    service.getInt("orderedId"),
+                    UUID.fromString(service.getString("id")),
+                    service.getInt("port"),
+                    service.getString("hostname"),
+                    service.getString("runningNode"),
+                    service.getInt("maxPlayers"),
+                    ClusterServiceStates.valueOf(service.getString("state"))
+                )
+            )
+        }
+
+        services.forEach { services.remove(it) }
+
+        futureServices.forEach { services.add(it) }
+    }
+
+    private fun getTaskFromJson(json: JSONObject): TaskImpl {
+        val versionJson = json.getJSONObject("version")
+
+        val version = VersionInfo(
+            versionJson.getString("name"),
+            VersionType.valueOf(versionJson.get("type").toString()),
+            versionJson.getString("versions")
+        )
+
+        val nodesJson = json.getJSONArray("nodes")
+
+        val nodes: Array<String?> = Array(nodesJson.length()) {
+            if (nodesJson.isNull(it)) null else nodesJson.getString(it)
+        }
+
+
+        val templatesJson = json.getJSONArray("nodes")
+
+        val templates: Array<String?> = Array(templatesJson.length()) {
+            if (templatesJson.isNull(it)) null else templatesJson.getString(it)
+        }
+
+        val task = TaskImpl(
+            json.getString("name"),
+            json.getInt("maxMemory"),
+            version,
+            templates.toList(),
+            nodes.toList(),
+            json.getInt("maxPlayers"),
+            json.getBoolean("staticServices"),
+            json.getInt("minOnlineCount"),
+            json.getBoolean("maintenance"),
+            json.getInt("startPort"),
+            json.getBoolean("fallback")
+        )
+
+        return task
     }
 
 }

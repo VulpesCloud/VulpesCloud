@@ -9,8 +9,6 @@ vulpescloud-action-service
     -> SERVICE;<service id/uuid>;ACTION;COMMAND;[<parameter>]
 vulpescloud-auth-service
     -> SERVICE;<service name>;AUTH;<service uuid>
-vulpescloud-unregister-service
-    -> SERVICE;<service name>;UNREGISTER
 
 
 RedisPubSubChannels.VULPESCLOUD_EVENT_SERVICE.name
@@ -27,3 +25,5 @@ vulpescloud-event-service // implemented builder
     -> SERVICE;<service name>;EVENT;STATE;STOPPING // implemented builder
 vulpescloud-register-service // implemented builder
     -> SERVICE;<service name>;REGISTER;ADDRESS;<service address>;PORT;<service port> // implemented builder
+vulpescloud-unregister-service // implemented builder
+    -> SERVICE;<service name>;UNREGISTER // implemented builder

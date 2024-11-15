@@ -9,7 +9,7 @@
 
     <appender name="ConsoleAppender" class="ConsoleAppender">
         <filter class="ThresholdFilter">
-            <level>INFO</level>
+            <level>DEBUG</level>
         </filter>
         <encoder class="PatternLayoutEncoder">
             <pattern>${LINE_PATTERN}</pattern>
