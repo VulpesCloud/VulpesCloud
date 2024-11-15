@@ -52,11 +52,11 @@ open class TaskImpl(
     }
 
     override fun serviceCount(): Long? {
-        return null
+        return Node.serviceProvider.services()?.stream()?.filter { it.task().name() == name() }?.count()
     }
 
     override fun services(): List<ClusterService?>? {
-        return Node.serviceProvider.services()?.stream()?.filter { it.task() == this }?.toList()
+        return Node.serviceProvider.services()?.stream()?.filter { it.task().name() == name() }?.toList()
     }
 
     override fun startPort(): Int {

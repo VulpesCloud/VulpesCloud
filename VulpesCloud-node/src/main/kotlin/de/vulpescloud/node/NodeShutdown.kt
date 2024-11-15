@@ -3,6 +3,7 @@ package de.vulpescloud.node
 import de.vulpescloud.api.cluster.NodeStates
 import de.vulpescloud.node.logging.Logger
 import de.vulpescloud.node.networking.redis.RedisConnectionChecker
+import de.vulpescloud.node.service.ServiceStartScheduler
 import kotlin.system.exitProcess
 
 object NodeShutdown {
@@ -19,6 +20,7 @@ object NodeShutdown {
 
             Node.serviceProvider.services()?.forEach { Node.instance?.getRC()?.sendMessage("SERVICE;${it.id()};ACTION;STOP", "vulpescloud-action-service") }
 
+            ServiceStartScheduler.instance.cancel()
             RedisConnectionChecker.instance.cancel()
             Node.instance!!.getRC()?.setHashField("VulpesCloud-HeartBeat", Node.nodeConfig!!.name, "0")
             Node.clusterProvider.updateLocalNodeState(NodeStates.OFFLINE)

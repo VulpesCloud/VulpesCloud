@@ -92,9 +92,8 @@ class Version(
 
         val file = platformDir.resolve("${display.name}-${display.versions}.jar")
         if (!Files.exists(file)) {
-            if (version is Versions) {
-                Downloader.download(version.link, file)
-            }
+            Logger().error("Downloading and patching file!")
+            Downloader.download(version.link, file)
 
             patchers.forEach { it.patch(file.toFile(), localService) }
         }

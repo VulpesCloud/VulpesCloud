@@ -13,6 +13,7 @@ import de.vulpescloud.node.networking.mysql.MySQLController
 import de.vulpescloud.node.networking.redis.RedisConnectionChecker
 import de.vulpescloud.node.networking.redis.RedisController
 import de.vulpescloud.node.service.ServiceProvider
+import de.vulpescloud.node.service.ServiceStartScheduler
 import de.vulpescloud.node.task.TaskProvider
 import de.vulpescloud.node.template.TemplateProvider
 import de.vulpescloud.node.terminal.JLineTerminal
@@ -150,6 +151,8 @@ class Node {
         Runtime.getRuntime().addShutdownHook(Thread())
 
         RedisConnectionChecker().schedule()
+
+       //  ServiceStartScheduler().schedule()
 
         terminal!!.allowInput()
 

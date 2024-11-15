@@ -32,4 +32,9 @@
         <appender-ref ref="ConsoleAppender"/>
         <appender-ref ref="Rolling"/>
     </root>
+
+    <logger name="com.zaxxer.hikari.pool.PoolBase" level="INFO"/>
+    <logger name="com.zaxxer.hikari.pool.HikariPool" level="INFO"/>
+    <logger name="com.zaxxer.hikari.HikariDataSource" level="INFO"/>
+    <logger name="org.mariadb.jdbc" level="INFO" />
 </configuration>
