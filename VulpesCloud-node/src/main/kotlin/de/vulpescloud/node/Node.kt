@@ -152,7 +152,7 @@ class Node {
 
         RedisConnectionChecker().schedule()
 
-       //  ServiceStartScheduler().schedule()
+        ServiceStartScheduler().schedule()
 
         terminal!!.allowInput()
 

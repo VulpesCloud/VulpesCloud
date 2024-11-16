@@ -3,6 +3,7 @@ package de.vulpescloud.connector.bukkit
 import de.vulpescloud.api.network.redis.RedisPubSubChannels
 import de.vulpescloud.wrapper.redis.RedisJsonParser
 import de.vulpescloud.wrapper.redis.RedisManager
+import org.bukkit.Bukkit
 
 class BukkitRedisSubscribe {
 
@@ -29,7 +30,7 @@ class BukkitRedisSubscribe {
                                 if (splitMSG[3] == "STOP") {
                                     BukkitConnector.instance.server.shutdown()
                                 } else if (splitMSG[3] == "COMMAND") {
-                                    BukkitConnector.instance.server.dispatchCommand(BukkitConnector.instance.server.consoleSender, splitMSG[4])
+                                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), splitMSG[4])
                                 }
                             }
                         }

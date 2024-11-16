@@ -1,6 +1,9 @@
 package de.vulpescloud.node
 
 import de.vulpescloud.api.cluster.NodeStates
+import de.vulpescloud.api.network.redis.RedisPubSubChannels
+import de.vulpescloud.api.services.ServiceMessageBuilder
+import de.vulpescloud.api.services.action.ServiceActions
 import de.vulpescloud.node.logging.Logger
 import de.vulpescloud.node.networking.redis.RedisConnectionChecker
 import de.vulpescloud.node.service.ServiceStartScheduler
@@ -18,7 +21,15 @@ object NodeShutdown {
 
             logger.info("Shutting down the Node!")
 
-            Node.serviceProvider.services()?.forEach { Node.instance?.getRC()?.sendMessage("SERVICE;${it.id()};ACTION;STOP", "vulpescloud-action-service") }
+            Node.serviceProvider.services()?.forEach {
+                Node.instance?.getRC()?.sendMessage(
+                    ServiceMessageBuilder.actionMessageBuilder()
+                    .setService(it)
+                    .setAction(ServiceActions.STOP)
+                    .build(),
+                    RedisPubSubChannels.VULPESCLOUD_ACTION_SERVICE.name
+                )
+            }
 
             ServiceStartScheduler.instance.cancel()
             RedisConnectionChecker.instance.cancel()
