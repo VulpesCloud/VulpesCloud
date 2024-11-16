@@ -12,7 +12,7 @@ public final class Launcher {
 
     @SneakyThrows
     public static void main(String[] args) {
-
+        System.setProperty("startup", String.valueOf(System.currentTimeMillis()));
 
         var boot = new Boot();
         var apiFile = Path.of("local/dependencies/vulpescloud-api.jar");

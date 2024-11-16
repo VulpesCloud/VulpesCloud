@@ -1,7 +1,7 @@
 package de.vulpescloud.node.command.source
 
-import de.vulpescloud.node.logging.Logger
 import lombok.NonNull
+import org.slf4j.LoggerFactory
 
 class ConsoleCommandSource : CommandSource {
     /**
@@ -56,6 +56,6 @@ class ConsoleCommandSource : CommandSource {
 
     companion object {
         val INSTANCE: ConsoleCommandSource = ConsoleCommandSource()
-        private val LOGGER = Logger()
+        private val LOGGER = LoggerFactory.getLogger(ConsoleCommandSource::class.java)
     }
 }

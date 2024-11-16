@@ -4,17 +4,17 @@ import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.api.version.VersionInfo
 import de.vulpescloud.api.version.VersionType
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.logging.Logger
 import org.json.JSONObject
+import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
-import kotlin.collections.HashSet
 
 object TaskFactory {
 
     private val GROUP_DIR = Path.of("local/groups")
-    private val logger = Logger()
+
+    private val logger = LoggerFactory.getLogger(TaskFactory::class.java)
 
     fun createNewTask(taskInformation: JSONObject) {
 
@@ -88,18 +88,18 @@ object TaskFactory {
 
             groups.add(
                 TaskImpl(
-                taskInformation.getString("name"),
-                taskInformation.getInt("maxMemory"),
-                version,
-                templates.toList(),
-                nodes.toList(),
-                taskInformation.getInt("maxPlayers"),
-                taskInformation.getBoolean("staticServices"),
-                taskInformation.getInt("minOnlineCount"),
-                taskInformation.getBoolean("maintenance"),
-                taskInformation.getInt("startPort"),
-                taskInformation.getBoolean("fallback")
-            )
+                    taskInformation.getString("name"),
+                    taskInformation.getInt("maxMemory"),
+                    version,
+                    templates.toList(),
+                    nodes.toList(),
+                    taskInformation.getInt("maxPlayers"),
+                    taskInformation.getBoolean("staticServices"),
+                    taskInformation.getInt("minOnlineCount"),
+                    taskInformation.getBoolean("maintenance"),
+                    taskInformation.getInt("startPort"),
+                    taskInformation.getBoolean("fallback")
+                )
             )
         }
         return groups

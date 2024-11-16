@@ -3,20 +3,17 @@ package de.vulpescloud.node.commands
 import de.vulpescloud.api.command.CommandInfo
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.logging.Logger
 import de.vulpescloud.node.service.ServiceFactory
 import de.vulpescloud.node.service.ServiceStartScheduler
-import de.vulpescloud.node.task.TaskProvider
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.delay
 import org.incendo.cloud.kotlin.extension.buildAndRegister
 import org.incendo.cloud.parser.standard.IntegerParser
 import org.incendo.cloud.parser.standard.StringParser
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.concurrent.CompletableFuture
 
 class DevCommand {
-    val logger = Logger()
+    val logger: Logger = LoggerFactory.getLogger(DevCommand::class.java)
 
     init {
         Node.commandProvider?.registeredCommands?.add(
@@ -45,10 +42,12 @@ class DevCommand {
             required("integer", IntegerParser.integerParser())
 
             handler { ctx ->
-                logger.info(ServiceFactory().isIdPresent(
-                    Node.taskProvider.findByName("Test")!!,
-                    ctx.get("integer")
-                ))
+                logger.info(
+                    ServiceFactory().isIdPresent(
+                        Node.taskProvider.findByName("Test")!!,
+                        ctx.get("integer")
+                    ).toString()
+                )
             }
         }
         Node.commandProvider!!.commandManager!!.buildAndRegister("dev") {
@@ -57,9 +56,11 @@ class DevCommand {
             literal("generateOrderedId")
 
             handler { _ ->
-                logger.info(ServiceFactory().generateOrderedId(
-                    Node.taskProvider.findByName("Test")!!
-                ))
+                logger.info(
+                    ServiceFactory().generateOrderedId(
+                        Node.taskProvider.findByName("Test")!!
+                    ).toString()
+                )
             }
         }
         Node.commandProvider!!.commandManager!!.buildAndRegister("dev") {
@@ -68,9 +69,11 @@ class DevCommand {
             literal("detectServicePort")
 
             handler { _ ->
-                logger.info(ServiceFactory().detectServicePort(
-                    Node.taskProvider.findByName("Test")!!
-                ))
+                logger.info(
+                    ServiceFactory().detectServicePort(
+                        Node.taskProvider.findByName("Test")!!
+                    ).toString()
+                )
             }
         }
 

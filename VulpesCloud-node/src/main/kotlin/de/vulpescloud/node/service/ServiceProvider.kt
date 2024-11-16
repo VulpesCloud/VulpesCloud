@@ -10,7 +10,6 @@ import de.vulpescloud.api.services.ClusterServiceStates
 import de.vulpescloud.api.version.VersionInfo
 import de.vulpescloud.api.version.VersionType
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.logging.Logger
 import de.vulpescloud.node.networking.redis.RedisJsonParser
 import de.vulpescloud.node.networking.redis.RedisManager
 import de.vulpescloud.node.task.TaskImpl

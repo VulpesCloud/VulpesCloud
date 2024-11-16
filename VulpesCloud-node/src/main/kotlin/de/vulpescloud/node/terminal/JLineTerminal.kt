@@ -106,10 +106,8 @@ class JLineTerminal(config: NodeConfig) {
 
     fun print(terminal: JLineTerminal, config: NodeConfig) {
         terminal.printLine("")
-        terminal.printLine("   &fTestCloud &8- &71.0.0-alpha")
-        terminal.printLine(
-            ("   &7Local node&8: &7" + config.nodes)
-        )
+        terminal.printLine("   &oVulpesCloud &8- &71.0.0-alpha")
+        terminal.printLine("        &8[&OFennek&8]")
         terminal.printLine("")
     }
 

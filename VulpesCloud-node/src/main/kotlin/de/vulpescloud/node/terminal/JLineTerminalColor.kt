@@ -6,7 +6,6 @@ import lombok.experimental.Accessors
 import org.jetbrains.annotations.Contract
 import org.jline.jansi.Ansi
 
-
 @Getter
 @Accessors(fluent = true)
 @AllArgsConstructor
@@ -20,7 +19,9 @@ enum class JLineTerminalColor(internal val key: Char, ansiCode: Ansi) {
     CYAN('b', Ansi.ansi().reset().fg(Ansi.Color.CYAN).bold()),
     YELLOW('e', Ansi.ansi().reset().fg(Ansi.Color.YELLOW)),
     RED('c', Ansi.ansi().reset().fg(Ansi.Color.RED).bold()),
-    WHITE('f', Ansi.ansi().reset().fg(Ansi.Color.WHITE).bold());
+    WHITE('f', Ansi.ansi().reset().fg(Ansi.Color.WHITE).bold()),
+    ORANGE('o', Ansi.ansi().reset().fg(214)),
+    BOLD_ORANGE('O', Ansi.ansi().reset().fg(214).bold());
 
     val ansiCode: String = ansiCode.toString()
 

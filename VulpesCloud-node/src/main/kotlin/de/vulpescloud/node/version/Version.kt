@@ -3,14 +3,15 @@ package de.vulpescloud.node.version
 import de.vulpescloud.api.version.VersionInfo
 import de.vulpescloud.api.version.VersionType
 import de.vulpescloud.api.version.Versions
-import io.github.thecguygithub.launcher.util.FileSystemUtil
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.logging.Logger
 import de.vulpescloud.node.service.LocalService
 import de.vulpescloud.node.util.*
 import de.vulpescloud.node.version.files.VersionFile
 import de.vulpescloud.node.version.files.VersionFileStrategy
 import de.vulpescloud.node.version.patcher.VersionPatcher
+import io.github.thecguygithub.launcher.util.FileSystemUtil
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.Path
 
@@ -19,10 +20,12 @@ class Version(
     val type: VersionType,
     val pluginDir: String,
     val arguments: List<String>,
-    val patchers: List<VersionPatcher>,
+    private val patchers: List<VersionPatcher>,
     val files: List<VersionFile>,
-    val versions: List<Versions>
+    val versions: List<Versions>,
 ) {
+
+    private val logger: Logger = LoggerFactory.getLogger(Versions::class.java)
 
     fun prepare(display: VersionInfo, service: LocalService) {
         val version = service.task.version()
@@ -31,7 +34,10 @@ class Version(
         this.download(display, service)
 
         // copy platform jar and maybe patch files
-        DirectoryActions.copyDirectoryContents(Path.of("local/versionCache/${version.name}/${version.versions}"), service.runningDir)
+        DirectoryActions.copyDirectoryContents(
+            Path.of("local/versionCache/${version.name}/${version.versions}"),
+            service.runningDir
+        )
 
         for (file in files) {
             val strategy = file.strategy
@@ -41,15 +47,21 @@ class Version(
             when (strategy) {
                 VersionFileStrategy.COPY_FROM_CLASSPATH_IF_NOT_EXISTS -> {
                     if (!Files.exists(target)) {
-                        FileSystemUtil.copyClassPathFile(this::class.java.classLoader, "platforms/${version.name}/${file.file}", target.toString())
+                        FileSystemUtil.copyClassPathFile(
+                            this::class.java.classLoader,
+                            "platforms/${version.name}/${file.file}",
+                            target.toString()
+                        )
                     }
                 }
+
                 VersionFileStrategy.DIRECT_CREATE -> {
                     Files.deleteIfExists(target)
                     target.parent.toFile().mkdirs()
                     Files.createFile(target)
                 }
-                null -> Logger().error("Version.kt Strategy is null!")
+
+                null -> logger.error("Version.kt Strategy is null!")
             }
 
             if (file.replacements!!.isNotEmpty()) {
@@ -72,7 +84,8 @@ class Version(
                     .replace("%forwarding_secret%", Node.versionProvider.FORWARDING_SECRET)
                     .replace(
                         "%velocity_use%",
-                        Node.taskProvider.tasks()?.any { it.version().name.equals("velocity", ignoreCase = true) }.toString()
+                        Node.taskProvider.tasks()?.any { it.version().name.equals("velocity", ignoreCase = true) }
+                            .toString()
                     )
 
                 Files.writeString(target, Files.readString(target) + content)
@@ -80,7 +93,7 @@ class Version(
         }
     }
 
-    fun download(display: VersionInfo, localService: LocalService) {
+    private fun download(display: VersionInfo, localService: LocalService) {
         val version = versions.firstOrNull { it.version.equals(display.versions, ignoreCase = true) }
             ?: throw NoSuchElementException()
 
@@ -92,7 +105,7 @@ class Version(
 
         val file = platformDir.resolve("${display.name}-${display.versions}.jar")
         if (!Files.exists(file)) {
-            Logger().error("Downloading and patching file!")
+            logger.error("Downloading and patching file!")
             Downloader.download(version.link, file)
 
             patchers.forEach { it.patch(file.toFile(), localService) }

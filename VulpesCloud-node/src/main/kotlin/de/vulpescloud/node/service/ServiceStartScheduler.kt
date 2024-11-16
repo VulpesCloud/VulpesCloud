@@ -28,7 +28,7 @@ class ServiceStartScheduler : CoroutineScope {
 
     fun schedule() = launch {
         while (true) {
-            logger.warn("Checking for services to start!")
+            logger.debug("Checking for services to start!")
             for (task: Task in taskProvider.tasks()!!) {
                 if (task.maintenance()) continue
 
@@ -36,13 +36,13 @@ class ServiceStartScheduler : CoroutineScope {
 
                 if (task.minOnlineCount() < task.services()!!.size) continue
 
-                logger.warn(task.name())
-                logger.warn(task.minOnlineCount().toString())
-                logger.warn(task.services()!!.size.toString())
+                logger.debug(task.name())
+                logger.debug(task.minOnlineCount().toString())
+                logger.debug(task.services()!!.size.toString())
 
                 val serviceToStart = task.minOnlineCount() - task.services()!!.size
 
-                logger.warn(serviceToStart.toString())
+                logger.debug(serviceToStart.toString())
 
                 for (i in 0 until serviceToStart) {
                     Node.serviceProvider.factory().startServiceOnTask(task)

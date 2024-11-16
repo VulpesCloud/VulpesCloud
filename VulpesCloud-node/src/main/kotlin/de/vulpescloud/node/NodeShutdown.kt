@@ -4,14 +4,14 @@ import de.vulpescloud.api.cluster.NodeStates
 import de.vulpescloud.api.network.redis.RedisPubSubChannels
 import de.vulpescloud.api.services.ServiceMessageBuilder
 import de.vulpescloud.api.services.action.ServiceActions
-import de.vulpescloud.node.logging.Logger
 import de.vulpescloud.node.networking.redis.RedisConnectionChecker
 import de.vulpescloud.node.service.ServiceStartScheduler
+import org.slf4j.LoggerFactory
 import kotlin.system.exitProcess
 
 object NodeShutdown {
 
-    private val logger = Logger()
+    private val logger = LoggerFactory.getLogger(NodeShutdown::class.java)
 
     fun nodeShutdown(forceShutdown: Boolean) {
 
@@ -24,9 +24,9 @@ object NodeShutdown {
             Node.serviceProvider.services()?.forEach {
                 Node.instance?.getRC()?.sendMessage(
                     ServiceMessageBuilder.actionMessageBuilder()
-                    .setService(it)
-                    .setAction(ServiceActions.STOP)
-                    .build(),
+                        .setService(it)
+                        .setAction(ServiceActions.STOP)
+                        .build(),
                     RedisPubSubChannels.VULPESCLOUD_ACTION_SERVICE.name
                 )
             }

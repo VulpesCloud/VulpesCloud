@@ -4,14 +4,14 @@ import de.vulpescloud.api.command.CommandInfo
 import de.vulpescloud.api.version.VersionInfo
 import de.vulpescloud.api.version.VersionType
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.logging.Logger
 import de.vulpescloud.node.task.TaskImpl
 import org.incendo.cloud.kotlin.extension.buildAndRegister
 import org.incendo.cloud.parser.standard.StringParser
 import org.json.JSONObject
+import org.slf4j.LoggerFactory
 
 class TasksCommand {
-    val logger = Logger()
+    val logger: org.slf4j.Logger = LoggerFactory.getLogger(TasksCommand::class.java)
 
     init {
         Node.commandProvider?.registeredCommands?.add(
@@ -110,7 +110,6 @@ class TasksCommand {
                 } else {
                     // TODO("FIX TASK SETUP")
                     // TaskSetup().run()
-                    Logger().info("test")
                 }
             }
         }

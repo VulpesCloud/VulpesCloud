@@ -2,15 +2,15 @@ package de.vulpescloud.node.commands
 
 import de.vulpescloud.api.command.CommandInfo
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.logging.Logger
 import org.incendo.cloud.kotlin.extension.buildAndRegister
 import org.incendo.cloud.parser.standard.StringParser
+import org.slf4j.LoggerFactory
 
 class ClusterCommand {
 
     init {
 
-        val logger = Logger()
+        val logger = LoggerFactory.getLogger(ClusterCommand::class.java)
 
         Node.commandProvider?.registeredCommands?.add(
             CommandInfo(

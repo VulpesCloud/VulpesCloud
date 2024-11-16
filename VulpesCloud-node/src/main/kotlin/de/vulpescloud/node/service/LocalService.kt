@@ -6,10 +6,10 @@ import de.vulpescloud.api.services.ClusterServiceStates
 import de.vulpescloud.api.services.builder.ServiceEventMessageBuilder
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.logging.Logger
 import de.vulpescloud.node.util.DirectoryActions
 import de.vulpescloud.node.version.Version
 import org.json.JSONObject
+import org.slf4j.LoggerFactory
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 import java.nio.file.Files
@@ -27,7 +27,7 @@ class LocalService(
 ) :
     Service(task, orderedId, id, port, hostname!!, runningNode!!) {
 
-    private val logger = Logger()
+    private val logger = LoggerFactory.getLogger(LocalService::class.java)
 
     private var process: Process? = null
     private var processTracking: Thread? = null
@@ -65,7 +65,8 @@ class LocalService(
         Thread {
             process?.inputStream?.bufferedReader()?.use { reader ->
                 reader.forEachLine { line ->
-                    Logger().debug("[${name()}] $line")
+                    // todo Make better service console logging
+                    logger.debug("[${name()}] $line")
                 }
             }
         }.start()
@@ -77,15 +78,15 @@ class LocalService(
                     process?.waitFor()
                 }
             } catch (e: InterruptedException) {
-                Logger().debug("Exception: ${e.printStackTrace()}")
+                logger.debug("Exception: {}", e.printStackTrace())
             }
-//            if (state() != ClusterServiceStates.STOPPING) {
-//                Node.instance?.getRC()?.sendMessage("SERVICE;${this.name()};EVENT;STOP", "testcloud-service-events")
-//                if (process != null) {
-//                    process!!.exitValue()
-//                }
-//                this.postShutdownProcess()
-//            }
+            if (state() != ClusterServiceStates.STOPPING) {
+                // Node.instance?.getRC()?.sendMessage("SERVICE;${this.name()};EVENT;STOP", "testcloud-service-events")
+                if (process != null) {
+                    process!!.exitValue()
+                }
+                this.postShutdownProcess()
+            }
         }
 
         processTracking!!.start()
@@ -119,7 +120,6 @@ class LocalService(
 
         if (!task.staticService()) {
             synchronized(this) {
-                // todo check for windows directory not empty exception
                 try {
                     Thread.sleep(200)
                 } catch (ignore: InterruptedException) {
@@ -139,7 +139,7 @@ class LocalService(
         logger.info("The service &8'&f${name()}&8' &7is stopped now&8!")
 
         // todo Update the Service in the cluster
-        // Node.instance?.getRC()?.sendMessage("SERVICE;${this.name()};EVENT;STOPPED", "testcloud-service-events")
+        Node.instance!!.getRC()?.deleteHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, name())
     }
 
     private fun hasProcess(): Boolean {

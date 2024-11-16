@@ -3,20 +3,19 @@ package de.vulpescloud.node.networking.redis
 
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeShutdown
-import de.vulpescloud.node.logging.Logger
 import org.json.JSONObject
-// import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import redis.clients.jedis.BinaryJedisPubSub
 import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
 import redis.clients.jedis.exceptions.JedisConnectionException
 import java.nio.charset.StandardCharsets
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class RedisController : BinaryJedisPubSub(), Runnable {
 
-    private val logger: Logger = Logger()  // LoggerFactory.getLogger(RedisController::class.java)
+    private val logger = LoggerFactory.getLogger(RedisController::class.java)
 
     private val jedisPool: JedisPool
     private var channelsInByte: Array<ByteArray>

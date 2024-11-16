@@ -5,11 +5,13 @@
     <import class="ch.qos.logback.classic.filter.ThresholdFilter"/>
     <import class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy"/>
 
-    <property name="LINE_PATTERN" value="%gray([%boldWhite(%d{dd.MM HH:mm:ss.SSS}%gray(]))) %gray(%-5level) %msg%n"/>
+    <conversionRule conversionWord="levelColor" class="de.vulpescloud.node.terminal.LoggingLevelConversion"/>
+
+    <property name="LINE_PATTERN" value="%gray([%boldWhite(%d{dd.MM HH:mm:ss.SSS}%gray(]))) %gray(%levelColor(%-5level)) %gray(:) %msg"/>
 
     <appender name="ConsoleAppender" class="ConsoleAppender">
         <filter class="ThresholdFilter">
-            <level>DEBUG</level>
+            <level>INFO</level>
         </filter>
         <encoder class="PatternLayoutEncoder">
             <pattern>${LINE_PATTERN}</pattern>
@@ -24,7 +26,7 @@
             <totalSizeCap>2GB</totalSizeCap>
         </rollingPolicy>
         <encoder class="PatternLayoutEncoder">
-            <pattern>[%d{dd.MM HH:mm:ss.SSS}] %-5level: %msg%n</pattern>
+            <pattern>[%d{dd.MM HH:mm:ss.SSS}] %-5level: %msg</pattern>
         </encoder>
     </appender>
 
@@ -36,5 +38,6 @@
     <logger name="com.zaxxer.hikari.pool.PoolBase" level="INFO"/>
     <logger name="com.zaxxer.hikari.pool.HikariPool" level="INFO"/>
     <logger name="com.zaxxer.hikari.HikariDataSource" level="INFO"/>
+    <logger name="com.zaxxer.hikari" level="INFO"/>
     <logger name="org.mariadb.jdbc" level="INFO" />
 </configuration>

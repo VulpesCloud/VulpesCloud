@@ -1,8 +1,8 @@
 package de.vulpescloud.node.util
 
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.logging.Logger
 import lombok.SneakyThrows
+import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
@@ -59,7 +59,8 @@ object JavaFileAttach {
             }
             tempJarFile.renameTo(outputJarFile)
         } catch (e: IOException) {
-            Logger().error("A new error has occured in JavaFileAttach! >>" + e)
+            LoggerFactory.getLogger(JavaFileAttach::class.java)
+                .error("A new error has occured in JavaFileAttach! >> $e")
         }
     }
 

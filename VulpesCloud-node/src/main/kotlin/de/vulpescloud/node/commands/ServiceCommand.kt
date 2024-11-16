@@ -5,12 +5,13 @@ import de.vulpescloud.api.network.redis.RedisPubSubChannels
 import de.vulpescloud.api.services.ServiceMessageBuilder
 import de.vulpescloud.api.services.action.ServiceActions
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.logging.Logger
 import org.incendo.cloud.kotlin.extension.buildAndRegister
 import org.incendo.cloud.parser.standard.StringParser
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 class ServiceCommand {
-    val logger = Logger()
+    val logger: Logger = LoggerFactory.getLogger(ServiceCommand::class.java)
 
     init {
         Node.commandProvider?.registeredCommands?.add(
@@ -27,7 +28,8 @@ class ServiceCommand {
 
             handler { _ ->
                 logger.info("The following &b${Node.serviceProvider.services()!!.size} &7services are loaded&8:")
-                Node.serviceProvider.services()!!.forEach { service -> logger.info("&8- &f${service.name()} &8: (&7${service.details()}&8)") }
+                Node.serviceProvider.services()!!
+                    .forEach { service -> logger.info("&8- &f${service.name()} &8: (&7${service.details()}&8)") }
             }
         }
 
@@ -55,7 +57,7 @@ class ServiceCommand {
                             )
                         }
                     } catch (e: Exception) {
-                        logger.error(e)
+                        logger.error(e.toString())
                     }
                 } else {
                     logger.info("The entered Service does not exist!")
@@ -80,7 +82,7 @@ class ServiceCommand {
                             RedisPubSubChannels.VULPESCLOUD_ACTION_SERVICE.name
                         )
                     } catch (e: Exception) {
-                        logger.error(e)
+                        logger.error(e.toString())
                     }
                 } else {
                     logger.info("The entered Service does not exist!")

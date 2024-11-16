@@ -8,7 +8,6 @@ import de.vulpescloud.node.commands.*
 import de.vulpescloud.node.config.LogLevels
 import de.vulpescloud.node.event.events.NodeStateChangeEvent
 import de.vulpescloud.node.event.events.TaskUpdateEvent
-import de.vulpescloud.node.logging.Logger
 import de.vulpescloud.node.networking.mysql.MySQLController
 import de.vulpescloud.node.networking.redis.RedisConnectionChecker
 import de.vulpescloud.node.networking.redis.RedisController
@@ -20,10 +19,8 @@ import de.vulpescloud.node.terminal.JLineTerminal
 import de.vulpescloud.node.util.Configurations.readContent
 import de.vulpescloud.node.version.VersionProvider
 import org.slf4j.LoggerFactory
-import java.net.URI
 import java.nio.file.Path
 import kotlin.system.exitProcess
-
 
 class Node {
 
@@ -87,56 +84,30 @@ class Node {
 
         languageProvider.loadLangFilesFromClassPath()
 
-        // logger = Logger()
-
         logger = LoggerFactory.getLogger(Node::class.java)
-
-        logger.debug("Terminal initialized! Continuing Startup!")
-
-        logger.debug("Loading Redis Controller")
 
         redisController = RedisController()
 
-        logger.debug("Initializing MySQL Controller")
-
         mySQLController = MySQLController()
 
-        logger.debug("Creating MySQL Tables")
-
         mySQLController.createDefaultTables()
-
-        logger.debug("Loading Events!")
 
         NodeStateChangeEvent
         TaskUpdateEvent
 
-        logger.debug("Initializing ClusterProvider")
-
         clusterProvider = ClusterProvider()
-
-        logger.debug("Initializing VersionProvider")
 
         versionProvider = VersionProvider()
 
-        logger.debug("Initializing TaskProvider")
-
         taskProvider = TaskProvider()
 
-        logger.debug("Initializing TemplateProvider")
-
         templateProvider = TemplateProvider()
-
-        logger.debug("Initializing ServiceProvider")
 
         serviceProvider = ServiceProvider()
 
         serviceProvider.getAllServiceFromRedis()
 
-        logger.debug("Initializing CommandProvider")
-
         commandProvider = CommandProvider()
-
-        logger.debug("Registering Commands!")
 
         ClearCommand()
         HelpCommand()
@@ -153,6 +124,11 @@ class Node {
         RedisConnectionChecker().schedule()
 
         ServiceStartScheduler().schedule()
+
+        logger.info(
+            languageProvider.translate("node.boot.success.message"),
+            System.currentTimeMillis() - System.getProperty("startup").toLong()
+        )
 
         terminal!!.allowInput()
 

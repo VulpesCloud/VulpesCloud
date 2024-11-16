@@ -3,7 +3,7 @@ package de.vulpescloud.node.cluster
 import de.vulpescloud.api.cluster.NodeInformation
 import de.vulpescloud.api.cluster.NodeStates
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.logging.Logger
+import org.slf4j.LoggerFactory
 import java.util.*
 import javax.sql.rowset.RowSetFactory
 import javax.sql.rowset.RowSetProvider
@@ -13,7 +13,7 @@ class ClusterProvider {
 
     private val redis = Node.instance!!.getRC()
     private val mySQL = Node.mySQLController
-    private val logger = Logger()
+    private val logger = LoggerFactory.getLogger(ClusterProvider::class.java)
     private lateinit var rowSetFactory: RowSetFactory
     val nodes: MutableList<NodeInformation> = mutableListOf()
 
@@ -29,7 +29,7 @@ class ClusterProvider {
         try {
             rowSetFactory = RowSetProvider.newFactory()
         } catch (e: Exception) {
-            logger.error(e)
+            logger.error(e.toString())
         }
 
         val redisNodes = redis?.getAllHashFields("VulpesCloud-Nodes")
@@ -89,7 +89,7 @@ class ClusterProvider {
                 updateLocalNodeState(NodeStates.STARTING)
 
             } catch (e: Exception) {
-                logger.error(e)
+                logger.error(e.toString())
             }
         }
     }

@@ -4,12 +4,13 @@ import com.google.common.collect.Iterables
 import de.vulpescloud.api.command.CommandInfo
 import de.vulpescloud.node.command.CloudCommandManager
 import de.vulpescloud.node.command.source.CommandSource
-import de.vulpescloud.node.logging.Logger
 import org.incendo.cloud.annotations.AnnotationParser
 import org.incendo.cloud.execution.CommandResult
 import org.incendo.cloud.execution.ExecutionCoordinator
 import org.incendo.cloud.meta.CommandMeta
 import org.incendo.cloud.parser.ParserParameters
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.function.Function
@@ -24,7 +25,7 @@ class CommandProvider {
 //        String::class.java
 //    )
 
-    val logger = Logger()
+    val logger: Logger = LoggerFactory.getLogger(CommandProvider::class.java)
 
     var commandManager: CloudCommandManager?
 
@@ -69,7 +70,7 @@ class CommandProvider {
         return listOf()
     }
 
-    fun execute(source: CommandSource, input: String) : CompletableFuture<CommandResult<CommandSource>>? {
+    fun execute(source: CommandSource, input: String): CompletableFuture<CommandResult<CommandSource>>? {
         return commandManager?.commandExecutor()?.executeCommand(source, input)
 
     }

@@ -1,8 +1,8 @@
 package de.vulpescloud.node.networking.redis
 
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.logging.Logger
 import kotlinx.coroutines.*
+import org.slf4j.LoggerFactory
 import kotlin.coroutines.CoroutineContext
 
 class RedisConnectionChecker : CoroutineScope {
@@ -16,6 +16,7 @@ class RedisConnectionChecker : CoroutineScope {
     private var runtime = 0
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Default + job
+    private val logger = LoggerFactory.getLogger(RedisConnectionChecker::class.java)
 
     init {
         instance = this
@@ -30,16 +31,16 @@ class RedisConnectionChecker : CoroutineScope {
             runtime += 1
             redis?.setHashField("VulpesCloud-HeartBeat", Node.nodeConfig!!.name, "$runtime")
             if (redis?.getHashField("VulpesCloud-HeartBeat", Node.nodeConfig!!.name)?.toInt() != runtime) {
-                Logger.instance.error("REDIS CONNECTION SEEMS TO BE LOST!")
-                Logger.instance.error("REDIS CONNECTION SEEMS TO BE LOST!")
-                Logger.instance.error("REDIS CONNECTION SEEMS TO BE LOST!")
-                Logger.instance.error("REDIS CONNECTION SEEMS TO BE LOST!")
-                Logger.instance.error("REDIS CONNECTION SEEMS TO BE LOST!")
-                Logger.instance.error("REDIS CONNECTION SEEMS TO BE LOST!")
-                Logger.instance.error("REDIS CONNECTION SEEMS TO BE LOST!")
-                Logger.instance.error("REDIS CONNECTION SEEMS TO BE LOST!")
+                logger.error("REDIS CONNECTION SEEMS TO BE LOST!")
+                logger.error("REDIS CONNECTION SEEMS TO BE LOST!")
+                logger.error("REDIS CONNECTION SEEMS TO BE LOST!")
+                logger.error("REDIS CONNECTION SEEMS TO BE LOST!")
+                logger.error("REDIS CONNECTION SEEMS TO BE LOST!")
+                logger.error("REDIS CONNECTION SEEMS TO BE LOST!")
+                logger.error("REDIS CONNECTION SEEMS TO BE LOST!")
+                logger.error("REDIS CONNECTION SEEMS TO BE LOST!")
             } else {
-                Logger.instance.debug(" || RedisConnectionListener -> Redis Connection is still valid. ||")
+                logger.debug(" || RedisConnectionListener -> Redis Connection is still valid. ||")
             }
             delay(60000)
         }

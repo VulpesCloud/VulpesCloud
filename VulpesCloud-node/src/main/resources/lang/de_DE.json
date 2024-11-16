@@ -1,3 +1,4 @@
 {
-  "service.event.state.message": "&7Der Service %name% ist jetzt am %state%"
+  "service.event.state.message": "&7Der Service %name% ist jetzt am %state%",
+  "node.boot.success.message": "Die Node hat {}ms zum starten gebraucht"
 }

@@ -3,13 +3,12 @@ package de.vulpescloud.node.networking.mysql
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.logging.Logger
+import org.slf4j.LoggerFactory
 import java.sql.ResultSet
-import java.util.*
 
 class MySQLController {
 
-    private val logger = Logger()
+    private val logger = LoggerFactory.getLogger(MySQLController::class.java)
 
     private var dataSource: HikariDataSource
 
@@ -45,15 +44,11 @@ class MySQLController {
     }
 
     fun createDefaultTables() {
-
-        logger.warn(UUID.randomUUID())
-
         try {
             dbExecute("CREATE TABLE IF NOT EXISTS nodes (id SERIAL PRIMARY KEY, name TEXT, uuid VARCHAR(36))")
         } catch (e: Exception) {
-            logger.error(e)
+            logger.error(e.toString())
         }
-
     }
 
     fun dbExecWithRs(sql: String): ResultSet {

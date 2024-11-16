@@ -2,13 +2,13 @@ package de.vulpescloud.node.commands
 
 import de.vulpescloud.api.command.CommandInfo
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.logging.Logger
 import org.incendo.cloud.kotlin.extension.buildAndRegister
 import org.incendo.cloud.parser.standard.StringParser
+import org.slf4j.LoggerFactory
 
 class VersionCommand {
 
-    private val logger = Logger()
+    val logger: org.slf4j.Logger = LoggerFactory.getLogger(VersionCommand::class.java)
 
     init {
         Node.commandProvider?.registeredCommands?.add(

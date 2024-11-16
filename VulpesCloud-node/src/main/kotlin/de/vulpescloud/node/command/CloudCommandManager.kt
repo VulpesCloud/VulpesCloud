@@ -1,11 +1,12 @@
 package de.vulpescloud.node.command
 
 import de.vulpescloud.node.command.source.CommandSource
-import de.vulpescloud.node.logging.Logger
 import lombok.NonNull
 import org.incendo.cloud.CommandManager
 import org.incendo.cloud.execution.ExecutionCoordinator
 import org.incendo.cloud.internal.CommandRegistrationHandler
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.function.Consumer
 
@@ -18,11 +19,14 @@ class CloudCommandManager(
         lateinit var instance: CloudCommandManager
     }
 
+    val logger: Logger = LoggerFactory.getLogger(CloudCommandManager::class.java)
+
     fun bootstrap(
         @NonNull args: @NonNull Array<String?>,
         @NonNull managerConsumer: Consumer<CommandManager<CommandSource>?>,
     ) {
-        val cliCommandManager: CommandManager<CommandSource> = CloudCommandManager(ExecutionCoordinator.simpleCoordinator())
+        val cliCommandManager: CommandManager<CommandSource> =
+            CloudCommandManager(ExecutionCoordinator.simpleCoordinator())
         managerConsumer.accept(cliCommandManager)
         instance.run(args)
     }
@@ -35,10 +39,10 @@ class CloudCommandManager(
         this.registerDefaultExceptionHandlers(
             { triplet ->
                 val message = triplet.first().formatCaption(triplet.second(), triplet.third())
-                Logger().error(message)
+                logger.error(message)
             },
             { pair ->
-                Logger().error(pair.first())
+                logger.error(pair.first())
                 pair.second().printStackTrace()
             }
         )
@@ -53,13 +57,13 @@ class CloudCommandManager(
         try {
             commandExecutor().executeCommand(CommandSource.console(), java.lang.String.join(" ", *args)).join()
         } catch (e: Exception) {
-            Logger().error(e.toString())
+            logger.error(e.toString())
         }
     }
 
 //    fun permissionFunction(permissionFunction: PermissionFunction) {
 //        this.permissionFunction = Objects.requireNonNull(permissionFunction)
 //    }
-    
+
 
 }

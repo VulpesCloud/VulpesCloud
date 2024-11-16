@@ -6,7 +6,6 @@ import de.vulpescloud.api.services.ClusterServiceFactory
 import de.vulpescloud.api.services.ClusterServiceStates
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.logging.Logger
 import de.vulpescloud.node.service.config.ServiceConfig
 import de.vulpescloud.node.template.TemplateFactory
 import org.json.JSONObject
@@ -21,6 +20,8 @@ import java.util.concurrent.CompletableFuture
 import java.util.stream.IntStream
 
 class ServiceFactory : ClusterServiceFactory {
+
+    private val logger = LoggerFactory.getLogger(ServiceFactory::class.java)
 
     override fun shutdownAllServicesOnTask(task: Task) {
         TODO("Not yet implemented")
@@ -45,37 +46,41 @@ class ServiceFactory : ClusterServiceFactory {
 
             localService.updateLocalServiceState(ClusterServiceStates.PREPARED)
 
-            Node.instance!!.getRC()?.setHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, localService.name(), JSONObject(localService).toString())
+            Node.instance!!.getRC()?.setHashField(
+                RedisHashNames.VULPESCLOUD_SERVICES.name,
+                localService.name(),
+                JSONObject(localService).toString()
+            )
 
             try {
 
-                Logger().debug("Adding to services")
+                logger.debug("Adding to services")
 
                 Node.serviceProvider.services()!!.add(localService)
 
-                Logger().debug("Cloning Template")
+                logger.debug("Cloning Template")
 
                 TemplateFactory.cloneTemplate(localService)
 
-                Logger().debug("Prepairing Version")
+                logger.debug("Prepairing Version")
 
                 try {
                     version?.prepare(task.version(), localService)
                 } catch (e: Exception) {
-                    Logger.instance.error(e.printStackTrace())
+                    logger.error(e.toString())
                 }
 
-                Logger().debug("generate args")
+                logger.debug("generate args")
 
                 val arguments = generateServiceArguments(localService)
 
-                Logger().debug("Making processBuilder")
+                logger.debug("Making processBuilder")
 
                 val processBuilder = ProcessBuilder(*arguments.toTypedArray()).directory(
                     localService.runningDir.toFile()
                 ).redirectErrorStream(true)
 
-                Logger().debug("Adding Environment vars")
+                logger.debug("Adding Environment vars")
 
                 processBuilder.environment()["bootstrapFile"] = "${task.version().name}-${task.version().versions}.jar"
                 processBuilder.environment()["redis_user"] = Node.nodeConfig?.redis?.user
@@ -92,24 +97,28 @@ class ServiceFactory : ClusterServiceFactory {
                     processBuilder.environment()["separateClassLoader"] = false.toString()
                 else processBuilder.environment()["separateClassLoader"] = true.toString()
 
-                Logger().debug("Making PluginDir")
+                logger.debug("Making PluginDir")
 
                 val pluginDir = localService.runningDir.resolve(version?.pluginDir!!)
                 pluginDir.toFile().mkdirs()
 
-                Files.copy(Path.of("local/dependencies/vulpescloud-connector.jar"), pluginDir.resolve("vulpescloud-connector.jar"), StandardCopyOption.REPLACE_EXISTING)
+                Files.copy(
+                    Path.of("local/dependencies/vulpescloud-connector.jar"),
+                    pluginDir.resolve("vulpescloud-connector.jar"),
+                    StandardCopyOption.REPLACE_EXISTING
+                )
 
                 ServiceConfig.makeServiceConfigs(localService)
 
-                Logger().debug("Calling update")
+                logger.debug("Calling update")
 
                 localService.updateLocalServiceState(ClusterServiceStates.CONNECTING)
 
-                Logger().debug("Starting Service")
+                logger.debug("Starting Service")
 
                 localService.start(processBuilder)
             } catch (e: Exception) {
-                Logger().error(e)
+                logger.error(e.toString())
             }
         }
     }
@@ -128,8 +137,8 @@ class ServiceFactory : ClusterServiceFactory {
         val services = task.services() ?: return false // Check if services is null
 
         services.forEach {
-            Logger().debug(it!!.name())
-            Logger().debug(it.orderedId())
+            logger.debug(it!!.name())
+            logger.debug(it.orderedId().toString())
         }
 
         return services.stream()
