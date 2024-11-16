@@ -17,6 +17,7 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.*
+import java.util.concurrent.CompletableFuture
 import java.util.stream.IntStream
 
 class ServiceFactory : ClusterServiceFactory {
@@ -30,8 +31,8 @@ class ServiceFactory : ClusterServiceFactory {
     }
 
     override fun startServiceOnTask(task: Task) {
-
-        val localService = LocalService(
+        CompletableFuture.runAsync {
+            val localService = LocalService(
                 task,
                 generateOrderedId(task),
                 UUID.randomUUID(),
@@ -40,75 +41,76 @@ class ServiceFactory : ClusterServiceFactory {
                 Node.nodeConfig?.name!!
             )
 
-        val version = localService.version()
+            val version = localService.version()
 
-        localService.updateLocalServiceState(ClusterServiceStates.PREPARED)
+            localService.updateLocalServiceState(ClusterServiceStates.PREPARED)
 
-        Node.instance!!.getRC()?.setHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, localService.name(), JSONObject(localService).toString())
-
-        try {
-
-            Logger().debug("Adding to services")
-
-            Node.serviceProvider.services()!!.add(localService)
-
-            Logger().debug("Cloning Template")
-
-            TemplateFactory.cloneTemplate(localService)
-
-            Logger().debug("Prepairing Version")
+            Node.instance!!.getRC()?.setHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, localService.name(), JSONObject(localService).toString())
 
             try {
-                version?.prepare(task.version(), localService)
+
+                Logger().debug("Adding to services")
+
+                Node.serviceProvider.services()!!.add(localService)
+
+                Logger().debug("Cloning Template")
+
+                TemplateFactory.cloneTemplate(localService)
+
+                Logger().debug("Prepairing Version")
+
+                try {
+                    version?.prepare(task.version(), localService)
+                } catch (e: Exception) {
+                    Logger.instance.error(e.printStackTrace())
+                }
+
+                Logger().debug("generate args")
+
+                val arguments = generateServiceArguments(localService)
+
+                Logger().debug("Making processBuilder")
+
+                val processBuilder = ProcessBuilder(*arguments.toTypedArray()).directory(
+                    localService.runningDir.toFile()
+                ).redirectErrorStream(true)
+
+                Logger().debug("Adding Environment vars")
+
+                processBuilder.environment()["bootstrapFile"] = "${task.version().name}-${task.version().versions}.jar"
+                processBuilder.environment()["redis_user"] = Node.nodeConfig?.redis?.user
+                processBuilder.environment()["redis_hostname"] = Node.nodeConfig?.redis?.hostname
+                processBuilder.environment()["redis_password"] = Node.nodeConfig?.redis?.password
+                processBuilder.environment()["redis_port"] = Node.nodeConfig?.redis?.port.toString()
+                processBuilder.environment()["serviceId"] = localService.id().toString()
+                processBuilder.environment()["serviceName"] = localService.name()
+                processBuilder.environment()["forwarding_secret"] = Node.versionProvider.FORWARDING_SECRET
+                processBuilder.environment()["hostname"] = localService.hostname()
+                processBuilder.environment()["port"] = localService.port().toString()
+
+                if (localService.version()?.name == "Velocity")
+                    processBuilder.environment()["separateClassLoader"] = false.toString()
+                else processBuilder.environment()["separateClassLoader"] = true.toString()
+
+                Logger().debug("Making PluginDir")
+
+                val pluginDir = localService.runningDir.resolve(version?.pluginDir!!)
+                pluginDir.toFile().mkdirs()
+
+                Files.copy(Path.of("local/dependencies/vulpescloud-connector.jar"), pluginDir.resolve("vulpescloud-connector.jar"), StandardCopyOption.REPLACE_EXISTING)
+
+                ServiceConfig.makeServiceConfigs(localService)
+
+                Logger().debug("Calling update")
+
+                localService.updateLocalServiceState(ClusterServiceStates.CONNECTING)
+
+                Logger().debug("Starting Service")
+
+                localService.start(processBuilder)
             } catch (e: Exception) {
-                Logger.instance.error(e.printStackTrace())
+                Logger().error(e)
             }
-
-            Logger().debug("generate args")
-
-            val arguments = generateServiceArguments(localService)
-
-            Logger().debug("Making processBuilder")
-
-            val processBuilder = ProcessBuilder(*arguments.toTypedArray()).directory(
-                localService.runningDir.toFile()
-            ).redirectErrorStream(true)
-
-            Logger().debug("Adding Environment vars")
-
-            processBuilder.environment()["bootstrapFile"] = "${task.version().name}-${task.version().versions}.jar"
-            processBuilder.environment()["redis_user"] = Node.nodeConfig?.redis?.user
-            processBuilder.environment()["redis_hostname"] = Node.nodeConfig?.redis?.hostname
-            processBuilder.environment()["redis_password"] = Node.nodeConfig?.redis?.password
-            processBuilder.environment()["redis_port"] = Node.nodeConfig?.redis?.port.toString()
-            processBuilder.environment()["serviceId"] = localService.id().toString()
-            processBuilder.environment()["serviceName"] = localService.name()
-            processBuilder.environment()["forwarding_secret"] = Node.versionProvider.FORWARDING_SECRET
-            processBuilder.environment()["hostname"] = localService.hostname()
-            processBuilder.environment()["port"] = localService.port().toString()
-
-            if (localService.version()?.name == "Velocity")
-                processBuilder.environment()["separateClassLoader"] = false.toString()
-            else processBuilder.environment()["separateClassLoader"] = true.toString()
-
-            Logger().debug("Making PluginDir")
-
-            val pluginDir = localService.runningDir.resolve(version?.pluginDir!!)
-            pluginDir.toFile().mkdirs()
-
-            Files.copy(Path.of("local/dependencies/vulpescloud-connector.jar"), pluginDir.resolve("vulpescloud-connector.jar"), StandardCopyOption.REPLACE_EXISTING)
-
-            ServiceConfig.makeServiceConfigs(localService)
-
-            Logger().debug("Calling update")
-
-            localService.updateLocalServiceState(ClusterServiceStates.CONNECTING)
-
-            Logger().debug("Starting Service")
-
-            localService.start(processBuilder)
-        } catch (e: Exception) {
-            Logger().error(e)
         }
     }
 
