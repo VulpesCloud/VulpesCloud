@@ -111,7 +111,7 @@ class Node {
 
         setupLock.withLock {
             while (!nodeConfig!!.ranFirstSetup) {
-                setupCondition.await() // Wait efficiently
+                setupCondition.await()
             }
         }
 
@@ -163,10 +163,6 @@ class Node {
 
         clusterProvider.updateLocalNodeState(NodeStates.ONLINE)
     }
-
-//    fun updateConfig() {
-//        writeContent(Path.of("config.json"), nodeConfig)
-//    }
 
     fun getRC(): RedisController? {
         return redisController
