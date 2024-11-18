@@ -7,6 +7,8 @@ import de.vulpescloud.api.services.action.ServiceActions
 import de.vulpescloud.node.networking.redis.RedisConnectionChecker
 import de.vulpescloud.node.service.ServiceStartScheduler
 import org.slf4j.LoggerFactory
+import java.util.concurrent.locks.Condition
+import java.util.concurrent.locks.ReentrantLock
 import kotlin.system.exitProcess
 
 object NodeShutdown {

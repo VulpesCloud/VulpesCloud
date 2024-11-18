@@ -40,7 +40,6 @@ class JLineTerminal(config: NodeConfig) {
         ConcurrentHashMap<UUID, ConsoleTabCompleteHandler>()
 
     init {
-        println("Setting and building terminal")
         terminal = TerminalBuilder.builder()
             .system(true)
             .encoding(StandardCharsets.UTF_8)
@@ -48,7 +47,6 @@ class JLineTerminal(config: NodeConfig) {
             .jansi(true)
             .build()
 
-        println("Setting and building lineReader")
         lineReader = LineReaderBuilder.builder()
             .terminal(terminal)
 //            .completer(JLineCompleter())
@@ -62,16 +60,12 @@ class JLineTerminal(config: NodeConfig) {
             .variable(LineReader.BELL_STYLE, "none")
             .build() as LineReaderImpl
 
-        println("Setting commandReadingThread")
         commandReadingThread = JLineCommandReadingThread(config, this)
 
-        println("Setting err stuff")
         System.setErr(LogOutputStream.forWarn(log).toPrintStream())
         System.setOut(LogOutputStream.forInfo(log).toPrintStream())
 
-        printLine("test")
-        println("print")
-        // clear()
+        clear()
         this.print(this, config)
     }
 

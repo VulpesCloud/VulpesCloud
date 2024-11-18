@@ -38,7 +38,7 @@ class ServiceFactory : ClusterServiceFactory {
                 generateOrderedId(task),
                 UUID.randomUUID(),
                 detectServicePort(task),
-                "127.0.0.1", // todo Make it pull the hostname from the Node's Config
+                "0.0.0.0", // todo Make it pull the hostname from the Node's Config
                 Node.nodeConfig?.name!!
             )
 
