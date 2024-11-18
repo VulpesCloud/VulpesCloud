@@ -17,6 +17,7 @@ class NodeConfig {
     var mysql: MySQLEndpointData?
     var nodes: MutableList<NodeInformation>
     var language: Languages
+    var ranFirstSetup: Boolean
 
 
     init {
@@ -27,5 +28,6 @@ class NodeConfig {
         this.mysql = MySQLEndpointData("vulpescloud", "", "vulpescloud", "127.0.0.1", 3306, false)
         this.nodes = mutableListOf()
         this.language = Languages.en_US
+        this.ranFirstSetup = false
     }
 }

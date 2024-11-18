@@ -58,9 +58,11 @@ class SetupProvider {
         val suffix = if (answers.isNotEmpty()) "&ePossible answers: " + answers.joinToString() else ""
         if (suffix.isEmpty()) {
             Node.terminal!!.printSetup(Node.languageProvider.translate(currentQuestion.setupQuestion.message))
+            Node.terminal!!.printSetup("")
         } else {
             Node.terminal!!.printSetup(Node.languageProvider.translate(currentQuestion.setupQuestion.message))
             Node.terminal!!.printSetup(suffix)
+            Node.terminal!!.printSetup("")
         }
     }
 
@@ -73,6 +75,7 @@ class SetupProvider {
 
         this.currentQuestionIndex++
         this.currentQuestion = setup.questions[currentQuestionIndex]
+        Node.terminal!!.printSetup("")
         printCurrentQuestion()
     }
 

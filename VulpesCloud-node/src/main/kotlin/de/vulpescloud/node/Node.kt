@@ -14,6 +14,7 @@ import de.vulpescloud.node.networking.redis.RedisController
 import de.vulpescloud.node.service.ServiceProvider
 import de.vulpescloud.node.service.ServiceStartScheduler
 import de.vulpescloud.node.setup.SetupProvider
+import de.vulpescloud.node.setups.NodeSetup
 import de.vulpescloud.node.task.TaskProvider
 import de.vulpescloud.node.template.TemplateProvider
 import de.vulpescloud.node.terminal.JLineTerminal
@@ -21,9 +22,16 @@ import de.vulpescloud.node.util.Configurations.readContent
 import de.vulpescloud.node.version.VersionProvider
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.locks.Condition
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 import kotlin.system.exitProcess
 
 class Node {
+
+    val setupLock = ReentrantLock()
+    val setupCondition: Condition = setupLock.newCondition()
 
     companion object {
 
@@ -91,6 +99,21 @@ class Node {
         languageProvider.setLang(nodeConfig!!.language)
 
         languageProvider.loadLangFilesFromClassPath()
+
+        if (!nodeConfig!!.ranFirstSetup) {
+            CompletableFuture.runAsync {
+                setupLock.withLock {
+                    terminal!!.allowInput()
+                    setupProvider.startSetup(NodeSetup())
+                }
+            }
+        }
+
+        setupLock.withLock {
+            while (!nodeConfig!!.ranFirstSetup) {
+                setupCondition.await() // Wait efficiently
+            }
+        }
 
         redisController = RedisController()
 

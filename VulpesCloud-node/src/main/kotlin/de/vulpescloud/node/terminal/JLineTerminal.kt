@@ -93,12 +93,12 @@ class JLineTerminal(config: NodeConfig) {
     }
 
     fun printLine(message: String) {
-        if (Node.setupProvider.currentSetup == null) {
+         if (Node.setupProvider.currentSetup == null) {
             terminal.puts(InfoCmp.Capability.carriage_return)
             terminal.writer().println(TerminalColorUtil.replaceColorCodes(message) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
             terminal.flush()
             update()
-        }
+         }
     }
 
     fun printSetup(message: String) {

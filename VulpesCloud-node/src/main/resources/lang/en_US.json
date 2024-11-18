@@ -1,5 +1,37 @@
 {
   "service.event.state.message": "&7The Service %name% is now %state%",
+
   "node.boot.success.message": "Node startup took {}ms",
-  "node.setup.all.started": "Setup started. Type `exit` to leave the setup."
+
+  "node.setup.all.started": "Setup started. Type `exit` to leave the setup.",
+
+  "node.setup.node.question.name": "What should this Node be named?",
+  "node.setup.node.question.name.answer.long": "Please pick a shorter name!",
+  "node.setup.node.question.name.answer.empty": "Please enter a name for this Node!",
+  "node.setup.node.question.name.answer.success": "Node name set &2successfully&7!",
+
+  "node.setup.node.question.mysql.user": "What is the name of the MySQL User?",
+  "node.setup.node.question.mysql.user.success": "&2Successfully &7set the MySQL User!",
+  "node.setup.node.question.mysql.password": "What is the password of the MySQL User?",
+  "node.setup.node.question.mysql.password.success": "&2Successfully &7set the MySQL Password!",
+  "node.setup.node.question.mysql.hostname": "What is the hostname of the MySQL Server?",
+  "node.setup.node.question.mysql.hostname.success": "&2Successfully &7set the MySQL hostname!",
+  "node.setup.node.question.mysql.port": "What is the port of the MySQL Server?",
+  "node.setup.node.question.mysql.port.success": "&2Successfully &7set the MySQL Port!",
+  "node.setup.node.question.mysql.port.invalid": "The entered Port is &cnot &7valid!",
+  "node.setup.node.question.mysql.ssl": "Does the MySQL server use ssl?",
+  "node.setup.node.question.mysql.ssl.success": "&2Successfully &7set ssl of MySQL server!",
+  "node.setup.node.question.mysql.ssl.invalid": "The input has to be true of false!",
+  "node.setup.node.question.mysql.database": "What is the name of the MySQL Database?",
+  "node.setup.node.question.mysql.database.success": "&2Successfully &7set the MySQL Database!",
+
+  "node.setup.node.question.redis.user": "What is the name of the Redis User?",
+  "node.setup.node.question.redis.user.success": "&2Successfully &7set the Redis User!",
+  "node.setup.node.question.redis.password": "What is the password of the Redis User?",
+  "node.setup.node.question.redis.password.success": "&2Successfully &7set the Redis Password!",
+  "node.setup.node.question.redis.hostname": "What is the hostname of the Redis Server?",
+  "node.setup.node.question.redis.hostname.success": "&2Successfully &7set the Redis hostname!",
+  "node.setup.node.question.redis.port": "What is the port of the Redis Server?",
+  "node.setup.node.question.redis.port.success": "&2Successfully &7set the Redis Port!",
+  "node.setup.node.question.redis.port.invalid": "The entered Port is &cnot &7valid!"
 }
