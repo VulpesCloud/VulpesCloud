@@ -20,7 +20,7 @@ public final class Launcher {
         Launcher.CLASS_LOADER.addURL(apiFile.toFile().toURI().toURL());
 
         var gsonDependency = new Dependency("com.google.code.gson", "gson", "2.11.0");
-        var jLineDependency = new  Dependency("org.jline", "jline", "3.27.0");
+        var jLineDependency = new  Dependency("org.jline", "jline", "3.27.1");
         var kotlinSTD = new  Dependency("org.jetbrains.kotlin", "kotlin-stdlib", "2.0.0");
         var jsonDependency = new Dependency("org.json", "json", "20240303");
         var jedisDependency = new Dependency("redis.clients", "jedis", "5.2.0");

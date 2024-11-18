@@ -16,6 +16,7 @@ class LoggingLevelConversion : CompositeConverter<ILoggingEvent>() {
             Level.WARN_INT -> { JLineTerminalColor.YELLOW.key.toString() }
             Level.ERROR_INT -> { JLineTerminalColor.RED.key.toString() }
             Level.TRACE_INT -> { JLineTerminalColor.MAGENTA.key.toString() }
+            Level.DEBUG_INT -> { JLineTerminalColor.MAGENTA.key.toString() }
             else -> { JLineTerminalColor.DARK_GRAY.key.toString() }
         }
     }

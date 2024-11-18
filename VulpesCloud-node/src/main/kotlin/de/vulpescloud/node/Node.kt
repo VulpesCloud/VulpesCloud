@@ -13,6 +13,7 @@ import de.vulpescloud.node.networking.redis.RedisConnectionChecker
 import de.vulpescloud.node.networking.redis.RedisController
 import de.vulpescloud.node.service.ServiceProvider
 import de.vulpescloud.node.service.ServiceStartScheduler
+import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.task.TaskProvider
 import de.vulpescloud.node.template.TemplateProvider
 import de.vulpescloud.node.terminal.JLineTerminal
@@ -64,12 +65,17 @@ class Node {
 
         lateinit var languageProvider: LanguageProvider
             private set
+
+        lateinit var setupProvider: SetupProvider
+            private set
     }
 
     init {
         instance = this
 
         nodeConfig = readContent(Path.of("config.json"), NodeConfig())
+
+        setupProvider = SetupProvider()
 
         terminal = JLineTerminal(nodeConfig!!)
 
@@ -78,13 +84,13 @@ class Node {
             exitProcess(1)
         }
 
+        logger = LoggerFactory.getLogger(Node::class.java)
+
         languageProvider = LanguageProvider()
 
         languageProvider.setLang(nodeConfig!!.language)
 
         languageProvider.loadLangFilesFromClassPath()
-
-        logger = LoggerFactory.getLogger(Node::class.java)
 
         redisController = RedisController()
 

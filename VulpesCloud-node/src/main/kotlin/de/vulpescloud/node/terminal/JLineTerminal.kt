@@ -1,5 +1,6 @@
 package de.vulpescloud.node.terminal
 
+import de.vulpescloud.node.Node
 import io.github.thecguygithub.api.log.LogOutputStream
 import de.vulpescloud.node.NodeConfig
 import de.vulpescloud.node.terminal.handler.ConsoleTabCompleteHandler
@@ -39,6 +40,7 @@ class JLineTerminal(config: NodeConfig) {
         ConcurrentHashMap<UUID, ConsoleTabCompleteHandler>()
 
     init {
+        println("Setting and building terminal")
         terminal = TerminalBuilder.builder()
             .system(true)
             .encoding(StandardCharsets.UTF_8)
@@ -46,6 +48,7 @@ class JLineTerminal(config: NodeConfig) {
             .jansi(true)
             .build()
 
+        println("Setting and building lineReader")
         lineReader = LineReaderBuilder.builder()
             .terminal(terminal)
 //            .completer(JLineCompleter())
@@ -59,12 +62,16 @@ class JLineTerminal(config: NodeConfig) {
             .variable(LineReader.BELL_STYLE, "none")
             .build() as LineReaderImpl
 
+        println("Setting commandReadingThread")
         commandReadingThread = JLineCommandReadingThread(config, this)
 
+        println("Setting err stuff")
         System.setErr(LogOutputStream.forWarn(log).toPrintStream())
         System.setOut(LogOutputStream.forInfo(log).toPrintStream())
 
-        clear()
+        printLine("test")
+        println("print")
+        // clear()
         this.print(this, config)
     }
 
@@ -86,10 +93,21 @@ class JLineTerminal(config: NodeConfig) {
     }
 
     fun printLine(message: String) {
-        terminal.puts(InfoCmp.Capability.carriage_return)
-        terminal.writer().println(TerminalColorUtil.replaceColorCodes(message) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
-        terminal.flush()
-        update()
+        if (Node.setupProvider.currentSetup == null) {
+            terminal.puts(InfoCmp.Capability.carriage_return)
+            terminal.writer().println(TerminalColorUtil.replaceColorCodes(message) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
+            terminal.flush()
+            update()
+        }
+    }
+
+    fun printSetup(message: String) {
+        if (Node.setupProvider.currentSetup != null) {
+            terminal.puts(InfoCmp.Capability.carriage_return)
+            terminal.writer().println(TerminalColorUtil.replaceColorCodes(message) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
+            terminal.flush()
+            update()
+        }
     }
 
     fun close() {
@@ -99,10 +117,6 @@ class JLineTerminal(config: NodeConfig) {
     fun updatePrompt(prompt: String) {
         lineReader.setPrompt(TerminalColorUtil.replaceColorCodes(prompt))
     }
-
-//    fun hasSetup(): Boolean {
-//        return setup != null
-//    }
 
     fun print(terminal: JLineTerminal, config: NodeConfig) {
         terminal.printLine("")

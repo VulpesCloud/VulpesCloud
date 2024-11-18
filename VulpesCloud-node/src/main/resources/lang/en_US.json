@@ -1,4 +1,5 @@
 {
   "service.event.state.message": "&7The Service %name% is now %state%",
-  "node.boot.success.message": "Node startup took {}ms"
+  "node.boot.success.message": "Node startup took {}ms",
+  "node.setup.all.started": "Setup started. Type `exit` to leave the setup."
 }
