@@ -11,12 +11,13 @@ object VelocityRegistrationHandler {
         for (server in servers()) {
             proxyServer.getServer(server).ifPresent { proxyServer.unregisterServer(it.serverInfo) }
         }
+        proxyServer.registerServer(ServerInfo("lobby-1", InetSocketAddress("127.0.0.1", 30000)))
 
         servers().forEach { println(it) }
     }
 
     fun registerServer(name: String, address: String, port: Int) {
-        proxyServer.registerServer(ServerInfo(name, InetSocketAddress(address, port)))
+        // proxyServer.registerServer(ServerInfo(name, InetSocketAddress(address, port)))
         servers().forEach { println(it) }
     }
 

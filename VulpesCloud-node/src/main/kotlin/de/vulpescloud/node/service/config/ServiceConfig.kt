@@ -48,6 +48,7 @@ object ServiceConfig {
                     properties.setProperty("server-ip", service.hostname())
                     properties.setProperty("server-port", service.port().toString())
                     properties.setProperty("motd", "A VulpesCloud Service!")
+                    properties.setProperty("online-mode", false.toString())
 
                     logger.info("Writing out the File to {}", service.runningDir.resolve("server.properties"))
                     val out = Files.newOutputStream(service.runningDir.resolve("server.properties"))
@@ -80,6 +81,7 @@ object ServiceConfig {
                     properties.setProperty("server-ip", service.hostname())
                     properties.setProperty("server-port", service.port().toString())
                     properties.setProperty("motd", "A VulpesCloud Service!")
+                    properties.setProperty("online-mode", false.toString())
 
                     logger.info("Writing out the File to {}", service.runningDir.resolve("server.properties"))
                     val out = Files.newOutputStream(service.runningDir.resolve("server.properties"))

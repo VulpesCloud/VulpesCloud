@@ -34,6 +34,7 @@ class VelocityConnector @Inject constructor(
         init()
         VelocityRegistrationHandler
         VelocityRedisSubscribe()
+        this.eventManager.register(this, VelocityEventListener())
     }
 
     @Subscribe(order = PostOrder.LAST)
