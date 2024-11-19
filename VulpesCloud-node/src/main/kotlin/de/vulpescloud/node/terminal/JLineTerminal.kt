@@ -1,5 +1,7 @@
 package de.vulpescloud.node.terminal
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.spi.ILoggingEvent
 import de.vulpescloud.node.Node
 import io.github.thecguygithub.api.log.LogOutputStream
 import de.vulpescloud.node.NodeConfig
@@ -29,6 +31,8 @@ class JLineTerminal(config: NodeConfig) {
 
 
     private val log = LoggerFactory.getLogger(JLineTerminal::class.java)
+
+    val logLines: MutableList<ILoggingEvent> = mutableListOf()
 
     var terminal: Terminal
 

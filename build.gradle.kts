@@ -1,4 +1,5 @@
 plugins {
+    kotlin("jvm") version "2.0.21"
     id("org.jetbrains.dokka") version "1.9.20"
     id("maven-publish")
     id("signing")
@@ -17,6 +18,7 @@ allprojects {
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
     apply(plugin = "org.jetbrains.dokka")
+    apply(plugin = "org.jetbrains.kotlin.jvm")
 
     version = "1.0.0-alpha"
     group = "io.github.thecguygithub"

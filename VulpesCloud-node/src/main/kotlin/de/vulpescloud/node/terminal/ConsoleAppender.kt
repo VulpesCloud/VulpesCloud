@@ -8,6 +8,10 @@ class ConsoleAppender : ConsoleAppender<ILoggingEvent>() {
 
     override fun append(eventObject: ILoggingEvent) {
         Node.terminal!!.printLine(String(super.encoder.encode(eventObject)))
+        Node.terminal!!.logLines.add(eventObject)
+        while (Node.terminal!!.logLines.size > 128) {
+            Node.terminal!!.logLines.removeLast()
+        }
     }
 
 }

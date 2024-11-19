@@ -75,6 +75,7 @@ cloud-extension = { group = "org.incendo", name = "cloud-kotlin-extensions", ver
 cloud-annotations = { group = "org.incendo", name = "cloud-annotations", version.ref = "cloud"}
 cloud-kotlin-coroutines = { group = "org.incendo", name = "cloud-kotlin-coroutines", version.ref = "cloud"}
 cloud-kotlin-coroutines-annotations = { group = "org.incendo", name = "cloud-kotlin-coroutines-annotations", version.ref = "cloud"}
+cloud-velocity = { group = "org.incendo", name = "cloud-velocity", version.ref = "cloud"}
 
 # platforms
 kSpigot = { group = "net.axay", name = "kspigot", version.ref = "kSpigot" }

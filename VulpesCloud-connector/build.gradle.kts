@@ -20,6 +20,13 @@ dependencies {
     implementation(project(":VulpesCloud-bridge"))
     compileOnly(project(":VulpesCloud-wrapper"))
 
+    implementation(libs.cloud)
+    // implementation(libs.cloud.velocity)
+    implementation("org.incendo:cloud-velocity:2.0.0-beta.10")
+    implementation(libs.cloud.extension)
+    implementation(libs.cloud.kotlin.coroutines)
+    implementation(libs.cloud.kotlin.coroutines.annotations)
+
     compileOnly(libs.velocity)
     annotationProcessor(libs.velocity)
     compileOnly(libs.jedis)

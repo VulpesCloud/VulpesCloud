@@ -4,6 +4,7 @@ import de.vulpescloud.api.command.CommandInfo
 import de.vulpescloud.api.version.VersionInfo
 import de.vulpescloud.api.version.VersionType
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.setups.TaskSetup
 import de.vulpescloud.node.task.TaskImpl
 import org.incendo.cloud.kotlin.extension.buildAndRegister
 import org.incendo.cloud.parser.standard.StringParser
@@ -11,7 +12,7 @@ import org.json.JSONObject
 import org.slf4j.LoggerFactory
 
 class TasksCommand {
-    val logger: org.slf4j.Logger = LoggerFactory.getLogger(TasksCommand::class.java)
+    val logger = LoggerFactory.getLogger(TasksCommand::class.java)
 
     init {
         Node.commandProvider?.registeredCommands?.add(
@@ -73,14 +74,9 @@ class TasksCommand {
             flag("default")
 
             handler { ctx ->
-
-                logger.debug(ctx.flags().get("default")!!)
-
                 if (ctx.flags().isPresent("default")) {
 
                     try {
-                        logger.debug("--default is present!")
-                        logger.debug("searching Platform")
 
                         val task = TaskImpl(
                             "Test",
@@ -108,8 +104,7 @@ class TasksCommand {
                         logger.error("HEWE IS A  SCREWWORM $e")
                     }
                 } else {
-                    // TODO("FIX TASK SETUP")
-                    // TaskSetup().run()
+                    Node.setupProvider.startSetup(TaskSetup())
                 }
             }
         }

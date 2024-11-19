@@ -26,7 +26,7 @@ class CloudCommandManager(
         @NonNull managerConsumer: Consumer<CommandManager<CommandSource>?>,
     ) {
         val cliCommandManager: CommandManager<CommandSource> =
-            CloudCommandManager(ExecutionCoordinator.simpleCoordinator())
+            CloudCommandManager(ExecutionCoordinator.asyncCoordinator())
         managerConsumer.accept(cliCommandManager)
         instance.run(args)
     }
