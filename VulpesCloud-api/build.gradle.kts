@@ -18,12 +18,3 @@ tasks.jar {
 tasks.shadowJar {
     archiveFileName.set("vulpescloud-api.jar")
 }
-
-tasks.dokkaHtmlPartial {
-    dokkaSourceSets {
-        create("main") {
-            includeNonPublic.set(true)
-            sourceRoots.from(file("src/main/kotlin"))
-        }
-    }
-}

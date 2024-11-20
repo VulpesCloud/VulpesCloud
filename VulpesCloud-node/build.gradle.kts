@@ -48,12 +48,3 @@ tasks.shadowJar {
     }
     archiveFileName.set("vulpescloud-node.jar")
 }
-
-tasks.dokkaHtmlPartial {
-    dokkaSourceSets {
-        create("main") {
-            includeNonPublic.set(true)
-            sourceRoots.from(file("src/main/kotlin"))
-        }
-    }
-}
