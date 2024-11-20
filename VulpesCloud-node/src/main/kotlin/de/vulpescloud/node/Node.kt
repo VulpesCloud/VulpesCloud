@@ -8,6 +8,7 @@ import de.vulpescloud.node.commands.*
 import de.vulpescloud.node.config.LogLevels
 import de.vulpescloud.node.event.events.NodeStateChangeEvent
 import de.vulpescloud.node.event.events.TaskUpdateEvent
+import de.vulpescloud.node.event.events.task.TaskCreateEvent
 import de.vulpescloud.node.networking.mysql.MySQLController
 import de.vulpescloud.node.networking.redis.RedisConnectionChecker
 import de.vulpescloud.node.networking.redis.RedisController
@@ -123,6 +124,7 @@ class Node {
 
         NodeStateChangeEvent
         TaskUpdateEvent
+        TaskCreateEvent
 
         clusterProvider = ClusterProvider()
 

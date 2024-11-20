@@ -33,10 +33,9 @@ object NodeShutdown {
             }
 
             GlobalScope.launch {
-                logger.info("Waiting 5 seconds for all Services to Stop!")
+                logger.info("Waiting 10 seconds for all Services to Stop!")
 
-                delay(5000)
-
+                delay(10000)
 
                 ServiceStartScheduler.instance.cancel()
                 RedisConnectionChecker.instance.cancel()

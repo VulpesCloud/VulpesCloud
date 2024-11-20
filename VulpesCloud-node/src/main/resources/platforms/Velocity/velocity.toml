@@ -6,7 +6,7 @@ bind = "0.0.0.0:25577"
 
 # What should be the MOTD? This gets displayed when the player adds your server to
 # their server list. Only MiniMessage format is accepted.
-motd = "<gradient:#00fdee:#118bd1><bold>PoloCloud</bold></gradient> <dark_gray>» <gray>Simple Cloudsystem<dark_gray> [<#00fdee>1.8 <gray>- <#00fdee>1.20.x<dark_gray>]\n<white>GitHub <dark_gray>× <white>github.com/HttpMarco/polocloud"
+motd = "<color:#C800FF>A VulpesCloud Proxy</color> <gray>[<bold>Development Server</bold>]</gray>"
 
 # What should we display for the maximum number of players? (Velocity does not support a cap
 # on the number of players online.)
@@ -34,7 +34,7 @@ prevent-client-proxy-connections = false
 #                  unable to implement network level firewalling (on a shared host).
 # - "modern":      Forward player IPs and UUIDs as part of the login process using
 #                  Velocity's native forwarding. Only applicable for Minecraft 1.13 or higher.
-player-info-forwarding-mode = "modern"
+player-info-forwarding-mode = "legacy"
 
 # If you are using modern or BungeeGuard IP forwarding, configure a file that contains a unique secret here.
 # The file is expected to be UTF-8 encoded and not empty.
@@ -72,26 +72,15 @@ enable-player-address-logging = true
 [servers]
 # Configure your servers here. Each key represents the server's name, and the value
 # represents the IP address of the server to connect to.
-lobby = "127.0.0.1:30066"
-factions = "127.0.0.1:30067"
-minigames = "127.0.0.1:30068"
+
 
 # In what order we should try servers when a player logs in or is kicked from a server.
 try = [
-    "lobby"
+
 ]
 
 [forced-hosts]
 # Configure your forced hosts here.
-"lobby.example.com" = [
-    "lobby"
-]
-"factions.example.com" = [
-    "factions"
-]
-"minigames.example.com" = [
-    "minigames"
-]
 
 [advanced]
 # How large a Minecraft packet has to be before we compress it. Setting this to zero will

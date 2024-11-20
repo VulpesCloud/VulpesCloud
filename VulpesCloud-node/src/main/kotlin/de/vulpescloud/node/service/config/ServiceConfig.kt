@@ -6,6 +6,7 @@ import de.vulpescloud.node.service.LocalService
 import io.github.thecguygithub.launcher.util.FileSystemUtil
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
+import java.nio.file.Path
 import java.util.Properties
 
 object ServiceConfig {
@@ -14,7 +15,7 @@ object ServiceConfig {
 
     fun makeServiceConfigs(service: LocalService) {
         when (service.task.version().name) {
-            "velocity" -> {
+            "Velocity" -> {
                 // Copy the Config
                 if (!Files.exists(service.runningDir.resolve("velocity.toml"))) {
                     FileSystemUtil.copyClassPathFile(this::class.java.classLoader, "platforms/Velocity/velocity.toml", "${service.runningDir.resolve("velocity.toml")}")
@@ -33,8 +34,10 @@ object ServiceConfig {
 
                 // save the config
                 velocityConfig.save()
+
+                Files.writeString(service.runningDir.resolve("forwarding.secret"), "lhg8u6asid7zrg")
             }
-            "purpur" -> {
+            "Purpur" -> {
                 // Copy the Config
                 if (!Files.exists(service.runningDir.resolve("server.properties"))) {
                     FileSystemUtil.copyClassPathFile(this::class.java.classLoader, "platforms/purpur/server.properties", "${service.runningDir.resolve("server.properties")}")
@@ -65,7 +68,7 @@ object ServiceConfig {
                     logger.error(e.toString())
                 }
             }
-            "paper" -> {
+            "Paper" -> {
                 // Copy the Config
                 if (!Files.exists(service.runningDir.resolve("server.properties"))) {
                     FileSystemUtil.copyClassPathFile(this::class.java.classLoader, "platforms/purpur/server.properties", "${service.runningDir.resolve("server.properties")}")

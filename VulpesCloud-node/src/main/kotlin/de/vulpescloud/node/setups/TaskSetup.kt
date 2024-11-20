@@ -48,11 +48,11 @@ class TaskSetup : Setup {
         val ver = Node.versionProvider.search(version)
 
         if (ver != null) {
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.version.name.success"))
+            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.version.version.success"))
             this.version = ver
             return true
         } else {
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.version.name.invalid"))
+            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.version.version.invalid"))
             return false
         }
     }
@@ -126,11 +126,11 @@ class TaskSetup : Setup {
         val boolean = try {
             bool.toBoolean()
         } catch (e: Exception) {
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.node.question.fallback.invalid"))
+            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.fallback.invalid"))
             return false
         }
-        this.static = boolean
-        Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.node.question.fallback.success"))
+        this.fallback = boolean
+        Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.fallback.success"))
         return true
     }
 
@@ -162,6 +162,7 @@ class TaskSetup : Setup {
 
     @SetupFinish
     fun finish() {
+
         val task = TaskImpl(
             name,
             memory,

@@ -12,7 +12,7 @@ import java.util.*
 
 object TaskFactory {
 
-    private val GROUP_DIR = Path.of("local/groups")
+    private val GROUP_DIR = Path.of("local/tasks")
 
     private val logger = LoggerFactory.getLogger(TaskFactory::class.java)
 
@@ -32,8 +32,7 @@ object TaskFactory {
             if (nodesJson.isNull(it)) null else nodesJson.getString(it)
         }
 
-
-        val templatesJson = taskInformation.getJSONArray("nodes")
+        val templatesJson = taskInformation.getJSONArray("templates")
 
         val templates: Array<String?> = Array(templatesJson.length()) {
             if (templatesJson.isNull(it)) null else templatesJson.getString(it)
@@ -56,6 +55,10 @@ object TaskFactory {
         GROUP_DIR.toFile().mkdirs()
         val taskFile: Path = GROUP_DIR.resolve(task.name() + ".json")
         Files.writeString(taskFile, JSONObject(task).toString(4))
+
+        logger.debug("Preparing Templates")
+
+        Node.templateProvider.prepareTemplate(task.templates.toTypedArray())
 
         logger.debug("Adding to Groups")
 

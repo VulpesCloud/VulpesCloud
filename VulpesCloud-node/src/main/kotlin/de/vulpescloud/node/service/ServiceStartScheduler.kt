@@ -30,7 +30,7 @@ class ServiceStartScheduler : CoroutineScope {
         while (true) {
             logger.debug("Checking for services to start!")
             for (task: Task in taskProvider.tasks()!!) {
-                if (task.maintenance()) continue
+                if (!task.maintenance()) continue
 
                 if (task.nodes().contains(Node.nodeConfig!!.name)) continue
 
