@@ -1,38 +1,33 @@
 package de.vulpescloud.node.terminal
 
-import lombok.NonNull
+import de.vulpescloud.node.Node
+import de.vulpescloud.node.command.source.ConsoleCommandSource
+import org.incendo.cloud.suggestion.Suggestion
 import org.jline.reader.Candidate
 import org.jline.reader.Completer
 import org.jline.reader.LineReader
 import org.jline.reader.ParsedLine
 
 class JLineCompleter : Completer {
-    private var console: JLineTerminal? = null
+    override fun complete(p0: LineReader, p1: ParsedLine, p2: MutableList<Candidate>) {
+        val line = p1.line()
+        val suggestions: List<String> = if (Node.setupProvider.currentSetup != null) {
+            Node.setupProvider.getSetupAnswers(line)
+        } else {
+            Node.commandProvider!!.commandManager!!.suggestionFactory().suggest(ConsoleCommandSource(), line).join().list().stream()
+                .map(Suggestion::suggestion)
+                .toList()
+        }
+        if (suggestions.isEmpty()) {
+            return
+        }
 
-    fun JLine3Completer(@NonNull console: JLineTerminal?) {
-        this.console = console
-    }
+        val answers = ArrayList<String>()
+        answers.addAll(suggestions)
 
-    override fun complete(
-        @NonNull reader: LineReader?,
-        @NonNull line: ParsedLine,
-        @NonNull candidates: MutableList<Candidate?>,
-    ) {
-        // iterate over all enabled tab complete handlers and record their completions
-        // make sure to pass a sort to the candidate in order to keep the order the same way as given
-        var currentCandidateSort = 1
-        for (completeHandler in console?.tabCompleteHandlers()?.values!!) {
-            if (completeHandler.enabled()) {
-                // compute the completions of the handler and add the candidates
-                val completions = completeHandler.completeInput(line.line())
-                if (completions != null) {
-                    for (completion in completions) {
-                        val candidate: Candidate =
-                            Candidate(completion, completion, null, null, null, null, true, currentCandidateSort++)
-                        candidates.add(candidate)
-                    }
-                }
-            }
+        if (answers.isNotEmpty()) {
+            answers.sort()
+            p2.addAll(answers.map { Candidate(it) })
         }
     }
 }

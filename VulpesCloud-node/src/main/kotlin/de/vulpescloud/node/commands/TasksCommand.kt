@@ -28,7 +28,7 @@ class TasksCommand {
             literal("list")
 
             handler { _ ->
-                logger.info("Following &b${Node.taskProvider.tasks()?.size} &7groups are loaded&8:")
+                logger.info("Following &b${Node.taskProvider.tasks()?.size} &7tasks are loaded&8:")
                 Node.taskProvider.tasks()
                     ?.forEach { task -> logger.info("&8- &f${task.name()}&8: (&7${task.details()}&8)") }
             }
@@ -55,7 +55,7 @@ class TasksCommand {
         Node.commandProvider!!.commandManager!!.buildAndRegister("task", aliases = arrayOf("tasks")) {
             literal("task")
             required("task", StringParser.stringParser(StringParser.StringMode.SINGLE))
-            literal("stop")
+            literal("delete")
 
             handler { ctx ->
                 val task = Node.taskProvider.findByName(ctx.get<String>("task").toString())
@@ -70,42 +70,19 @@ class TasksCommand {
         }
 
         Node.commandProvider!!.commandManager!!.buildAndRegister("task", aliases = arrayOf("tasks")) {
-            literal("create")
-            flag("default")
+            literal("setup")
 
-            handler { ctx ->
-                if (ctx.flags().isPresent("default")) {
+            handler { _ ->
+                Node.setupProvider.startSetup(TaskSetup())
+            }
+        }
 
-                    try {
+        Node.commandProvider!!.commandManager!!.buildAndRegister("task", aliases = arrayOf("tasks")) {
+            literal("reload")
 
-                        val task = TaskImpl(
-                            "Test",
-                            1024,
-                            VersionInfo("velocity", VersionType.PROXY, "3.4.0-SNAPSHOT"),
-                            listOf(),
-                            listOf(),
-                            69,
-                            true,
-                            1,
-                            false,
-                            25565,
-                            false
-                        )
-
-                        logger.warn(JSONObject(task).toString(4))
-
-                        logger.debug("JSON created! sending redis message!")
-
-                        Node.instance!!.getRC()
-                            ?.sendMessage(JSONObject(task).toString(), "testcloud-events-group-create")
-
-                        logger.debug("Redis message sent successfully!")
-                    } catch (e: Exception) {
-                        logger.error("HEWE IS A  SCREWWORM $e")
-                    }
-                } else {
-                    Node.setupProvider.startSetup(TaskSetup())
-                }
+            handler { _ ->
+                logger.info("Reloading Tasks!")
+                Node.taskProvider.reload()
             }
         }
 

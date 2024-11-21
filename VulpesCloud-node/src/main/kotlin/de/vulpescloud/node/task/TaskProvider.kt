@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture
 
 class TaskProvider : TaskProvider() {
 
-    private val tasks: MutableSet<Task> = TaskFactory.readGroups().toMutableSet()
+    private var tasks: MutableSet<Task> = TaskFactory.readGroups().toMutableSet()
 
     override fun createAsync(
         name: String,
@@ -58,5 +58,9 @@ class TaskProvider : TaskProvider() {
 
     override fun tasksAsync(): CompletableFuture<MutableSet<Task>>? {
         return CompletableFuture.completedFuture(tasks)
+    }
+
+    fun reload() {
+        this.tasks = TaskFactory.readGroups().toMutableSet()
     }
 }

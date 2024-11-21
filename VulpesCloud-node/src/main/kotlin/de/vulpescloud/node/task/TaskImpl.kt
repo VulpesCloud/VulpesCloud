@@ -4,6 +4,9 @@ import de.vulpescloud.api.services.ClusterService
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.api.version.VersionInfo
 import de.vulpescloud.node.Node
+import org.json.JSONObject
+import java.nio.file.Files
+import java.nio.file.Path
 
 open class TaskImpl(
     val name: String,
@@ -72,7 +75,7 @@ open class TaskImpl(
     }
 
     override fun update() {
-        TODO("Not yet implemented")
+        Files.writeString(Path.of("local/tasks/${name()}.json"), JSONObject(this).toString())
     }
 
     override fun fallback(): Boolean {

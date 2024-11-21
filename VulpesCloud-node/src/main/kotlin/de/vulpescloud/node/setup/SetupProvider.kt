@@ -8,6 +8,8 @@ import de.vulpescloud.node.terminal.ConsoleAppender
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Method
 import java.lang.reflect.Parameter
+import java.util.*
+import kotlin.collections.ArrayList
 
 class SetupProvider {
 
@@ -117,6 +119,15 @@ class SetupProvider {
             return
         }
         prepareNextQuestion()
+    }
+
+    fun getSetupAnswers(input: String): List<String> {
+        if (currentSetup == null) {
+            throw IllegalStateException("There is no Setup running!")
+        }
+        val answers = currentQuestion!!.setupQuestion.answer.java.newInstance().suggest()
+
+        return answers.filter { it.lowercase(Locale.getDefault()).startsWith(input.lowercase(Locale.getDefault())) }
     }
 
 

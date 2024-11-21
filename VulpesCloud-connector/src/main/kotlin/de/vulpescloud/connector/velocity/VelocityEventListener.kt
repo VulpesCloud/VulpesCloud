@@ -11,20 +11,18 @@ class VelocityEventListener {
 
     @Subscribe(order = PostOrder.FIRST)
     fun playerChooseInitialServerEvent(event: PlayerChooseInitialServerEvent) {
-        val fallbackServer = VelocityConnector.instance.serviceProvider.findByFilter(ClusterServiceFilter.LOWEST_FALLBACK)
+        val fallbackServer = VelocityConnector.instance.serviceProvider.findByFilter(ClusterServiceFilter.FALLBACKS)
 
         if (fallbackServer?.isEmpty()!!) {
             println("FALLBACK SERVER IS NULL!")
-            // event.setInitialServer(null)
-            // return
+            event.setInitialServer(null)
+            return
         }
 
         //todo maybe send redis Message if there is no fallback
-        //println(fallbackServer[0].name())
-         // proxyServer.getServer(fallbackServer[0].name()).ifPresent { event.setInitialServer(it) }
+        println(fallbackServer[0].name())
+        proxyServer.getServer(fallbackServer[0].name()).ifPresent { event.setInitialServer(it) }
 
-        proxyServer.getServer("lobby-1").ifPresent { event.setInitialServer(it) }
-        proxyServer.getServer("lobby-2").ifPresent { event.setInitialServer(it) }
     }
 
 }
