@@ -8,7 +8,7 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 
 
-interface ClusterPlayer : Named {
+interface Player : Named {
 
     fun uniqueId(): UUID
 

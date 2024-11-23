@@ -2,7 +2,7 @@ package de.vulpescloud.api.services
 
 import de.vulpescloud.api.Detail
 import de.vulpescloud.api.Named
-import de.vulpescloud.api.players.ClusterPlayer
+import de.vulpescloud.api.players.Player
 import de.vulpescloud.api.tasks.Task
 import lombok.SneakyThrows
 import java.util.*
@@ -72,7 +72,7 @@ interface ClusterService : Named, Detail {
 
     fun onlinePlayersCountAsync(): CompletableFuture<Int>
 
-    fun onlinePlayersAsync(): CompletableFuture<List<ClusterPlayer?>?>
+    fun onlinePlayersAsync(): CompletableFuture<List<Player?>?>
 
     /**
      * Returns true if the service has no players on it
@@ -93,7 +93,7 @@ interface ClusterService : Named, Detail {
      * Returns the online Players from the service as a List
      */
     @SneakyThrows
-    fun onlinePlayers(): List<ClusterPlayer?>? {
+    fun onlinePlayers(): List<Player?>? {
         return onlinePlayersAsync()[5, TimeUnit.SECONDS]
     }
 

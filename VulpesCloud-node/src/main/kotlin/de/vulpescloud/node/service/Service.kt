@@ -1,6 +1,6 @@
 package de.vulpescloud.node.service
 
-import de.vulpescloud.api.players.ClusterPlayer
+import de.vulpescloud.api.players.Player
 import de.vulpescloud.api.services.ClusterService
 import de.vulpescloud.api.services.ClusterServiceStates
 import de.vulpescloud.api.tasks.Task
@@ -73,7 +73,7 @@ open class Service(
         return CompletableFuture.completedFuture(onlinePlayers()?.size)
     }
 
-    override fun onlinePlayersAsync(): CompletableFuture<List<ClusterPlayer?>?> {
+    override fun onlinePlayersAsync(): CompletableFuture<List<Player?>?> {
         return CompletableFuture.completedFuture(
             null
 //            JavaCloudAPI.getInstance().playerProvider().players()

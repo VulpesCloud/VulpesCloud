@@ -12,6 +12,7 @@ import de.vulpescloud.node.event.events.task.TaskCreateEvent
 import de.vulpescloud.node.networking.mysql.MySQLController
 import de.vulpescloud.node.networking.redis.RedisConnectionChecker
 import de.vulpescloud.node.networking.redis.RedisController
+import de.vulpescloud.node.player.PlayerProvider
 import de.vulpescloud.node.service.ServiceProvider
 import de.vulpescloud.node.service.ServiceStartScheduler
 import de.vulpescloud.node.setup.SetupProvider
@@ -77,6 +78,9 @@ class Node {
 
         lateinit var setupProvider: SetupProvider
             private set
+
+        lateinit var playerProvider: PlayerProvider
+            private set
     }
 
     init {
@@ -135,6 +139,8 @@ class Node {
         templateProvider = TemplateProvider()
 
         serviceProvider = ServiceProvider()
+
+        playerProvider = PlayerProvider()
 
         serviceProvider.getAllServiceFromRedis()
 

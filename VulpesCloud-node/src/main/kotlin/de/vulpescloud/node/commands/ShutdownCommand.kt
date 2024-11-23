@@ -20,7 +20,7 @@ class ShutdownCommand {
         )
 
         Node.commandProvider?.commandManager!!.buildAndRegister(
-            "shutdown", Description.of("Shutdown the cloud and all node services."), aliases = arrayOf("exit", "stop")) {
+            "exit", Description.of("Shutdown the cloud and all node services."), aliases = arrayOf("shutdown", "stop")) {
             handler { _ ->
                 NodeShutdown.nodeShutdown(false)
             }
