@@ -9,17 +9,17 @@ class VelocityRedisSubscribe {
     private val redis = VelocityConnector.instance.wrapper.getRC()
     private val redisManager = redis?.let { RedisManager(it.getJedisPool()) }
     private val redisChannels = listOf(
-        RedisPubSubChannels.VULPESCLOUD_ACTION_SERVICE.name,
-        RedisPubSubChannels.VULPESCLOUD_EVENT_SERVICE.name,
-        RedisPubSubChannels.VULPESCLOUD_REGISTER_SERVICE.name,
-        RedisPubSubChannels.VULPESCLOUD_UNREGISTER_SERVICE.name
+        RedisPubSubChannels.VULPESCLOUD_SERVICE_ACTION.name,
+        RedisPubSubChannels.VULPESCLOUD_SERVICE_EVENT.name,
+        RedisPubSubChannels.VULPESCLOUD_SERVICE_REGISTER.name,
+        RedisPubSubChannels.VULPESCLOUD_SERVICE_UNREGISTER.name
     )
 
     init {
 
         redisManager?.subscribe(redisChannels) { _,  channel, msg ->
             when (channel) {
-                RedisPubSubChannels.VULPESCLOUD_ACTION_SERVICE.name -> {
+                RedisPubSubChannels.VULPESCLOUD_SERVICE_ACTION.name -> {
                     val message = msg?.let { RedisJsonParser.parseJson(it) }
                         ?.let { RedisJsonParser.getMessagesFromRedisJson(it) }
 
@@ -40,7 +40,7 @@ class VelocityRedisSubscribe {
                         }
                     }
                 }
-                RedisPubSubChannels.VULPESCLOUD_REGISTER_SERVICE.name -> {
+                RedisPubSubChannels.VULPESCLOUD_SERVICE_REGISTER.name -> {
                     val message = msg?.let { RedisJsonParser.parseJson(it) }
                         ?.let { RedisJsonParser.getMessagesFromRedisJson(it) }
 

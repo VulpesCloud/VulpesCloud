@@ -38,7 +38,7 @@ open class Connector {
             ServiceMessageBuilder.registrationMessageBuilder().serviceRegisterBuilder()
                 .setService(serviceProvider.getLocalService())
                 .build(),
-            RedisPubSubChannels.VULPESCLOUD_REGISTER_SERVICE.name
+            RedisPubSubChannels.VULPESCLOUD_SERVICE_REGISTER.name
         )
     }
 
@@ -47,7 +47,7 @@ open class Connector {
             ServiceMessageBuilder.registrationMessageBuilder().serviceUnregisterBuilder()
                 .setService(serviceProvider.getLocalService())
                 .build(),
-            RedisPubSubChannels.VULPESCLOUD_UNREGISTER_SERVICE.name
+            RedisPubSubChannels.VULPESCLOUD_SERVICE_UNREGISTER.name
         )
     }
 
@@ -69,7 +69,7 @@ open class Connector {
                 .setService(ls)
                 .setState(state)
                 .build(),
-            RedisPubSubChannels.VULPESCLOUD_EVENT_SERVICE.name
+            RedisPubSubChannels.VULPESCLOUD_SERVICE_EVENT.name
         )
 
         wrapper.getRC()?.setHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, ls.name(), JSONObject(si).toString())

@@ -50,7 +50,7 @@ class LocalService(
                 .setService(this)
                 .setState(status)
                 .build(),
-            RedisPubSubChannels.VULPESCLOUD_EVENT_SERVICE.name
+            RedisPubSubChannels.VULPESCLOUD_SERVICE_EVENT.name
         )
         Node.instance!!.getRC()?.setHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, name(), JSONObject(this).toString())
     }

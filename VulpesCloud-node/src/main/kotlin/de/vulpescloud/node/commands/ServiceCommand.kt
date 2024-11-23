@@ -53,7 +53,7 @@ class ServiceCommand {
                                     .setAction(ServiceActions.COMMAND)
                                     .setParameter(ctx.get("command"))
                                     .build(),
-                                RedisPubSubChannels.VULPESCLOUD_ACTION_SERVICE.name
+                                RedisPubSubChannels.VULPESCLOUD_SERVICE_ACTION.name
                             )
                         }
                     } catch (e: Exception) {
@@ -79,7 +79,7 @@ class ServiceCommand {
                                 .setService(service)
                                 .setAction(ServiceActions.STOP)
                                 .build(),
-                            RedisPubSubChannels.VULPESCLOUD_ACTION_SERVICE.name
+                            RedisPubSubChannels.VULPESCLOUD_SERVICE_ACTION.name
                         )
                     } catch (e: Exception) {
                         logger.error(e.toString())

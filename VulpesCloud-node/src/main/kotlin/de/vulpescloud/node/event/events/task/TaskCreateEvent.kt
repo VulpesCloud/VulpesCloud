@@ -10,7 +10,7 @@ import org.json.JSONObject
 object TaskCreateEvent : Event() {
 
     init {
-        redisManager?.subscribe(listOf(RedisPubSubChannels.VULPESCLOUD_CREATE_TASK.name)) { _, _, msg ->
+        redisManager?.subscribe(listOf(RedisPubSubChannels.VULPESCLOUD_TASK_CREATE.name)) { _, _, msg ->
             val message = msg?.let { RedisJsonParser.parseJson(it) }
                 ?.let { RedisJsonParser.getMessagesFromRedisJson(it) }
 

@@ -10,15 +10,15 @@ class BukkitRedisSubscribe {
     private val redis = BukkitConnector.instance.connector.wrapper.getRC()
     private val redisManager = redis?.let { RedisManager(it.getJedisPool()) }
     private val redisChannels = listOf(
-        RedisPubSubChannels.VULPESCLOUD_ACTION_SERVICE.name,
-        RedisPubSubChannels.VULPESCLOUD_EVENT_SERVICE.name
+        RedisPubSubChannels.VULPESCLOUD_SERVICE_ACTION.name,
+        RedisPubSubChannels.VULPESCLOUD_SERVICE_EVENT.name
     )
 
     init {
 
         redisManager?.subscribe(redisChannels) { _, channel, msg ->
             when (channel) {
-                RedisPubSubChannels.VULPESCLOUD_ACTION_SERVICE.name -> {
+                RedisPubSubChannels.VULPESCLOUD_SERVICE_ACTION.name -> {
                     val message = msg?.let { RedisJsonParser.parseJson(it) }
                         ?.let { RedisJsonParser.getMessagesFromRedisJson(it) }
 

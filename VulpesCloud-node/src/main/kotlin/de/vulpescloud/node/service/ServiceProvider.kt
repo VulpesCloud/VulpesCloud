@@ -25,13 +25,13 @@ class ServiceProvider : ClusterServiceProvider() {
     private val factory = ServiceFactory()
     private val logger = LoggerFactory.getLogger(ServiceProvider::class.java)
     private val channels = mutableListOf(
-        RedisPubSubChannels.VULPESCLOUD_EVENT_SERVICE.name,
-        RedisPubSubChannels.VULPESCLOUD_AUTH_SERVICE.name)
+        RedisPubSubChannels.VULPESCLOUD_SERVICE_EVENT.name,
+        RedisPubSubChannels.VULPESCLOUD_SERVICE_AUTH.name)
     private val redisManger = Node.instance?.getRC()?.let { RedisManager(it.getJedisPool()) }
 
     init {
         redisManger?.subscribe(channels) { _, channel, msg ->
-            if (channel == RedisPubSubChannels.VULPESCLOUD_EVENT_SERVICE.name) {
+            if (channel == RedisPubSubChannels.VULPESCLOUD_SERVICE_EVENT.name) {
                 val message = msg?.let { RedisJsonParser.parseJson(it) }
                     ?.let { RedisJsonParser.getMessagesFromRedisJson(it) }
 

@@ -39,7 +39,7 @@ class PlayerImpl(
         val player = Node.playerProvider.getPlayerByUUID(uniqueId())
         return if (Node.playerProvider.isPlayerOnline(uniqueId())) {
             if (player == null) {
-                throw IllegalStateException("The Player is null but is also online! ")
+                throw IllegalStateException("The Player is null but is also online!")
             } else {
                 if (currentServer == null) {
                     throw IllegalStateException("CurrentServer is null but the Player is online!")

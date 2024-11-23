@@ -181,7 +181,7 @@ class TaskSetup : Setup {
             TaskCreateMessageBuilder
                 .setTask(task)
                 .build(),
-            RedisPubSubChannels.VULPESCLOUD_CREATE_TASK.name
+            RedisPubSubChannels.VULPESCLOUD_TASK_CREATE.name
         )
     }
 }

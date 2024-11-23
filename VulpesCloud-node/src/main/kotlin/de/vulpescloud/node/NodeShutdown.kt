@@ -28,7 +28,7 @@ object NodeShutdown {
                         .setService(it)
                         .setAction(ServiceActions.STOP)
                         .build(),
-                    RedisPubSubChannels.VULPESCLOUD_ACTION_SERVICE.name
+                    RedisPubSubChannels.VULPESCLOUD_SERVICE_ACTION.name
                 )
             }
 
