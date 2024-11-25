@@ -155,6 +155,7 @@ class Node {
         ClusterCommand()
         ServiceCommand()
         DevCommand()
+        PlayerCommand()
 
         Runtime.getRuntime().addShutdownHook(Thread())
 

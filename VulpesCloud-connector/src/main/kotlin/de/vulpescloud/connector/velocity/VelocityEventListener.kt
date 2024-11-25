@@ -4,10 +4,12 @@ import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.connection.PostLoginEvent
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
+import de.vulpescloud.api.network.redis.RedisHashNames
 import de.vulpescloud.api.network.redis.RedisPubSubChannels
 import de.vulpescloud.api.players.builder.PlayerJoinMessageBuilder
 import de.vulpescloud.api.services.ClusterServiceFilter
 import de.vulpescloud.bridge.player.PlayerImpl
+import org.json.JSONObject
 
 class VelocityEventListener {
 
@@ -30,6 +32,7 @@ class VelocityEventListener {
 
     @Subscribe
     fun playerPostLoginEvent(event: PostLoginEvent) {
+        VelocityConnector.instance.wrapper.getRC()?.setHashField(RedisHashNames.VULPESCLOUD_PLAYERS_ONLINE.name, event.player.uniqueId.toString(), JSONObject(PlayerImpl(event.player.username, event.player.uniqueId)).toString())
         VelocityConnector.instance.wrapper.getRC()?.sendMessage(
             PlayerJoinMessageBuilder
                 .setPlayer(PlayerImpl(event.player.username, event.player.uniqueId))
