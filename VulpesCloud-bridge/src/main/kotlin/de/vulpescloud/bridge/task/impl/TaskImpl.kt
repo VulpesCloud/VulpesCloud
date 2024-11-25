@@ -51,7 +51,7 @@ open class TaskImpl(
     }
 
     override fun serviceCount(): Long? {
-        return null
+        return null //todo Implement the ServiceTask stuff in the Bridge too xD
     }
 
     override fun services(): List<ClusterService?>? {

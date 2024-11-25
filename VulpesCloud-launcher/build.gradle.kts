@@ -3,7 +3,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
-group = "de.vulpescloud"
+group = "io.github.thecguygithub"
 version = "1.0.0-alpha"
 
 

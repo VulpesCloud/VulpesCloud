@@ -1,6 +1,7 @@
 plugins {
     kotlin("jvm") version "2.0.21"
     id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("cn.lalaki.central") version "1.2.5"
 }
 
 dependencies {

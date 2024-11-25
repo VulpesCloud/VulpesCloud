@@ -7,11 +7,11 @@ plugins {
 group = "de.vulpescloud"
 version = "1.0-SNAPSHOT"
 
-tasks.register<Jar>("javadocJar") {
-    dependsOn("dokkaHtmlMultiModule") // Make sure `dokkaHtmlMultiModule` runs first
-    from(buildDir.resolve("dokka/htmlMultiModule")) // Use the specified output directory
-    archiveClassifier.set("javadoc")
-}
+//tasks.register<Jar>("javadocJar") {
+//    dependsOn("dokkaHtmlMultiModule") // Make sure `dokkaHtmlMultiModule` runs first
+//    from(buildDir.resolve("dokka/htmlMultiModule")) // Use the specified output directory
+//    archiveClassifier.set("javadoc")
+//}
 
 allprojects {
     apply(plugin = "java-library")

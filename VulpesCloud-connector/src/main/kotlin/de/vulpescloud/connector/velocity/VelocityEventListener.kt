@@ -2,8 +2,12 @@ package de.vulpescloud.connector.velocity
 
 import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
+import com.velocitypowered.api.event.connection.PostLoginEvent
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
+import de.vulpescloud.api.network.redis.RedisPubSubChannels
+import de.vulpescloud.api.players.builder.PlayerJoinMessageBuilder
 import de.vulpescloud.api.services.ClusterServiceFilter
+import de.vulpescloud.bridge.player.PlayerImpl
 
 class VelocityEventListener {
 
@@ -22,7 +26,17 @@ class VelocityEventListener {
         //todo maybe send redis Message if there is no fallback
         println(fallbackServer[0].name())
         proxyServer.getServer(fallbackServer[0].name()).ifPresent { event.setInitialServer(it) }
+    }
 
+    @Subscribe
+    fun playerPostLoginEvent(event: PostLoginEvent) {
+        VelocityConnector.instance.wrapper.getRC()?.sendMessage(
+            PlayerJoinMessageBuilder
+                .setPlayer(PlayerImpl(event.player.username, event.player.uniqueId))
+                .setService(VelocityConnector.instance.serviceProvider.getLocalService())
+                .build(),
+            RedisPubSubChannels.VULPESCLOUD_PLAYER_EVENT.name
+        )
     }
 
 }

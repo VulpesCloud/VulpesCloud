@@ -5,6 +5,7 @@ import de.vulpescloud.api.network.redis.RedisPubSubChannels
 import de.vulpescloud.api.services.ClusterServiceStates
 import de.vulpescloud.api.services.ServiceMessageBuilder
 import de.vulpescloud.api.services.builder.ServiceEventMessageBuilder
+import de.vulpescloud.bridge.player.PlayerProvider
 import de.vulpescloud.bridge.service.ServiceProvider
 import de.vulpescloud.bridge.service.impl.ServiceImpl
 import de.vulpescloud.wrapper.Wrapper
@@ -14,11 +15,14 @@ import java.util.concurrent.TimeUnit
 open class Connector {
 
     val serviceProvider = ServiceProvider()
+    val playerProvider = PlayerProvider()
 
     val wrapper = Wrapper.instance
 
     fun init() {
         serviceProvider.getAllServiceFromRedis()
+        playerProvider.initializePlayerProvider()
+        playerProvider.loadPlayerDataFromRedis()
 
         TimeUnit.SECONDS.sleep(1)
 
