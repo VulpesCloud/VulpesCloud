@@ -6,12 +6,12 @@ import java.util.*
 import java.util.concurrent.CompletableFuture
 
 class PlayerImpl(
-    private val name: String,
-    private val uuid: UUID
+    val name: String,
+    val uuid: UUID
 ) : Player {
 
-    private var currentServer: ClusterService? = null
-    private var currentProxy: ClusterService? = null
+    var currentServer: ClusterService? = null
+    var currentProxy: ClusterService? = null
 
     override fun uniqueId(): UUID {
         return this.uuid

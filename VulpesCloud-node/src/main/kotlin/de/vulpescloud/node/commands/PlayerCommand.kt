@@ -17,6 +17,13 @@ class PlayerCommand {
                 Node.playerProvider.players()!!.forEach { logger.info(" - {} {}", it!!.name(), it.details()) }
             }
         }
+        commandProvider.commandManager!!.buildAndRegister("player", aliases = arrayOf("players")) {
+            literal("override")
+            handler { _ ->
+                logger.info("Overriding local Players!")
+                Node.playerProvider.overridePlayersFromRedis()
+            }
+        }
     }
 
 }

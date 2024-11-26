@@ -32,14 +32,18 @@ class VelocityEventListener {
 
     @Subscribe
     fun playerPostLoginEvent(event: PostLoginEvent) {
-        VelocityConnector.instance.wrapper.getRC()?.setHashField(RedisHashNames.VULPESCLOUD_PLAYERS_ONLINE.name, event.player.uniqueId.toString(), JSONObject(PlayerImpl(event.player.username, event.player.uniqueId)).toString())
+        val player = PlayerImpl(event.player.username, event.player.uniqueId)
+        player.setProxy(VelocityConnector.instance.serviceProvider.getLocalService())
         VelocityConnector.instance.wrapper.getRC()?.sendMessage(
             PlayerJoinMessageBuilder
-                .setPlayer(PlayerImpl(event.player.username, event.player.uniqueId))
+                .setPlayer(player)
                 .setService(VelocityConnector.instance.serviceProvider.getLocalService())
                 .build(),
             RedisPubSubChannels.VULPESCLOUD_PLAYER_EVENT.name
         )
+        val json = JSONObject(player)
+        json.put("currentProxy", player.currentProxy!!.name())
+        json.put("currentServer", player.currentProxy!!.name())
+        VelocityConnector.instance.wrapper.getRC()?.setHashField(RedisHashNames.VULPESCLOUD_PLAYERS_ONLINE.name, event.player.uniqueId.toString(), json.toString())
     }
-
 }

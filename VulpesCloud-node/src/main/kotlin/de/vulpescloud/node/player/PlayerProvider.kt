@@ -11,7 +11,7 @@ import java.util.*
 import java.util.concurrent.CompletableFuture
 
 class PlayerProvider : PlayerProvider() {
-    private val players: Map<UUID, Player> = emptyMap()
+    private var players: Map<UUID, Player> = emptyMap()
     private val logger = LoggerFactory.getLogger(PlayerProvider::class.java)
 
     init {
@@ -53,8 +53,11 @@ class PlayerProvider : PlayerProvider() {
             }
             val uuid = Node.instance!!.getRC()?.getHashFieldNameByValue(RedisHashNames.VULPESCLOUD_PLAYERS_ONLINE.name, it)
             val player = PlayerImpl(json.getString("name"), UUID.fromString(uuid))
+            player.currentProxy = Node.serviceProvider.findByName(json.getString("currentProxy"))
+            player.currentServer = Node.serviceProvider.findByName(json.getString("currentServer"))
             players[UUID.fromString(uuid)] = player
             // todo Add the Proxy and Server!
         }
+        this.players = players
     }
 }

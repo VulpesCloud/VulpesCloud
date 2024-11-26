@@ -29,7 +29,9 @@ class PlayerEvents {
                         if (splitMSG[2] == "JOIN") {
                             if (splitMSG[5] == "PROXY") {
                                 val player = PlayerImpl(splitMSG[3], UUID.fromString(splitMSG[4]))
-                                val proxy = ServiceProvider().findByName(splitMSG[6])
+                                val serviceProv = ServiceProvider()
+                                serviceProv.getAllServiceFromRedis()
+                                val proxy = serviceProv.findByName(splitMSG[6])
                                 if (proxy == null) {
                                     println("WARN: Tried to register a player but the Service does not exist!")
                                 } else {
