@@ -1,16 +1,26 @@
 plugins {
-    kotlin("jvm") version "2.0.0"
+    kotlin("jvm") version "2.1.0"
+    id("org.jetbrains.dokka") version "1.9.20"
+    id("signing")
 }
 
-group = "io.github.thecguygithub"
+group = "de.vulpescloud"
 version = "1.0-SNAPSHOT"
+
+//tasks.register<Jar>("javadocJar") {
+//    dependsOn("dokkaHtmlMultiModule") // Make sure `dokkaHtmlMultiModule` runs first
+//    from(buildDir.resolve("dokka/htmlMultiModule")) // Use the specified output directory
+//    archiveClassifier.set("javadoc")
+//}
 
 allprojects {
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
+    apply(plugin = "org.jetbrains.dokka")
+    apply(plugin = "org.jetbrains.kotlin.jvm")
 
     version = "1.0.0-alpha"
-    group = "io.github.thecguygithub"
+    group = "de.vulpescloud"
 
     repositories {
         mavenCentral()
@@ -20,15 +30,11 @@ allprojects {
         "implementation"(rootProject.libs.lombok)
         "annotationProcessor"(rootProject.libs.lombok)
         "implementation"(rootProject.libs.annotations)
-        // "implementation"(rootProject.libs.log4j2)
-        // "implementation"(rootProject.libs.log4j2.simple)
         "implementation"(rootProject.libs.gson)
+        "implementation"(rootProject.libs.guava)
     }
-
 }
 
 
-tasks.test {
-    useJUnitPlatform()
-}
+
 

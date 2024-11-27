@@ -16,19 +16,19 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Set up JDK 21
-        uses: actions/setup-java@v4.2.1
+        uses: actions/setup-java@v4.5.0
         with:
-          java-version: '17'
+          java-version: '21'
           distribution: 'temurin'
 
       - name: Make Gradle wrapper executable
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew shadowJar
+        run: ./gradlew :VulpesCloud-launcher:jar
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: test-cloud
-          path: TestCloud-launcher/build/libs/testcloud-launcher.jar
+          name: VulpesCloud
+          path: VulpesCloud-launcher/build/libs/vulpescloud-launcher.jar

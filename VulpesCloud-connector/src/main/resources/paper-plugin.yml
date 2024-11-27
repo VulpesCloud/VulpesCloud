@@ -1,0 +1,8 @@
+name: VulpesCloud-Connector
+version: 1.0.0
+main: de.vulpescloud.connector.bukkit.BukkitConnector
+author: TheCGuy
+api-version: '1.21'
+
+libraries:
+  - net.axay:kspigot:1.21.0

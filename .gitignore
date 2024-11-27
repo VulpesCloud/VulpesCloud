@@ -9,12 +9,14 @@ build/
 .idea/jarRepositories.xml
 .idea/compiler.xml
 .idea/libraries/
+.idea/discord.xml
 *.iws
 *.iml
 *.ipr
 out/
 !**/src/main/**/out/
 !**/src/test/**/out/
+.idea/workspace.xml
 
 ### Eclipse ###
 .apt_generated
@@ -40,3 +42,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+
+filegetter.py
+
