@@ -49,13 +49,13 @@ class ModuleProvider {
                 continue
             }
             val reader = InputStreamReader(jarFile.getInputStream(moduleJson))
-            val json = JSONObject(reader)
+            val json = JSONObject(reader.readText())
             val moduleInfo = getModuleInfoFromJson(json)
             if (moduleInfo == null) {
                 logger.error("Module {} contains an invalid module.json", file.name)
                 continue
             }
-            logger.info("Loading Module &d{}", moduleInfo.name)
+            logger.info("Loading Module &m{}", moduleInfo.name)
             try {
                 val vulpesModule = this.loadModule(file, moduleInfo.main)
                 val classLoader = vulpesModule.javaClass.classLoader as URLClassLoader
@@ -72,7 +72,7 @@ class ModuleProvider {
 
         if (this.loadedModules.isNotEmpty()) {
             this.loadedModules.forEach {
-                logger.info("Starting Module &d{}", it.moduleInfo.name)
+                logger.info("Starting Module &m{}", it.moduleInfo.name)
                 it.module.enable()
                 it.moduleInfo.states = ModuleStates.STARTED
             }
@@ -81,7 +81,7 @@ class ModuleProvider {
 
     fun unloadAllModules() {
         this.loadedModules.forEach {
-            logger.info("Unloading Module &d{}", it.moduleInfo.name)
+            logger.info("Unloading Module &m{}", it.moduleInfo.name)
             it.module.disable()
             it.moduleInfo.states = ModuleStates.STOPPED
         }
@@ -94,6 +94,10 @@ class ModuleProvider {
             throw IllegalArgumentException("Class $main does not implement VulpesModule")
         }
         return clazz.getDeclaredConstructor().newInstance() as VulpesModule
+    }
+    
+    fun loadedModules(): List<LoadedModule> {
+        return loadedModules
     }
 
     private fun getModuleInfoFromJson(json: JSONObject): ModuleInfo? {

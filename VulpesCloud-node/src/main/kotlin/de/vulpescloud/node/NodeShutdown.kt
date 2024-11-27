@@ -37,6 +37,8 @@ object NodeShutdown {
 
                 delay(10000)
 
+                Node.moduleProvider.unloadAllModules()
+
                 ServiceStartScheduler.instance.cancel()
                 RedisConnectionChecker.instance.cancel()
                 Node.instance!!.getRC()?.setHashField("VulpesCloud-HeartBeat", Node.nodeConfig!!.name, "0")

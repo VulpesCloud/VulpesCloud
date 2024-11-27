@@ -166,6 +166,7 @@ class Node {
         ServiceCommand()
         DevCommand()
         PlayerCommand()
+        ModuleCommand()
 
         Runtime.getRuntime().addShutdownHook(Thread())
 

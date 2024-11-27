@@ -64,5 +64,7 @@
   "node.setup.task.question.name": "What is the name of the Task?",
   "node.setup.task.question.name.long": "The entered name is too long!",
   "node.setup.task.question.name.empty": "Please enter a name!",
-  "node.setup.task.question.name.success": "&2Successfully &7set the Task name!"
+  "node.setup.task.question.name.success": "&2Successfully &7set the Task name!",
+
+  "node.modules.loading": ""
 }

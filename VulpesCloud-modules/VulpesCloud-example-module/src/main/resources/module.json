@@ -1,0 +1,8 @@
+{
+  "name": "VulpesCloud-example-module",
+  "description": "An Example Module!",
+  "main": "de.vulpescloud.modules.example.ExampleModule",
+  "author": "TheCGuy",
+  "website": "https://vulpescloud.de",
+  "version": "1.0.0"
+}
