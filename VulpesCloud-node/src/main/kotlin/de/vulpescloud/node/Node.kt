@@ -9,6 +9,7 @@ import de.vulpescloud.node.config.LogLevels
 import de.vulpescloud.node.event.events.NodeStateChangeEvent
 import de.vulpescloud.node.event.events.TaskUpdateEvent
 import de.vulpescloud.node.event.events.task.TaskCreateEvent
+import de.vulpescloud.node.module.ModuleProvider
 import de.vulpescloud.node.networking.mysql.MySQLController
 import de.vulpescloud.node.networking.redis.RedisConnectionChecker
 import de.vulpescloud.node.networking.redis.RedisController
@@ -81,6 +82,9 @@ class Node {
 
         lateinit var playerProvider: PlayerProvider
             private set
+
+        lateinit var moduleProvider: ModuleProvider
+            private set
     }
 
     init {
@@ -124,12 +128,6 @@ class Node {
 
         mySQLController = MySQLController()
 
-        mySQLController.createDefaultTables()
-
-        NodeStateChangeEvent
-        TaskUpdateEvent
-        TaskCreateEvent
-
         clusterProvider = ClusterProvider()
 
         versionProvider = VersionProvider()
@@ -142,9 +140,21 @@ class Node {
 
         playerProvider = PlayerProvider()
 
-        serviceProvider.getAllServiceFromRedis()
+        moduleProvider = ModuleProvider()
 
         commandProvider = CommandProvider()
+
+        // Setting Finished, doing other stuff like initialization now
+
+        mySQLController.createDefaultTables()
+
+        moduleProvider.loadAllModules()
+
+        NodeStateChangeEvent
+        TaskUpdateEvent
+        TaskCreateEvent
+
+        serviceProvider.getAllServiceFromRedis()
 
         ClearCommand()
         HelpCommand()
