@@ -1,23 +1,21 @@
 package io.github.thecguygithub.launcher;
 
-import io.github.thecguygithub.launcher.dependency.Dependency;
-import io.github.thecguygithub.launcher.dependency.DependencyDownloader;
+import de.vulpescloud.launcher.dependency.Dependency;
+import de.vulpescloud.launcher.dependency.DependencyDownloader;
 import lombok.SneakyThrows;
 
 import java.nio.file.Path;
 
 public final class Launcher {
 
-    public static TestCloudClassLoader CLASS_LOADER = new TestCloudClassLoader();
+    // public static TestCloudClassLoader CLASS_LOADER = new TestCloudClassLoader();
 
     @SneakyThrows
     public static void main(String[] args) {
-        System.setProperty("startup", String.valueOf(System.currentTimeMillis()));
-
-        var boot = new Boot();
+        // var boot = new Boot();
         var apiFile = Path.of("local/dependencies/vulpescloud-api.jar");
 
-        Launcher.CLASS_LOADER.addURL(apiFile.toFile().toURI().toURL());
+        // Launcher.CLASS_LOADER.addURL(apiFile.toFile().toURI().toURL());
 
         var gsonDependency = new Dependency("com.google.code.gson", "gson", "2.11.0");
         var jLineDependency = new  Dependency("org.jline", "jline", "3.27.1");
@@ -40,11 +38,13 @@ public final class Launcher {
         var coreConfig = new Dependency("com.electronwill.night-config", "core", "3.6.0");
 
         // add boot file to the current classpath
-        CLASS_LOADER.addURL(boot.bootFile().toURI().toURL());
+        // CLASS_LOADER.addURL(boot.bootFile().toURI().toURL());
 
-        DependencyDownloader.download(coreConfig, jsonConfig, yamlConfig, tomlConfig, cloud, cloudExtension, cloudAnnotations, cloudKotlinCoroutines, cloudKotlinCoroutinesAnnotations, mariaDB, hikariCP, jLineDependency, kotlinSTD, gsonDependency, jsonDependency, jedisDependency, slf4jDependency, logbackClassicDependency, logbackCoreDependency);
+        final DependencyDownloader depDown = new DependencyDownloader();
+        depDown.download(coreConfig, jsonConfig, yamlConfig, tomlConfig, cloud, cloudExtension, cloudAnnotations, cloudKotlinCoroutines, cloudKotlinCoroutinesAnnotations, mariaDB, hikariCP, jLineDependency, kotlinSTD, gsonDependency, jsonDependency, jedisDependency, slf4jDependency, logbackClassicDependency, logbackCoreDependency);
 
-        Thread.currentThread().setContextClassLoader(CLASS_LOADER);
-        Class.forName(boot.mainClass(), true, CLASS_LOADER).getMethod("main", String[].class).invoke(null, (Object) args);
+        // Thread.currentThread().setContextClassLoader(CLASS_LOADER);
+        System.setProperty("startup", String.valueOf(System.currentTimeMillis()));
+        // Class.forName(boot.mainClass(), true, CLASS_LOADER).getMethod("main", String[].class).invoke(null, (Object) args);
     }
 }
