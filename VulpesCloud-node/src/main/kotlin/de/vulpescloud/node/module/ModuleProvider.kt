@@ -4,7 +4,6 @@ import de.vulpescloud.api.module.VulpesModule
 import de.vulpescloud.api.module.ModuleInfo
 import de.vulpescloud.api.module.ModuleStates
 import de.vulpescloud.launcher.VulpesLauncher
-import io.github.thecguygithub.launcher.Launcher
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import java.io.File
