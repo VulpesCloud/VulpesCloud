@@ -2,16 +2,17 @@ package de.vulpescloud.launcher.dependency
 
 import org.jetbrains.annotations.Contract
 
+
 class Dependency(
     val groupId: String,
     val artifactId: String,
-    val version: String
+    val version: String,
 ) {
 
     fun downloadUrl(): String {
         return String.format(
             Repository.MAVEN_CENTRAL.repository,
-            groupId.replace(".", "/"), artifactId, version, artifactId
+            groupId.replace(".", "/"), artifactId, version, artifactId, version
         )
     }
 
