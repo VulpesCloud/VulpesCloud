@@ -3,6 +3,7 @@ package de.vulpescloud.node.module
 import de.vulpescloud.api.module.VulpesModule
 import de.vulpescloud.api.module.ModuleInfo
 import de.vulpescloud.api.module.ModuleStates
+import de.vulpescloud.launcher.VulpesLauncher
 import io.github.thecguygithub.launcher.Launcher
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
@@ -88,7 +89,7 @@ class ModuleProvider {
     }
 
     private fun loadModule(file: File, main: String): VulpesModule {
-        val classLoader = URLClassLoader(arrayOf(file.toURI().toURL()), Launcher.CLASS_LOADER)
+        val classLoader = URLClassLoader(arrayOf(file.toURI().toURL()), VulpesLauncher.CLASS_LOADER)
         val clazz = classLoader.loadClass(main)
         if (!VulpesModule::class.java.isAssignableFrom(clazz)) {
             throw IllegalArgumentException("Class $main does not implement VulpesModule")
