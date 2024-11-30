@@ -1,7 +1,7 @@
 [versions]
 # kotlin
 
-stdlib = "2.0.21"
+stdlib = "2.1.0"
 
 # google deps
 guava = "33.3.1-jre"
