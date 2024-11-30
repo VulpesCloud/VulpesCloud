@@ -7,10 +7,11 @@ version = "1.0.0-alpha"
 
 repositories {
     mavenCentral()
+    maven("https://repo.vulpescloud.de/snapshots")
 }
 
 dependencies {
-    compileOnly(project(":VulpesCloud-api"))
-    compileOnly(project(":VulpesCloud-node"))
+    compileOnly("de.vulpescloud:VulpesCloud-api:1.0.0-alpha")
+    compileOnly("de.vulpescloud:VulpesCloud-node:1.0.0-alpha")
     compileOnly(rootProject.libs.slf4jApi)
 }
