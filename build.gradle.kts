@@ -27,6 +27,7 @@ plugins {
     id("org.jetbrains.dokka") version "1.9.20"
     id("signing")
     id("maven-publish")
+    alias(libs.plugins.shadow)
 }
 
 group = "de.vulpescloud"
@@ -90,36 +91,40 @@ allprojects {
     }
 }
 
-//tasks {
-//    publishing {
-//        repositories {
-//            maven {
-//                name = "vulpescloudReleases"
-//                url = uri("https://repo.vulpescloud.de/releases/")
-//                credentials{
-//                    username = System.getenv("REPO_USERNAME")
-//                    password = System.getenv("REPO_PASSWORD")
-//                }
-//            }
-//
-//            maven {
-//                name = "vulpescloudSnapshots"
-//                url = uri("https://repo.vulpescloud.de/snapshots/")
-//                credentials{
-//                    username = System.getenv("REPO_USERNAME")
-//                    password = System.getenv("REPO_PASSWORD")
-//                }
-//            }
-//        }
-//        publications {
-//            create<MavenPublication>("maven") {
-//                groupId = project.group.toString()
-//                artifactId = project.name
-//                version = project.version.toString()
-//                from(project.components["java"])
-//            }
-//        }
-//    }
-//}
+tasks.register("copyFilesForMetaRepo") {
+    dependsOn(project(":VulpesCloud-api").tasks.jar)
+    dependsOn(project(":VulpesCloud-bridge").tasks.jar)
+    dependsOn(project(":VulpesCloud-node").tasks.shadowJar)
+    dependsOn(project(":VulpesCloud-wrapper").tasks.shadowJar)
+    dependsOn(project(":VulpesCloud-connector").tasks.shadowJar)
+
+    doLast {
+        copy {
+            from(project(":VulpesCloud-api").buildDir.resolve("libs/vulpescloud-api.jar"))
+            into("$buildDir/meta-repo")
+            rename { "vulpescloud-api.jar" }
+        }
+        copy {
+            from(project(":VulpesCloud-bridge").buildDir.resolve("libs/vulpescloud-bridge.jar"))
+            into("$buildDir/meta-repo")
+            rename { "vulpescloud-bridge.jar" }
+        }
+        copy {
+            from(project(":VulpesCloud-node").buildDir.resolve("libs/vulpescloud-node.jar"))
+            into("$buildDir/meta-repo")
+            rename { "vulpescloud-node.jar" }
+        }
+        copy {
+            from(project(":VulpesCloud-wrapper").buildDir.resolve("libs/vulpescloud-wrapper.jar"))
+            into("$buildDir/meta-repo")
+            rename { "vulpescloud-wrapper.jar" }
+        }
+        copy {
+            from(project(":VulpesCloud-connector").buildDir.resolve("libs/vulpescloud-connector.jar"))
+            into("$buildDir/meta-repo")
+            rename { "vulpescloud-connector.jar" }
+        }
+    }
+}
 
 
