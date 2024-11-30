@@ -24,7 +24,7 @@
 
 package de.vulpescloud.wrapper
 
-import java.util.UUID
+import java.util.*
 
 class LocalServiceInformation(
     val id: UUID,

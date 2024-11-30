@@ -24,6 +24,10 @@
 
 package io.github.thecguygithub.api.log;
 
+import lombok.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.event.Level;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -31,9 +35,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
-import lombok.NonNull;
-import org.slf4j.Logger;
-import org.slf4j.event.Level;
 
 public final class LogOutputStream extends ByteArrayOutputStream {
 

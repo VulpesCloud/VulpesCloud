@@ -25,9 +25,8 @@
 package de.vulpescloud.connector.bukkit
 
 import de.vulpescloud.connector.Connector
-import de.vulpescloud.connector.bukkit.events.*
-import de.vulpescloud.connector.velocity.VelocityConnector
-import de.vulpescloud.connector.velocity.VelocityConnector.Companion
+import de.vulpescloud.connector.bukkit.events.MapInitializeEvent
+import de.vulpescloud.connector.bukkit.events.PlayerJoinEvent
 import net.axay.kspigot.extensions.server
 import net.axay.kspigot.main.KSpigot
 import net.kyori.adventure.text.minimessage.MiniMessage

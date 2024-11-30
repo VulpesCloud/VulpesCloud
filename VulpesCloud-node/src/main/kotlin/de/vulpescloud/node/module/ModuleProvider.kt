@@ -24,9 +24,9 @@
 
 package de.vulpescloud.node.module
 
-import de.vulpescloud.api.module.VulpesModule
 import de.vulpescloud.api.module.ModuleInfo
 import de.vulpescloud.api.module.ModuleStates
+import de.vulpescloud.api.module.VulpesModule
 import de.vulpescloud.launcher.VulpesLauncher
 import org.json.JSONObject
 import org.slf4j.LoggerFactory

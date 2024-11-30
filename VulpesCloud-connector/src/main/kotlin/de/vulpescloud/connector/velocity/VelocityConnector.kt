@@ -31,9 +31,7 @@ import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.plugin.Plugin
-import com.velocitypowered.api.proxy.Player
 import com.velocitypowered.api.proxy.ProxyServer
-import com.velocitypowered.api.proxy.player.ResourcePackInfo
 import de.vulpescloud.connector.Connector
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.slf4j.Logger

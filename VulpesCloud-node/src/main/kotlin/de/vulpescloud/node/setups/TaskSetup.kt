@@ -37,7 +37,6 @@ import de.vulpescloud.node.setup.answer.MemorySetupAnswer
 import de.vulpescloud.node.setup.answer.VersionSetupAnswer
 import de.vulpescloud.node.task.TaskImpl
 import de.vulpescloud.node.version.Version
-import kotlin.math.sign
 import kotlin.properties.Delegates
 
 class TaskSetup : Setup {

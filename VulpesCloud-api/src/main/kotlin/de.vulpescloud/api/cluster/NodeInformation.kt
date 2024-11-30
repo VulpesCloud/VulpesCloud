@@ -24,6 +24,6 @@
 
 package de.vulpescloud.api.cluster
 
-import java.util.UUID
+import java.util.*
 
 data class NodeInformation(val name: String, val uuid: UUID)

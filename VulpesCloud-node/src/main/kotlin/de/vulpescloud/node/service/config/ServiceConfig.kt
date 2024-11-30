@@ -30,8 +30,7 @@ import de.vulpescloud.launcher.util.FileSystemUtil
 import de.vulpescloud.node.service.LocalService
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
-import java.nio.file.Path
-import java.util.Properties
+import java.util.*
 
 object ServiceConfig {
 

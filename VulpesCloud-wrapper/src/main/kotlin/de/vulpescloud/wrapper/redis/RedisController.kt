@@ -31,7 +31,7 @@ import redis.clients.jedis.JedisPool
 import redis.clients.jedis.JedisPoolConfig
 import redis.clients.jedis.exceptions.JedisConnectionException
 import java.nio.charset.StandardCharsets
-import java.util.UUID
+import java.util.*
 import java.util.concurrent.atomic.AtomicBoolean
 
 class RedisController : BinaryJedisPubSub(), Runnable {

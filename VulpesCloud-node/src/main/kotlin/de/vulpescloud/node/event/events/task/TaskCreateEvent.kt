@@ -25,7 +25,6 @@
 package de.vulpescloud.node.event.events.task
 
 import de.vulpescloud.api.network.redis.RedisPubSubChannels
-import de.vulpescloud.node.Node
 import de.vulpescloud.node.event.events.Event
 import de.vulpescloud.node.networking.redis.RedisJsonParser
 import de.vulpescloud.node.task.TaskFactory

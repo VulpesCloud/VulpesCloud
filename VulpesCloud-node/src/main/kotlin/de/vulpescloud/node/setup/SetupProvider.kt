@@ -28,12 +28,10 @@ import de.vulpescloud.node.Node
 import de.vulpescloud.node.setup.annotations.SetupCancel
 import de.vulpescloud.node.setup.annotations.SetupFinish
 import de.vulpescloud.node.setup.annotations.SetupQuestion
-import de.vulpescloud.node.terminal.ConsoleAppender
 import org.slf4j.LoggerFactory
 import java.lang.reflect.Method
 import java.lang.reflect.Parameter
 import java.util.*
-import kotlin.collections.ArrayList
 
 class SetupProvider {
 

@@ -24,14 +24,11 @@
 
 package de.vulpescloud.launcher.util
 
-import java.io.IOException
-import java.io.UncheckedIOException
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.net.http.HttpResponse.BodyHandler
-import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.time.Duration

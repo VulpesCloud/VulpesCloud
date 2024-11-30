@@ -26,7 +26,6 @@ package de.vulpescloud.launcher
 
 import de.vulpescloud.launcher.dependency.Dependency
 import de.vulpescloud.launcher.dependency.DependencyDownloader
-import de.vulpescloud.launcher.util.FileSystemUtil
 import de.vulpescloud.launcher.util.FileUpdaterUtil
 import java.io.File
 import java.net.URI

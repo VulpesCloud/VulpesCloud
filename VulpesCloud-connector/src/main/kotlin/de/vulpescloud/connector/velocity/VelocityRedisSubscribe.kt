@@ -25,8 +25,8 @@
 package de.vulpescloud.connector.velocity
 
 import de.vulpescloud.api.network.redis.RedisPubSubChannels
-import de.vulpescloud.wrapper.redis.RedisManager
 import de.vulpescloud.wrapper.redis.RedisJsonParser
+import de.vulpescloud.wrapper.redis.RedisManager
 
 class VelocityRedisSubscribe {
 

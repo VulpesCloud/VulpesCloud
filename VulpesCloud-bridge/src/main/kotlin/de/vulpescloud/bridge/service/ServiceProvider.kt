@@ -33,9 +33,9 @@ import de.vulpescloud.api.version.VersionType
 import de.vulpescloud.bridge.service.impl.ServiceImpl
 import de.vulpescloud.bridge.task.impl.TaskImpl
 import de.vulpescloud.wrapper.Wrapper
+import org.jetbrains.annotations.ApiStatus
 import org.json.JSONObject
 import java.util.*
-import org.jetbrains.annotations.ApiStatus
 
 /**
  *   The ServiceProvider is used to manage the Services

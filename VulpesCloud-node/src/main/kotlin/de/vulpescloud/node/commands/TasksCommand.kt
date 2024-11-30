@@ -25,14 +25,10 @@
 package de.vulpescloud.node.commands
 
 import de.vulpescloud.api.command.CommandInfo
-import de.vulpescloud.api.version.VersionInfo
-import de.vulpescloud.api.version.VersionType
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.setups.TaskSetup
-import de.vulpescloud.node.task.TaskImpl
 import org.incendo.cloud.kotlin.extension.buildAndRegister
 import org.incendo.cloud.parser.standard.StringParser
-import org.json.JSONObject
 import org.slf4j.LoggerFactory
 
 class TasksCommand {

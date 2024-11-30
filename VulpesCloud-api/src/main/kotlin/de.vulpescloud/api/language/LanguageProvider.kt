@@ -26,14 +26,11 @@ package de.vulpescloud.api.language
 
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
-import java.io.File
-import java.io.IOException
-import java.io.InputStream
 import java.net.URI
-import java.nio.file.*
-import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.nio.file.StandardCopyOption
 import java.util.concurrent.CompletableFuture
-import java.util.zip.ZipFile
 
 class LanguageProvider {
 
