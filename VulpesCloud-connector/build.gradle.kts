@@ -3,11 +3,7 @@ plugins {
     kotlin("jvm") version "2.1.0"
     //id("io.papermc.paperweight.userdev") version "1.7.4"
     id("com.github.johnrengelman.shadow") version "8.1.1"
-    //id("io.github.goooler.shadow") version "8.1.8"
 }
-
-group = "de.vulpescloud"
-version = "1.0.0-alpha"
 
 repositories {
     mavenCentral()
@@ -49,6 +45,9 @@ sourceSets {
 tasks.jar {
     archiveFileName.set("vulpescloud-connector.jar")
 }
+
 tasks.shadowJar {
     archiveFileName.set("vulpescloud-connector.jar")
+    dependsOn(":VulpesCloud-api:jar")
+    dependsOn(":VulpesCloud-bridge:jar")
 }
