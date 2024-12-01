@@ -25,6 +25,9 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
+        env:
+          REPO_USERNAME: ${{ secrets.REPO_USERNAME }}
+          REPO_PASSWORD: ${{ secrets.REPO_PASSWORD }}
         run: ./gradlew :VulpesCloud-launcher:shadowJar publishAllPublicationsToVulpesCloudSnapshotsRepository
 
 #      - name: Get branch name
