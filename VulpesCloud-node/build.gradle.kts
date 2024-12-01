@@ -64,6 +64,7 @@ tasks.jar {
         attributes["Main-Class"] = "de.vulpescloud.node.NodeLauncher"
     }
     archiveFileName.set("vulpescloud-node.jar")
+    destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
 }
 
 tasks.shadowJar {
@@ -71,4 +72,5 @@ tasks.shadowJar {
         attributes["Main-Class"] = "de.vulpescloud.node.NodeLauncher"
     }
     archiveFileName.set("vulpescloud-node.jar")
+    destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
 }

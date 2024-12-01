@@ -25,24 +25,24 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build with Gradle
-        run: ./gradlew :VulpesCloud-launcher:shadowJar copyFilesForMetaRepo
+        run: ./gradlew :VulpesCloud-launcher:shadowJar publishAllPublicationsToVulpesCloudSnapshotsRepository
 
-      - name: Get branch name
-        id: branch-name
-        uses: tj-actions/branch-names@v8
-
-      - name: Publish updater metadata
-        uses: s0/git-publish-subdir-action@develop
-        if: ${{ github.event_name == 'push' && !startsWith(github.ref, 'refs/heads/renovate/') }}
-        env:
-          REPO: git@github.com:VulpesCloud/VulpesCloud-meta.git
-          BRANCH: ${{ steps.branch-name.outputs.current_branch }}
-          FOLDER: 'build/meta-repo'
-          SQUASH_HISTORY: true
-          SKIP_EMPTY_COMMITS: true
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          MESSAGE: 'Update Meta for branch {target-branch} of commit {sha}'
+#      - name: Get branch name
+#        id: branch-name
+#        uses: tj-actions/branch-names@v8
+#
+#      - name: Publish updater metadata
+#        uses: s0/git-publish-subdir-action@develop
+#        if: ${{ github.event_name == 'push' && !startsWith(github.ref, 'refs/heads/renovate/') }}
+#        env:
+#          REPO: git@github.com:VulpesCloud/VulpesCloud-meta.git
+#          BRANCH: ${{ steps.branch-name.outputs.current_branch }}
+#          FOLDER: 'build/meta-repo'
+#          SQUASH_HISTORY: true
+#          SKIP_EMPTY_COMMITS: true
+#          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#          MESSAGE: 'Update Meta for branch {target-branch} of commit {sha}'
 
       - name: Upload a Build Artifact
         uses: actions/upload-artifact@v4

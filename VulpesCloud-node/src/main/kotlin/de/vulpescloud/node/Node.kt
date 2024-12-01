@@ -32,12 +32,14 @@ import de.vulpescloud.node.commands.*
 import de.vulpescloud.node.config.LogLevels
 import de.vulpescloud.node.event.events.NodeStateChangeEvent
 import de.vulpescloud.node.event.events.TaskUpdateEvent
+import de.vulpescloud.node.event.events.service.ServiceLoggingEvent
 import de.vulpescloud.node.event.events.task.TaskCreateEvent
 import de.vulpescloud.node.module.ModuleProvider
 import de.vulpescloud.node.networking.mysql.MySQLController
 import de.vulpescloud.node.networking.redis.RedisConnectionChecker
 import de.vulpescloud.node.networking.redis.RedisController
 import de.vulpescloud.node.player.PlayerProvider
+import de.vulpescloud.node.service.LocalServiceLoggingThread
 import de.vulpescloud.node.service.ServiceProvider
 import de.vulpescloud.node.service.ServiceStartScheduler
 import de.vulpescloud.node.setup.SetupProvider
@@ -177,6 +179,7 @@ class Node {
         NodeStateChangeEvent
         TaskUpdateEvent
         TaskCreateEvent
+        ServiceLoggingEvent
 
         serviceProvider.getAllServiceFromRedis()
 

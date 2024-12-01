@@ -104,7 +104,12 @@ class VulpesLauncher {
                 System.err.println("│         VulpesCloud will start in 5 seconds!           │")
                 System.err.println("│                                                        │")
                 System.err.println("╰────────────────────────────────────────────────────────╯")
-                TimeUnit.SECONDS.sleep(5)
+
+                if (System.getProperty("skipWait") == "true") {
+                    println("Skipping Wait")
+                } else {
+                    TimeUnit.SECONDS.sleep(5)
+                }
 
                 val apiFile = Path.of("launcher/dependencies/vulpescloud-api.jar").toFile()
                 val nodeFile = Path.of("launcher/dependencies/vulpescloud-node.jar").toFile()

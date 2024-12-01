@@ -33,6 +33,36 @@ class ServiceEventMessageBuilder {
         fun stateEventBuilder(): StateEventBuilder {
             return StateEventBuilder()
         }
+        fun consoleEventBuilder(): ConsoleEventBuilder {
+            return ConsoleEventBuilder()
+        }
+    }
+
+    class ConsoleEventBuilder() {
+        private var service: ClusterService? = null
+        private var line: String? = null
+
+        fun setService(service: ClusterService): ConsoleEventBuilder {
+            this.service = service
+            return this
+        }
+
+        fun setLine(line: String): ConsoleEventBuilder {
+            this.line = line
+            return this
+        }
+
+        fun build(): String {
+            if (line == null) {
+                throw NullPointerException("The line is null!")
+            }
+            if (service == null) {
+                throw NullPointerException("The service is null!")
+            }
+            return "SERVICE\uD835\uDF06%name%\uD835\uDF06EVENT\uD835\uDF06LOG\uD835\uDF06%line%"
+                .replace("%name%", this.service!!.name())
+                .replace("%line%", line!!)
+        }
     }
 
     class StateEventBuilder() {

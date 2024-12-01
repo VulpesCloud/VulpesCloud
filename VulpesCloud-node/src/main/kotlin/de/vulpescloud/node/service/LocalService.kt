@@ -48,12 +48,11 @@ class LocalService(
     port: Int,
     hostname: String?,
     runningNode: String?
-) :
-    Service(task, orderedId, id, port, hostname!!, runningNode!!) {
+) : Service(task, orderedId, id, port, hostname!!, runningNode!!) {
 
     private val logger = LoggerFactory.getLogger(LocalService::class.java)
 
-    private var process: Process? = null
+    var process: Process? = null
     private var processTracking: Thread? = null
 
     val runningDir: Path
@@ -63,7 +62,7 @@ class LocalService(
         maxPlayers = task.maxPlayers()
 
         this.runningDir =
-            if (task.staticService()) Path.of(("static/" + task.name()) + "-" + orderedId) else Path.of("running/" + name() + "-" + id)
+            if (task.staticService()) Path.of(("local/services/" + task.name()) + "-" + orderedId) else Path.of("local/temp/services/" + name() + "-" + id)
         runningDir.toFile().mkdirs()
     }
 
@@ -89,8 +88,11 @@ class LocalService(
         Thread {
             process?.inputStream?.bufferedReader()?.use { reader ->
                 reader.forEachLine { line ->
-                    // todo Make better service console logging
-                    logger.debug("[${name()}] $line")
+                    val msg = ServiceEventMessageBuilder.consoleEventBuilder()
+                        .setService(this)
+                        .setLine(line.trim())
+                        .build()
+                    Node.instance!!.getRC()?.sendMessage(msg, RedisPubSubChannels.VULPESCLOUD_SERVICE_EVENT.name)
                 }
             }
         }.start()
@@ -173,4 +175,6 @@ class LocalService(
     fun version(): Version? {
         return Node.versionProvider.search(task().version().name)
     }
+
+
 }

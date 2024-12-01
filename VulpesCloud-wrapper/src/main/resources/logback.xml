@@ -35,7 +35,7 @@
     <appender name="Rolling" class="RollingFileAppender">
         <file>VulpesLog/latest.log</file>
         <rollingPolicy class="SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>local/logs/vulpescloud-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
+            <fileNamePattern>VulpesLog/vulpescloud-%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern>
             <maxFileSize>15MB</maxFileSize>
             <maxHistory>3</maxHistory>
             <totalSizeCap>50MB</totalSizeCap>

@@ -127,7 +127,7 @@ class ServiceFactory : ClusterServiceFactory {
                 pluginDir.toFile().mkdirs()
 
                 Files.copy(
-                    Path.of("local/dependencies/vulpescloud-connector.jar"),
+                    Path.of("launcher/dependencies/vulpescloud-connector.jar"),
                     pluginDir.resolve("vulpescloud-connector.jar"),
                     StandardCopyOption.REPLACE_EXISTING
                 )
@@ -147,7 +147,6 @@ class ServiceFactory : ClusterServiceFactory {
         }
     }
 
-    // todo Fix broken id generation
     fun generateOrderedId(task: Task): Int {
         return IntStream.iterate(1) { i: Int -> i + 1 }.filter { id: Int ->
             !isIdPresent(
@@ -196,7 +195,7 @@ class ServiceFactory : ClusterServiceFactory {
         }
     }
 
-    fun generateServiceArguments(clusterService: ClusterService): MutableList<String> {
+    private fun generateServiceArguments(clusterService: ClusterService): MutableList<String> {
         val arguments = LinkedList<String>()
 
         arguments.add("java")
@@ -240,10 +239,10 @@ class ServiceFactory : ClusterServiceFactory {
 
         arguments.add("-cp")
 
-        val path = "../../local/dependencies/"
+        val path = "../../launcher/dependencies/"
 
         val neededDependencies = listOf(
-            "testcloud-api.jar"
+            "vulpescloud-api.jar"
         )
 
         arguments.add(
@@ -253,7 +252,11 @@ class ServiceFactory : ClusterServiceFactory {
             )
         )
 
-        arguments.add("-javaagent:../../local/dependencies/vulpescloud-wrapper.jar")
+        if (clusterService.task().staticService()) {
+            arguments.add("-javaagent:../../../launcher/dependencies/vulpescloud-wrapper.jar")
+        } else {
+            arguments.add("-javaagent:../../../../launcher/dependencies/vulpescloud-wrapper.jar")
+        }
         arguments.add("de.vulpescloud.wrapper.WrapperLauncher")
 
         return arguments

@@ -29,6 +29,7 @@ import de.vulpescloud.api.network.redis.RedisPubSubChannels
 import de.vulpescloud.api.services.ServiceMessageBuilder
 import de.vulpescloud.api.services.action.ServiceActions
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.service.Service
 import org.incendo.cloud.kotlin.extension.buildAndRegister
 import org.incendo.cloud.parser.standard.StringParser
 import org.slf4j.Logger
@@ -107,6 +108,28 @@ class ServiceCommand {
                         )
                     } catch (e: Exception) {
                         logger.error(e.toString())
+                    }
+                } else {
+                    logger.info("The entered Service does not exist!")
+                }
+            }
+        }
+
+        Node.commandProvider!!.commandManager!!.buildAndRegister("service", aliases = arrayOf("ser", "services")) {
+            required("service", StringParser.stringParser(StringParser.StringMode.SINGLE))
+            literal("screen")
+
+            handler { ctx ->
+                val service = Node.serviceProvider.findByName(ctx.get("service"))
+
+                if (service != null) {
+                    val srv = service as Service
+                    if (srv.logging) {
+                        srv.logging = false
+                        logger.info("Service logging has been disabled!")
+                    } else {
+                        srv.logging = true
+                        logger.info("Service logging has been enabled!")
                     }
                 } else {
                     logger.info("The entered Service does not exist!")

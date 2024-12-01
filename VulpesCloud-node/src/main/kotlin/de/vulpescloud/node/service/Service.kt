@@ -43,6 +43,8 @@ open class Service(
     var state: ClusterServiceStates = ClusterServiceStates.PREPARED,  // Default value for state
 ) : ClusterService {
 
+    var logging = false
+
     override fun details(): String {
         return "id&8=&7$id&8, &7hostname&8=&7$hostname, &7port&8=&7$port&8, &7node&8=&7$runningNode"
     }
