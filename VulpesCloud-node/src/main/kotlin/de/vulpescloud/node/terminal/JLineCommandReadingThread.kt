@@ -26,6 +26,7 @@ package de.vulpescloud.node.terminal
 
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeShutdown
+import de.vulpescloud.node.command.source.CommandSource
 import de.vulpescloud.node.terminal.util.TerminalColorUtil
 import org.jline.reader.EndOfFileException
 import org.jline.reader.UserInterruptException
@@ -54,7 +55,7 @@ class JLineCommandReadingThread(private val terminal: JLineTerminal) : Thread() 
 //                            }
 //                            Node.setupProvider.input(rawLine)
 //                        } else {
-//                            Node.commandProvider?.execute(CommandSource.console(), rawLine)
+                            Node.instance.commandProvider.execute(CommandSource.console(), rawLine)
 //                        }
 
                     } catch (ignore: EndOfFileException) {}
