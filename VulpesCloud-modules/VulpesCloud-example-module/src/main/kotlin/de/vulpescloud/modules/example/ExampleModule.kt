@@ -24,7 +24,6 @@
 
 package de.vulpescloud.modules.example
 
-import de.vulpescloud.api.module.VulpesModule
 import org.slf4j.LoggerFactory
 
 //class ExampleModule : VulpesModule {
