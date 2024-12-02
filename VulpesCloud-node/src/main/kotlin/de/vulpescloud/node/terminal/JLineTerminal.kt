@@ -24,6 +24,7 @@
 
 package de.vulpescloud.node.terminal
 
+import de.vulpescloud.node.Node
 import de.vulpescloud.node.terminal.util.TerminalColorUtil
 import io.github.thecguygithub.api.log.LogOutputStream
 import org.jline.jansi.Ansi
@@ -41,7 +42,7 @@ class JLineTerminal {
     private val log = LoggerFactory.getLogger(JLineTerminal::class.java)
     lateinit var terminal: Terminal
     lateinit var lineReader: LineReaderImpl
-    val commandReadingThread: JLineCommandReadingThread = JLineCommandReadingThread(this)
+    private val commandReadingThread: JLineCommandReadingThread = JLineCommandReadingThread(this)
 
     fun initialize() {
         terminal = TerminalBuilder.builder()
@@ -93,24 +94,24 @@ class JLineTerminal {
     }
 
     fun printLine(message: String) {
-//        if (Node.setupProvider.currentSetup == null) {
+        if (Node.instance.setupProvider.currentSetup == null) {
             terminal.puts(InfoCmp.Capability.carriage_return)
             terminal.writer()
                 .println(TerminalColorUtil.replaceColorCodes(message) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
             terminal.flush()
             update()
-//        }
+       }
     }
 
-//    fun printSetup(message: String) {
-//        if (Node.setupProvider.currentSetup != null) {
-//            terminal.puts(InfoCmp.Capability.carriage_return)
-//            terminal.writer()
-//                .println(TerminalColorUtil.replaceColorCodes(message) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
-//            terminal.flush()
-//            update()
-//        }
-//    }
+    fun printSetup(message: String) {
+        if (Node.instance.setupProvider.currentSetup != null) {
+            terminal.puts(InfoCmp.Capability.carriage_return)
+            terminal.writer()
+                .println(TerminalColorUtil.replaceColorCodes(message) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
+            terminal.flush()
+            update()
+        }
+    }
 
     fun close() {
         terminal.close()

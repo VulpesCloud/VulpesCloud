@@ -48,15 +48,15 @@ class JLineCommandReadingThread(private val terminal: JLineTerminal) : Thread() 
                             continue
                         }
 
-//                        if (Node.setupProvider.currentSetup != null) {
-//                            if (rawLine.equals("exit", true)) {
-//                                Node.setupProvider.cancelSetup()
-//                                continue
-//                            }
-//                            Node.setupProvider.input(rawLine)
-//                        } else {
+                        if (Node.instance.setupProvider.currentSetup != null) {
+                            if (rawLine.equals("exit", true)) {
+                                Node.instance.setupProvider.cancelSetup()
+                                continue
+                            }
+                            Node.instance.setupProvider.input(rawLine)
+                        } else {
                             Node.instance.commandProvider.execute(CommandSource.console(), rawLine)
-//                        }
+                        }
 
                     } catch (ignore: EndOfFileException) {}
                 } catch (exception: UserInterruptException) {

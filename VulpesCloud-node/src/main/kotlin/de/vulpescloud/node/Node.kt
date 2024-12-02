@@ -6,12 +6,14 @@ import de.vulpescloud.node.commands.ExitCommand
 import de.vulpescloud.node.commands.HelpCommand
 import de.vulpescloud.node.commands.InfoCommand
 import de.vulpescloud.node.config.ConfigProvider
+import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.terminal.JLineTerminal
 
 class Node {
     val config = ConfigProvider()
     val terminal = JLineTerminal()
     val commandProvider = CommandProvider()
+    val setupProvider = SetupProvider()
 
     init {
         instance = this
