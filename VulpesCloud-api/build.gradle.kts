@@ -32,6 +32,8 @@ dependencies {
     compileOnly(libs.nightConfig.toml)
     compileOnly(libs.nightConfig.yaml)
     compileOnly(libs.json)
+    compileOnly(libs.exposed.core)
+    compileOnly(libs.exposed.jdbc)
 }
 
 tasks.jar {

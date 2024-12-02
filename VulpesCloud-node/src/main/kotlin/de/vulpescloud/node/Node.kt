@@ -7,6 +7,7 @@ import de.vulpescloud.node.commands.ExitCommand
 import de.vulpescloud.node.commands.HelpCommand
 import de.vulpescloud.node.commands.InfoCommand
 import de.vulpescloud.node.config.ConfigProvider
+import de.vulpescloud.node.networking.mysql.MySQLController
 import de.vulpescloud.node.networking.redis.RedisController
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setups.FirstSetup
@@ -28,6 +29,7 @@ class Node {
     private val translator = Translator
     private val logger = LoggerFactory.getLogger(Node::class.java)
     private var redisController: RedisController? = null
+    private var mysqlController: MySQLController? = null
 
     init {
         instance = this
@@ -49,6 +51,9 @@ class Node {
         }
 
         redisController = RedisController()
+        mysqlController = MySQLController()
+
+        mysqlController?.generateDefaultTables()
 
         commandProvider.register(InfoCommand())
         commandProvider.register(HelpCommand())
@@ -65,6 +70,9 @@ class Node {
 
     fun getRC(): RedisController? {
         return redisController
+    }
+    fun getDB(): MySQLController? {
+        return mysqlController
     }
 
     companion object {
