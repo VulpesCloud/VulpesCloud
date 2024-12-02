@@ -1,8 +1,8 @@
 package de.vulpescloud.node.commands
 
-import de.vulpescloud.api.Named
 import de.vulpescloud.api.command.CommandInfo
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.command.annotations.Alias
 import de.vulpescloud.node.command.annotations.Description
 import de.vulpescloud.node.command.source.CommandSource
 import org.incendo.cloud.annotations.Argument
@@ -12,7 +12,9 @@ import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
 import java.util.stream.Stream
 
-@Description("See all Commands!(translatalbe please!)", false)
+@Suppress("UNUSED")
+@Description("See all Commands!(translatable please!)", false)
+@Alias(["?"])
 class HelpCommand {
 
     @Parser(suggestions = "commands")
@@ -38,11 +40,15 @@ class HelpCommand {
     @Command("help|? <command>")
     fun sendSpecificHelp(
         source: CommandSource,
-        @Argument("command") command: CommandInfo) {
-        source.sendMessage("Aliases: &m${command.joinNameToAliases(", ")}")
-        source.sendMessage("Description: &m${command.description}")
-        source.sendMessage("Usages:")
-        command.usage.forEach { source.sendMessage(" > &m$it") }
+        @Argument("command") command: CommandInfo?) {
+        if (command != null) {
+            source.sendMessage("Aliases: &m${command.joinNameToAliases(", ")}")
+            source.sendMessage("Description: &m${command.description}")
+            source.sendMessage("Usages:")
+            command.usage.forEach { source.sendMessage(" > &m$it") }
+        } else {
+            source.sendMessage("&cInvalid command!")
+        }
     }
 
 }

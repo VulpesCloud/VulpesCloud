@@ -48,7 +48,7 @@ import kotlin.collections.HashSet
 
 class CommandProvider {
 
-    val ALIAS_KEY: CloudKey<out HashSet<String>>? = CloudKey.of("vulpescloud:alias", HashSet<String>()::class.java)
+    val ALIAS_KEY: CloudKey<Array<String>>? = CloudKey.of("vulpescloud:alias", Array<String>::class.java)
     val DESCRIPTION_KEY: CloudKey<String> = CloudKey.of(
         "vulpescloud:description",
         String::class.java
@@ -69,24 +69,19 @@ class CommandProvider {
             CommandSource::class.java
         ) { CommandMeta.empty() }
 
-//        this.annotationParser!!.registerBuilderModifier<Alias>(
-//            Alias::class.java
-//        ) { alias: Alias, builder: Command.Builder<CommandSource?> ->
-//            builder.meta<Set<String>>(
-//                this.ALIAS_KEY, HashSet(
-//                    listOf(*alias.alias)
-//                )
-//            )
-//        }
 
-//        annotationParser!!.registerBuilderModifier(
-//            Alias::class.java
-//        ) { alias: Alias, builder: Command.Builder<CommandSource?> ->
-//            builder.meta(
-//                ALIAS_KEY,
-//                setOf("")
-//            )
-//        }
+        this.annotationParser!!.registerBuilderModifier(
+            Alias::class.java,
+            BuilderModifier<Alias, CommandSource?> registerBuilderModifier@{ alias: Alias, builder: Command.Builder<CommandSource?> ->
+                if (alias.alias.isNotEmpty()) {
+                    return@registerBuilderModifier builder.meta(
+                        this.ALIAS_KEY!!,
+                        alias.alias
+                    )
+                }
+                builder
+            }
+        )
 
         this.annotationParser!!.registerBuilderModifier(
             Description::class.java,
@@ -98,7 +93,8 @@ class CommandProvider {
                     )
                 }
                 builder
-            })
+            }
+        )
 
     }
 
@@ -127,12 +123,14 @@ class CommandProvider {
                 DESCRIPTION_KEY
             ) { "No Description! Repleace me !" }
 
-            val aliases = emptySet<String>()
+            val aliases = cloudCommand.commandMeta().getOrSupplyDefault(
+                ALIAS_KEY ?: CloudKey.of("vulpescloud:alias", Array<String>::class.java)
+            ) { emptyArray() }
 
             val name = cloudCommand.nonFlagArguments().first().name().lowercase()
 
             registeredCommands!!.add(
-                CommandInfo(name, aliases, description, this.commandUsageOfRoot(name), permission)
+                CommandInfo(name, aliases.toSet(), description, this.commandUsageOfRoot(name), permission)
             )
         }
     }
