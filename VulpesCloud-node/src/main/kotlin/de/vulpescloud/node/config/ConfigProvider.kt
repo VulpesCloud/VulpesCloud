@@ -8,10 +8,31 @@ class ConfigProvider {
 
     val config = FileConfig.builder("config.json")
         .autosave()
+        .sync()
         .build()
 
     init {
         config.load()
+
+        if (config.get<String>("name") == null) {
+            config.set<String>("redis.user", "")
+            config.set<String>("redis.hostname", "")
+            config.set<Int>("redis.port", 0)
+            config.set<String>("redis.password", "")
+
+            config.set<String>("mysql.user", "")
+            config.set<String>("mysql.password", "")
+            config.set<String>("mysql.database", "")
+            config.set<String>("mysql.host", "")
+            config.set<Int>("mysql.port", 0)
+            config.set<Boolean>("mysql.ssl", false)
+
+            config.set<String>("name", "FIST_SETUP")
+            config.set<Boolean>("ranFirstSetup", false)
+            config.set<String>("language", Languages.en_US.name)
+
+            config.set<String>("uuid", "00000000-0000-0000-0000-000000000000")
+        }
     }
 
     val name = config.get<String>("name")
