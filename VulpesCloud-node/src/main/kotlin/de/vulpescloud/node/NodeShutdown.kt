@@ -7,6 +7,7 @@ object NodeShutdown {
     private val logger = LoggerFactory.getLogger(NodeShutdown::class.java)
 
     fun normalShutdown() {
+        Node.instance.getRC()?.shutdown()
         Node.instance.terminal.close()
         Node.instance.config.config.close()
         exitProcess(0)

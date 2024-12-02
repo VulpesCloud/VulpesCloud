@@ -7,9 +7,11 @@ import de.vulpescloud.node.commands.ExitCommand
 import de.vulpescloud.node.commands.HelpCommand
 import de.vulpescloud.node.commands.InfoCommand
 import de.vulpescloud.node.config.ConfigProvider
+import de.vulpescloud.node.networking.redis.RedisController
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setups.FirstSetup
 import de.vulpescloud.node.terminal.JLineTerminal
+import org.slf4j.LoggerFactory
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.locks.Condition
 import java.util.concurrent.locks.ReentrantLock
@@ -24,6 +26,8 @@ class Node {
     val commandProvider = CommandProvider()
     val setupProvider = SetupProvider()
     private val translator = Translator
+    private val logger = LoggerFactory.getLogger(Node::class.java)
+    private var redisController: RedisController? = null
 
     init {
         instance = this
@@ -44,12 +48,23 @@ class Node {
             }
         }
 
+        redisController = RedisController()
+
         commandProvider.register(InfoCommand())
         commandProvider.register(HelpCommand())
         commandProvider.register(ExitCommand())
         commandProvider.register(ClearCommand())
 
+        logger.info(
+            translator.trans("node.boot.success.message"),
+            System.currentTimeMillis() - System.getProperty("startup").toLong()
+        )
+
         terminal.allowInput()
+    }
+
+    fun getRC(): RedisController? {
+        return redisController
     }
 
     companion object {
