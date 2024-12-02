@@ -5,6 +5,7 @@ import de.vulpescloud.api.command.CommandInfo
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.command.annotations.Description
 import de.vulpescloud.node.command.source.CommandSource
+import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
@@ -28,10 +29,20 @@ class HelpCommand {
     }
 
     @Command("help|?")
-    fun sendHelp(source: CommandSource) {
+    fun sendGeneralHelp(source: CommandSource) {
         Node.instance.commandProvider.commands()!!.forEach {
             source.sendMessage("&f${it.name}${it.aliases} &8- &7${it.description}&8.")
         }
+    }
+
+    @Command("help|? <command>")
+    fun sendSpecificHelp(
+        source: CommandSource,
+        @Argument("command") command: CommandInfo) {
+        source.sendMessage("Aliases: &m${command.joinNameToAliases(", ")}")
+        source.sendMessage("Description: &m${command.description}")
+        source.sendMessage("Usages:")
+        command.usage.forEach { source.sendMessage(" > &m$it") }
     }
 
 }
