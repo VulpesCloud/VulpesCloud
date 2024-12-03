@@ -15,8 +15,9 @@ import org.slf4j.LoggerFactory
 
 class MySQLController {
 
-    private var dataSource: HikariDataSource
+    private val dataSource: HikariDataSource
     private val logger = LoggerFactory.getLogger(MySQLController::class.java)
+    private val db: Database
 
     init {
         val nodeConfig = Node.instance.config
@@ -44,7 +45,7 @@ class MySQLController {
 
         dataSource = HikariDataSource(config)
 
-        Database.connect(
+        db = Database.connect(
             datasource = dataSource
         )
 
@@ -61,6 +62,11 @@ class MySQLController {
             addLogger(SqlInternalLogger)
             SchemaUtils.create(NodeTable)
         }
+    }
+
+    fun close() {
+        logger.info("Closing Database connection")
+        dataSource.close()
     }
 
     object SqlInternalLogger : org.jetbrains.exposed.sql.SqlLogger {

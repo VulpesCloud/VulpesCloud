@@ -2,16 +2,14 @@ package de.vulpescloud.node
 
 import de.vulpescloud.api.language.Translator
 import de.vulpescloud.node.command.provider.CommandProvider
-import de.vulpescloud.node.commands.ClearCommand
-import de.vulpescloud.node.commands.ExitCommand
-import de.vulpescloud.node.commands.HelpCommand
-import de.vulpescloud.node.commands.InfoCommand
+import de.vulpescloud.node.commands.*
 import de.vulpescloud.node.config.ConfigProvider
 import de.vulpescloud.node.networking.mysql.MySQLController
 import de.vulpescloud.node.networking.redis.RedisController
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setups.FirstSetup
 import de.vulpescloud.node.terminal.JLineTerminal
+import de.vulpescloud.node.version.VersionProvider
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.locks.Condition
@@ -30,6 +28,7 @@ class Node {
     private val logger = LoggerFactory.getLogger(Node::class.java)
     private var redisController: RedisController? = null
     private var mysqlController: MySQLController? = null
+    val versionProvider = VersionProvider()
 
     init {
         instance = this
@@ -44,7 +43,6 @@ class Node {
                     setupProvider.startSetup(FirstSetup())
                 }
             }
-
             setupLock.withLock {
                 setupCondition.await()
             }
@@ -55,10 +53,13 @@ class Node {
 
         mysqlController?.generateDefaultTables()
 
+        versionProvider.initialize()
+
         commandProvider.register(InfoCommand())
         commandProvider.register(HelpCommand())
         commandProvider.register(ExitCommand())
         commandProvider.register(ClearCommand())
+        commandProvider.register(VersionCommand())
 
         logger.info(
             translator.trans("node.boot.success.message"),
