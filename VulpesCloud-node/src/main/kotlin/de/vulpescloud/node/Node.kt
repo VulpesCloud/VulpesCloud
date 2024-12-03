@@ -8,6 +8,7 @@ import de.vulpescloud.node.networking.mysql.MySQLController
 import de.vulpescloud.node.networking.redis.RedisController
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setups.FirstSetup
+import de.vulpescloud.node.tasks.TaskProvider
 import de.vulpescloud.node.terminal.JLineTerminal
 import de.vulpescloud.node.version.VersionProvider
 import org.slf4j.LoggerFactory
@@ -29,6 +30,7 @@ class Node {
     private var redisController: RedisController? = null
     private var mysqlController: MySQLController? = null
     val versionProvider = VersionProvider()
+    val taskProvider = TaskProvider()
 
     init {
         instance = this

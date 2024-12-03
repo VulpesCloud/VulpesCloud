@@ -3,6 +3,7 @@ package de.vulpescloud.node.networking.mysql
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import de.vulpescloud.api.mysql.tables.NodeTable
+import de.vulpescloud.api.mysql.tables.TaskTable
 import de.vulpescloud.node.Node
 import org.jetbrains.exposed.sql.Database
 import org.jetbrains.exposed.sql.SchemaUtils
@@ -60,7 +61,7 @@ class MySQLController {
         logger.debug("Generating tables...")
         transaction {
             addLogger(SqlInternalLogger)
-            SchemaUtils.create(NodeTable)
+            SchemaUtils.create(NodeTable, TaskTable)
         }
     }
 
