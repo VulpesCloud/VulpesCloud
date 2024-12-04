@@ -29,7 +29,7 @@ import de.vulpescloud.node.Node
 class VersionSetupAnswer : SetupAnswer {
     override fun suggest(): List<String> {
         val verNames: MutableList<String> = mutableListOf()
-            //Node.versionProvider.versions.forEach { verNames.add(it.name) }
+        Node.instance.versionProvider.versions.forEach { verNames.add(it.environment.name) }
         return verNames.toList()
     }
 }

@@ -101,6 +101,8 @@ class JLineTerminal {
             terminal.flush()
             update()
        }
+
+        printSetup("aaisdhgkl >> $message")
     }
 
     fun printSetup(message: String) {

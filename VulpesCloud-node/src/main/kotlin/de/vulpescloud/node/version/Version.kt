@@ -7,7 +7,7 @@ import de.vulpescloud.node.version.patcher.VersionPatcher
 
 class Version(
     val environment: Environments,
-    val type: VersionType,
+    val versionType: VersionType,
     val pluginDir: String,
     val versions: List<Version>,
     val patchers: List<VersionPatcher>

@@ -12,7 +12,7 @@ object TaskSerializer {
         val jsonVersion = json.getJSONObject("version")
         val version = VersionInfo(
             jsonVersion.getString("environment"),
-            VersionType.valueOf(jsonVersion.getString("versionType")),
+            VersionType.valueOf(jsonVersion.getString("versionType")).name,
             jsonVersion.getString("version")
         )
 

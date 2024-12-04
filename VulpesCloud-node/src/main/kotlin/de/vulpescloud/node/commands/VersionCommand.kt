@@ -35,7 +35,7 @@ class VersionCommand {
         source: CommandSource
     ) {
         source.sendMessage("The Following ${versionProvider.versions.size} Versions are loaded:")
-        versionProvider.versions.forEach { source.sendMessage(" - ${it.environment.name} (${it.type.name})") }
+        versionProvider.versions.forEach { source.sendMessage(" - ${it.environment.name} (${it.versionType.name})") }
     }
 
     @Command("version|versions|ver <version>")
