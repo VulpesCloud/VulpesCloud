@@ -1,7 +1,9 @@
 package de.vulpescloud.node.tasks
 
+import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.api.version.VersionInfo
+import de.vulpescloud.node.Node
 
 data class TaskImpl(
     var name: String,
@@ -45,13 +47,13 @@ data class TaskImpl(
         return version
     }
 
-//    override fun serviceCount(): Long? {
-//        return Node.serviceProvider.services()?.stream()?.filter { it.task().name() == name() }?.count()
-//    }
-//
-//    override fun services(): List<ClusterService?>? {
-//        return Node.serviceProvider.services()?.stream()?.filter { it.task().name() == name() }?.toList()
-//    }
+    override fun serviceCount(): Long? {
+        return Node.instance.serviceProvider.services().stream().filter { it.task().name() == name() }?.count()
+    }
+
+    override fun services(): List<Service?>? {
+        return Node.instance.serviceProvider.services().stream().filter { it.task().name() == name() }?.toList()
+    }
 
     override fun startPort(): Int {
         return startPort

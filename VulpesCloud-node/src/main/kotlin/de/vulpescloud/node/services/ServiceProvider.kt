@@ -23,6 +23,10 @@ class ServiceProvider {
         return serviceList
     }
 
+    fun localServices(): MutableList<LocalServiceImpl> {
+        return localServices
+    }
+
     fun findServiceById(id: UUID): Service? {
         return services().find { it.id() == id }
     }

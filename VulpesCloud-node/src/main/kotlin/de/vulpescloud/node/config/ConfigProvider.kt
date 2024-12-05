@@ -34,6 +34,7 @@ class ConfigProvider {
             config.set<String>("uuid", "00000000-0000-0000-0000-000000000000")
         }
     }
+    val hostname = "0.0.0.0" //todo Add Config entry and make it pull this from there!
 
     val name = config.get<String>("name")
     val uuid = UUID.fromString(config.get("uuid"))

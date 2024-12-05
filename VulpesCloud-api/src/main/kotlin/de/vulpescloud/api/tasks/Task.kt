@@ -1,6 +1,7 @@
 package de.vulpescloud.api.tasks
 
 import de.vulpescloud.api.Named
+import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.version.VersionInfo
 
 interface Task : Named {
@@ -17,9 +18,9 @@ interface Task : Named {
 
     fun minOnlineCount(): Int
 
-    // fun serviceCount(): Long?
+     fun serviceCount(): Long?
 
-    // fun services(): List<ClusterService?>?
+     fun services(): List<Service?>?
 
     fun version(): VersionInfo
 
