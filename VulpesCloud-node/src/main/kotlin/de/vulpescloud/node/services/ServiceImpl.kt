@@ -19,7 +19,7 @@ open class Service(
 ) : Service {
 
     fun details(): String {
-        return "id&8=&7$id&8, &7hostname&8=&7$hostname, &7port&8=&7$port&8, &7node&8=&7$runningNode"
+        return "id&8=&7$id&8, &7hostname&8=&7$hostname, &7port&8=&7$port&8, &7node&8=&7$runningNode&8, &7state&8=&7${state.name}"
     }
 
     fun setLogging(logging: Boolean) {

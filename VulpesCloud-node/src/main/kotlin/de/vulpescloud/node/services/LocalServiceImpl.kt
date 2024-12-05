@@ -13,13 +13,14 @@ import java.nio.file.Path
 import java.util.*
 
 class LocalServiceImpl(
-    private val task: Task,
-    private val orderedId: Int,
-    private val id: UUID,
-    private val port: Int,
-    private val hostname: String,
-    private val runningNode: String,
-) : Service(task, orderedId, id, port, hostname, runningNode) {
+    val task: Task,
+    val orderedId: Int,
+    val id: UUID,
+    val port: Int,
+    val hostname: String,
+    val runningNode: String,
+    val state: ServiceStates = ServiceStates.LOADING
+) : Service(task, orderedId, id, port, hostname, runningNode, state = state) {
 
     private val logger = LoggerFactory.getLogger(LocalServiceImpl::class.java)
     var process: Process? = null
@@ -129,7 +130,7 @@ class LocalServiceImpl(
     }
 
     fun version(): Version? {
-        return Node.instance.versionProvider.getByName(version()!!.environment.name)
+        return Node.instance.versionProvider.getByName(task.version().environment)
     }
 
 }

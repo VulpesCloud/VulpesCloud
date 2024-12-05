@@ -16,7 +16,7 @@ object ServiceSerializer {
             json.getInt("port"),
             json.getString("hostname"),
             json.getString("runningNode"),
-            json.getInt("maxPlayers"),
+            json.getJSONObject("task").getInt("maxPlayers"),
             ServiceStates.valueOf(json.getString("state")),
             json.getBoolean("logging")
         )

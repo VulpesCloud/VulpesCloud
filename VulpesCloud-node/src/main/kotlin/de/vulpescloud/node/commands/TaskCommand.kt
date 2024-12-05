@@ -31,7 +31,7 @@ class TaskCommand {
     }
 
     @Suggestions("tasks")
-    fun suggestCommands(): Stream<String> {
+    fun suggestTasks(): Stream<String> {
         return Node.instance.taskProvider.tasks().stream().map { it.name() }
     }
 
