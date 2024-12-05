@@ -26,7 +26,7 @@ interface Service : Named {
 
     fun onlinePlayersCountAsync(): CompletableFuture<Int>
 
-    fun onlinePlayersAsync(): CompletableFuture<List<Player?>?>
+    // fun onlinePlayersAsync(): CompletableFuture<List<Player?>?>
 
     fun isEmpty(): Boolean {
         return this.onlinePlayersCount() == 0
@@ -36,9 +36,9 @@ interface Service : Named {
         return onlinePlayersCountAsync()[5, TimeUnit.SECONDS]
     }
 
-    fun onlinePlayers(): List<Player?>? {
-        return onlinePlayersAsync()[5, TimeUnit.SECONDS]
-    }
+//    fun onlinePlayers(): List<Player?>? {
+//        return onlinePlayersAsync()[5, TimeUnit.SECONDS]
+//    }
 
     override fun name(): String {
         return task().name() + "-" + orderedId()

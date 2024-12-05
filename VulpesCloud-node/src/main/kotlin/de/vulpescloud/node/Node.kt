@@ -6,6 +6,7 @@ import de.vulpescloud.node.commands.*
 import de.vulpescloud.node.config.ConfigProvider
 import de.vulpescloud.node.networking.mysql.MySQLController
 import de.vulpescloud.node.networking.redis.RedisController
+import de.vulpescloud.node.services.ServiceProvider
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setups.FirstSetup
 import de.vulpescloud.node.tasks.TaskProvider
@@ -33,6 +34,7 @@ class Node {
     val versionProvider = VersionProvider()
     val taskProvider = TaskProvider()
     val templateProvider = TemplateProvider()
+    val serviceProvider = ServiceProvider()
 
     init {
         instance = this
