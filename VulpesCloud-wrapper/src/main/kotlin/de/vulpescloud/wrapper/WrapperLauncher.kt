@@ -28,8 +28,7 @@ class WrapperLauncher {
     companion object {
         @JvmStatic
         fun main(args: Array<String>) {
-            System.out.println("Uhm yhea idk")
-            println("WrapperLauncher is running Main")
+            println("Launcher Wrapper!")
             try {
                 Wrapper(args)
             } catch (e: Exception) {
