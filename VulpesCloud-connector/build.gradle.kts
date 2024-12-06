@@ -68,10 +68,12 @@ sourceSets {
 
 tasks.jar {
     archiveFileName.set("vulpescloud-connector.jar")
+    destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
 }
 
 tasks.shadowJar {
     archiveFileName.set("vulpescloud-connector.jar")
     dependsOn(":VulpesCloud-api:jar")
     dependsOn(":VulpesCloud-bridge:jar")
+    destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
 }

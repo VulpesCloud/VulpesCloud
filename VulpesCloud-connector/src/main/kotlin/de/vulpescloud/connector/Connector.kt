@@ -1,5 +1,7 @@
 package de.vulpescloud.connector
 
+import de.vulpescloud.api.services.ServiceStates
+import de.vulpescloud.bridge.service.ServiceProvider
 import de.vulpescloud.wrapper.Wrapper
 
 open class Connector {
@@ -13,15 +15,15 @@ open class Connector {
 
         // TimeUnit.SECONDS.sleep(1)
 
-        // updateLocalState(ClusterServiceStates.STARTING)
+        ServiceProvider.findServiceById(Wrapper.instance.service.id)?.setState(ServiceStates.STARTING)
     }
 
     fun finishStart() {
-        // updateLocalState(ClusterServiceStates.ONLINE)
+        ServiceProvider.findServiceById(Wrapper.instance.service.id)?.setState(ServiceStates.ONLINE)
     }
 
     fun shutdownLocal() {
-        // updateLocalState(ClusterServiceStates.STOPPING)
+        ServiceProvider.findServiceById(Wrapper.instance.service.id)?.setState(ServiceStates.STOPPING)
     }
 
 }

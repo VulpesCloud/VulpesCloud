@@ -17,6 +17,7 @@ class VelocityConnector @Inject constructor(
     val eventManager: EventManager,
     val proxyServer: ProxyServer,
 ) : Connector() {
+
     init {
         instance = this
     }
@@ -29,7 +30,7 @@ class VelocityConnector @Inject constructor(
         )
         init()
         // VelocityRegistrationHandler
-        // VelocityRedisSubscribe()
+        VelocityRedisListener()
         // this.eventManager.register(this, VelocityEventListener())
     }
 

@@ -40,4 +40,5 @@ dependencies {
 
 tasks.jar {
     archiveFileName.set("vulpescloud-bridge.jar")
+    destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
 }
