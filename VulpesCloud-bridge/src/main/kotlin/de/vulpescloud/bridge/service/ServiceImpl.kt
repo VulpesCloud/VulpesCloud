@@ -31,7 +31,8 @@ open class Service(
 
     fun setState(state: ServiceStates) {
         this.state = state
-        Wrapper.instance.getRC()?.setHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, name(), JSONObject(this).toString())
+        // todo FIX THIS: This always produces a empty JSON
+        // Wrapper.instance.getRC()?.setHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, name(), JSONObject(ServiceProvider.findServiceByName(Wrapper.instance.service.name)).toString())
     }
 
     fun logging(): Boolean {

@@ -19,8 +19,9 @@ class LocalServiceImpl(
     val port: Int,
     val hostname: String,
     val runningNode: String,
-    val state: ServiceStates = ServiceStates.LOADING
-) : Service(task, orderedId, id, port, hostname, runningNode, state = state) {
+    val state: ServiceStates = ServiceStates.LOADING,
+    val logging: Boolean = false
+) : Service(task, orderedId, id, port, hostname, runningNode, state = state, logging = logging) {
 
     private val logger = LoggerFactory.getLogger(LocalServiceImpl::class.java)
     var process: Process? = null
