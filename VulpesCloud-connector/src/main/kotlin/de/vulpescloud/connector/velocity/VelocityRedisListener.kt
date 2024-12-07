@@ -36,6 +36,38 @@ class VelocityRedisListener {
                         }
                     }
                 }
+                RedisChannelNames.VULPESCLOUD_SERVICE_REGISTER.name -> {
+                    val message = msg?.let { RedisJsonParser.parseJson(it) }
+                        ?.let { RedisJsonParser.getMessagesFromRedisJson(it) }
+
+                    val splitMSG = message!!.split(";")
+                    // SERVICE;<service name>;REGISTER;ADDRESS;<service address>;PORT;<service port>
+                    if (splitMSG[0] == "SERVICE") {
+                        if (splitMSG[2] == "REGISTER") {
+                            if (splitMSG[3] == "ADDRESS") {
+                                if (splitMSG[5] == "PORT") {
+                                    VelocityRegistrationHandler.registerServer(
+                                        splitMSG[1],
+                                        splitMSG[4],
+                                        splitMSG[6].toInt()
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+                RedisChannelNames.VULPESCLOUD_SERVICE_UNREGISTER.name -> {
+                    val message = msg?.let { RedisJsonParser.parseJson(it) }
+                        ?.let { RedisJsonParser.getMessagesFromRedisJson(it) }
+
+                    val splitMSG = message!!.split(";")
+                    // SERVICE;<service name>;UNREGISTER
+                    if (splitMSG[0] == "SERVICE") {
+                        if (splitMSG[2] == "UNREGISTER") {
+                            VelocityRegistrationHandler.unregisterServer(splitMSG[1])
+                        }
+                    }
+                }
             }
         }
     }

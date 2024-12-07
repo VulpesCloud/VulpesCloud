@@ -29,7 +29,7 @@ class VelocityConnector @Inject constructor(
                 .deserialize("<grey>[<aqua>VulpesCloud-Connector</aqua>]</grey> <yellow>Initializing</yellow>")
         )
         init()
-        // VelocityRegistrationHandler
+        VelocityRegistrationHandler
         VelocityRedisListener()
         // this.eventManager.register(this, VelocityEventListener())
     }
