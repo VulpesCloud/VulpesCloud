@@ -1,8 +1,8 @@
-package de.vulpescloud.node.json
+package de.vulpescloud.bridge.json
 
 import de.vulpescloud.api.player.VulpesPlayer
-import de.vulpescloud.node.json.ServiceSerializer.serviceFromJson
-import de.vulpescloud.node.player.VulpesPlayerImpl
+import de.vulpescloud.bridge.json.ServiceSerializer.serviceFromJson
+import de.vulpescloud.bridge.player.VulpesPlayerImpl
 import org.json.JSONObject
 import java.util.UUID
 
