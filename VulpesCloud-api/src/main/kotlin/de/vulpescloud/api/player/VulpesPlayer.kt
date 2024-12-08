@@ -8,9 +8,9 @@ interface VulpesPlayer : Named {
 
     fun uuid(): UUID
 
-    fun currentProxy(): Service
+    fun currentProxy(): Service?
 
-    fun currentServer(): Service
+    fun currentServer(): Service?
 
     fun sendTitle(title: String, subtitle: String?, fadeIn: Int, stay: Int, fadeOut: Int)
 
