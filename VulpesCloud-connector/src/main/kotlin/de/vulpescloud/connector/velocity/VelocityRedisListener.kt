@@ -1,6 +1,7 @@
 package de.vulpescloud.connector.velocity
 
 import de.vulpescloud.api.redis.RedisChannelNames
+import de.vulpescloud.wrapper.Wrapper
 import de.vulpescloud.wrapper.redis.RedisJsonParser
 import de.vulpescloud.wrapper.redis.RedisManager
 
@@ -9,7 +10,10 @@ class VelocityRedisListener {
     private val redisManager = redis?.let { RedisManager(it.getJedisPool()) }
     private val redisChannels = listOf(
         RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name,
-        RedisChannelNames.VULPESCLOUD_SERVICE_EVENT.name
+        RedisChannelNames.VULPESCLOUD_SERVICE_EVENT.name,
+        RedisChannelNames.VULPESCLOUD_SERVICE_REGISTER.name,
+        RedisChannelNames.VULPESCLOUD_SERVICE_UNREGISTER.name,
+        "debug_services"
     )
 
     init {
@@ -66,6 +70,12 @@ class VelocityRedisListener {
                         if (splitMSG[2] == "UNREGISTER") {
                             VelocityRegistrationHandler.unregisterServer(splitMSG[1])
                         }
+                    }
+                }
+                "debug_services" -> {
+                    Wrapper.instance.getRC()?.sendMessage("Returning servers!", "debug_return")
+                    VelocityConnector.instance.proxyServer.allServers.forEach {
+                        Wrapper.instance.getRC()?.sendMessage(it.serverInfo.name, "debug_return")
                     }
                 }
             }

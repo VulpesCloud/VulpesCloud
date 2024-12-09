@@ -37,7 +37,7 @@ class VelocityEventListener {
 
     @Subscribe
     fun playerPostLoginEvent(event: PostLoginEvent) {
-        val player = VulpesPlayerImpl(event.player.username, event.player.uniqueId, ServiceProvider.findServiceById(Wrapper.instance.service.id)) // ServiceProvider.findServiceByName(event.player.currentServer.get().serverInfo.name),
+        val player = VulpesPlayerImpl(event.player.username, event.player.uniqueId) // ServiceProvider.findServiceById(Wrapper.instance.service.id), ServiceProvider.findServiceByName(event.player.currentServer.get().serverInfo.name),
         VelocityConnector.instance.wrapper.getRC()?.sendMessage(
             PlayerJoinMessageBuilder
                 .setPlayer(player)
