@@ -26,9 +26,9 @@ package de.vulpescloud.modules.example
 
 import org.slf4j.LoggerFactory
 
-//class ExampleModule : VulpesModule {
-//    private val logger = LoggerFactory.getLogger(ExampleModule::class.java)
-//
+class ExampleModule /*: VulpesModule*/ {
+    private val logger = LoggerFactory.getLogger(ExampleModule::class.java)
+
 //    override fun enable() {
 //        logger.info("Enabled ExampleModule! :>")
 //    }
@@ -36,4 +36,4 @@ import org.slf4j.LoggerFactory
 //    override fun disable() {
 //        logger.info("Disabled ExampleModule! :<")
 //    }
-//}
+}

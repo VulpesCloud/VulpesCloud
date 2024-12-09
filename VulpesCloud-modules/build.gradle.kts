@@ -1,3 +1,5 @@
+import org.jetbrains.dokka.gradle.DokkaMultiModuleTask
+
 /*
  * MIT License
  *
@@ -21,4 +23,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+tasks.named<DokkaMultiModuleTask>("dokkaHtmlMultiModule") {
+    enabled = false
+}
+
 
