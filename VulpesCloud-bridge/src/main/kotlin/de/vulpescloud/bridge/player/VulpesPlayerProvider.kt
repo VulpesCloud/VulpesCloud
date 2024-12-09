@@ -7,7 +7,7 @@ import de.vulpescloud.wrapper.Wrapper
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 
-class VulpesPlayerProvider {
+object VulpesPlayerProvider {
     private val logger = LoggerFactory.getLogger(VulpesPlayerProvider::class.java)
 
     fun players(): List<VulpesPlayer> {
@@ -32,6 +32,10 @@ class VulpesPlayerProvider {
             }
         }
         return playerList
+    }
+
+    fun getOnlinePlayerByName(name: String): VulpesPlayer? {
+        return onlinePlayers().find { it.name().equals(name, true) }
     }
 
     //todo Add Stuff like checking if a player is online and getting Players from Name and uuid and maybe Filter them by what service they are on

@@ -14,7 +14,7 @@ object ServiceConfig {
 
     fun makeServiceConfigs(service: LocalServiceImpl) {
         when (service.task().version().environment) {
-            "Velocity" -> {
+            "VELOCITY" -> {
                 // Copy the Config
                 if (!Files.exists(service.runningDir.resolve("velocity.toml"))) {
                     FileSystemUtil.copyClassPathFile(this::class.java.classLoader, "platforms/Velocity/velocity.toml", "${service.runningDir.resolve("velocity.toml")}")
@@ -36,7 +36,7 @@ object ServiceConfig {
 
                 Files.writeString(service.runningDir.resolve("forwarding.secret"), "lhg8u6asid7zrg")
             }
-            "Purpur" -> {
+            "PURPUR" -> {
                 // Copy the Config
                 if (!Files.exists(service.runningDir.resolve("server.properties"))) {
                     FileSystemUtil.copyClassPathFile(this::class.java.classLoader, "platforms/purpur/server.properties", "${service.runningDir.resolve("server.properties")}")
@@ -67,7 +67,7 @@ object ServiceConfig {
                     logger.error(e.toString())
                 }
             }
-            "Paper" -> {
+            "PAPER" -> {
                 // Copy the Config
                 if (!Files.exists(service.runningDir.resolve("server.properties"))) {
                     FileSystemUtil.copyClassPathFile(this::class.java.classLoader, "platforms/purpur/server.properties", "${service.runningDir.resolve("server.properties")}")
