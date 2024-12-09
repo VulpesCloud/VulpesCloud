@@ -29,7 +29,7 @@ import lombok.NonNull
 fun interface PermissionFunction {
 
     fun alwaysTrue(): @NonNull PermissionFunction {
-        return PermissionFunction { permission -> true }
+        return PermissionFunction { true }
     }
 
     fun hasPermission(permission: String): Boolean

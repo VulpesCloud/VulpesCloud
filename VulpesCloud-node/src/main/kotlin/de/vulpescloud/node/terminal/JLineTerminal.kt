@@ -26,7 +26,6 @@ package de.vulpescloud.node.terminal
 
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.terminal.util.TerminalColorUtil
-import io.github.thecguygithub.api.log.LogOutputStream
 import org.jline.jansi.Ansi
 import org.jline.reader.LineReader
 import org.jline.reader.LineReaderBuilder
@@ -68,9 +67,6 @@ class JLineTerminal {
             .build() as LineReaderImpl
 
         lineReader.autosuggestion = LineReader.SuggestionType.COMPLETER
-
-        System.setErr(LogOutputStream.forWarn(log).toPrintStream())
-        System.setOut(LogOutputStream.forInfo(log).toPrintStream())
 
         clear()
         this.print(this)

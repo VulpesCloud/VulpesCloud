@@ -22,6 +22,10 @@
  * SOFTWARE.
  */
 
+/*
+ * Parts of this file is from CloudNet(https://github.com/CloudNetService/CloudNet)
+ */
+
 package de.vulpescloud.node.command.provider
 
 import com.google.common.collect.Iterables
