@@ -13,6 +13,7 @@ import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
 import java.util.stream.Stream
 
+@Suppress("UNUSED")
 class ServiceCommand {
 
     @Parser(suggestions = "services")
