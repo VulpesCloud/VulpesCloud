@@ -58,7 +58,7 @@ class VelocityEventListener {
                 .build(),
             RedisChannelNames.VULPESCLOUD_PLAYER_EVENT.name
         )
-        VelocityConnector.instance.wrapper.getRC()?.deleteHashField(RedisHashNames.VULPESCLOUD_PLAYERS_ONLINE.name, event.player.username)
+        VelocityConnector.instance.wrapper.getRC()?.deleteHashField(RedisHashNames.VULPESCLOUD_PLAYERS_ONLINE.name, event.player.uniqueId.toString())
     }
 
 }

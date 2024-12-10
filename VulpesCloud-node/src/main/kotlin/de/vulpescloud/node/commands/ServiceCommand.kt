@@ -35,6 +35,21 @@ class ServiceCommand {
             .forEach { service -> source.sendMessage("&8- &f${service.name()} &8: (&7${service.details()}&8)") }
     }
 
+    @Command("service|services|ser stopAll")
+    fun stopAll(source: CommandSource) {
+        source.sendMessage("Stopping all Services!")
+        Node.instance.serviceProvider.services()
+           .forEach {
+                Node.instance.getRC()?.sendMessage(
+                    ServiceActionMessageBuilder
+                       .setService(it)
+                       .setAction(ServiceActions.STOP)
+                       .build(),
+                    RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name
+                )
+           }
+    }
+
     @Command("service|services|ser <service> stop")
     fun sendServiceInfo(
         source: CommandSource,
