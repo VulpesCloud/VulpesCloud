@@ -2,10 +2,10 @@ package de.vulpescloud.api.mysql.tables
 
 import org.jetbrains.exposed.sql.Table
 
-object TaskTable : Table("nodes") {
+object TaskTable : Table("tasks") {
     val id = integer("id").autoIncrement()
     val name = text("name")
-    val uuid = text("json")
+    val json = text("json")
 
     override val primaryKey = PrimaryKey(id)
 }
