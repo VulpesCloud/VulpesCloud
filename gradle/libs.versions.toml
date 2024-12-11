@@ -14,7 +14,7 @@ annotations = "26.0.1"
 jedis = "5.2.0"
 hikariCP = "6.2.1"
 mariadb = "3.5.1"
-exposed = "0.56.0"
+exposed = "0.57.0"
 
 #logging
 slf4j = "2.0.16"
