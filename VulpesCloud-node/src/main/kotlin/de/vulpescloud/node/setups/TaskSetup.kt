@@ -1,31 +1,6 @@
-/*
- * MIT License
- *
- * Copyright (c) 2024 VulpesCloud
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 package de.vulpescloud.node.setups
 
-import de.vulpescloud.api.network.redis.RedisPubSubChannels
-import de.vulpescloud.api.tasks.builder.TaskCreateMessageBuilder
+import de.vulpescloud.api.language.Translator
 import de.vulpescloud.api.version.VersionInfo
 import de.vulpescloud.api.version.VersionType
 import de.vulpescloud.node.Node
@@ -35,8 +10,10 @@ import de.vulpescloud.node.setup.annotations.SetupQuestion
 import de.vulpescloud.node.setup.answer.BooleanSetupAnswer
 import de.vulpescloud.node.setup.answer.MemorySetupAnswer
 import de.vulpescloud.node.setup.answer.VersionSetupAnswer
-import de.vulpescloud.node.task.TaskImpl
+import de.vulpescloud.node.tasks.TaskFactory.createTask
+import de.vulpescloud.node.tasks.TaskImpl
 import de.vulpescloud.node.version.Version
+import org.json.JSONObject
 import kotlin.properties.Delegates
 
 class TaskSetup : Setup {
@@ -50,32 +27,33 @@ class TaskSetup : Setup {
     private var fallback by Delegates.notNull<Boolean>()
     private var minServiceCount by Delegates.notNull<Int>()
     private var maintenance by Delegates.notNull<Boolean>()
+    private lateinit var ver: String
 
     @SetupQuestion(0, "node.setup.task.question.name")
     fun name(name: String): Boolean {
         if (name.length > 16) {
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.name.long"))
+            Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.name.long"))
             return false
         }
         if (name.isEmpty()) {
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.name.empty"))
+            Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.name.empty"))
             return false
         }
         this.name = name
-        Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.name.success"))
+        Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.name.success"))
         return true
     }
 
-    @SetupQuestion(1, "node.setup.task.question.version.name", VersionSetupAnswer::class)
+    @SetupQuestion(1, "node.setup.task.question.environment.name", VersionSetupAnswer::class)
     fun choseVersion(version: String): Boolean {
-        val ver = Node.versionProvider.search(version)
+        val ver = Node.instance.versionProvider.getByName(version)
 
         if (ver != null) {
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.version.version.success"))
+            Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.environment.success"))
             this.version = ver
             return true
         } else {
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.version.version.invalid"))
+            Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.environment.invalid"))
             return false
         }
     }
@@ -85,11 +63,11 @@ class TaskSetup : Setup {
         val int = try {
             mem.toInt()
         } catch (e: Exception) {
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.memory.invalid"))
+            Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.memory.invalid"))
             return false
         }
         this.memory = int
-        Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.memory.success"))
+        Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.memory.success"))
         return true
     }
 
@@ -98,16 +76,16 @@ class TaskSetup : Setup {
         val int = try {
             port.toInt()
         } catch (e: Exception) {
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.startPort.invalid"))
+            Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.startPort.invalid"))
             return false
         }
 
         if (int < 20000) {
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.startPort.tooSmall"))
+            Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.startPort.tooSmall"))
             return false
         } else {
             this.startPort = int
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.startPort.success"))
+            Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.startPort.success"))
             return true
         }
     }
@@ -117,31 +95,31 @@ class TaskSetup : Setup {
         val int = try {
             maxP.toInt()
         } catch (e: Exception) {
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.maxPlayers.invalid"))
+            Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.maxPlayers.invalid"))
             return false
         }
         this.maxPlayers = int
-        Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.maxPlayers.success"))
+        Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.maxPlayers.success"))
         return true
     }
 
-    @SetupQuestion(5, "node.setup.task.question.static", BooleanSetupAnswer::class)
+    @SetupQuestion(5, "node.setup.task.question.static", BooleanSetupAnswer::class, true)
     fun isStatic(bool: String): Boolean {
         val boolean = try {
             bool.toBoolean()
         } catch (e: Exception) {
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.static.invalid"))
+            Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.static.invalid"))
             return false
         }
         this.static = boolean
-        Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.static.success"))
+        Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.static.success"))
         return true
     }
 
-    @SetupQuestion(6, "node.setup.task.question.fallback", BooleanSetupAnswer::class)
+    @SetupQuestion(6, "node.setup.task.question.fallback", BooleanSetupAnswer::class, true)
     fun fallback(bool: String): Boolean {
-        if (this.version.type == VersionType.PROXY) {
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.fallback.override"))
+        if (this.version.versionType == VersionType.PROXY) {
+            Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.fallback.override"))
             this.fallback = false
             return true
         }
@@ -149,11 +127,11 @@ class TaskSetup : Setup {
         val boolean = try {
             bool.toBoolean()
         } catch (e: Exception) {
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.fallback.invalid"))
+            Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.fallback.invalid"))
             return false
         }
         this.fallback = boolean
-        Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.fallback.success"))
+        Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.fallback.success"))
         return true
     }
 
@@ -162,36 +140,35 @@ class TaskSetup : Setup {
         val int = try {
             minServiceCount.toInt()
         } catch (e: Exception) {
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.minServiceCount.invalid"))
+            Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.minServiceCount.invalid"))
             return false
         }
         this.minServiceCount = int
-        Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.minServiceCount.success"))
+        Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.minServiceCount.success"))
         return true
     }
 
-    @SetupQuestion(8, "node.setup.task.question.maintenance", BooleanSetupAnswer::class)
+    @SetupQuestion(8, "node.setup.task.question.maintenance", BooleanSetupAnswer::class, true)
     fun maintenance(bool: String): Boolean {
         val boolean = try {
             bool.toBoolean()
         } catch (e: Exception) {
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.maintenance.invalid"))
+            Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.maintenance.invalid"))
             return false
         }
         this.maintenance = boolean
-        Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.task.question.maintenance.success"))
+        Node.instance.terminal.printSetup(Translator.trans("node.setup.task.question.maintenance.success"))
         return true
     }
 
     @SetupFinish
     fun finish() {
-
         val task = TaskImpl(
             name,
             memory,
-            VersionInfo(version.name, version.type, version.versions[0].version), // todo Make this better xD
+            VersionInfo(version.environment.name, version.versionType.name, version.versions.first().version),
             listOf(name),
-            listOf(Node.nodeConfig!!.name),
+            listOf(Node.instance.config.name),
             maxPlayers,
             static,
             minServiceCount,
@@ -199,12 +176,7 @@ class TaskSetup : Setup {
             startPort,
             fallback
         )
-
-        Node.instance!!.getRC()?.sendMessage(
-            TaskCreateMessageBuilder
-                .setTask(task)
-                .build(),
-            RedisPubSubChannels.VULPESCLOUD_TASK_CREATE.name
-        )
+        Node.instance.terminal.printSetup(JSONObject(task).toString(4))
+        createTask(JSONObject(task))
     }
 }

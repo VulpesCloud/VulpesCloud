@@ -1,164 +1,48 @@
-/*
- * MIT License
- *
- * Copyright (c) 2024 VulpesCloud
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 package de.vulpescloud.bridge.service
 
-import de.vulpescloud.api.network.redis.RedisHashNames
-import de.vulpescloud.api.services.ClusterService
-import de.vulpescloud.api.services.ClusterServiceFilter
-import de.vulpescloud.api.services.ClusterServiceStates
-import de.vulpescloud.api.version.VersionInfo
+import de.vulpescloud.api.redis.RedisHashNames
+import de.vulpescloud.api.services.ServiceFilters
+import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.api.version.VersionType
-import de.vulpescloud.bridge.service.impl.ServiceImpl
-import de.vulpescloud.bridge.task.impl.TaskImpl
+import de.vulpescloud.bridge.json.ServiceSerializer.serviceFromJson
 import de.vulpescloud.wrapper.Wrapper
-import org.jetbrains.annotations.ApiStatus
 import org.json.JSONObject
 import java.util.*
 
-/**
- *   The ServiceProvider is used to manage the Services
- */
-open class ServiceProvider {
+object ServiceProvider {
 
-    private var services: List<ClusterService> = listOf()
-
-    /**
-     *  This fun is used internally by Vulpescloud to get all Services from the Redis Hash.
-     *  This fun should NOT be used by ANYTHING except the Wrapper!!!
-     */
-    @ApiStatus.Internal
-    fun getAllServiceFromRedis() {
-        val futureServices: MutableList<ClusterService> = mutableListOf()
-        Wrapper.instance.getRC()?.getAllHashValues(RedisHashNames.VULPESCLOUD_SERVICES.name)?.forEach {
-            val service = JSONObject(it)
-
-            val taskJson = service.getJSONObject("task")
-            futureServices.add(
-                ServiceImpl(
-                    getTaskFromJson(taskJson),
-                    service.getInt("orderedId"),
-                    UUID.fromString(service.getString("id")),
-                    service.getInt("port"),
-                    service.getString("hostname"),
-                    service.getString("runningNode"),
-                    service.getInt("maxPlayers"),
-                    ClusterServiceStates.valueOf(service.getString("state"))
-                )
-            )
+    fun services(): List<Service> {
+        val serviceList = mutableListOf<Service>()
+        val list = Wrapper.instance.getRC()?.getAllHashValues(RedisHashNames.VULPESCLOUD_SERVICES.name)
+        if (!list.isNullOrEmpty()) {
+            list.forEach {
+                val service = serviceFromJson(JSONObject(it))
+                serviceList.add(service)
+            }
         }
-        services = futureServices.toList()
+        return serviceList
     }
 
-    /**
-     * This fun is used to retrieve a List of all Services that are stored in the Redis Hash
-     */
-    fun services(): List<ClusterService> {
-        return services
+    fun findServiceById(id: UUID): Service? {
+        return services().find { it.id() == id }
     }
 
-    /**
-     * This fun is used to retrieve a specific service by its name
-     * @property name The name of the Service to find
-     */
-    fun findByName(name: String): ClusterService? {
-        return services.find { it.name() == name }
+    fun findServiceByName(name: String): Service? {
+        return services().find { it.name().lowercase(Locale.getDefault()) == name.lowercase(Locale.getDefault()) }
     }
 
-    /**
-       This fun is used to retrieve a specific service by its id/UUID
-    */
-    fun findById(id: UUID): ClusterService? {
-        return services.find { it.id() == id }
-    }
-
-    /**
-       This fun is used to retrieve services by a ServiceFilter
-    */
-    fun findByFilter(filter: ClusterServiceFilter): List<ClusterService>? {
+    fun findServicesByFilter(filter: ServiceFilters): List<Service>? {
         return when (filter) {
-            ClusterServiceFilter.ONLINE_SERVICES -> services.filter { it.state() == ClusterServiceStates.ONLINE }
-            ClusterServiceFilter.EMPTY_SERVICES -> services.filter { it.isEmpty() }
-            ClusterServiceFilter.PLAYERS_PRESENT_SERVERS -> services.filter { !it.isEmpty() }
-            ClusterServiceFilter.SAME_NODE_SERVICES -> null // services.filter { Node.nodeConfig?.name == it.runningNode() } todo Get the Node of the Service and then check this
-            ClusterServiceFilter.PROXIES -> services.filter { it.task().version().type == VersionType.PROXY }
-            ClusterServiceFilter.SERVERS -> services.filter { it.task().version().type == VersionType.SERVER }
-            ClusterServiceFilter.FALLBACKS -> services.filter { it.task().fallback() }
-            ClusterServiceFilter.LOWEST_FALLBACK -> services.stream().filter { it.task().fallback() }.min(Comparator.comparingInt(
-                ClusterService::onlinePlayersCount)).stream().toList()
-        }?.toList()
-    }
-
-    /**
-       This fun returns the Service that it is being called from
-    */
-    fun getLocalService(): ClusterService {
-        val localService = findById(Wrapper.instance.service.id)
-        if (localService == null) {
-            throw NullPointerException()
-        } else {
-            return localService
+            ServiceFilters.PREPARED_SERVICES -> services().filter { it.state() == ServiceStates.PREPARED }
+            ServiceFilters.ONLINE_SERVICES -> services().filter { it.state() == ServiceStates.ONLINE}
+            ServiceFilters.SERVERS -> services().filter { it.task().version().versionType == VersionType.SERVER.name }
+            ServiceFilters.PROXIES -> services().filter { it.task().version().versionType == VersionType.PROXY.name }
+            ServiceFilters.FALLBACKS -> services().filter { it.task().fallback() }
+            ServiceFilters.EMPTY_SERVICES -> services().filter { it.isEmpty() }
+            ServiceFilters.FULL_SERVICES -> services().filter { it.maxPlayers() <= it.onlinePlayersCount() }
+            ServiceFilters.LOWEST_FALLBACK -> services().stream().filter { it.task().fallback() }.min(Comparator.comparingInt(
+                Service::onlinePlayersCount)).stream().toList()
         }
-    }
-
-    private fun getTaskFromJson(json: JSONObject): TaskImpl {
-        val versionJson = json.getJSONObject("version")
-
-        val version = VersionInfo(
-            versionJson.getString("name"),
-            VersionType.valueOf(versionJson.get("type").toString()),
-            versionJson.getString("versions")
-        )
-
-        val nodesJson = json.getJSONArray("nodes")
-
-        val nodes: Array<String?> = Array(nodesJson.length()) {
-            if (nodesJson.isNull(it)) null else nodesJson.getString(it)
-        }
-
-
-        val templatesJson = json.getJSONArray("nodes")
-
-        val templates: Array<String?> = Array(templatesJson.length()) {
-            if (templatesJson.isNull(it)) null else templatesJson.getString(it)
-        }
-
-        val task = TaskImpl(
-            json.getString("name"),
-            json.getInt("maxMemory"),
-            version,
-            templates.toList(),
-            nodes.toList(),
-            json.getInt("maxPlayers"),
-            json.getBoolean("staticServices"),
-            json.getInt("minOnlineCount"),
-            json.getBoolean("maintenance"),
-            json.getInt("startPort"),
-            json.getBoolean("fallback")
-        )
-
-        return task
     }
 
 }

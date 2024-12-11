@@ -35,13 +35,14 @@ import org.jline.reader.ParsedLine
 class JLineCompleter : Completer {
     override fun complete(p0: LineReader, p1: ParsedLine, p2: MutableList<Candidate>) {
         val line = p1.line()
-        val suggestions: List<String> = if (Node.setupProvider.currentSetup != null) {
-            Node.setupProvider.getSetupAnswers(line)
+        val suggestions: List<String> = if (Node.instance.setupProvider.currentSetup != null) {
+            Node.instance.setupProvider.getSetupAnswers(line)
         } else {
-            Node.commandProvider!!.commandManager!!.suggestionFactory().suggest(ConsoleCommandSource(), line).join().list().stream()
+            Node.instance.commandProvider.commandManager!!.suggestionFactory().suggest(ConsoleCommandSource(), line).join().list().stream()
                 .map(Suggestion::suggestion)
                 .toList()
         }
+
         if (suggestions.isEmpty()) {
             return
         }

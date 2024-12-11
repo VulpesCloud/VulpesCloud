@@ -1,50 +1,54 @@
-/*
- * MIT License
- *
- * Copyright (c) 2024 VulpesCloud
- *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
- *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
- */
-
 package de.vulpescloud.node.commands
 
 import de.vulpescloud.api.command.CommandInfo
 import de.vulpescloud.node.Node
-import org.incendo.cloud.description.Description
-import org.incendo.cloud.kotlin.extension.buildAndRegister
-import org.slf4j.LoggerFactory
+import de.vulpescloud.node.command.annotations.Alias
+import de.vulpescloud.node.command.annotations.Description
+import de.vulpescloud.node.command.source.CommandSource
+import org.incendo.cloud.annotations.Argument
+import org.incendo.cloud.annotations.Command
+import org.incendo.cloud.annotations.parser.Parser
+import org.incendo.cloud.annotations.suggestion.Suggestions
+import org.incendo.cloud.context.CommandInput
+import java.util.stream.Stream
 
+@Suppress("UNUSED")
+@Description("See all Commands!(translatable please!)", false)
+@Alias(["?"])
 class HelpCommand {
-    init {
-        val logger = LoggerFactory.getLogger(HelpCommand::class.java)
-        Node.commandProvider?.registeredCommands?.add(CommandInfo("help", setOf("?"), "Get information about all Commands!", listOf("help | ?")))
 
-        val commandInfo = Node.commandProvider?.registeredCommands
+    @Parser(suggestions = "commands")
+    fun commandInfoParser(input: CommandInput): CommandInfo {
+        val command = input.readString()
+        val commandInfo = Node.instance.commandProvider.command(command) ?: throw IllegalStateException()
 
-        Node.commandProvider?.commandManager!!.buildAndRegister(
-            "help", Description.of("Get information about all Commands!"), aliases = arrayOf("?")) {
-            handler { _ ->
-                    logger.info("All registered Commands:")
-                commandInfo!!.forEach { commandInfo ->
-                    logger.info("&f${commandInfo.name}${commandInfo.aliases} &8- &7${commandInfo.description}&8.")
-                }
-            }
+        return commandInfo
+    }
+
+    @Suggestions("commands")
+    fun suggestCommands(): Stream<String> {
+        return Node.instance.commandProvider.commands()!!.stream().map { it.name }
+    }
+
+    @Command("help|?")
+    fun sendGeneralHelp(source: CommandSource) {
+        Node.instance.commandProvider.commands()!!.forEach {
+            source.sendMessage("&f${it.name}${it.aliases} &8- &7${it.description}&8.")
         }
     }
+
+    @Command("help|? <command>")
+    fun sendSpecificHelp(
+        source: CommandSource,
+        @Argument("command") command: CommandInfo?) {
+        if (command != null) {
+            source.sendMessage("Aliases: &m${command.joinNameToAliases(", ")}")
+            source.sendMessage("Description: &m${command.description}")
+            source.sendMessage("Usages:")
+            command.usage.forEach { source.sendMessage(" > &m$it") }
+        } else {
+            source.sendMessage("&cInvalid command!")
+        }
+    }
+
 }

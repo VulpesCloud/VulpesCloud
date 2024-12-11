@@ -24,11 +24,8 @@
 
 package de.vulpescloud.node.terminal
 
-import ch.qos.logback.classic.spi.ILoggingEvent
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.NodeConfig
 import de.vulpescloud.node.terminal.util.TerminalColorUtil
-import io.github.thecguygithub.api.log.LogOutputStream
 import org.jline.jansi.Ansi
 import org.jline.reader.LineReader
 import org.jline.reader.LineReaderBuilder
@@ -39,15 +36,14 @@ import org.jline.utils.InfoCmp
 import org.slf4j.LoggerFactory
 import java.nio.charset.StandardCharsets
 
-class JLineTerminal(config: NodeConfig) {
+class JLineTerminal {
 
     private val log = LoggerFactory.getLogger(JLineTerminal::class.java)
-    val logLines: MutableList<ILoggingEvent> = mutableListOf()
-    var terminal: Terminal
-    var lineReader: LineReaderImpl
-    val commandReadingThread: JLineCommandReadingThread
+    lateinit var terminal: Terminal
+    lateinit var lineReader: LineReaderImpl
+    private val commandReadingThread: JLineCommandReadingThread = JLineCommandReadingThread(this)
 
-    init {
+    fun initialize() {
         terminal = TerminalBuilder.builder()
             .system(true)
             .encoding(StandardCharsets.UTF_8)
@@ -58,7 +54,6 @@ class JLineTerminal(config: NodeConfig) {
         lineReader = LineReaderBuilder.builder()
             .terminal(terminal)
             .completer(JLineCompleter())
-
 
             .option(LineReader.Option.AUTO_MENU_LIST, true)
             .option(LineReader.Option.AUTO_GROUP, false)
@@ -73,13 +68,8 @@ class JLineTerminal(config: NodeConfig) {
 
         lineReader.autosuggestion = LineReader.SuggestionType.COMPLETER
 
-        commandReadingThread = JLineCommandReadingThread(config, this)
-
-        System.setErr(LogOutputStream.forWarn(log).toPrintStream())
-        System.setOut(LogOutputStream.forInfo(log).toPrintStream())
-
         clear()
-        this.print(this, config)
+        this.print(this)
     }
 
     fun allowInput() {
@@ -100,17 +90,19 @@ class JLineTerminal(config: NodeConfig) {
     }
 
     fun printLine(message: String) {
-        if (Node.setupProvider.currentSetup == null) {
+        if (Node.instance.setupProvider.currentSetup == null) {
             terminal.puts(InfoCmp.Capability.carriage_return)
             terminal.writer()
                 .println(TerminalColorUtil.replaceColorCodes(message) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
             terminal.flush()
             update()
-        }
+       }
+
+        printSetup("aaisdhgkl >> $message")
     }
 
     fun printSetup(message: String) {
-        if (Node.setupProvider.currentSetup != null) {
+        if (Node.instance.setupProvider.currentSetup != null) {
             terminal.puts(InfoCmp.Capability.carriage_return)
             terminal.writer()
                 .println(TerminalColorUtil.replaceColorCodes(message) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
@@ -127,7 +119,7 @@ class JLineTerminal(config: NodeConfig) {
         lineReader.setPrompt(TerminalColorUtil.replaceColorCodes(prompt))
     }
 
-    fun print(terminal: JLineTerminal, config: NodeConfig) {
+    private fun print(terminal: JLineTerminal) {
         terminal.printLine("")
         terminal.printLine("   &oVulpesCloud &8- &71.0.0-alpha")
         terminal.printLine("        &8[&OFennek&8]")

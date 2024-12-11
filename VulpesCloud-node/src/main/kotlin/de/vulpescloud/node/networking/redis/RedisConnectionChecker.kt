@@ -36,7 +36,7 @@ class RedisConnectionChecker : CoroutineScope {
     }
 
     private val job = Job()
-    private val redis = Node.instance!!.getRC()
+    private val redis = Node.instance.getRC()
     private var runtime = 0
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Default + job
@@ -53,8 +53,8 @@ class RedisConnectionChecker : CoroutineScope {
     fun schedule() = launch {
         while (true) {
             runtime += 1
-            redis?.setHashField("VulpesCloud-HeartBeat", Node.nodeConfig!!.name, "$runtime")
-            if (redis?.getHashField("VulpesCloud-HeartBeat", Node.nodeConfig!!.name)?.toInt() != runtime) {
+            redis?.setHashField("VulpesCloud-HeartBeat", Node.instance.config.name, "$runtime")
+            if (redis?.getHashField("VulpesCloud-HeartBeat", Node.instance.config.name)?.toInt() != runtime) {
                 logger.error("REDIS CONNECTION SEEMS TO BE LOST!")
                 logger.error("REDIS CONNECTION SEEMS TO BE LOST!")
                 logger.error("REDIS CONNECTION SEEMS TO BE LOST!")

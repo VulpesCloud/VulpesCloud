@@ -25,14 +25,13 @@
 package de.vulpescloud.node.terminal
 
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.NodeConfig
 import de.vulpescloud.node.NodeShutdown
 import de.vulpescloud.node.command.source.CommandSource
 import de.vulpescloud.node.terminal.util.TerminalColorUtil
 import org.jline.reader.EndOfFileException
 import org.jline.reader.UserInterruptException
 
-class JLineCommandReadingThread(private val localNodeImpl: NodeConfig, private val terminal: JLineTerminal) : Thread() {
+class JLineCommandReadingThread(private val terminal: JLineTerminal) : Thread() {
 
     init {
         contextClassLoader = ClassLoader.getSystemClassLoader()
@@ -49,19 +48,19 @@ class JLineCommandReadingThread(private val localNodeImpl: NodeConfig, private v
                             continue
                         }
 
-                        if (Node.setupProvider.currentSetup != null) {
+                        if (Node.instance.setupProvider.currentSetup != null) {
                             if (rawLine.equals("exit", true)) {
-                                Node.setupProvider.cancelSetup()
+                                Node.instance.setupProvider.cancelSetup()
                                 continue
                             }
-                            Node.setupProvider.input(rawLine)
+                            Node.instance.setupProvider.input(rawLine)
                         } else {
-                            Node.commandProvider?.execute(CommandSource.console(), rawLine)
+                            Node.instance.commandProvider.execute(CommandSource.console(), rawLine)
                         }
 
                     } catch (ignore: EndOfFileException) {}
                 } catch (exception: UserInterruptException) {
-                    NodeShutdown.nodeShutdown(true)
+                    NodeShutdown.forceShutdown(true)
                 }
             } catch (exception: Exception) {
                 exception.printStackTrace()
@@ -71,7 +70,7 @@ class JLineCommandReadingThread(private val localNodeImpl: NodeConfig, private v
 
     private fun prompt(): String {
 
-        return ("&9" + localNodeImpl.name) + "&8@&7cloud &8» &7"
+        return ("&9" + Node.instance.config.name) + "&8@&7cloud &8» &7"
 
     }
 }

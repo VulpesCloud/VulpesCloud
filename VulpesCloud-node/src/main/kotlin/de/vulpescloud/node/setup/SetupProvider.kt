@@ -24,6 +24,7 @@
 
 package de.vulpescloud.node.setup
 
+import de.vulpescloud.api.language.Translator
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.setup.annotations.SetupCancel
 import de.vulpescloud.node.setup.annotations.SetupFinish
@@ -37,8 +38,7 @@ class SetupProvider {
 
     private val logger = LoggerFactory.getLogger(SetupProvider::class.java)
     var currentSetup: SetupInfo? = null
-    var currentQuestion: SetupQuestionInfo? = null
-        private set
+    private var currentQuestion: SetupQuestionInfo? = null
     private var currentQuestionIndex = 0
 
     fun startSetup(setup: Setup) {
@@ -68,8 +68,8 @@ class SetupProvider {
             this.currentSetup = sInfo
             this.currentQuestion = sInfo.questions[currentQuestionIndex]
 
-            Node.terminal!!.clear()
-            Node.terminal!!.printSetup(Node.languageProvider.translate("node.setup.all.started"))
+            Node.instance.terminal.clear()
+            Node.instance.terminal.printSetup(Translator.trans("node.setup.all.started"))
             printCurrentQuestion()
         } else {
             logger.warn("Trying to start a Setup whilst another Setup is running!")
@@ -82,12 +82,12 @@ class SetupProvider {
         val answers = questionSetupAnswer.suggest()
         val suffix = if (answers.isNotEmpty()) "&ePossible answers: " + answers.joinToString() else ""
         if (suffix.isEmpty()) {
-            Node.terminal!!.printSetup(Node.languageProvider.translate(currentQuestion.setupQuestion.message))
-            Node.terminal!!.printSetup("")
+            Node.instance.terminal.printSetup(Translator.trans(currentQuestion.setupQuestion.message))
+            Node.instance.terminal.printSetup("")
         } else {
-            Node.terminal!!.printSetup(Node.languageProvider.translate(currentQuestion.setupQuestion.message))
-            Node.terminal!!.printSetup(suffix)
-            Node.terminal!!.printSetup("")
+            Node.instance.terminal.printSetup(Translator.trans(currentQuestion.setupQuestion.message))
+            Node.instance.terminal.printSetup(suffix)
+            Node.instance.terminal.printSetup("")
         }
     }
 
@@ -100,14 +100,14 @@ class SetupProvider {
 
         this.currentQuestionIndex++
         this.currentQuestion = setup.questions[currentQuestionIndex]
-        Node.terminal!!.printSetup("")
+        Node.instance.terminal.printSetup("")
         printCurrentQuestion()
     }
 
     private fun nextQuestionExists(setup: SetupInfo) = this.currentQuestionIndex + 1 in setup.questions.indices
 
     private fun finishSetup() {
-        Node.terminal!!.clear()
+        Node.instance.terminal.clear()
         this.currentSetup?.callFinish()
         this.currentSetup = null
         this.currentQuestion = null
@@ -116,7 +116,7 @@ class SetupProvider {
     }
 
     fun cancelSetup() {
-        Node.terminal!!.clear()
+        Node.instance.terminal.clear()
         this.currentSetup?.callCancel()
         this.currentSetup = null
         this.currentQuestion = null
@@ -127,14 +127,14 @@ class SetupProvider {
     fun input(input: String) {
         val currentQuestion = this.currentQuestion ?: return
         val answers = currentQuestion.setupQuestion.answer.java.newInstance().suggest()
-        if (answers.isNotEmpty() && !answers.contains(input)) {
-            Node.terminal!!.printSetup("&cInvalid Response!")
+        if (answers.isNotEmpty() && !answers.contains(input) && currentQuestion.setupQuestion.forceAnswer) {
+            Node.instance.terminal.printSetup("&cInvalid Response!")
             return
         }
         val invoke = try {
             currentQuestion.method.invoke(this.currentSetup!!.setup, input)
         } catch (e: Exception) {
-            Node.terminal!!.printSetup("&cInvalid Response!")
+            Node.instance.terminal.printSetup("&cInvalid Response!")
             return
         }
         if (invoke is Boolean && invoke == false) {
@@ -148,6 +148,12 @@ class SetupProvider {
             throw IllegalStateException("There is no Setup running!")
         }
         val answers = currentQuestion!!.setupQuestion.answer.java.newInstance().suggest()
+        if (currentQuestion!!.setupQuestion.default.isNotEmpty()) {
+            val mList = answers.toMutableList()
+            mList.addAll(currentQuestion!!.setupQuestion.default)
+
+            return mList.filter { it.lowercase(Locale.getDefault()).startsWith(input.lowercase(Locale.getDefault())) }
+        }
 
         return answers.filter { it.lowercase(Locale.getDefault()).startsWith(input.lowercase(Locale.getDefault())) }
     }
@@ -155,8 +161,8 @@ class SetupProvider {
 
     class SetupInfo(
         val setup: Setup,
-        val finishMethod: Method?,
-        val cancelMethod: Method?,
+        private val finishMethod: Method?,
+        private val cancelMethod: Method?,
         val questions: List<SetupQuestionInfo>
     ) {
         fun callFinish() {

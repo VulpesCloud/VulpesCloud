@@ -107,7 +107,7 @@ class Wrapper(args: Array<String>) {
         }
     }
 
-    fun preloadClasses(file: Path, loader: ClassLoader) {
+    private fun preloadClasses(file: Path, loader: ClassLoader) {
         try {
             JarInputStream(Files.newInputStream(file)).use { stream ->
                 var entry: JarEntry

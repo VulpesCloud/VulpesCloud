@@ -33,5 +33,7 @@ import kotlin.reflect.KClass
 annotation class SetupQuestion(
     val number: Int,
     val message: String,
-    val answer: KClass<out SetupAnswer> = NullSetupAnswer::class
+    val answer: KClass<out SetupAnswer> = NullSetupAnswer::class,
+    val forceAnswer: Boolean = false,
+    val default: Array<String> = []
 )

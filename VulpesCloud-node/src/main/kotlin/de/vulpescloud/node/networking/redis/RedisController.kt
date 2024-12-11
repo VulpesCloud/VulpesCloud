@@ -56,20 +56,20 @@ class RedisController : BinaryJedisPubSub(), Runnable {
         jConfig.minIdle = 1
         jConfig.blockWhenExhausted = true
 
-        val password = Node.nodeConfig!!.redis?.password
-        jedisPool = if (password?.isEmpty() == true) {
+        val password = Node.instance.config.redis.password
+        jedisPool = if (password.isEmpty()) {
             JedisPool(
                 jConfig,
-                Node.nodeConfig!!.redis?.hostname,
-                Node.nodeConfig!!.redis?.port ?: 6379,
+                Node.instance.config.redis.hostname,
+                Node.instance.config.redis.port,
                 9000,
                 false
             )
         } else {
             JedisPool(
                 jConfig,
-                Node.nodeConfig!!.redis?.hostname,
-                Node.nodeConfig!!.redis?.port ?: 6379,
+                Node.instance.config.redis.hostname,
+                Node.instance.config.redis.port,
                 9000,
                 password,
                 false
@@ -96,7 +96,7 @@ class RedisController : BinaryJedisPubSub(), Runnable {
             isConnecting.set(false)
             isConnectionBroken.set(true)
             logger.error("Connection to Redis server has failed! Please check your details in the configuration. $e")
-            NodeShutdown.nodeShutdown(true)
+            NodeShutdown.forceShutdown(false)
         }
     }
 
@@ -106,6 +106,7 @@ class RedisController : BinaryJedisPubSub(), Runnable {
         json.put("action", "TestCloud")
         json.put("date", System.currentTimeMillis())
         finishSendMessage(json, channel)
+        logger.debug("&cRedis &8| &9MESSAGE &8>> &7(&f$channel&7) &m$message")
     }
 
     private fun finishSendMessage(json: JSONObject, channel: String) {
@@ -123,24 +124,11 @@ class RedisController : BinaryJedisPubSub(), Runnable {
         }
     }
 
-    fun testHashOperation() {
-        println("Testing hash operation...")
-        try {
-            jedisPool.resource.use { jedis ->
-                val testHashName = "testHash_${System.currentTimeMillis()}" // Unique hash name
-                jedis.hset(testHashName, "testField", "testValue")
-                println("Hash operation successful for $testHashName")
-            }
-        } catch (e: Exception) {
-            println("Exception during hash operation: ${e.message}")
-            e.printStackTrace()
-        }
-    }
-
     fun removeFromListByValue(listName: String, value: String) {
         jedisPool.resource.use { jedis ->
             jedis.lrem(listName, 0, value)
         }
+        logger.debug("&cRedis &8| &9LIST &eRemoveByValue &8>> &7(&f$listName&7) &bValue:&m$value")
     }
 
     fun setHashField(hashName: String, fieldName: String, value: String) {
@@ -152,12 +140,14 @@ class RedisController : BinaryJedisPubSub(), Runnable {
             println("Exception occurred during setting hash field: ${e.message}")
             e.printStackTrace()
         }
+        logger.debug("&cRedis &8| &9HASH &eSET &8>> &7(&f$hashName&7) &bField:&m$fieldName &bValue:&m$value")
     }
 
     fun deleteHashField(hashName: String, fieldName: String) {
         jedisPool.resource.use { jedis ->
             jedis.hdel(hashName, fieldName)
         }
+        logger.debug("&cRedis &8| &9HASH &eDeleteByField &8>> &7(&f$hashName&7) &bField:&m$fieldName")
     }
 
     fun createHashFromMap(hashName: String, values: Map<String, String>) {
@@ -173,12 +163,14 @@ class RedisController : BinaryJedisPubSub(), Runnable {
             println("Exception occurred during setting hash field: ${e.message}")
             e.printStackTrace()
         }
+        logger.debug("&cRedis &8| &9HASH &eCreateFromMap &8>> &7(&f$hashName&7)")
     }
 
     fun createListFromList(listName: String, values: List<String>) {
         jedisPool.resource.use { jedis ->
             jedis.rpush(listName, *values.toTypedArray())
         }
+        logger.debug("&cRedis &8| &9LIST &eCreateFromList &8>> &7(&f$listName&7)")
     }
 
     fun deleteEntriesFromArray(hashName: String, keys: Array<String>) {
@@ -193,6 +185,7 @@ class RedisController : BinaryJedisPubSub(), Runnable {
         jedisPool.resource.use { jedis ->
             jedis.del(hashName)
         }
+        logger.debug("&cRedis &8| &9HASH &eDELETE &8>> &7(&f$hashName&7) &mALL")
     }
 
     fun addToList(listName: String, values: String) {
@@ -282,6 +275,7 @@ class RedisController : BinaryJedisPubSub(), Runnable {
     }
 
     fun getHashField(hashName: String, fieldName: String): String? {
+        logger.debug("&cRedis &8| &9HASH &eGetByField &8>> &7(&f$hashName&7) &bField:&m$fieldName")
         return jedisPool.resource.use { jedis ->
             jedis.hget(hashName, fieldName)
         }
@@ -306,6 +300,7 @@ class RedisController : BinaryJedisPubSub(), Runnable {
     }
 
     fun getAllHashValues(hashName: String): List<String>? {
+        logger.debug("&cRedis &8| &9HASH &eGetAllValues &8>> &7(&f$hashName&7)")
         return jedisPool.resource.use { jedis ->
             jedis.hvals(hashName)
         }

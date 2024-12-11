@@ -22,15 +22,24 @@
  * SOFTWARE.
  */
 
+/*
+ * Parts of this file is from CloudNet(https://github.com/CloudNetService/CloudNet)
+ */
+
 package de.vulpescloud.node.command.provider
 
 import com.google.common.collect.Iterables
 import de.vulpescloud.api.command.CommandInfo
 import de.vulpescloud.node.command.CloudCommandManager
+import de.vulpescloud.node.command.annotations.Alias
+import de.vulpescloud.node.command.annotations.Description
 import de.vulpescloud.node.command.source.CommandSource
+import org.incendo.cloud.Command
 import org.incendo.cloud.annotations.AnnotationParser
+import org.incendo.cloud.annotations.BuilderModifier
 import org.incendo.cloud.execution.CommandResult
 import org.incendo.cloud.execution.ExecutionCoordinator
+import org.incendo.cloud.key.CloudKey
 import org.incendo.cloud.meta.CommandMeta
 import org.incendo.cloud.parser.ParserParameters
 import org.slf4j.Logger
@@ -38,20 +47,20 @@ import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.function.Function
+import kotlin.collections.HashSet
 
 
 class CommandProvider {
 
-//    val ALIAS_KEY =
-//        CloudKey.of("testcloud:alias", object : TypeToken<Set<String>?>() {})
-//    val DESCRIPTION_KEY: CloudKey<String> = CloudKey.of(
-//        "testcloud:description",
-//        String::class.java
-//    )
+    val ALIAS_KEY: CloudKey<Array<String>>? = CloudKey.of("vulpescloud:alias", Array<String>::class.java)
+    val DESCRIPTION_KEY: CloudKey<String> = CloudKey.of(
+        "vulpescloud:description",
+        String::class.java
+    )
 
     val logger: Logger = LoggerFactory.getLogger(CommandProvider::class.java)
 
-    var commandManager: CloudCommandManager?
+    var commandManager: CloudCommandManager? = CloudCommandManager(ExecutionCoordinator.simpleCoordinator())
 
     var registeredCommands: MutableList<CommandInfo>? = mutableListOf()
 
@@ -59,34 +68,37 @@ class CommandProvider {
 
     init {
 
-        this.commandManager = CloudCommandManager(ExecutionCoordinator.simpleCoordinator())
-
-        this.annotationParser = AnnotationParser<CommandSource>(
+        this.annotationParser = AnnotationParser(
             this.commandManager!!,
-            CommandSource::class.java,
-            Function<ParserParameters, CommandMeta> { CommandMeta.empty() }
+            CommandSource::class.java
+        ) { CommandMeta.empty() }
+
+
+        this.annotationParser!!.registerBuilderModifier(
+            Alias::class.java,
+            BuilderModifier<Alias, CommandSource?> registerBuilderModifier@{ alias: Alias, builder: Command.Builder<CommandSource?> ->
+                if (alias.alias.isNotEmpty()) {
+                    return@registerBuilderModifier builder.meta(
+                        this.ALIAS_KEY!!,
+                        alias.alias
+                    )
+                }
+                builder
+            }
         )
-//        this.annotationParser!!.registerBuilderModifier<AliasAnnotation>(
-//            AliasAnnotation::class.java,
-//            BuilderModifier<AliasAnnotation, CommandSource?> { alias: AliasAnnotation, builder: Command.Builder<CommandSource?> ->
-//                builder.meta<Set<String>>(
-//                    Node.commandProvider!!.ALIAS_KEY, HashSet<String>(
-//                        listOf<String>(*alias.value)
-//                    )
-//                )
-//            })
-//
-//        this.annotationParser!!.registerBuilderModifier<Description>(
-//            Description::class.java,
-//            BuilderModifier<Description, CommandSource?> registerBuilderModifier@{ description: Description, builder: Command.Builder<CommandSource?> ->
-//                if (description.value.trim { it <= ' ' }.isNotEmpty()) {
-//                    return@registerBuilderModifier builder.meta<String>(
-//                        Node.commandProvider!!.DESCRIPTION_KEY,
-//                        description.value
-//                    )
-//                }
-//                builder
-//            })
+
+        this.annotationParser!!.registerBuilderModifier(
+            Description::class.java,
+            BuilderModifier<Description, CommandSource?> registerBuilderModifier@{ description: Description, builder: Command.Builder<CommandSource?> ->
+                if (description.description.trim { it <= ' ' }.isNotEmpty()) {
+                    return@registerBuilderModifier builder.meta<String>(
+                        this.DESCRIPTION_KEY,
+                        description.description
+                    )
+                }
+                builder
+            }
+        )
 
     }
 
@@ -111,14 +123,18 @@ class CommandProvider {
 
             val permission = cloudCommand.commandPermission().permissionString()
 
-            val description = cloudCommand.nonFlagArguments()[1].description().toString()
+            val description = cloudCommand.commandMeta().getOrSupplyDefault(
+                DESCRIPTION_KEY
+            ) { "No Description! Repleace me !" }
 
-            val aliases = cloudCommand.nonFlagArguments()[1].aliases().toSet()
+            val aliases = cloudCommand.commandMeta().getOrSupplyDefault(
+                ALIAS_KEY ?: CloudKey.of("vulpescloud:alias", Array<String>::class.java)
+            ) { emptyArray() }
 
-            val name = cloudCommand.nonFlagArguments()[1].name().lowercase()
+            val name = cloudCommand.nonFlagArguments().first().name().lowercase()
 
             registeredCommands!!.add(
-                CommandInfo(name, aliases, description, this.commandUsageOfRoot(name))
+                CommandInfo(name, aliases.toSet(), description, this.commandUsageOfRoot(name), permission)
             )
         }
     }
@@ -142,7 +158,7 @@ class CommandProvider {
         for (command in commandManager!!.commands()) {
             // the first argument is the root, check if it matches
             val arguments = command.components()
-            if (arguments.isEmpty() || !arguments[1].name().equals(root, ignoreCase = true)) {
+            if (arguments.isEmpty() || !arguments.first().name().equals(root, ignoreCase = true)) {
                 continue
             }
 

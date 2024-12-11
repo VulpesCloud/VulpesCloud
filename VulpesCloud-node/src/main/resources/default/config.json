@@ -1,0 +1,21 @@
+{
+  "uuid": "00000000-0000-0000-0000-000000000000",
+  "name": "Node-1",
+  "redis": {
+    "user": "default",
+    "hostname": "localhost",
+    "port": 6379,
+    "password": ""
+  },
+  "logLevel": "INFO",
+  "mysql": {
+    "user": "vulpescloud",
+    "password": "",
+    "database": "vulpescloud",
+    "host": "localhost",
+    "port": 3306,
+    "ssl": false
+  },
+  "language": "en_US",
+  "ranFirstSetup": false
+}
