@@ -79,6 +79,7 @@ class Node {
         commandProvider.register(VersionCommand())
         commandProvider.register(TaskCommand())
         commandProvider.register(ServiceCommand())
+        commandProvider.register(DebugCommand())
 
         logger.info(
             translator.trans("node.boot.success.message"),

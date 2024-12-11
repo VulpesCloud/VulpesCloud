@@ -31,11 +31,13 @@
 
     <conversionRule conversionWord="levelColor" class="de.vulpescloud.node.terminal.LoggingLevelConversion"/>
 
+    <variable name="logLevel" value="INFO"/>
+
     <property name="LINE_PATTERN" value="%gray([%boldWhite(%d{dd.MM HH:mm:ss.SSS}%gray(]))) %gray(%levelColor(%-5level)) %gray(:) %msg"/>
 
     <appender name="ConsoleAppender" class="ConsoleAppender">
         <filter class="ThresholdFilter">
-            <level>DEBUG</level>
+            <level>${logLevel}</level>
         </filter>
         <encoder class="PatternLayoutEncoder">
             <pattern>${LINE_PATTERN}</pattern>
