@@ -47,7 +47,7 @@ class VulpesLauncher {
 
             // Setting the Dependency's
             val gsonDependency = Dependency("com.google.code.gson", "gson", "2.11.0")
-            val jLineDependency = Dependency("org.jline", "jline", "3.27.1")
+            val jLineDependency = Dependency("org.jline", "jline", "3.28.0")
             val kotlinSTD = Dependency("org.jetbrains.kotlin", "kotlin-stdlib", "2.1.0")
             val jsonDependency = Dependency("org.json", "json", "20240303")
             val jedisDependency = Dependency("redis.clients", "jedis", "5.2.0")
@@ -65,8 +65,8 @@ class VulpesLauncher {
             val yamlConfig = Dependency("com.electronwill.night-config", "yaml", "3.8.1")
             val tomlConfig = Dependency("com.electronwill.night-config", "toml", "3.8.1")
             val coreConfig = Dependency("com.electronwill.night-config", "core", "3.8.1")
-            val exposedCore = Dependency("org.jetbrains.exposed", "exposed-core", "0.56.0")
-            val exposedJDBC = Dependency("org.jetbrains.exposed", "exposed-jdbc", "0.56.0")
+            val exposedCore = Dependency("org.jetbrains.exposed", "exposed-core", "0.57.0")
+            val exposedJDBC = Dependency("org.jetbrains.exposed", "exposed-jdbc", "0.57.0")
             val snakeYAML = Dependency("org.yaml", "snakeyaml", "2.3")
 
             // Downloading the Dependency's
