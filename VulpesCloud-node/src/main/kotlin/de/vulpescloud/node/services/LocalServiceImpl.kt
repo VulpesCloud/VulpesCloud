@@ -44,7 +44,9 @@ class LocalServiceImpl(
         Thread {
             process?.inputStream?.bufferedReader()?.use { reader ->
                 reader.forEachLine { line ->
-                    logger.info("Service {}: {}", this.name(), line.trim())
+                    if (Node.instance.serviceProvider.isLogging(this)) {
+                        logger.info("&8[ &m{} &8] &b{}", name(), line.trim())
+                    }
 //                    val msg = ServiceEventMessageBuilder.consoleEventBuilder()
 //                        .setService(this)
 //                        .setLine(line.trim())

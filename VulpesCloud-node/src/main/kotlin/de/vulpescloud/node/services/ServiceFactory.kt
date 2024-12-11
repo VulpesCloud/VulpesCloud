@@ -31,6 +31,9 @@ object ServiceFactory {
             Node.instance.config.hostname,
             Node.instance.config.name
         )
+        val ls = Node.instance.serviceProvider.localServices()
+        ls.add(localService)
+        Node.instance.serviceProvider.updateLocalServices(ls)
         val version = localService.version()
 
         localService.setState(ServiceStates.LOADING)

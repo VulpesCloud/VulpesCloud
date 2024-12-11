@@ -9,7 +9,8 @@ import org.json.JSONObject
 import java.util.*
 
 class ServiceProvider {
-    private val localServices = mutableListOf<LocalServiceImpl>()
+    private var localServices = mutableListOf<LocalServiceImpl>()
+    val loggingServices = mutableListOf<String>()
 
     fun services(): List<Service> {
         val serviceList = mutableListOf<Service>()
@@ -21,6 +22,15 @@ class ServiceProvider {
             }
         }
         return serviceList
+    }
+
+    fun isLogging(service: Service): Boolean {
+        return loggingServices.contains(service.name())
+    }
+
+    fun updateLocalServices(services: MutableList<LocalServiceImpl>) {
+        localServices.clear()
+        localServices = services
     }
 
     fun localServices(): MutableList<LocalServiceImpl> {
