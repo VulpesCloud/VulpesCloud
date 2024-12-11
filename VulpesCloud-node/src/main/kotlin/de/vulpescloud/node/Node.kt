@@ -1,6 +1,7 @@
 package de.vulpescloud.node
 
 import de.vulpescloud.api.language.Translator
+import de.vulpescloud.api.utils.StringUtils
 import de.vulpescloud.node.command.provider.CommandProvider
 import de.vulpescloud.node.commands.*
 import de.vulpescloud.node.config.ConfigProvider
@@ -36,6 +37,7 @@ class Node {
     val taskProvider = TaskProvider()
     val templateProvider = TemplateProvider()
     val serviceProvider = ServiceProvider()
+    val forwardingSecret = StringUtils.generateRandomString(8)
 
     init {
         instance = this
