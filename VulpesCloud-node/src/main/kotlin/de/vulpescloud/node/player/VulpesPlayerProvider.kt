@@ -4,6 +4,7 @@ import de.vulpescloud.api.player.VulpesPlayer
 import de.vulpescloud.api.redis.RedisHashNames
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.json.PlayerSerializer.playerFromJson
+import de.vulpescloud.node.player.redis.PlayerEventListener
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 

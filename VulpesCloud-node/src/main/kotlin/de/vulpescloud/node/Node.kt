@@ -7,6 +7,8 @@ import de.vulpescloud.node.commands.*
 import de.vulpescloud.node.config.ConfigProvider
 import de.vulpescloud.node.networking.mysql.MySQLController
 import de.vulpescloud.node.networking.redis.RedisController
+import de.vulpescloud.node.player.VulpesPlayerProvider
+import de.vulpescloud.node.player.redis.PlayerEventListener
 import de.vulpescloud.node.schedulers.ServiceStartScheduler
 import de.vulpescloud.node.services.ServiceProvider
 import de.vulpescloud.node.setup.SetupProvider
@@ -38,6 +40,7 @@ class Node {
     val templateProvider = TemplateProvider()
     val serviceProvider = ServiceProvider()
     val forwardingSecret = StringUtils.generateRandomString(8)
+    val playerProvider = VulpesPlayerProvider()
 
     init {
         instance = this
@@ -85,6 +88,7 @@ class Node {
         terminal.allowInput()
 
         ServiceStartScheduler.schedule()
+        PlayerEventListener
     }
 
     fun getRC(): RedisController? {
