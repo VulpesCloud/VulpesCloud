@@ -44,7 +44,7 @@ jobs:
           SQUASH_HISTORY: true
           SKIP_EMPTY_COMMITS: true
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          GITHUB_TOKEN: ${{ secrets.TOKEN_GITHUB }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MESSAGE: 'Update Meta for branch {target-branch} of commit {sha}'
 
       - name: Upload a Build Artifact
