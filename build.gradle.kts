@@ -48,7 +48,7 @@ allprojects {
     apply(plugin = "org.jetbrains.dokka")
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
-    version = "1.0.0-alpha"
+    version = "1.0.0-alpha1"
     group = "de.vulpescloud"
 
     repositories {
