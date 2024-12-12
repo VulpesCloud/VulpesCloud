@@ -75,5 +75,7 @@ tasks.shadowJar {
     archiveFileName.set("vulpescloud-connector.jar")
     dependsOn(":VulpesCloud-api:jar")
     dependsOn(":VulpesCloud-bridge:jar")
-    destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
+    if (System.getenv("dev") == "true") {
+        destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
+    }
 }

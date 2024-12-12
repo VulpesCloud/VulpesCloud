@@ -54,5 +54,7 @@ tasks.shadowJar {
         attributes["Premain-Class"] = "de.vulpescloud.wrapper.Premain"
     }
     archiveFileName.set("vulpescloud-wrapper.jar")
-    destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
+    if (System.getenv("dev") == "true") {
+        destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
+    }
 }

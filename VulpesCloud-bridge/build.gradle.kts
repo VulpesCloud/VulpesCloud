@@ -40,5 +40,7 @@ dependencies {
 
 tasks.jar {
     archiveFileName.set("vulpescloud-bridge.jar")
-    destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
+    if (System.getenv("dev") == "true") {
+        destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
+    }
 }
