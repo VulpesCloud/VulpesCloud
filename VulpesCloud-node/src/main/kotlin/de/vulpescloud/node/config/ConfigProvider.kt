@@ -1,12 +1,13 @@
 package de.vulpescloud.node.config
 
 import com.electronwill.nightconfig.core.file.FileConfig
+import com.electronwill.nightconfig.json.JsonFormat
 import de.vulpescloud.api.language.Languages
 import java.util.UUID
 
 class ConfigProvider {
 
-    val config = FileConfig.builder("config.json")
+    val config: FileConfig = FileConfig.builder("config.json", JsonFormat.fancyInstance())
         .autosave()
         .sync()
         .build()
@@ -36,8 +37,8 @@ class ConfigProvider {
     }
     val hostname = "0.0.0.0" //todo Add Config entry and make it pull this from there!
 
-    val name = config.get<String>("name")
-    val uuid = UUID.fromString(config.get("uuid"))
+    val name: String = config.get("name")
+    val uuid: UUID = UUID.fromString(config.get("uuid"))
     val redis = RedisEndpointData(
         config.get("redis.user"),
         config.get("redis.hostname"),
@@ -53,5 +54,5 @@ class ConfigProvider {
         config.get("mysql.ssl")
     )
     val language = Languages.valueOf(config.get("language"))
-    val ranFirstSetup = config.get<Boolean>("ranFirstSetup")
+    val ranFirstSetup: Boolean = config.get("ranFirstSetup")
 }
