@@ -27,6 +27,7 @@ object ServiceStartScheduler : CoroutineScope {
                 val serviceToStart = task.minOnlineCount() - task.services()!!.size
 
                 for (i in 0 until serviceToStart) {
+                    logger.info("Starting service for task &m${task.name()} &8(&7service count&8: &b${task.services()!!.size + 1}&8)")
                     ServiceFactory.prepareStartedService(task)
                 }
             }
