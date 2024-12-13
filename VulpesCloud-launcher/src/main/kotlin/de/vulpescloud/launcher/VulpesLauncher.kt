@@ -24,6 +24,7 @@
 
 package de.vulpescloud.launcher
 
+import de.vulpescloud.launcher.config.Config
 import de.vulpescloud.launcher.dependency.Dependency
 import de.vulpescloud.launcher.dependency.DependencyDownloader
 import de.vulpescloud.launcher.util.FileUpdaterUtil
@@ -39,7 +40,8 @@ class VulpesLauncher {
     companion object {
         val CLASS_LOADER = VulpesClassLoader()
         val DEPENDENCY_DIR: Path = Path.of("launcher/dependencies")
-        private val githubURL = "https://github.com/VulpesCloud/VulpesCloud-meta/raw/main/"
+        private val githubURL = "https://github.com/VulpesCloud/VulpesCloud-meta/raw/"
+        val config = Config()
 
         @JvmStatic
         fun main(args: Array<String>) {
@@ -94,9 +96,10 @@ class VulpesLauncher {
                 exposedJDBC,
                 snakeYAML,
             )
+            // config.debug()
 
             val devMode = System.getProperty("devMode")
-            if (devMode != null && devMode.toBoolean()) {
+            if (devMode != null && devMode.toBoolean() && !config.autoUpdatesEnabled()) {
                 System.err.println("╭────────────────────────────────────────────────────────╮")
                 System.err.println("│                                                        │")
                 System.err.println("│                      INFORMATION                       │")
@@ -143,6 +146,9 @@ class VulpesLauncher {
                     System.err.println("vulpescloud-bridge.jar not found in dependencies folder! Put the file there, or disable Development mode!")
                     exitProcess(-1)
                 }
+            } else {
+                println("Downloading VulpesFiles!")
+                getCloudFilesFromGithub()
             }
 
             this.CLASS_LOADER.addURL(Path.of("launcher/dependencies/vulpescloud-api.jar").toUri().toURL())
@@ -182,27 +188,27 @@ class VulpesLauncher {
 
         private fun getCloudFilesFromGithub() {
             FileUpdaterUtil.get(
-                URI(githubURL + "vulpescloud-api.jar"),
+                URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-api.jar"),
                 FileUpdaterUtil.filePathHandler(Path.of("launcher/dependencies/vulpescloud-api.jar")
                 )
             )
             FileUpdaterUtil.get(
-                URI(githubURL + "vulpescloud-node.jar"),
+                URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-node.jar"),
                 FileUpdaterUtil.filePathHandler(Path.of("launcher/dependencies/vulpescloud-node.jar")
                 )
             )
             FileUpdaterUtil.get(
-                URI(githubURL + "vulpescloud-wrapper.jar"),
+                URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-wrapper.jar"),
                 FileUpdaterUtil.filePathHandler(Path.of("launcher/dependencies/vulpescloud-wrapper.jar")
                 )
             )
             FileUpdaterUtil.get(
-                URI(githubURL + "vulpescloud-connector.jar"),
+                URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-connector.jar"),
                 FileUpdaterUtil.filePathHandler(Path.of("launcher/dependencies/vulpescloud-connector.jar")
                 )
             )
             FileUpdaterUtil.get(
-                URI(githubURL + "vulpescloud-bridge.jar"),
+                URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-bridge.jar"),
                 FileUpdaterUtil.filePathHandler(Path.of("launcher/dependencies/vulpescloud-bridge.jar")
                 )
             )
