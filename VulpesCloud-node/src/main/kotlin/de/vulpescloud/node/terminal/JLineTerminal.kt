@@ -41,7 +41,7 @@ class JLineTerminal {
     private val log = LoggerFactory.getLogger(JLineTerminal::class.java)
     lateinit var terminal: Terminal
     lateinit var lineReader: LineReaderImpl
-    private val commandReadingThread: JLineCommandReadingThread = JLineCommandReadingThread(this)
+    val commandReadingThread: JLineCommandReadingThread = JLineCommandReadingThread(this)
 
     fun initialize() {
         terminal = TerminalBuilder.builder()

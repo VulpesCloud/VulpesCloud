@@ -86,7 +86,9 @@ class Node {
             System.currentTimeMillis() - System.getProperty("startup").toLong()
         )
 
-        terminal.allowInput()
+        if (!terminal.commandReadingThread.isAlive) {
+            terminal.allowInput()
+        }
 
         ServiceStartScheduler.schedule()
         PlayerEventListener
