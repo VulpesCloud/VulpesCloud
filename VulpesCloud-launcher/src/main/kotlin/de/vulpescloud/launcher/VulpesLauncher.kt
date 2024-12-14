@@ -162,10 +162,10 @@ class VulpesLauncher {
         }
 
         private fun bootFile(): File {
-            val devMode = System.getProperty("devMode")
-            if (devMode == null || !devMode.toBoolean()) {
-                getCloudFilesFromGithub()
-            }
+//            val devMode = System.getProperty("devMode")
+//            if (devMode == null || !devMode.toBoolean()) {
+//                getCloudFilesFromGithub()
+//            }
 
             return DEPENDENCY_DIR.resolve("vulpescloud-node.jar").toFile()
         }
