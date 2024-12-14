@@ -47,6 +47,8 @@ class LocalServiceImpl(
                 reader.forEachLine { line ->
                     if (Node.instance.serviceProvider.isLogging(this)) {
                         logger.info("&8[ &m{} &8] &b{}", name(), line.trim())
+                    } else {
+                        logger.debug("&8[ &m{} &8] &b{}", name(), line.trim())
                     }
 //                    val msg = ServiceEventMessageBuilder.consoleEventBuilder()
 //                        .setService(this)

@@ -50,6 +50,8 @@ object ServiceFactory {
 
         val arguments = generateServiceArguments(localService)
 
+        arguments.add("--nogui")
+
         val processBuilder = ProcessBuilder(*arguments.toTypedArray()).directory(localService.runningDir.toFile())
             .redirectErrorStream(true)
 
@@ -172,8 +174,7 @@ object ServiceFactory {
                 "-Dfile.encoding=UTF-8",
                 "-Dclient.encoding.override=UTF-8",
                 "-DIReallyKnowWhatIAmDoingISwear=true",
-                "-Djava.util.logging.ConsoleHandler.level=FINE",
-                "--nogui"
+                "-Djava.util.logging.ConsoleHandler.level=FINE"
             )
         )
 
