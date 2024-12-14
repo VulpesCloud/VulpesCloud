@@ -1,6 +1,9 @@
 package de.vulpescloud.node.commands
 
+import de.vulpescloud.api.redis.RedisChannelNames
 import de.vulpescloud.api.redis.RedisHashNames
+import de.vulpescloud.api.services.ServiceActions
+import de.vulpescloud.api.services.builder.ServiceActionMessageBuilder
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.command.annotations.Alias
@@ -108,4 +111,40 @@ class TaskCommand {
         }
     }
 
+    @Command("task|tasks <task> set static <boolean>")
+    fun setStatic(
+        source: CommandSource,
+        @Argument("task") task: Task,
+        @Argument("boolean") static: Boolean,
+    ) {
+        if (task is TaskImpl) {
+            source.sendMessage("Setting staticServices of &m${task.name()} &7 to $static")
+            task.staticServices = static
+            Node.instance.getRC()
+               ?.setHashField(RedisHashNames.VULPESCLOUD_TASKS.name, task.name(), jsonFromTask(task).toString())
+        } else {
+            source.sendMessage("Something went south, please report this in the VulpesCloud discord or GitHub issue!")
+        }
+    }
+
+    @Command("task|tasks <task> stop")
+    fun stopAllServicesOnTask(
+        source: CommandSource,
+        @Argument("task") task: Task,
+    ) {
+        if (!task.services().isNullOrEmpty()) {
+            source.sendMessage("Stopping all Services on task ${task.name()}")
+            task.services()!!.forEach {
+                Node.instance.getRC()?.sendMessage(
+                    ServiceActionMessageBuilder
+                        .setService(it!!)
+                        .setAction(ServiceActions.STOP)
+                        .build(),
+                    RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name
+                )
+            }
+        } else {
+            source.sendMessage("There are no Services running on this task!")
+        }
+    }
 }
