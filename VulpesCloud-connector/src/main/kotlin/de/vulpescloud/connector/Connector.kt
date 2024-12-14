@@ -9,21 +9,15 @@ open class Connector {
     val wrapper = Wrapper.instance
 
     fun init() {
-        // serviceProvider.getAllServiceFromRedis()
-        // playerProvider.initializePlayerProvider()
-        // playerProvider.loadPlayerDataFromRedis()
-
-        // TimeUnit.SECONDS.sleep(1)
-
-        ServiceProvider.findServiceById(Wrapper.instance.service.id)?.setState(ServiceStates.STARTING)
+        ServiceProvider.findServiceById(Wrapper.instance.service.id)?.updateState(ServiceStates.STARTING)
     }
 
     fun finishStart() {
-        ServiceProvider.findServiceById(Wrapper.instance.service.id)?.setState(ServiceStates.ONLINE)
+        ServiceProvider.findServiceById(Wrapper.instance.service.id)?.updateState(ServiceStates.ONLINE)
     }
 
     fun shutdownLocal() {
-        ServiceProvider.findServiceById(Wrapper.instance.service.id)?.setState(ServiceStates.STOPPING)
+        ServiceProvider.findServiceById(Wrapper.instance.service.id)?.updateState(ServiceStates.STOPPING)
     }
 
 }

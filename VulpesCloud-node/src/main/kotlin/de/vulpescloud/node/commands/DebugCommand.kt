@@ -10,7 +10,7 @@ import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
 import org.slf4j.LoggerFactory
 
-
+@Suppress("UNUSED")
 class DebugCommand {
 
     val logLevels = listOf("ERROR", "WARN", "INFO", "DEBUG")
@@ -36,6 +36,20 @@ class DebugCommand {
             source.sendMessage("Setting logLevel to $level")
             rootLogger.level = level
         }
+    }
+
+    @Command("debug test logging")
+    fun testLogLevel(
+        source: CommandSource,
+    ) {
+        val logger = LoggerFactory.getLogger("dbgCommand")
+
+        logger.error("TEST -> &cERROR")
+        logger.warn("TEST -> &cWARN")
+        logger.info("TEST -> &cINFO")
+        logger.debug("TEST -> &cDEBUG")
+        logger.trace("TEST -> &mTRACE")
+        source.sendMessage("Test logging done with ERROR, WARN, INFO, DEBUG, TRACE!")
     }
 
 }

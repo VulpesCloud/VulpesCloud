@@ -1,34 +1,34 @@
 package de.vulpescloud.node.services
 
+import de.vulpescloud.api.player.VulpesPlayer
+import de.vulpescloud.api.redis.RedisHashNames
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.api.tasks.Task
+import de.vulpescloud.node.Node
+import de.vulpescloud.node.json.ServiceSerializer.jsonFromService
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
 open class Service(
-    private val task: Task,
-    private val orderedId: Int,
-    private val id: UUID,
-    private val port: Int,
-    private val hostname: String,
-    private val runningNode: String,
-    private var maxPlayers: Int = task.maxPlayers(),
-    private var state: ServiceStates = ServiceStates.LOADING,
-    private var logging: Boolean = false
+    open val task: Task,
+    open val orderedId: Int,
+    open val id: UUID,
+    open val port: Int,
+    open val hostname: String,
+    open val runningNode: String,
+    open var maxPlayers: Int = task.maxPlayers(),
+    open var state: ServiceStates = ServiceStates.LOADING,
+    open var logging: Boolean = false
 ) : Service {
 
     fun details(): String {
-        return "id&8=&7$id&8, &7hostname&8=&7$hostname, &7port&8=&7$port&8, &7node&8=&7$runningNode&8, &7state&8=&7${state.name}"
+        return "id&8=&7$id&8, &7hostname&8=&7$hostname, &7port&8=&7$port&8, &7node&8=&7$runningNode&8, &7state&8=&7${state.name}&8, &7state&8=&7$state"
     }
 
-    fun setLogging(logging: Boolean) {
-        this.logging = logging
-    }
-
-    fun setState(state: ServiceStates) {
+    fun updateState(state: ServiceStates) {
         this.state = state
-        //todo Send notify to all nodes
+        Node.instance.getRC()?.setHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, name(), jsonFromService(this).toString())
     }
 
     fun logging(): Boolean {
@@ -68,15 +68,12 @@ open class Service(
     }
 
     override fun onlinePlayersCountAsync(): CompletableFuture<Int> {
-        throw IllegalStateException("Sklahsbglidzgjhnklvcxybc,ui")
-        //return CompletableFuture.completedFuture(onlinePlayers()?.size)
+        return CompletableFuture.completedFuture(onlinePlayers()?.size)
     }
-//
-//    override fun onlinePlayersAsync(): CompletableFuture<List<Player?>?> {
-//        return CompletableFuture.completedFuture(
-//            null
-////            JavaCloudAPI.getInstance().playerProvider().players()
-////                ?.filter { it?.currentServer()?.id() == id || it?.currentProxy()?.id() == id }
-//        )
-//    }
+
+    override fun onlinePlayersAsync(): CompletableFuture<List<VulpesPlayer?>?> {
+        return CompletableFuture.completedFuture(
+            Node.instance.playerProvider.onlinePlayers().filter { it.currentServer()?.id() == id() || it.currentProxy()?.id() == id() }
+        )
+    }
 }

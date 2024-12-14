@@ -13,19 +13,18 @@ import java.nio.file.Path
 import java.util.*
 
 class LocalServiceImpl(
-    val task: Task,
-    val orderedId: Int,
-    val id: UUID,
-    val port: Int,
-    val hostname: String,
-    val runningNode: String,
-    val state: ServiceStates = ServiceStates.LOADING,
-    val logging: Boolean = false
+    override val task: Task,
+    override val orderedId: Int,
+    override val id: UUID,
+    override val port: Int,
+    override val hostname: String,
+    override val runningNode: String,
+    override var state: ServiceStates = ServiceStates.LOADING,
+    override var logging: Boolean = false
 ) : Service(task, orderedId, id, port, hostname, runningNode, state = state, logging = logging) {
 
     private val logger = LoggerFactory.getLogger(LocalServiceImpl::class.java)
-    var process: Process? = null
-        private set
+    private var process: Process? = null
     private var processTracking: Thread? = null
     val runningDir: Path = if (task.staticService()) {
         Path.of("local/services/${task.name()}-${orderedId()}")
@@ -40,6 +39,8 @@ class LocalServiceImpl(
 
     fun start(builder: ProcessBuilder) {
         this.process = builder.start()
+
+        updateState(ServiceStates.CONNECTING)
 
         Thread {
             process?.inputStream?.bufferedReader()?.use { reader ->
@@ -124,8 +125,7 @@ class LocalServiceImpl(
 
         logger.info("The service &8'&f${name()}&8' &7is stopped now&8!")
 
-        // todo Update the Service in the cluster
-        Node.instance!!.getRC()?.deleteHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, name())
+        Node.instance.getRC()?.deleteHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, name())
     }
 
     private fun hasProcess(): Boolean {

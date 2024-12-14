@@ -1,6 +1,7 @@
 package de.vulpescloud.api.services
 
 import de.vulpescloud.api.Named
+import de.vulpescloud.api.player.VulpesPlayer
 import de.vulpescloud.api.tasks.Task
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -26,7 +27,7 @@ interface Service : Named {
 
     fun onlinePlayersCountAsync(): CompletableFuture<Int>
 
-    // fun onlinePlayersAsync(): CompletableFuture<List<Player?>?>
+    fun onlinePlayersAsync(): CompletableFuture<List<VulpesPlayer?>?>
 
     fun isEmpty(): Boolean {
         return this.onlinePlayersCount() == 0
@@ -36,9 +37,9 @@ interface Service : Named {
         return onlinePlayersCountAsync()[5, TimeUnit.SECONDS]
     }
 
-//    fun onlinePlayers(): List<Player?>? {
-//        return onlinePlayersAsync()[5, TimeUnit.SECONDS]
-//    }
+    fun onlinePlayers(): List<VulpesPlayer?>? {
+        return onlinePlayersAsync()[5, TimeUnit.SECONDS]
+    }
 
     override fun name(): String {
         return task().name() + "-" + orderedId()

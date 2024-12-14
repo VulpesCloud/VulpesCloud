@@ -7,7 +7,6 @@ import de.vulpescloud.node.Node
 import de.vulpescloud.node.json.ServiceSerializer.jsonFromService
 import de.vulpescloud.node.services.config.ServiceConfig
 import de.vulpescloud.node.template.TemplateFactory
-import kotlinx.coroutines.future.await
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.net.ServerSocket
@@ -15,7 +14,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.util.*
-import java.util.concurrent.CompletableFuture
 import java.util.stream.IntStream
 
 object ServiceFactory {
@@ -36,7 +34,7 @@ object ServiceFactory {
         Node.instance.serviceProvider.updateLocalServices(ls)
         val version = localService.version()
 
-        localService.setState(ServiceStates.LOADING)
+        localService.updateState(ServiceStates.LOADING)
 
         Node.instance.getRC()?.setHashField(
             RedisHashNames.VULPESCLOUD_SERVICES.name,
@@ -62,7 +60,6 @@ object ServiceFactory {
         processBuilder.environment()["redis_port"] = Node.instance.config.redis.port.toString()
         processBuilder.environment()["serviceId"] = localService.id().toString()
         processBuilder.environment()["serviceName"] = localService.name()
-        // processBuilder.environment()["forwarding_secret"] = Node.versionProvider.FORWARDING_SECRET todo Make the stuff
         processBuilder.environment()["hostname"] = localService.hostname()
         processBuilder.environment()["port"] = localService.port().toString()
 
@@ -80,6 +77,8 @@ object ServiceFactory {
         )
 
         ServiceConfig.makeServiceConfigs(localService)
+
+        localService.updateState(ServiceStates.PREPARED)
 
         return Pair(processBuilder, localService)
     }
