@@ -72,7 +72,7 @@ object ServiceFactory {
             processBuilder.environment()["separateClassLoader"] = false.toString()
         else processBuilder.environment()["separateClassLoader"] = true.toString()
 
-        val pluginDir = localService.runningDir.resolve(version?.pluginDir!!)
+        val pluginDir = localService.runningDir.resolve(version.pluginDir)
         pluginDir.toFile().mkdirs()
 
         Files.copy(

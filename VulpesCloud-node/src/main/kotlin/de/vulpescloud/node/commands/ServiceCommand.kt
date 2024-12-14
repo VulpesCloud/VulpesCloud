@@ -1,13 +1,12 @@
 package de.vulpescloud.node.commands
 
 import de.vulpescloud.api.redis.RedisChannelNames
-import de.vulpescloud.api.redis.RedisHashNames
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceActions
 import de.vulpescloud.api.services.builder.ServiceActionMessageBuilder
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.command.source.CommandSource
-import de.vulpescloud.node.json.ServiceSerializer.jsonFromService
+import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.parser.Parser
@@ -81,5 +80,20 @@ class ServiceCommand {
             source.sendMessage("Enabling Screen for &m${service.name()}")
             Node.instance.serviceProvider.loggingServices.add(ser.name())
         }
+    }
+
+    @Command("service|services|ser <service> command <command>")
+    fun sendCommand(
+        @Argument("service") service: Service,
+        @Greedy @Argument("command") command: String,
+    ) {
+        Node.instance.getRC()?.sendMessage(
+            ServiceActionMessageBuilder
+                .setService(service)
+                .setAction(ServiceActions.COMMAND)
+                .setParameter(command)
+                .build(),
+            RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name
+        )
     }
 }
