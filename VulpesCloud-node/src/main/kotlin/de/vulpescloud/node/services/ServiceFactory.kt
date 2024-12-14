@@ -3,6 +3,7 @@ package de.vulpescloud.node.services
 import de.vulpescloud.api.redis.RedisHashNames
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.api.tasks.Task
+import de.vulpescloud.api.version.VersionType
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.json.ServiceSerializer.jsonFromService
 import de.vulpescloud.node.services.config.ServiceConfig
@@ -50,7 +51,9 @@ object ServiceFactory {
 
         val arguments = generateServiceArguments(localService)
 
-        arguments.add("--nogui")
+        if (version!!.versionType == VersionType.SERVER) {
+            arguments.add("--nogui")
+        }
 
         val processBuilder = ProcessBuilder(*arguments.toTypedArray()).directory(localService.runningDir.toFile())
             .redirectErrorStream(true)
