@@ -172,7 +172,8 @@ object ServiceFactory {
                 "-Dfile.encoding=UTF-8",
                 "-Dclient.encoding.override=UTF-8",
                 "-DIReallyKnowWhatIAmDoingISwear=true",
-                "-Djava.util.logging.ConsoleHandler.level=FINE"
+                "-Djava.util.logging.ConsoleHandler.level=FINE",
+                "--nogui"
             )
         )
 
