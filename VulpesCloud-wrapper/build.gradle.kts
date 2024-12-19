@@ -34,7 +34,7 @@ repositories {
 dependencies {
     compileOnly(project(":VulpesCloud-api"))
     implementation(libs.kotlin.stdlib)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.0")
     implementation(libs.jedis)
     implementation(libs.logbackCore)
     implementation(libs.logbackClassic)
