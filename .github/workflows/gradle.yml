@@ -22,11 +22,12 @@ jobs:
       - name: Make Gradle wrapper executable
         run: chmod +x gradlew
 
-      - name: Build with Gradle
-        env:
-          REPO_USERNAME: ${{ secrets.REPO_USERNAME }}
-          REPO_PASSWORD: ${{ secrets.REPO_PASSWORD }}
-        run: ./gradlew publishAllPublicationsToVulpesCloudSnapshotsRepository
+#      - name: Build with Gradle
+#        if: ${{ github.event_name == 'push' && !startsWith(github.ref, 'refs/heads/renovate/') }}
+#        env:
+#          REPO_USERNAME: ${{ secrets.REPO_USERNAME }}
+#          REPO_PASSWORD: ${{ secrets.REPO_PASSWORD }}
+#        run: ./gradlew publishAllPublicationsToVulpesCloudSnapshotsRepository
 
   build:
     runs-on: ubuntu-latest
