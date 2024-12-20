@@ -99,7 +99,7 @@ class VulpesLauncher {
             // config.debug()
 
             val devMode = System.getProperty("devMode")
-            if (devMode != null && devMode.toBoolean() && !config.autoUpdatesEnabled()) {
+            if (devMode != null && devMode.toBoolean() || !config.autoUpdatesEnabled()) {
                 System.err.println("╭────────────────────────────────────────────────────────╮")
                 System.err.println("│                                                        │")
                 System.err.println("│                      INFORMATION                       │")
