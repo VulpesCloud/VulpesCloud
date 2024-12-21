@@ -35,9 +35,9 @@ repositories {
 }
 
 dependencies {
-//    compileOnly("de.vulpescloud:VulpesCloud-api:1.0.0-alpha")
-//    compileOnly("de.vulpescloud:VulpesCloud-node:1.0.0-alpha")
-    compileOnly(project(":VulpesCloud-api"))
-    compileOnly(project(":VulpesCloud-node"))
+    compileOnly("de.vulpescloud:VulpesCloud-api:1.0.0-alpha1")
+    compileOnly("de.vulpescloud:VulpesCloud-node:1.0.0-alpha1")
+//    compileOnly(project(":VulpesCloud-api"))
+//    compileOnly(project(":VulpesCloud-node"))
     compileOnly(rootProject.libs.slf4jApi)
 }
