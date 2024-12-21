@@ -2,6 +2,9 @@
 
 ![build](https://github.com/VulpesCloud/VulpesCloud/actions/workflows/gradle.yml/badge.svg) [![wakatime](https://wakatime.com/badge/user/aa01ba3d-dfe7-48c2-a04a-851391922abb/project/5cfdbad5-ec19-4f63-838c-ae0ba1328497.svg)](https://wakatime.com/badge/user/aa01ba3d-dfe7-48c2-a04a-851391922abb/project/5cfdbad5-ec19-4f63-838c-ae0ba1328497)
 
+> [!CAUTION]
+> # VulpesCloud is in Early Development! Bugs may occur
+
 # API
 
 ### Adding the Vulpescloud Repository
