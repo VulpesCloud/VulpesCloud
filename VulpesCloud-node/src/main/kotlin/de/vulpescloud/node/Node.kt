@@ -5,6 +5,7 @@ import de.vulpescloud.api.utils.StringUtils
 import de.vulpescloud.node.command.provider.CommandProvider
 import de.vulpescloud.node.commands.*
 import de.vulpescloud.node.config.ConfigProvider
+import de.vulpescloud.node.modules.ModuleProvider
 import de.vulpescloud.node.networking.mysql.MySQLController
 import de.vulpescloud.node.networking.redis.RedisController
 import de.vulpescloud.node.player.VulpesPlayerProvider
@@ -41,6 +42,7 @@ class Node {
     val serviceProvider = ServiceProvider()
     val forwardingSecret = StringUtils.generateRandomString(8)
     val playerProvider = VulpesPlayerProvider()
+    val moduleProvider = ModuleProvider()
 
     init {
         instance = this
@@ -72,6 +74,8 @@ class Node {
             templateProvider.prepareTemplate(it.templates())
         }
 
+        moduleProvider.loadAllModules()
+
         commandProvider.register(InfoCommand())
         commandProvider.register(HelpCommand())
         commandProvider.register(ExitCommand())
@@ -80,6 +84,7 @@ class Node {
         commandProvider.register(TaskCommand())
         commandProvider.register(ServiceCommand())
         commandProvider.register(DebugCommand())
+        commandProvider.register(ModuleCommand())
 
         logger.info(
             translator.trans("node.boot.success.message"),
