@@ -1,0 +1,1 @@
+screen -S VulpesCloud java -jar vulpescloud-launcher.jar
