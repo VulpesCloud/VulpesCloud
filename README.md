@@ -3,7 +3,7 @@
 ![build](https://github.com/VulpesCloud/VulpesCloud/actions/workflows/gradle.yml/badge.svg) [![wakatime](https://wakatime.com/badge/user/aa01ba3d-dfe7-48c2-a04a-851391922abb/project/5cfdbad5-ec19-4f63-838c-ae0ba1328497.svg)](https://wakatime.com/badge/user/aa01ba3d-dfe7-48c2-a04a-851391922abb/project/5cfdbad5-ec19-4f63-838c-ae0ba1328497)
 
 > [!CAUTION]
-> # VulpesCloud is in Early Development! Bugs may occur
+> # VulpesCloud is in Early Development! Bugs may occur, please Report them!
 
 # API
 
@@ -39,7 +39,7 @@ dependencies {
     compileOnly("de.vulpescloud:VulpesCloud-wrapper:%version%")
 }
 ```
-#### Replace the `%version%` to the latest version of VulpesCloud (current: `1.0.0-alpha`)
+#### Replace the `%version%` to the latest version of VulpesCloud (current: `1.0.0-alpha1`)
 
 ### Snapshots
 Snapshots are available from the snapshot repository!
