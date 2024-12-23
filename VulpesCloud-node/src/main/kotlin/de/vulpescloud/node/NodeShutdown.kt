@@ -65,6 +65,8 @@ object NodeShutdown {
 //            condition.await()
 //        }
         logger.info("Received Signal, continuing shutdown!")
+        logger.info("Stopping Modules!")
+        Node.instance.moduleProvider.unloadAllModules()
 
         Node.instance.getRC()?.shutdown()
         Node.instance.getDB()?.close()
