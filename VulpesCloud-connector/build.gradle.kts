@@ -26,7 +26,7 @@ plugins {
     id("java")
     kotlin("jvm") version "2.1.0"
     //id("io.papermc.paperweight.userdev") version "1.7.4"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.gradleup.shadow") version "8.3.3"
 }
 
 repositories {
@@ -77,5 +77,5 @@ tasks.shadowJar {
     if (System.getenv("dev") == "true") {
         destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
     }
-    relocate("dev.jorel.commandapi", "de.vulpescloud.connector.commandapi")
+    //relocate("dev.jorel.commandapi", "de.vulpescloud.connector.commandapi")
 }
