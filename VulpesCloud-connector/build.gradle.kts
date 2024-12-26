@@ -32,6 +32,9 @@ plugins {
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven {
+        url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
+    }
 }
 
 dependencies {
@@ -40,12 +43,8 @@ dependencies {
     implementation(project(":VulpesCloud-bridge"))
     compileOnly(project(":VulpesCloud-wrapper"))
 
-    implementation(libs.cloud)
-    // implementation(libs.cloud.velocity)
-    implementation("org.incendo:cloud-velocity:2.0.0-SNAPSHOT")
-    implementation(libs.cloud.extension)
-    implementation(libs.cloud.kotlin.coroutines)
-    implementation(libs.cloud.kotlin.coroutines.annotations)
+    implementation("dev.jorel:commandapi-velocity-shade:9.6.2-SNAPSHOT")
+    implementation("dev.jorel:commandapi-bukkit-kotlin:9.6.2-SNAPSHOT")
 
     compileOnly(libs.velocity)
     annotationProcessor(libs.velocity)
@@ -78,4 +77,5 @@ tasks.shadowJar {
     if (System.getenv("dev") == "true") {
         destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
     }
+    relocate("dev.jorel.commandapi", "de.vulpescloud.connector.commandapi")
 }

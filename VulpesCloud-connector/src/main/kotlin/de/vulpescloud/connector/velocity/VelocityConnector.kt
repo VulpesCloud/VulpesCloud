@@ -6,8 +6,12 @@ import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.plugin.Plugin
+import com.velocitypowered.api.plugin.PluginContainer
 import com.velocitypowered.api.proxy.ProxyServer
 import de.vulpescloud.connector.Connector
+import de.vulpescloud.connector.velocity.commands.CloudCommand
+import dev.jorel.commandapi.CommandAPI
+import dev.jorel.commandapi.CommandAPIVelocityConfig
 import jakarta.inject.Inject
 import net.kyori.adventure.text.minimessage.MiniMessage
 
@@ -16,6 +20,7 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 class VelocityConnector @Inject constructor(
     val eventManager: EventManager,
     val proxyServer: ProxyServer,
+    val pluginsContainer: PluginContainer
 ) : Connector() {
 
     init {
@@ -29,6 +34,9 @@ class VelocityConnector @Inject constructor(
                 .deserialize("<grey>[<aqua>VulpesCloud-Connector</aqua>]</grey> <yellow>Initializing</yellow>")
         )
         init()
+
+        CommandAPI.onLoad(CommandAPIVelocityConfig(proxyServer, this))
+
         VelocityRegistrationHandler
         VelocityRedisListener()
         this.eventManager.register(this, VelocityEventListener())
@@ -36,11 +44,17 @@ class VelocityConnector @Inject constructor(
 
     @Subscribe(order = PostOrder.LAST)
     fun proxyInitializeEventLAST(event: ProxyInitializeEvent) {
+
+        CommandAPI.onEnable()
+
+        CloudCommand()
+
         finishStart()
     }
 
     @Subscribe(order = PostOrder.FIRST)
     fun stop(event: ProxyShutdownEvent) {
+        CommandAPI.onDisable()
         proxyServer.consoleCommandSource.sendMessage(
             MiniMessage.miniMessage().deserialize("<gray>Stopping VulpesCloud-Connector!</gray>")
         )
