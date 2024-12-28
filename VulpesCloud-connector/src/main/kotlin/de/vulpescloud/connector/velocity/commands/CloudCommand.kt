@@ -12,6 +12,7 @@ class CloudCommand {
 
     val command = commandTree("cloud") {
         literalArgument("task") {
+            withAliases("tasks")
             withPermission("vulpescloud.task")
             literalArgument("list") {
                 executes(
@@ -22,7 +23,7 @@ class CloudCommand {
                         )
                         tasks.forEach {
                             sender.sendMessage(
-                                miniMessage.deserialize(" <black>-</black> <aqua>${it.name()}</aqua>")
+                                miniMessage.deserialize("<gray>-</gray> <aqua>${it.name()}</aqua> <gray>[ <white>services<gray>:</gray> <green>${it.serviceCount()}</green> startPort<gray>:</gray> <green>${it.startPort()}</green> static<gray>:</gray> <green>${it.staticService()}</green></white> ]</gray>")
                             )
                         }
                     }
@@ -30,5 +31,4 @@ class CloudCommand {
             }
         }
     }
-
 }
