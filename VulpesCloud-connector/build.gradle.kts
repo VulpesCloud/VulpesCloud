@@ -44,7 +44,7 @@ dependencies {
     compileOnly(project(":VulpesCloud-wrapper"))
 
     implementation("dev.jorel:commandapi-velocity-shade:9.6.2-SNAPSHOT")
-    implementation("dev.jorel:commandapi-bukkit-kotlin:9.6.2-SNAPSHOT")
+    implementation("dev.jorel:commandapi-bukkit-kotlin:9.7.0")
 
     compileOnly(libs.velocity)
     annotationProcessor(libs.velocity)
