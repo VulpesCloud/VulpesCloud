@@ -31,7 +31,7 @@ class AuthenticationManager {
 
     fun initializeAuth() {
         val authFile = Path.of("node/auth.secret")
-        authFile.toFile().mkdirs()
+        Path.of("node/").toFile().mkdirs()
         if (authFile.toFile().exists()) {
             token = authFile.toFile().readText()
         } else {
