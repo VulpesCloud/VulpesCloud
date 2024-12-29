@@ -66,5 +66,7 @@
   "node.setup.task.question.name.empty": "Please enter a name!",
   "node.setup.task.question.name.success": "&2Successfully &7set the Task name!",
 
-  "node.modules.loading": ""
+  "node.modules.loading": "",
+
+  "node.authenticated": "Node &m{} &7has been authenticated &2successfully!"
 }
