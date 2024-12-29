@@ -16,7 +16,6 @@ class AuthenticationManager {
     private var token: String? = null
 
     private var channels = mutableListOf(RedisChannelNames.VULPESCLOUD_NODE_AUTH.name)
-    private val redisManger = Node.instance.getRC()?.let { RedisManager(it.getJedisPool()) }
     private val logger = LoggerFactory.getLogger(AuthenticationManager::class.java)
 
     fun sendAuthentication() {
@@ -46,6 +45,8 @@ class AuthenticationManager {
             authFile.toFile().writeText(StringUtils.generateRandomString(16))
             token = authFile.toFile().readText()
         }
+
+        val redisManger = Node.instance.getRC()?.let { RedisManager(it.getJedisPool()) }
 
         redisManger?.subscribe(channels) { _, channel, message ->
             if (channel == RedisChannelNames.VULPESCLOUD_NODE_AUTH.name) {

@@ -24,7 +24,7 @@ object RedisJsonParser {
     fun convert(string: String): JSONObject {
         val json =  JSONObject(string)
         if (json.getString("secret") == Node.instance.authenticationManager.getAuthToken()) {
-            return json.getJSONObject("messages")
+            return JSONObject(json.getString("messages"))
         } else {
             throw IllegalAccessError("trying to parse message while secret is invalid")
         }
