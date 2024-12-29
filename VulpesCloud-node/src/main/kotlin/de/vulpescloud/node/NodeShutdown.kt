@@ -49,21 +49,6 @@ object NodeShutdown {
             globalScope.join()
         }
 
-
-//        GlobalScope.launch {
-//            lock.withLock {
-//                GlobalScope.launch {
-//                    while (Node.instance.serviceProvider.services().isNotEmpty()) {
-//                        delay(1000)
-//                        continue
-//                    }
-//                    condition.signalAll()
-//                }
-//            }
-//        }
-//        lock.withLock {
-//            condition.await()
-//        }
         logger.info("Received Signal, continuing shutdown!")
         logger.info("Stopping Modules!")
         Node.instance.moduleProvider.unloadAllModules()

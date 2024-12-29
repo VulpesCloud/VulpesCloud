@@ -9,7 +9,6 @@ import de.vulpescloud.node.networking.redis.RedisJsonParser.convert
 import de.vulpescloud.node.networking.redis.RedisManager
 import org.slf4j.LoggerFactory
 import java.nio.file.Path
-import kotlin.io.path.exists
 
 class AuthenticationManager {
 
