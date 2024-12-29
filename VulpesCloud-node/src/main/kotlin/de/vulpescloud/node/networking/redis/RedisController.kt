@@ -105,6 +105,7 @@ class RedisController : BinaryJedisPubSub(), Runnable {
         json.put("messages", message)
         json.put("action", "TestCloud")
         json.put("date", System.currentTimeMillis())
+        json.put("secret", Node.instance.authenticationManager.getAuthToken())
         finishSendMessage(json, channel)
         logger.debug("&cRedis &8| &9MESSAGE &8>> &7(&f$channel&7) &m$message")
     }
