@@ -25,7 +25,10 @@
 package de.vulpescloud.wrapper
 
 import de.vulpescloud.api.redis.RedisChannelNames
+import de.vulpescloud.api.redis.builders.services.ServiceAuthMessageBuilder
+import de.vulpescloud.api.services.ServiceActions
 import de.vulpescloud.wrapper.redis.RedisController
+import org.json.JSONObject
 import java.io.IOException
 import java.lang.instrument.Instrumentation
 import java.net.URLClassLoader
@@ -58,7 +61,17 @@ class Wrapper(args: Array<String>) {
 
         redisController = RedisController()
 
-        redisController?.sendMessage("SERVICE;${System.getenv("serviceName")};AUTH;${System.getenv("serviceId")}", RedisChannelNames.VULPESCLOUD_SERVICE_AUTH.name)
+        val json = JSONObject()
+
+        json.put("action", ServiceActions.AUTHORIZE.name)
+        json.put("secret", System.getenv("secret"))
+        json.put("serviceName", System.getenv("serviceName"))
+        json.put("serviceId", UUID.fromString(System.getenv("serviceId")))
+
+        redisController?.sendMessage(
+            json.toString(),
+            RedisChannelNames.VULPESCLOUD_SERVICE_AUTH.name
+        )
 
         //
         // Actually start the Service
