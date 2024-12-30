@@ -70,5 +70,6 @@
 
   "node.authenticated": "Node &m{} &7has been authenticated &2successfully!",
 
-  "node.service.authenticated": "Service &m{} &7has been authenticated &2successfully!"
+  "node.service.authenticated": "Service &m{} &7has been authenticated &2successfully!",
+  "node.service.authenticated.failure": "Service &m{} &7with UUID &m{} &7tried to Authenticate, but is &cnot &7a registered Service!"
 }
