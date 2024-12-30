@@ -1,7 +1,7 @@
 package de.vulpescloud.connector.bukkit
 
 import de.vulpescloud.api.redis.RedisChannelNames
-import de.vulpescloud.api.services.builder.ServiceRegistrationMessageBuilder
+import de.vulpescloud.api.redis.builders.services.ServiceRegistrationMessageBuilder
 import de.vulpescloud.bridge.service.ServiceProvider
 import de.vulpescloud.connector.Connector
 import de.vulpescloud.wrapper.Wrapper

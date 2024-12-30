@@ -1,9 +1,9 @@
 package de.vulpescloud.node.commands
 
 import de.vulpescloud.api.redis.RedisChannelNames
+import de.vulpescloud.api.redis.builders.services.ServiceActionMessageBuilder
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceActions
-import de.vulpescloud.api.services.builder.ServiceActionMessageBuilder
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.command.source.CommandSource
 import org.incendo.cloud.annotation.specifier.Greedy

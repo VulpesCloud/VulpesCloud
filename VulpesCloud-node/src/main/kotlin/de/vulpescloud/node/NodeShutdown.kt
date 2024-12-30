@@ -1,8 +1,8 @@
 package de.vulpescloud.node
 
 import de.vulpescloud.api.redis.RedisChannelNames
+import de.vulpescloud.api.redis.builders.services.ServiceActionMessageBuilder
 import de.vulpescloud.api.services.ServiceActions
-import de.vulpescloud.api.services.builder.ServiceActionMessageBuilder
 import de.vulpescloud.node.schedulers.ServiceStartScheduler
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
