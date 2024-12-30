@@ -30,8 +30,8 @@ object ServiceRegistrationMessageBuilder {
 
             json.put("action", "SERVICE_REGISTER")
             json.put("serviceName", service!!.name())
-            json.put("address", address!!)
-            json.put("port", port!!)
+            json.put("address", service!!.hostname())
+            json.put("port", service!!.port())
 
             return json.toString()
         }
