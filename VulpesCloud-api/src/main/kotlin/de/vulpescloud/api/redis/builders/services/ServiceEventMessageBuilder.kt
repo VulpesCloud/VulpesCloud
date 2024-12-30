@@ -2,6 +2,7 @@ package de.vulpescloud.api.redis.builders.services
 
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceStates
+import org.json.JSONObject
 
 
 object ServiceEventMessageBuilder {
@@ -56,15 +57,13 @@ object ServiceEventMessageBuilder {
         }
 
         fun build(): String {
-            if (serviceState == null) {
-                throw NullPointerException("The serviceName is null!")
-            }
-            if (serviceName == null) {
-                throw NullPointerException("The serviceName is null!")
-            }
-            return "SERVICE;%name%;EVENT;STATE;%state%"
-                .replace("%name%", serviceName!!)
-                .replace("%state%", serviceState!!.name)
+            val json = JSONObject()
+
+            json.put("action", "UPDATE_SERVICE_STATE")
+            json.put("serviceName", serviceName!!)
+            json.put("serviceState", serviceState!!.name)
+
+            return json.toString()
         }
     }
 
