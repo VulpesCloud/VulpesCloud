@@ -11,7 +11,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage
 
 class BukkitConnector : KSpigot() {
     val connector = Connector()
-    private val miniMessages = MiniMessage.miniMessage()
     private val logger = LocalLogger()
 
     class LocalLogger {
