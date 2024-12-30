@@ -91,6 +91,9 @@ class Node {
         commandProvider.register(DebugCommand())
         commandProvider.register(ModuleCommand())
 
+
+        serviceProvider.initializeSub()
+
         logger.info(
             translator.trans("node.boot.success.message"),
             System.currentTimeMillis() - System.getProperty("startup").toLong()
