@@ -68,5 +68,7 @@
 
   "node.modules.loading": "",
 
-  "node.authenticated": "Node &m{} &7has been authenticated &2successfully!"
+  "node.authenticated": "Node &m{} &7has been authenticated &2successfully!",
+
+  "node.service.authenticated": "Service &m{} &7has been authenticated &2successfully!"
 }
