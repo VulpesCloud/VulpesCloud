@@ -67,6 +67,7 @@ object ServiceFactory {
         processBuilder.environment()["serviceName"] = localService.name()
         processBuilder.environment()["hostname"] = localService.hostname()
         processBuilder.environment()["port"] = localService.port().toString()
+        processBuilder.environment()["secret"] = Node.instance.authenticationManager.getAuthToken()
 
         if (localService.version()?.environment?.name.equals("Velocity", true))
             processBuilder.environment()["separateClassLoader"] = false.toString()

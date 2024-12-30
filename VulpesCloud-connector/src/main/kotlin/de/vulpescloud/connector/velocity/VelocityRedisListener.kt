@@ -20,63 +20,37 @@ class VelocityRedisListener {
         redisManager?.subscribe(redisChannels) { _,  channel, msg ->
             when (channel) {
                 RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name -> {
-                    val message = msg?.let { RedisJsonParser.parseJson(it) }
-                        ?.let { RedisJsonParser.getMessagesFromRedisJson(it) }
+                    val message = RedisJsonParser.convert(msg!!)
 
-                    val splitMSG = message!!.split(";")
-
-                    if (splitMSG[1] == VelocityConnector.instance.wrapper.service.name) {
-                        if (splitMSG[0] == "SERVICE") {
-                            if (splitMSG[2] == "ACTION") {
-                                if (splitMSG[3] == "STOP") {
-                                    VelocityConnector.instance.proxyServer.shutdown()
-                                } else if (splitMSG[3] == "COMMAND") {
-                                    VelocityConnector.instance.proxyServer.commandManager.executeAsync(
-                                        VelocityConnector.instance.proxyServer.consoleCommandSource,
-                                        splitMSG[4]
-                                    )
-                                }
+                    if (message.getString("service") == Wrapper.instance.service.name) {
+                        when (message.getString("action")) {
+                            "STOP" -> {
+                                VelocityConnector.instance.proxyServer.shutdown()
+                            }
+                            "COMMAND" -> {
+                                VelocityConnector.instance.proxyServer.commandManager.executeAsync(
+                                    VelocityConnector.instance.proxyServer.consoleCommandSource,
+                                    message.getString("parameter")
+                                )
                             }
                         }
                     }
                 }
                 RedisChannelNames.VULPESCLOUD_SERVICE_REGISTER.name -> {
-                    val message = msg?.let { RedisJsonParser.parseJson(it) }
-                        ?.let { RedisJsonParser.getMessagesFromRedisJson(it) }
+                    val message = RedisJsonParser.convert(msg!!)
 
-                    val splitMSG = message!!.split(";")
-                    // SERVICE;<service name>;REGISTER;ADDRESS;<service address>;PORT;<service port>
-                    if (splitMSG[0] == "SERVICE") {
-                        if (splitMSG[2] == "REGISTER") {
-                            if (splitMSG[3] == "ADDRESS") {
-                                if (splitMSG[5] == "PORT") {
-                                    VelocityRegistrationHandler.registerServer(
-                                        splitMSG[1],
-                                        splitMSG[4],
-                                        splitMSG[6].toInt()
-                                    )
-                                }
-                            }
-                        }
-                    }
+                    VelocityRegistrationHandler.registerServer(
+                        message.getString("serviceName"),
+                        message.getString("address"),
+                        message.getInt("port")
+                    )
                 }
                 RedisChannelNames.VULPESCLOUD_SERVICE_UNREGISTER.name -> {
-                    val message = msg?.let { RedisJsonParser.parseJson(it) }
-                        ?.let { RedisJsonParser.getMessagesFromRedisJson(it) }
+                    val message = RedisJsonParser.convert(msg!!)
 
-                    val splitMSG = message!!.split(";")
-                    // SERVICE;<service name>;UNREGISTER
-                    if (splitMSG[0] == "SERVICE") {
-                        if (splitMSG[2] == "UNREGISTER") {
-                            VelocityRegistrationHandler.unregisterServer(splitMSG[1])
-                        }
-                    }
-                }
-                "debug_services" -> {
-                    Wrapper.instance.getRC()?.sendMessage("Returning servers!", "debug_return")
-                    VelocityConnector.instance.proxyServer.allServers.forEach {
-                        Wrapper.instance.getRC()?.sendMessage(it.serverInfo.name, "debug_return")
-                    }
+                    VelocityRegistrationHandler.unregisterServer(
+                        message.getString("serviceName")
+                    )
                 }
             }
         }

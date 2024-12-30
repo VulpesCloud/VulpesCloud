@@ -2,8 +2,8 @@ package de.vulpescloud.node.commands
 
 import de.vulpescloud.api.redis.RedisChannelNames
 import de.vulpescloud.api.redis.RedisHashNames
+import de.vulpescloud.api.redis.builders.services.ServiceActionMessageBuilder
 import de.vulpescloud.api.services.ServiceActions
-import de.vulpescloud.api.services.builder.ServiceActionMessageBuilder
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.command.annotations.Alias

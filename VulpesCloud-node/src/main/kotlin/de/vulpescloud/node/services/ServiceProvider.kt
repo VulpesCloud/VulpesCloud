@@ -1,16 +1,19 @@
 package de.vulpescloud.node.services
 
 import de.vulpescloud.api.redis.RedisHashNames
-import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.json.ServiceSerializer.serviceFromJson
-import de.vulpescloud.node.json.TaskSerializer.taskFromJson
+import de.vulpescloud.node.networking.redis.subscribers.ServiceChannelSubscribers
 import org.json.JSONObject
 import java.util.*
 
 class ServiceProvider {
     private var localServices = mutableListOf<LocalServiceImpl>()
     val loggingServices = mutableListOf<String>()
+
+    fun initializeSub() {
+        ServiceChannelSubscribers()
+    }
 
     fun services(): List<Service> {
         val serviceList = mutableListOf<Service>()

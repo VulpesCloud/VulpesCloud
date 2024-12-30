@@ -1,6 +1,7 @@
 package de.vulpescloud.connector.bukkit
 
 import de.vulpescloud.api.redis.RedisChannelNames
+import de.vulpescloud.wrapper.Wrapper
 import de.vulpescloud.wrapper.redis.RedisJsonParser
 import de.vulpescloud.wrapper.redis.RedisManager
 import org.bukkit.Bukkit
@@ -18,19 +19,15 @@ class BukkitRedisListener {
         redisManager?.subscribe(redisChannels) { _, channel, msg ->
             when (channel) {
                 RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name -> {
-                    val message = msg?.let { RedisJsonParser.parseJson(it) }
-                        ?.let { RedisJsonParser.getMessagesFromRedisJson(it) }
+                    val message = RedisJsonParser.convert(msg!!)
 
-                    val splitMSG = message!!.split(";")
-
-                    if (splitMSG[1] == BukkitConnector.instance.connector.wrapper.service.name) {
-                        if (splitMSG[0] == "SERVICE") {
-                            if (splitMSG[2] == "ACTION") {
-                                if (splitMSG[3] == "STOP") {
-                                    BukkitConnector.instance.server.shutdown()
-                                } else if (splitMSG[3] == "COMMAND") {
-                                    Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), splitMSG[4])
-                                }
+                    if (message.getString("service") == Wrapper.instance.service.name) {
+                        when (message.getString("action")) {
+                            "STOP" -> {
+                                Bukkit.getServer().shutdown()
+                            }
+                            "COMMAND" -> {
+                                Bukkit.getServer().dispatchCommand(Bukkit.getConsoleSender(), message.getString("parameter"))
                             }
                         }
                     }
