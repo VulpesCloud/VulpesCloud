@@ -24,6 +24,7 @@
 
 package de.vulpescloud.wrapper
 
+import de.vulpescloud.api.redis.RedisChannelNames
 import de.vulpescloud.wrapper.redis.RedisController
 import java.io.IOException
 import java.lang.instrument.Instrumentation
@@ -57,7 +58,7 @@ class Wrapper(args: Array<String>) {
 
         redisController = RedisController()
 
-        redisController?.sendMessage("SERVICE;${System.getenv("serviceName")};AUTH;${System.getenv("serviceId")}", "vulpescloud-auth-service")
+        redisController?.sendMessage("SERVICE;${System.getenv("serviceName")};AUTH;${System.getenv("serviceId")}", RedisChannelNames.VULPESCLOUD_SERVICE_AUTH.name)
 
         //
         // Actually start the Service
