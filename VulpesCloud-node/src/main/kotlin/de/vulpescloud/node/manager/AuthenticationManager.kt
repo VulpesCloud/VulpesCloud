@@ -60,7 +60,7 @@ class AuthenticationManager {
                     val serviceByName = Node.instance.serviceProvider.findServiceByName(msg.getString("serviceName"))
                     val serviceById = Node.instance.serviceProvider.findServiceById(UUID.fromString(msg.getString("serviceId")))
 
-                    if (serviceById == serviceByName) {
+                    if (serviceById!!.id() == serviceByName!!.id() && serviceById.name() == serviceByName.name()) {
                         logger.info(Translator.trans("node.service.authenticated"), msg.get("serviceName"))
                     } else {
                         logger.warn(Translator.trans("node.service.authenticated.failure"), msg.get("serviceName"), msg.get("serviceId"))
