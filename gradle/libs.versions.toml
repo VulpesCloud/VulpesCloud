@@ -22,7 +22,7 @@ logback = "1.5.15"
 
 # configuration
 gson = "2.11.0"
-json = "20240303"
+json = "20241224"
 
 # console
 jline = "3.28.0"
