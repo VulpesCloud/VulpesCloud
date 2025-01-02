@@ -18,9 +18,9 @@ interface Task : Named {
 
     fun minOnlineCount(): Int
 
-     fun serviceCount(): Long?
+    fun serviceCount(): Long?
 
-     fun services(): List<Service?>?
+    fun services(): List<Service?>?
 
     fun version(): VersionInfo
 

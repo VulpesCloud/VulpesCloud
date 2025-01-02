@@ -19,6 +19,7 @@ import org.incendo.cloud.annotations.Flag
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
+import org.json.JSONObject
 import java.util.stream.Stream
 
 @Description("Manage all Tasks (translate)")
@@ -58,9 +59,24 @@ class TaskCommand {
     fun sendTaskInfo(
         source: CommandSource,
         @Argument("task") task: Task,
+        @Flag("json") json: Boolean,
     ) {
-        source.sendMessage("Name: ${task.name()}")
-        source.sendMessage("Templates: ${task.templates()}")
+        if (json) {
+            source.sendMessage(JSONObject(task).toString(4))
+        } else {
+            source.sendMessage("Name: ${task.name()}")
+            source.sendMessage("Nodes: ${task.nodes()}")
+            source.sendMessage("Templates: ${task.templates()}")
+            source.sendMessage("maxMemory: ${task.maxMemory()}")
+            source.sendMessage("Max Players: ${task.maxPlayers()}")
+            source.sendMessage("Static Services: ${task.staticService()}")
+            source.sendMessage("Min Online Count: ${task.minOnlineCount()}")
+            source.sendMessage("Maintenance: ${task.maintenance()}")
+            source.sendMessage("Start Port: ${task.startPort()}")
+            source.sendMessage("Fallback: ${task.fallback()}")
+            source.sendMessage("ServiceCount: ${task.serviceCount()}")
+            source.sendMessage("Version: ${task.version()}")
+        }
     }
 
     @Command("task|tasks <task> prepare")
