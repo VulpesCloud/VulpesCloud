@@ -1,7 +1,9 @@
 package de.vulpescloud.bridge.service
 
 import de.vulpescloud.api.player.VulpesPlayer
+import de.vulpescloud.api.redis.RedisChannelNames
 import de.vulpescloud.api.redis.RedisHashNames
+import de.vulpescloud.api.redis.builders.services.ServiceEventMessageBuilder
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.api.tasks.Task
@@ -30,6 +32,13 @@ open class Service(
     fun updateState(state: ServiceStates) {
         this.state = state
         Wrapper.instance.getRC()?.setHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, name(), jsonFromService(this).toString())
+        Wrapper.instance.getRC()?.sendMessage(
+            ServiceEventMessageBuilder.stateEventBuilder()
+                .setService(this)
+                .setState(state)
+                .build(),
+            RedisChannelNames.VULPESCLOUD_SERVICE_EVENT.name
+        )
     }
 
     fun logging(): Boolean {

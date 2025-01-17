@@ -66,5 +66,17 @@
   "node.setup.task.question.name.empty": "Please enter a name!",
   "node.setup.task.question.name.success": "&2Successfully &7set the Task name!",
 
-  "node.modules.loading": ""
+  "node.modules.loading": "",
+
+  "node.authenticated": "Node &m{} &7has been authenticated &2successfully!",
+
+  "node.service.authenticated": "Service &m{} &7has been authenticated &2successfully!",
+  "node.service.authenticated.failure": "Service &m{} &7with UUID &m{} &7tried to Authenticate, but is &cnot &7a registered Service!",
+
+  "node.service.event.state.prepared": "Service &m{} &7has been &eprepared&7!",
+  "node.service.event.state.connecting": "Service &m{} &7has been &bconnected&7!",
+  "node.service.event.state.started": "Service &m{} &7has been &2started&7!",
+  "node.service.event.state.stopped": "Service &m{} &7has been &cstopped&7!"
+
+
 }

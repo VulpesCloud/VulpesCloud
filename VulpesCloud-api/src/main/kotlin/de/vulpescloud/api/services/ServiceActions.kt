@@ -6,6 +6,7 @@ enum class ServiceActions {
     START,
     RESTART,
     COMMAND,
-    KICK_ALL;
+    KICK_ALL,
+    AUTHORIZE;
 
 }

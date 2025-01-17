@@ -37,7 +37,7 @@
 
     <appender name="ConsoleAppender" class="ConsoleAppender">
         <filter class="ThresholdFilter">
-            <level>INFO</level>
+            <level>ALL</level>
         </filter>
         <encoder class="PatternLayoutEncoder">
             <pattern>${LINE_PATTERN}</pattern>

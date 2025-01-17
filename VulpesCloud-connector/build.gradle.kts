@@ -26,12 +26,15 @@ plugins {
     id("java")
     kotlin("jvm") version "2.1.0"
     //id("io.papermc.paperweight.userdev") version "1.7.4"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    id("com.gradleup.shadow") version "8.3.5"
 }
 
 repositories {
     mavenCentral()
     maven("https://repo.papermc.io/repository/maven-public/")
+    maven {
+        url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
+    }
 }
 
 dependencies {
@@ -40,12 +43,8 @@ dependencies {
     implementation(project(":VulpesCloud-bridge"))
     compileOnly(project(":VulpesCloud-wrapper"))
 
-    implementation(libs.cloud)
-    // implementation(libs.cloud.velocity)
-    implementation("org.incendo:cloud-velocity:2.0.0-SNAPSHOT")
-    implementation(libs.cloud.extension)
-    implementation(libs.cloud.kotlin.coroutines)
-    implementation(libs.cloud.kotlin.coroutines.annotations)
+    implementation("dev.jorel:commandapi-velocity-shade:9.6.2-SNAPSHOT")
+    implementation("dev.jorel:commandapi-bukkit-kotlin:9.7.0")
 
     compileOnly(libs.velocity)
     annotationProcessor(libs.velocity)
@@ -78,4 +77,5 @@ tasks.shadowJar {
     if (System.getenv("dev") == "true") {
         destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
     }
+    //relocate("dev.jorel.commandapi", "de.vulpescloud.connector.commandapi")
 }

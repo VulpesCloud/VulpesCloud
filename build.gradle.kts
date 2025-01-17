@@ -34,7 +34,7 @@ plugins {
 }
 
 group = "de.vulpescloud"
-version = "1.0.0-SNAPSHOT"
+version = "1.0.0-alpha2"
 
 //tasks.register<Jar>("javadocJar") {
 //    dependsOn("dokkaHtmlMultiModule") // Make sure `dokkaHtmlMultiModule` runs first
@@ -48,7 +48,7 @@ allprojects {
     apply(plugin = "org.jetbrains.dokka")
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
-    version = "1.0.0-alpha1"
+    version = "1.0.0-alpha2"
     group = "de.vulpescloud"
 
     repositories {

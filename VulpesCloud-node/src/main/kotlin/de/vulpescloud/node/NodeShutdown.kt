@@ -1,8 +1,8 @@
 package de.vulpescloud.node
 
 import de.vulpescloud.api.redis.RedisChannelNames
+import de.vulpescloud.api.redis.builders.services.ServiceActionMessageBuilder
 import de.vulpescloud.api.services.ServiceActions
-import de.vulpescloud.api.services.builder.ServiceActionMessageBuilder
 import de.vulpescloud.node.schedulers.ServiceStartScheduler
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
@@ -49,21 +49,6 @@ object NodeShutdown {
             globalScope.join()
         }
 
-
-//        GlobalScope.launch {
-//            lock.withLock {
-//                GlobalScope.launch {
-//                    while (Node.instance.serviceProvider.services().isNotEmpty()) {
-//                        delay(1000)
-//                        continue
-//                    }
-//                    condition.signalAll()
-//                }
-//            }
-//        }
-//        lock.withLock {
-//            condition.await()
-//        }
         logger.info("Received Signal, continuing shutdown!")
         logger.info("Stopping Modules!")
         Node.instance.moduleProvider.unloadAllModules()

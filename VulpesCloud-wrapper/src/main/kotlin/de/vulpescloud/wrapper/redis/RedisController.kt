@@ -101,6 +101,7 @@ class RedisController : BinaryJedisPubSub(), Runnable {
         json.put("messages", message)
         json.put("action", "TestCloud")
         json.put("date", System.currentTimeMillis())
+        json.put("secret", System.getenv("secret"))
         finishSendMessage(json, channel)
     }
 

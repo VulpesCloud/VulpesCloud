@@ -18,11 +18,11 @@ exposed = "0.57.0"
 
 #logging
 slf4j = "2.0.16"
-logback = "1.5.15"
+logback = "1.5.16"
 
 # configuration
 gson = "2.11.0"
-json = "20240303"
+json = "20250107"
 
 # console
 jline = "3.28.0"
