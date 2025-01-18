@@ -112,25 +112,6 @@ class Node {
 
         ServiceStartScheduler.schedule()
         PlayerEventListener
-
-        logger.debug("Registering Event")
-
-        eventManager.registerListener(this::class)
-
-        GlobalScope.launch {
-            logger.debug("Calling Event")
-            delay(1999)
-            eventManager.call(testEvent)
-        }
-    }
-
-    val test = eventManager.listen<testEvent> {
-        logger.debug("KTNODE> event triggered ${it.text}")
-    }
-
-    @EventHandler
-    fun onTestEvent(event: testEvent) {
-        logger.debug("NODE> event triggered ${event.text}")
     }
 
 
