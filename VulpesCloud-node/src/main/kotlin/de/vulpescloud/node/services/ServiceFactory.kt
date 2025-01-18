@@ -1,5 +1,6 @@
 package de.vulpescloud.node.services
 
+import de.vulpescloud.api.event.events.service.ServicePrepareEvent
 import de.vulpescloud.api.redis.RedisHashNames
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.api.tasks.Task
@@ -34,6 +35,8 @@ object ServiceFactory {
         ls.add(localService)
         Node.instance.serviceProvider.updateLocalServices(ls)
         val version = localService.version()
+
+        Node.instance.eventManager.call(ServicePrepareEvent(localService))
 
         localService.updateState(ServiceStates.LOADING)
 

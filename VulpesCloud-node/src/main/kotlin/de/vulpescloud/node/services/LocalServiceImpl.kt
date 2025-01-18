@@ -38,6 +38,7 @@ class LocalServiceImpl(
     }
 
     fun start(builder: ProcessBuilder) {
+
         this.process = builder.start()
 
         updateState(ServiceStates.CONNECTING)
