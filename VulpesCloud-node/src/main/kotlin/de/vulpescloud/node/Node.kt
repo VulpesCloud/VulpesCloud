@@ -1,10 +1,13 @@
 package de.vulpescloud.node
 
+import de.vulpescloud.api.event.annotations.EventHandler
 import de.vulpescloud.api.language.Translator
 import de.vulpescloud.api.utils.StringUtils
 import de.vulpescloud.node.command.provider.CommandProvider
 import de.vulpescloud.node.commands.*
 import de.vulpescloud.node.config.ConfigProvider
+import de.vulpescloud.node.event.EventManagerImpl
+import de.vulpescloud.node.event.events.testEvent
 import de.vulpescloud.node.manager.AuthenticationManager
 import de.vulpescloud.node.modules.ModuleProvider
 import de.vulpescloud.node.networking.mysql.MySQLController
@@ -19,6 +22,9 @@ import de.vulpescloud.node.tasks.TaskProvider
 import de.vulpescloud.node.template.TemplateProvider
 import de.vulpescloud.node.terminal.JLineTerminal
 import de.vulpescloud.node.version.VersionProvider
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.locks.Condition
@@ -45,6 +51,7 @@ class Node {
     val playerProvider = VulpesPlayerProvider()
     val moduleProvider = ModuleProvider()
     val authenticationManager = AuthenticationManager()
+    val eventManager = EventManagerImpl()
 
     init {
         instance = this
@@ -105,7 +112,27 @@ class Node {
 
         ServiceStartScheduler.schedule()
         PlayerEventListener
+
+        logger.debug("Registering Event")
+
+        eventManager.registerListener(this::class)
+
+        GlobalScope.launch {
+            logger.debug("Calling Event")
+            delay(1999)
+            eventManager.call(testEvent)
+        }
     }
+
+    val test = eventManager.listen<testEvent> {
+        logger.debug("KTNODE> event triggered ${it.text}")
+    }
+
+    @EventHandler
+    fun onTestEvent(event: testEvent) {
+        logger.debug("NODE> event triggered ${event.text}")
+    }
+
 
     fun getRC(): RedisController? {
         return redisController

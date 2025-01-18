@@ -61,6 +61,7 @@ allprojects {
         "implementation"(rootProject.libs.annotations)
         "implementation"(rootProject.libs.gson)
         "implementation"(rootProject.libs.guava)
+        "implementation"(kotlin("reflect"))
     }
 
     publishing {
