@@ -1,5 +1,6 @@
 package de.vulpescloud.node.modules
 
+import de.vulpescloud.api.modules.DownloadableModule
 import de.vulpescloud.api.modules.ModuleInfo
 import de.vulpescloud.api.modules.ModuleStates
 import de.vulpescloud.api.modules.VulpesModule
@@ -23,12 +24,27 @@ class ModuleProvider {
     private val logger = LoggerFactory.getLogger(ModuleProvider::class.java)
     val modules: MutableList<ModuleInfo> = mutableListOf()
     val loadedModules: MutableList<LoadedModule> = mutableListOf()
+    val downloadableModules: MutableList<DownloadableModule> = mutableListOf()
 
     init {
         if (!Files.exists(moduleFolder)) {
             Files.createDirectories(moduleFolder)
         }
         Files.writeString(moduleJsonPath, String(moduleJsonURL.openStream().readAllBytes()))
+        val json = JSONObject(Files.readString(moduleJsonPath)).getJSONArray("modules")
+        for (i in 0 until json.length()) {
+            val obj = json.getJSONObject(i)
+            val downloadableModule = DownloadableModule(
+                obj.getString("name"),
+                obj.getString("version"),
+                obj.getString("installUrl"),
+                obj.getJSONArray("authors").toList(),
+                obj.getString("description"),
+                obj.getString("website"),
+                obj.getString("supportUrl")
+            )
+            this.downloadableModules.add(downloadableModule)
+        }
     }
 
     fun loadAllModules() {
@@ -80,13 +96,29 @@ class ModuleProvider {
         }
     }
 
-    private fun loadModule(file: File, main: String): VulpesModule {
+    fun loadModule(file: File, main: String): VulpesModule {
         val classLoader = URLClassLoader(arrayOf(file.toURI().toURL()), VulpesLauncher.CLASS_LOADER)
         val clazz = classLoader.loadClass(main)
         if (!VulpesModule::class.java.isAssignableFrom(clazz)) {
             throw IllegalArgumentException("Class $main does not implement VulpesModule")
         }
         return clazz.getDeclaredConstructor().newInstance() as VulpesModule
+    }
+
+    fun startModule(module: LoadedModule) {
+        logger.info("Starting Module &m{}", module.moduleInfo.name)
+        module.module.enable()
+        module.moduleInfo.state = ModuleStates.STARTED
+    }
+
+    fun stopModule(module: LoadedModule) {
+        logger.info("Stopping Module &m{}", module.moduleInfo.name)
+        module.module.disable()
+        module.moduleInfo.state = ModuleStates.STOPPED
+    }
+
+    fun unloadModule(module: LoadedModule) {
+        this.loadedModules.remove(module)
     }
 
     fun unloadAllModules() {
