@@ -1,6 +1,9 @@
 package de.vulpescloud.node.services
 
 import de.vulpescloud.api.redis.RedisHashNames
+import de.vulpescloud.api.services.ServiceFilters
+import de.vulpescloud.api.services.ServiceStates
+import de.vulpescloud.api.version.VersionType
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.json.ServiceSerializer.serviceFromJson
 import de.vulpescloud.node.networking.redis.subscribers.ServiceChannelSubscribers
@@ -56,5 +59,17 @@ class ServiceProvider {
         return localServices.find { it.id() == id }
     }
 
-    //todo Implement service filtering
+    fun findServicesByFilter(filter: ServiceFilters): List<Service>? {
+        return when (filter) {
+            ServiceFilters.PREPARED_SERVICES -> services().filter { it.state() == ServiceStates.PREPARED }
+            ServiceFilters.ONLINE_SERVICES -> services().filter { it.state() == ServiceStates.ONLINE}
+            ServiceFilters.SERVERS -> services().filter { it.task().version().versionType == VersionType.SERVER.name }
+            ServiceFilters.PROXIES -> services().filter { it.task().version().versionType == VersionType.PROXY.name }
+            ServiceFilters.FALLBACKS -> services().filter { it.task().fallback() }
+            ServiceFilters.EMPTY_SERVICES -> services().filter { it.isEmpty() }
+            ServiceFilters.FULL_SERVICES -> services().filter { it.maxPlayers() <= it.onlinePlayersCount() }
+            ServiceFilters.LOWEST_FALLBACK -> services().stream().filter { it.task().fallback() }.min(Comparator.comparingInt(
+                Service::onlinePlayersCount)).stream().toList()
+        }
+    }
 }
