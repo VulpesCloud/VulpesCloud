@@ -36,6 +36,9 @@ object ServiceFactory {
         Node.instance.serviceProvider.updateLocalServices(ls)
         val version = localService.version()
 
+        val pluginDir = localService.runningDir.resolve(version!!.pluginDir)
+        pluginDir.toFile().mkdirs()
+
         Node.instance.eventManager.call(ServicePrepareEvent(localService))
 
         localService.updateState(ServiceStates.LOADING)
@@ -50,11 +53,11 @@ object ServiceFactory {
 
         TemplateFactory.cloneTemplate(localService)
 
-        version?.prepare(task.version(), localService)
+        version.prepare(task.version(), localService)
 
         val arguments = generateServiceArguments(localService)
 
-        if (version!!.versionType == VersionType.SERVER) {
+        if (version.versionType == VersionType.SERVER) {
             arguments.add("--nogui")
         }
 
@@ -75,9 +78,6 @@ object ServiceFactory {
         if (localService.version()?.environment?.name.equals("Velocity", true))
             processBuilder.environment()["separateClassLoader"] = false.toString()
         else processBuilder.environment()["separateClassLoader"] = true.toString()
-
-        val pluginDir = localService.runningDir.resolve(version.pluginDir)
-        pluginDir.toFile().mkdirs()
 
         Files.copy(
             Path.of("launcher/dependencies/vulpescloud-connector.jar"),
