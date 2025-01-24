@@ -8,9 +8,11 @@ import de.vulpescloud.node.version.Version
 import org.slf4j.LoggerFactory
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
+import java.nio.file.FileVisitor
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
+import kotlin.io.path.exists
 
 class LocalServiceImpl(
     override val task: Task,
@@ -51,11 +53,6 @@ class LocalServiceImpl(
                     } else {
                         logger.debug("&8[ &m{} &8] &b{}", name(), line.trim())
                     }
-//                    val msg = ServiceEventMessageBuilder.consoleEventBuilder()
-//                        .setService(this)
-//                        .setLine(line.trim())
-//                        .build()
-//                    Node.instance!!.getRC()?.sendMessage(msg, RedisPubSubChannels.VULPESCLOUD_SERVICE_EVENT.name)
                 }
             }
         }.start()
@@ -70,7 +67,6 @@ class LocalServiceImpl(
                 logger.debug("Exception: {}", e.printStackTrace())
             }
             if (state() != ServiceStates.STOPPING) {
-                // Node.instance?.getRC()?.sendMessage("SERVICE;${this.name()};EVENT;STOP", "testcloud-service-events")
                 if (process != null) {
                     process!!.exitValue()
                 }
@@ -114,14 +110,13 @@ class LocalServiceImpl(
                 } catch (ignore: InterruptedException) {
                 }
                 try {
-                    Files.deleteIfExists(runningDir)
-//                    if (DirectoryActions.delete(runningDir)) {
-//                        Files.deleteIfExists(runningDir)
-//                    } else {
-//                        logger.info("Cannot shutdown ${name()} cleanly! Files are already deleted")
-//                    }
+                    if (runningDir.exists()) {
+                        Files.walk(runningDir)
+                            .sorted(Comparator.reverseOrder())
+                            .forEach { Files.delete(it) }
+                    }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    logger.error("Failed to delete directory: $runningDir", e)
                 }
             }
         }
