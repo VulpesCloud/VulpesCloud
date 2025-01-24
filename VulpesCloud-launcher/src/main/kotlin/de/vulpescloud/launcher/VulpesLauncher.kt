@@ -67,8 +67,8 @@ class VulpesLauncher {
             val yamlConfig = Dependency("com.electronwill.night-config", "yaml", "3.8.1")
             val tomlConfig = Dependency("com.electronwill.night-config", "toml", "3.8.1")
             val coreConfig = Dependency("com.electronwill.night-config", "core", "3.8.1")
-            val exposedCore = Dependency("org.jetbrains.exposed", "exposed-core", "0.57.0")
-            val exposedJDBC = Dependency("org.jetbrains.exposed", "exposed-jdbc", "0.57.0")
+            val exposedCore = Dependency("org.jetbrains.exposed", "exposed-core", "0.58.0")
+            val exposedJDBC = Dependency("org.jetbrains.exposed", "exposed-jdbc", "0.58.0")
             val snakeYAML = Dependency("org.yaml", "snakeyaml", "2.3")
 
             // Downloading the Dependency's
