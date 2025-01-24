@@ -1,5 +1,6 @@
 package de.vulpescloud.node.commands
 
+import de.vulpescloud.api.language.Translator
 import de.vulpescloud.api.redis.RedisChannelNames
 import de.vulpescloud.api.redis.RedisHashNames
 import de.vulpescloud.api.redis.builders.services.ServiceActionMessageBuilder
@@ -32,7 +33,7 @@ class TaskCommand {
     fun taskParser(input: CommandInput): Task {
         val command = input.readString()
         val task = Node.instance.taskProvider.tasks().find { it.name().equals(command, true) }
-            ?: throw IllegalArgumentException()
+            ?: throw IllegalArgumentException(Translator.trans("node.commands.task.not-exist"))
 
         return task
     }

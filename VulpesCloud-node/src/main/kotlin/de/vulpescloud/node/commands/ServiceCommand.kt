@@ -1,5 +1,6 @@
 package de.vulpescloud.node.commands
 
+import de.vulpescloud.api.language.Translator
 import de.vulpescloud.api.redis.RedisChannelNames
 import de.vulpescloud.api.redis.builders.services.ServiceActionMessageBuilder
 import de.vulpescloud.api.services.Service
@@ -20,7 +21,7 @@ class ServiceCommand {
     @Parser(suggestions = "services")
     fun serviceParser(input: CommandInput): Service {
         val command = input.readString()
-        val task = Node.instance.serviceProvider.findServiceByName(command) ?: throw IllegalArgumentException()
+        val task = Node.instance.serviceProvider.findServiceByName(command) ?: throw IllegalArgumentException(Translator.trans("node.commands.service.not-exist"))
 
         return task
     }
