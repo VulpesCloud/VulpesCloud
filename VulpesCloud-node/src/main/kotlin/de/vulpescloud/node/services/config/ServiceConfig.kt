@@ -34,6 +34,8 @@ object ServiceConfig {
                 velocityConfig.set<String>("bind", service.hostname() + ":" + service.port())
                 velocityConfig.set<String>("player-info-forwarding-mode", "modern")
 
+                velocityConfig.set<Int>("show-max-players", service.maxPlayers)
+
                 // save the config
                 velocityConfig.save()
 
@@ -52,6 +54,7 @@ object ServiceConfig {
                     properties.setProperty("server-port", service.port().toString())
                     properties.setProperty("motd", "A VulpesCloud Service!")
                     properties.setProperty("online-mode", false.toString())
+                    properties.setProperty("max-players", service.maxPlayers.toString())
 
                     val out = Files.newOutputStream(service.runningDir.resolve("server.properties"))
                     properties.store(out, "Minecraft server properties - edited by VulpesCloud")
@@ -99,6 +102,8 @@ object ServiceConfig {
                     properties.setProperty("server-port", service.port().toString())
                     properties.setProperty("motd", "A VulpesCloud Service!")
                     properties.setProperty("online-mode", false.toString())
+                    properties.setProperty("max-players", service.maxPlayers.toString())
+
 
                     logger.info("Writing out the File to {}", service.runningDir.resolve("server.properties"))
                     val out = Files.newOutputStream(service.runningDir.resolve("server.properties"))
