@@ -41,6 +41,8 @@ class LocalServiceImpl(
 
     fun start(builder: ProcessBuilder) {
 
+        Node.instance.serviceProvider.preparedServices.remove(Pair(builder, this))
+
         this.process = builder.start()
 
         updateState(ServiceStates.CONNECTING)

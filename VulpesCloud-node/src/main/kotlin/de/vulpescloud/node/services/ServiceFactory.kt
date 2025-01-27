@@ -89,6 +89,7 @@ object ServiceFactory {
 
         localService.updateState(ServiceStates.PREPARED)
 
+        Node.instance.serviceProvider.preparedServices.add(Pair(processBuilder, localService))
         return Pair(processBuilder, localService)
     }
 

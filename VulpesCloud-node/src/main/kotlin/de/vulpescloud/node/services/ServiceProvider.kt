@@ -13,6 +13,7 @@ import java.util.*
 class ServiceProvider {
     private var localServices = mutableListOf<LocalServiceImpl>()
     val loggingServices = mutableListOf<String>()
+    val preparedServices = mutableListOf<Pair<ProcessBuilder, LocalServiceImpl>>()
 
     fun initializeSub() {
         ServiceChannelSubscribers()

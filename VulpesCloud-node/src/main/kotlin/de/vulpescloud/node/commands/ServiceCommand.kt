@@ -5,6 +5,7 @@ import de.vulpescloud.api.redis.RedisChannelNames
 import de.vulpescloud.api.redis.builders.services.ServiceActionMessageBuilder
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceActions
+import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.command.source.CommandSource
 import org.incendo.cloud.annotation.specifier.Greedy
@@ -100,6 +101,25 @@ class ServiceCommand {
         } else {
             Node.instance.serviceProvider.findLocalServiceById(service.id())!!
                 .executeCommand(command)
+        }
+    }
+
+    @Command("service|services|ser <service> start")
+    fun startService(
+        source: CommandSource,
+        @Argument("service") service: Service,
+    ) {
+        if (service.state() == ServiceStates.PREPARED) {
+            source.sendMessage("Starting Service: ${service.name()}")
+            val pair = Node.instance.serviceProvider.preparedServices.find { it.second.name() == service.name() }!!
+            pair.second.start(pair.first)
+//            Node.instance.getRC()?.sendMessage(
+//                ServiceActionMessageBuilder
+//                    .setService(service)
+//                    .setAction(ServiceActions.START)
+//                    .build(),
+//                RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name
+//            )
         }
     }
 }
