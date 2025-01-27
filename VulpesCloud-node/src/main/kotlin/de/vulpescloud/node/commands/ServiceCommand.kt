@@ -88,13 +88,18 @@ class ServiceCommand {
         @Argument("service") service: Service,
         @Greedy @Argument("command") command: String,
     ) {
-        Node.instance.getRC()?.sendMessage(
-            ServiceActionMessageBuilder
-                .setService(service)
-                .setAction(ServiceActions.COMMAND)
-                .setParameter(command)
-                .build(),
-            RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name
-        )
+        if (Node.instance.serviceProvider.findLocalServiceById(service.id()) == null) {
+            Node.instance.getRC()?.sendMessage(
+                ServiceActionMessageBuilder
+                    .setService(service)
+                    .setAction(ServiceActions.COMMAND)
+                    .setParameter(command)
+                    .build(),
+                RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name
+            )
+        } else {
+            Node.instance.serviceProvider.findLocalServiceById(service.id())!!
+                .executeCommand(command)
+        }
     }
 }
