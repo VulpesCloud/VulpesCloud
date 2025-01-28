@@ -48,7 +48,7 @@ object ServiceRegistrationMessageBuilder {
         fun build(): String {
             val json = JSONObject()
 
-            json.put("action", "SERVICE_REGISTER")
+            json.put("action", "SERVICE_UNREGISTER")
             json.put("serviceName", service!!.name())
 
             return json.toString()

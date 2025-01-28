@@ -71,7 +71,7 @@ class BukkitConnector : KSpigot() {
             ServiceRegistrationMessageBuilder.serviceUnregisterBuilder()
                 .setService(ServiceProvider.findServiceById(Wrapper.instance.service.id)!!)
                 .build(),
-            RedisChannelNames.VULPESCLOUD_SERVICE_REGISTER.name
+            RedisChannelNames.VULPESCLOUD_SERVICE_UNREGISTER.name
         )
     }
 
