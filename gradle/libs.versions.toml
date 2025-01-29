@@ -21,7 +21,7 @@ slf4j = "2.0.16"
 logback = "1.5.16"
 
 # configuration
-gson = "2.11.0"
+gson = "2.12.0"
 json = "20250107"
 
 # console
