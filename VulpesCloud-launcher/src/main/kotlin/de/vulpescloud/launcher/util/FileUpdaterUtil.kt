@@ -24,14 +24,17 @@
 
 package de.vulpescloud.launcher.util
 
+import java.io.File
 import java.net.URI
 import java.net.http.HttpClient
 import java.net.http.HttpRequest
 import java.net.http.HttpResponse
 import java.net.http.HttpResponse.BodyHandler
+import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.time.Duration
+import kotlin.reflect.jvm.internal.impl.util.Check
 
 
 object FileUpdaterUtil {
@@ -59,6 +62,28 @@ object FileUpdaterUtil {
             StandardOpenOption.WRITE,
             StandardOpenOption.TRUNCATE_EXISTING
         )
+    }
+
+    fun updateFile(target: File, downloadURI: URI, downloadChecksum: String): Boolean {
+        if (Files.exists(target.toPath())) {
+            val currentChecksum = ChecksumUtil.getFileChecksum(target)
+            if (currentChecksum == downloadChecksum) {
+                println("File ${target.name} is already up to date!")
+                return false
+            }
+        }
+
+        println("Updating ${target.name}")
+
+        this.get(downloadURI, filePathHandler(target.toPath()))
+
+        val newChecksum = ChecksumUtil.getFileChecksum(target)
+
+        if (newChecksum != downloadChecksum) {
+            throw IllegalStateException("Checksum mismatch for file ${target.name}")
+        }
+
+        return true
     }
 
 }
