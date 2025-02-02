@@ -30,6 +30,7 @@ plugins {
 dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
     implementation(libs.nightConfig.toml)
+    implementation(libs.json)
 }
 
 tasks.jar {

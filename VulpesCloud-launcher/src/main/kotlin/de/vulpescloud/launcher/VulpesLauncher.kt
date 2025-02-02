@@ -27,6 +27,8 @@ package de.vulpescloud.launcher
 import de.vulpescloud.launcher.config.Config
 import de.vulpescloud.launcher.dependency.Dependency
 import de.vulpescloud.launcher.dependency.DependencyDownloader
+import de.vulpescloud.launcher.updater.*
+import de.vulpescloud.launcher.util.ChecksumUtil
 import de.vulpescloud.launcher.util.FileUpdaterUtil
 import java.io.File
 import java.net.URI
@@ -40,7 +42,7 @@ class VulpesLauncher {
     companion object {
         val CLASS_LOADER = VulpesClassLoader()
         val DEPENDENCY_DIR: Path = Path.of("launcher/dependencies")
-        private val githubURL = "https://github.com/VulpesCloud/VulpesCloud-meta/raw/"
+        val githubURL = "https://github.com/VulpesCloud/VulpesCloud-meta/raw/"
         val config = Config()
 
         @JvmStatic
@@ -98,6 +100,8 @@ class VulpesLauncher {
             )
             // config.debug()
 
+            ChecksumUtil.downloadChecksumJson()
+
             val devMode = System.getProperty("devMode")
             if (devMode != null && devMode.toBoolean() || !config.autoUpdatesEnabled()) {
                 System.err.println("╭────────────────────────────────────────────────────────╮")
@@ -147,8 +151,11 @@ class VulpesLauncher {
                     exitProcess(-1)
                 }
             } else {
-                println("Downloading VulpesFiles!")
-                getCloudFilesFromGithub()
+                APIUpdater().updateAPI()
+                BridgeUpdater().updateBridge()
+                ConnectorUpdater().updateConnector()
+                NodeUpdater().updateNode()
+                WrapperUpdater().updateWrapper()
             }
 
             this.CLASS_LOADER.addURL(Path.of("launcher/dependencies/vulpescloud-api.jar").toUri().toURL())
@@ -159,6 +166,8 @@ class VulpesLauncher {
             Thread.currentThread().contextClassLoader = this.CLASS_LOADER
             Class.forName(this.mainClass(), true, this.CLASS_LOADER).getMethod("main", Array<String>::class.java)
                 .invoke(null, args)
+
+            println(ChecksumUtil.getFileChecksum(File("vulpescloud-launcher.jar")))
         }
 
         private fun bootFile(): File {
