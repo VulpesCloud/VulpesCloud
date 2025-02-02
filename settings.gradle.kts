@@ -22,6 +22,13 @@
  * SOFTWARE.
  */
 
+pluginManagement {
+    includeBuild("build-helper")
+    repositories {
+        gradlePluginPortal()
+    }
+}
+
 rootProject.name = "VulpesCloud"
 include("VulpesCloud-api")
 include("VulpesCloud-node")
