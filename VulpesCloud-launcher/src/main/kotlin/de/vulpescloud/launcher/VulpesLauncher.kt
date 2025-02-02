@@ -166,8 +166,6 @@ class VulpesLauncher {
             Thread.currentThread().contextClassLoader = this.CLASS_LOADER
             Class.forName(this.mainClass(), true, this.CLASS_LOADER).getMethod("main", Array<String>::class.java)
                 .invoke(null, args)
-
-            println(ChecksumUtil.getFileChecksum(File("vulpescloud-launcher.jar")))
         }
 
         private fun bootFile(): File {
