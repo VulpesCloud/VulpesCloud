@@ -1,9 +1,11 @@
 package de.vulpescloud.node.commands
 
+import de.vulpescloud.api.language.Translator
 import de.vulpescloud.api.redis.RedisChannelNames
 import de.vulpescloud.api.redis.builders.services.ServiceActionMessageBuilder
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceActions
+import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.command.source.CommandSource
 import org.incendo.cloud.annotation.specifier.Greedy
@@ -20,7 +22,7 @@ class ServiceCommand {
     @Parser(suggestions = "services")
     fun serviceParser(input: CommandInput): Service {
         val command = input.readString()
-        val task = Node.instance.serviceProvider.findServiceByName(command) ?: throw IllegalArgumentException()
+        val task = Node.instance.serviceProvider.findServiceByName(command) ?: throw IllegalArgumentException(Translator.trans("node.commands.service.not-exist"))
 
         return task
     }
@@ -87,13 +89,37 @@ class ServiceCommand {
         @Argument("service") service: Service,
         @Greedy @Argument("command") command: String,
     ) {
-        Node.instance.getRC()?.sendMessage(
-            ServiceActionMessageBuilder
-                .setService(service)
-                .setAction(ServiceActions.COMMAND)
-                .setParameter(command)
-                .build(),
-            RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name
-        )
+        if (Node.instance.serviceProvider.findLocalServiceById(service.id()) == null) {
+            Node.instance.getRC()?.sendMessage(
+                ServiceActionMessageBuilder
+                    .setService(service)
+                    .setAction(ServiceActions.COMMAND)
+                    .setParameter(command)
+                    .build(),
+                RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name
+            )
+        } else {
+            Node.instance.serviceProvider.findLocalServiceById(service.id())!!
+                .executeCommand(command)
+        }
+    }
+
+    @Command("service|services|ser <service> start")
+    fun startService(
+        source: CommandSource,
+        @Argument("service") service: Service,
+    ) {
+        if (service.state() == ServiceStates.PREPARED) {
+            source.sendMessage("Starting Service: ${service.name()}")
+            val pair = Node.instance.serviceProvider.preparedServices.find { it.second.name() == service.name() }!!
+            pair.second.start(pair.first)
+//            Node.instance.getRC()?.sendMessage(
+//                ServiceActionMessageBuilder
+//                    .setService(service)
+//                    .setAction(ServiceActions.START)
+//                    .build(),
+//                RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name
+//            )
+        }
     }
 }

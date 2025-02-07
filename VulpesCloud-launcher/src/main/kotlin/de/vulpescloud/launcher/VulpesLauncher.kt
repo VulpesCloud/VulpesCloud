@@ -27,6 +27,8 @@ package de.vulpescloud.launcher
 import de.vulpescloud.launcher.config.Config
 import de.vulpescloud.launcher.dependency.Dependency
 import de.vulpescloud.launcher.dependency.DependencyDownloader
+import de.vulpescloud.launcher.updater.*
+import de.vulpescloud.launcher.util.ChecksumUtil
 import de.vulpescloud.launcher.util.FileUpdaterUtil
 import java.io.File
 import java.net.URI
@@ -40,7 +42,7 @@ class VulpesLauncher {
     companion object {
         val CLASS_LOADER = VulpesClassLoader()
         val DEPENDENCY_DIR: Path = Path.of("launcher/dependencies")
-        private val githubURL = "https://github.com/VulpesCloud/VulpesCloud-meta/raw/"
+        val githubURL = "https://github.com/VulpesCloud/VulpesCloud-meta/raw/"
         val config = Config()
 
         @JvmStatic
@@ -67,8 +69,8 @@ class VulpesLauncher {
             val yamlConfig = Dependency("com.electronwill.night-config", "yaml", "3.8.1")
             val tomlConfig = Dependency("com.electronwill.night-config", "toml", "3.8.1")
             val coreConfig = Dependency("com.electronwill.night-config", "core", "3.8.1")
-            val exposedCore = Dependency("org.jetbrains.exposed", "exposed-core", "0.57.0")
-            val exposedJDBC = Dependency("org.jetbrains.exposed", "exposed-jdbc", "0.57.0")
+            val exposedCore = Dependency("org.jetbrains.exposed", "exposed-core", "0.58.0")
+            val exposedJDBC = Dependency("org.jetbrains.exposed", "exposed-jdbc", "0.58.0")
             val snakeYAML = Dependency("org.yaml", "snakeyaml", "2.3")
 
             // Downloading the Dependency's
@@ -97,6 +99,8 @@ class VulpesLauncher {
                 snakeYAML,
             )
             // config.debug()
+
+            ChecksumUtil.downloadChecksumJson()
 
             val devMode = System.getProperty("devMode")
             if (devMode != null && devMode.toBoolean() || !config.autoUpdatesEnabled()) {
@@ -147,8 +151,11 @@ class VulpesLauncher {
                     exitProcess(-1)
                 }
             } else {
-                println("Downloading VulpesFiles!")
-                getCloudFilesFromGithub()
+                APIUpdater().updateAPI()
+                BridgeUpdater().updateBridge()
+                ConnectorUpdater().updateConnector()
+                NodeUpdater().updateNode()
+                WrapperUpdater().updateWrapper()
             }
 
             this.CLASS_LOADER.addURL(Path.of("launcher/dependencies/vulpescloud-api.jar").toUri().toURL())

@@ -1,10 +1,12 @@
 package de.vulpescloud.node.commands
 
+import de.vulpescloud.api.language.Translator
 import de.vulpescloud.api.redis.RedisChannelNames
 import de.vulpescloud.api.redis.RedisHashNames
 import de.vulpescloud.api.redis.builders.services.ServiceActionMessageBuilder
 import de.vulpescloud.api.services.ServiceActions
 import de.vulpescloud.api.tasks.Task
+import de.vulpescloud.api.utils.RowFormatter
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.command.annotations.Alias
 import de.vulpescloud.node.command.annotations.Description
@@ -31,7 +33,7 @@ class TaskCommand {
     fun taskParser(input: CommandInput): Task {
         val command = input.readString()
         val task = Node.instance.taskProvider.tasks().find { it.name().equals(command, true) }
-            ?: throw IllegalArgumentException()
+            ?: throw IllegalArgumentException(Translator.trans("node.commands.task.not-exist"))
 
         return task
     }
@@ -46,8 +48,20 @@ class TaskCommand {
         source: CommandSource,
     ) {
         val tasks = Node.instance.taskProvider.tasks()
-        source.sendMessage("Following &b${tasks.size} &7tasks are registered&8:")
-        tasks.forEach { source.sendMessage(" - ${it.name()}") }
+        val taskRows = RowFormatter.addRow("Name", "ServiceCount", "Nodes", "Templates", "Static", "StartPort")
+        tasks.forEach {
+            taskRows.addRow(
+                it.name(),
+                it.serviceCount().toString(),
+                it.nodes().toString(),
+                it.templates().toString(),
+                it.staticService().toString(),
+                it.startPort().toString()
+            )
+        }
+        taskRows.build().forEach { source.sendMessage(it) }
+        //source.sendMessage("Following &b${tasks.size} &7tasks are registered&8:")
+        //tasks.forEach { source.sendMessage(" - ${it.name()}") }
     }
 
     @Command("task|tasks setup")

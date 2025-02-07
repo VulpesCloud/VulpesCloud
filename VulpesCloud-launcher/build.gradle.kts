@@ -23,13 +23,14 @@
  */
 
 plugins {
-    kotlin("jvm") version "2.1.0"
+    kotlin("jvm") version "2.1.10"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.0")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
     implementation(libs.nightConfig.toml)
+    implementation(libs.json)
 }
 
 tasks.jar {

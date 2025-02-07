@@ -52,7 +52,7 @@
             <totalSizeCap>2GB</totalSizeCap>
         </rollingPolicy>
         <encoder class="PatternLayoutEncoder">
-            <pattern>[%d{dd.MM HH:mm:ss.SSS}] %-5level: %msg</pattern>
+            <pattern>[%d{dd.MM HH:mm:ss.SSS}] [%thread] %-5level: %msg%n</pattern>
         </encoder>
     </appender>
 

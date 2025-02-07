@@ -24,9 +24,9 @@
 
 plugins {
     id("java")
-    kotlin("jvm") version "2.1.0"
+    kotlin("jvm") version "2.1.10"
     //id("io.papermc.paperweight.userdev") version "1.7.4"
-    id("com.gradleup.shadow") version "8.3.5"
+    id("com.gradleup.shadow") version "8.3.6"
 }
 
 repositories {

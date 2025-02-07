@@ -1,10 +1,12 @@
 package de.vulpescloud.node
 
 import de.vulpescloud.api.language.Translator
+import de.vulpescloud.api.utils.RowFormatter
 import de.vulpescloud.api.utils.StringUtils
 import de.vulpescloud.node.command.provider.CommandProvider
 import de.vulpescloud.node.commands.*
 import de.vulpescloud.node.config.ConfigProvider
+import de.vulpescloud.node.event.EventManagerImpl
 import de.vulpescloud.node.manager.AuthenticationManager
 import de.vulpescloud.node.modules.ModuleProvider
 import de.vulpescloud.node.networking.mysql.MySQLController
@@ -45,6 +47,7 @@ class Node {
     val playerProvider = VulpesPlayerProvider()
     val moduleProvider = ModuleProvider()
     val authenticationManager = AuthenticationManager()
+    val eventManager = EventManagerImpl()
 
     init {
         instance = this
@@ -107,9 +110,11 @@ class Node {
         PlayerEventListener
     }
 
+
     fun getRC(): RedisController? {
         return redisController
     }
+
     fun getDB(): MySQLController? {
         return mysqlController
     }

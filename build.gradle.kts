@@ -1,6 +1,3 @@
-import org.jetbrains.dokka.gradle.DokkaMultiModuleTask
-import org.jetbrains.dokka.gradle.DokkaTask
-
 /*
  * MIT License
  *
@@ -26,7 +23,8 @@ import org.jetbrains.dokka.gradle.DokkaTask
  */
 
 plugins {
-    kotlin("jvm") version "2.1.0"
+    id("vulpescloud.parent-build-logic")
+    kotlin("jvm") version "2.1.10"
     id("org.jetbrains.dokka") version "2.0.0"
     id("signing")
     id("maven-publish")
@@ -61,6 +59,7 @@ allprojects {
         "implementation"(rootProject.libs.annotations)
         "implementation"(rootProject.libs.gson)
         "implementation"(rootProject.libs.guava)
+        "implementation"(kotlin("reflect"))
     }
 
     publishing {
@@ -127,6 +126,8 @@ tasks.register("copyFilesForMetaRepo") {
             into("$buildDir/meta-repo")
             rename { "vulpescloud-connector.jar" }
         }
+
+        generateCheckSums("$buildDir/meta-repo")
     }
 }
 

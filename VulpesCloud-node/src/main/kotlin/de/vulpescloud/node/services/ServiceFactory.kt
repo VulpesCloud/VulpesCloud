@@ -1,5 +1,6 @@
 package de.vulpescloud.node.services
 
+import de.vulpescloud.api.event.events.service.ServicePrepareEvent
 import de.vulpescloud.api.redis.RedisHashNames
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.api.tasks.Task
@@ -35,6 +36,11 @@ object ServiceFactory {
         Node.instance.serviceProvider.updateLocalServices(ls)
         val version = localService.version()
 
+        val pluginDir = localService.runningDir.resolve(version!!.pluginDir)
+        pluginDir.toFile().mkdirs()
+
+        Node.instance.eventManager.call(ServicePrepareEvent(localService))
+
         localService.updateState(ServiceStates.LOADING)
 
         Node.instance.getRC()?.setHashField(
@@ -47,11 +53,11 @@ object ServiceFactory {
 
         TemplateFactory.cloneTemplate(localService)
 
-        version?.prepare(task.version(), localService)
+        version.prepare(task.version(), localService)
 
         val arguments = generateServiceArguments(localService)
 
-        if (version!!.versionType == VersionType.SERVER) {
+        if (version.versionType == VersionType.SERVER) {
             arguments.add("--nogui")
         }
 
@@ -73,9 +79,6 @@ object ServiceFactory {
             processBuilder.environment()["separateClassLoader"] = false.toString()
         else processBuilder.environment()["separateClassLoader"] = true.toString()
 
-        val pluginDir = localService.runningDir.resolve(version.pluginDir)
-        pluginDir.toFile().mkdirs()
-
         Files.copy(
             Path.of("launcher/dependencies/vulpescloud-connector.jar"),
             pluginDir.resolve("vulpescloud-connector.jar"),
@@ -86,6 +89,7 @@ object ServiceFactory {
 
         localService.updateState(ServiceStates.PREPARED)
 
+        Node.instance.serviceProvider.preparedServices.add(Pair(processBuilder, localService))
         return Pair(processBuilder, localService)
     }
 

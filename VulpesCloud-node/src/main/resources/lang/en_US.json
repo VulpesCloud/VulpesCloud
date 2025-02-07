@@ -76,7 +76,10 @@
   "node.service.event.state.prepared": "Service &m{} &7has been &eprepared&7!",
   "node.service.event.state.connecting": "Service &m{} &7has been &bconnected&7!",
   "node.service.event.state.started": "Service &m{} &7has been &2started&7!",
-  "node.service.event.state.stopped": "Service &m{} &7has been &cstopped&7!"
+  "node.service.event.state.stopped": "Service &m{} &7has been &cstopped&7!",
+
+  "node.commands.task.not-exist": "Task does not exist!",
+  "node.commands.service.not-exist": "Service does not exists!"
 
 
 }

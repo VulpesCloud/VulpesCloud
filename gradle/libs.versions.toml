@@ -1,31 +1,31 @@
 [versions]
 # kotlin
 
-stdlib = "2.1.0"
+stdlib = "2.1.10"
 
 # google deps
 guava = "33.4.0-jre"
 
 # utils
 lombok = "1.18.36"
-annotations = "26.0.1"
+annotations = "26.0.2"
 
 # network
 jedis = "5.2.0"
 hikariCP = "6.2.1"
 mariadb = "3.5.1"
-exposed = "0.57.0"
+exposed = "0.59.0"
 
 #logging
 slf4j = "2.0.16"
 logback = "1.5.16"
 
 # configuration
-gson = "2.11.0"
+gson = "2.12.1"
 json = "20250107"
 
 # console
-jline = "3.28.0"
+jline = "3.29.0"
 cloud = "2.0.0"
 
 # platforms

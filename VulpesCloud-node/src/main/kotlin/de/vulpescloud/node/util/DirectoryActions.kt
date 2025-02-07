@@ -6,6 +6,8 @@ import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
+import java.util.Comparator
+import kotlin.io.path.exists
 
 
 object DirectoryActions {
@@ -22,7 +24,11 @@ object DirectoryActions {
         for (file in files) {
             success = success and deleteRecursively(file)
         }
-        Files.deleteIfExists(directoryPath.toPath())
+        if (directoryPath.toPath().exists()) {
+            Files.walk(directoryPath.toPath())
+                .sorted(Comparator.reverseOrder())
+                .forEach { Files.delete(it) }
+        }
         return success
     }
 

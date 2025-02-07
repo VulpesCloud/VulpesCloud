@@ -10,6 +10,7 @@ import com.velocitypowered.api.plugin.PluginContainer
 import com.velocitypowered.api.proxy.ProxyServer
 import de.vulpescloud.connector.Connector
 import de.vulpescloud.connector.velocity.commands.CloudCommand
+import de.vulpescloud.connector.velocity.commands.HubCommand
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIVelocityConfig
 import jakarta.inject.Inject
@@ -48,6 +49,7 @@ class VelocityConnector @Inject constructor(
         CommandAPI.onEnable()
 
         CloudCommand()
+        HubCommand(proxyServer)
 
         finishStart()
     }
