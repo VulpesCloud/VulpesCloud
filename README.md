@@ -41,7 +41,7 @@ dependencies {
     compileOnly("de.vulpescloud:VulpesCloud-wrapper:%version%")
 }
 ```
-#### Replace the `%version%` to the latest version of VulpesCloud (current: `1.0.0-alpha2`)
+#### Replace the `%version%` to the latest version of VulpesCloud (current: `1.0.0-alpha3`)
 
 ### Snapshots
 Snapshots are available from the snapshot repository!
