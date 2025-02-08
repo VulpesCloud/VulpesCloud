@@ -31,6 +31,7 @@ class ConfigProvider {
             config.set<String>("name", "FIST_SETUP")
             config.set<Boolean>("ranFirstSetup", false)
             config.set<String>("language", Languages.en_US.name)
+            config.set<Int>("service_stop_timeout", 15)
 
             config.set<String>("uuid", "00000000-0000-0000-0000-000000000000")
         }
@@ -55,4 +56,5 @@ class ConfigProvider {
     )
     val language = Languages.valueOf(config.get("language"))
     val ranFirstSetup: Boolean = config.get("ranFirstSetup")
+    val serviceStopTimeout: Int = config.get("service_stop_timeout")
 }
