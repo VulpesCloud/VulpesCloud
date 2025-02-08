@@ -29,6 +29,9 @@ object NodeShutdown {
 
         logger.info("Waiting for Signal to Shutdown!")
         val globalScope = GlobalScope.launch {
+
+            Node.instance.serviceProvider.loggingServices.clear()
+
             var ttl = Node.instance.config.serviceStopTimeout
             while (Node.instance.serviceProvider.localServices().isNotEmpty()) {
                 Node.instance.serviceProvider.localServices()
