@@ -49,6 +49,7 @@ dependencies {
     implementation(libs.cloud)
     implementation(libs.cloud.velocity)
     implementation(libs.cloud.annotations)
+    implementation(libs.cloud.extension)
 
     compileOnly(libs.velocity)
     annotationProcessor(libs.velocity)
