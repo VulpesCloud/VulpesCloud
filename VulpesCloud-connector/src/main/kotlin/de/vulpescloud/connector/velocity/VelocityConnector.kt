@@ -10,6 +10,7 @@ import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.plugin.PluginContainer
 import com.velocitypowered.api.proxy.ProxyServer
 import de.vulpescloud.connector.Connector
+import de.vulpescloud.connector.velocity.commands.CloudCommand
 import de.vulpescloud.connector.velocity.commands.HubCommand
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIVelocityConfig
@@ -49,6 +50,8 @@ class VelocityConnector @Inject constructor(
             ExecutionCoordinator.asyncCoordinator(),
             SenderMapper.identity()
         )
+
+        CloudCommand(commandManager).registerCloudCommand()
 
         VelocityRegistrationHandler
         VelocityRedisListener()
