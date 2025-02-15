@@ -15,7 +15,7 @@ class CloudCommand(
     private val commandManager: VelocityCommandManager<CommandSource>,
 ) {
 
-    val miniMessage = MiniMessage.miniMessage()
+    private val miniMessage = MiniMessage.miniMessage()
 
     fun registerCloudCommand() {
         commandManager.buildAndRegister("cloud") {
@@ -23,9 +23,9 @@ class CloudCommand(
             literal("list")
             handler { context ->
                 val source = context.sender()
-                source.sendMessage(miniMessage.deserialize("The following &b${ServiceProvider.services().size} &7services are registered&8:"))
+                source.sendMessage(miniMessage.deserialize("<gray>The following <aqua>${ServiceProvider.services().size}</aqua> services are registered<black>:</black></gray>"))
                 ServiceProvider.services().forEach { service ->
-                    source.sendMessage(miniMessage.deserialize("&8- &f${service.name()} &8: (&7${service.details()}&8)"))
+                    source.sendMessage(miniMessage.deserialize("<gray><black>-</black> <white>${service.name()}</white> <black>:</black> <black>(${service.details()})</black> services are registered</gray>"))
                 }
             }
         }
@@ -34,7 +34,7 @@ class CloudCommand(
             literal("stopAll")
             handler { context ->
                 val source = context.sender()
-                source.sendMessage(miniMessage.deserialize("Stopping all Services!"))
+                source.sendMessage(miniMessage.deserialize("<gray>Stopping all Services!</gray>"))
                 ServiceProvider.services().forEach {
                     Wrapper.instance.getRC()?.sendMessage(
                         ServiceActionMessageBuilder
@@ -55,11 +55,11 @@ class CloudCommand(
                 val source = context.sender()
                 val service = ServiceProvider.findServiceByName(context["service"])
                 if (service == null) {
-                    source.sendMessage(miniMessage.deserialize("Service not found!"))
+                    source.sendMessage(miniMessage.deserialize("<gray>Service not found!</gray>"))
                     return@handler
                 }
 
-                source.sendMessage(miniMessage.deserialize("Trying to stop the Service!"))
+                source.sendMessage(miniMessage.deserialize("<gray>Trying to stop the Service!</gray>"))
                 Wrapper.instance.getRC()?.sendMessage(
                     ServiceActionMessageBuilder
                         .setService(service)
