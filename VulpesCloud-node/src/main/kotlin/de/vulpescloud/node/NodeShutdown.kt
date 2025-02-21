@@ -54,6 +54,7 @@ object NodeShutdown {
                         .forEach {
                             it.destroyService()
                         }
+                    break
                 }
             }
         }

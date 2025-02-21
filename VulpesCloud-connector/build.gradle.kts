@@ -46,6 +46,11 @@ dependencies {
     implementation("dev.jorel:commandapi-velocity-shade:9.6.2-SNAPSHOT")
     implementation("dev.jorel:commandapi-bukkit-kotlin:9.7.0")
 
+    implementation(libs.cloud)
+    implementation(libs.cloud.velocity)
+    implementation(libs.cloud.annotations)
+    implementation(libs.cloud.extension)
+
     compileOnly(libs.velocity)
     annotationProcessor(libs.velocity)
     compileOnly(libs.jedis)
