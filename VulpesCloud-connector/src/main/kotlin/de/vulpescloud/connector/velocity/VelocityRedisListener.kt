@@ -22,7 +22,7 @@ class VelocityRedisListener {
                 RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name -> {
                     val message = RedisJsonParser.convert(msg!!)
 
-                    if (message.getString("service") == Wrapper.instance.service.name) {
+                    if (message.getString("service") == Wrapper.instance.serviceName) {
                         when (message.getString("action")) {
                             "STOP" -> {
                                 VelocityConnector.instance.proxyServer.shutdown()
