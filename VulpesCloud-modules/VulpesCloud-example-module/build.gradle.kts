@@ -35,7 +35,7 @@ repositories {
 }
 
 dependencies {
-    compileOnly("de.vulpescloud:VulpesCloud-api:1.0.0-alpha1")
+    compileOnly("de.vulpescloud:VulpesCloud-api:1.0.0")
     compileOnly("de.vulpescloud:VulpesCloud-node:1.0.0-alpha1")
 //    compileOnly(project(":VulpesCloud-api"))
 //    compileOnly(project(":VulpesCloud-node"))
