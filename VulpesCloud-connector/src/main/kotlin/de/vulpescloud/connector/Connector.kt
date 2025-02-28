@@ -9,15 +9,15 @@ open class Connector {
     val wrapper = Wrapper.instance
 
     fun init() {
-        ServiceProvider.findServiceById(Wrapper.instance.service.id)?.updateState(ServiceStates.STARTING)
+        ServiceProvider.findServiceById(Wrapper.instance.serviceUUID)?.updateState(ServiceStates.STARTING)
     }
 
     fun finishStart() {
-        ServiceProvider.findServiceById(Wrapper.instance.service.id)?.updateState(ServiceStates.ONLINE)
+        ServiceProvider.findServiceById(Wrapper.instance.serviceUUID)?.updateState(ServiceStates.ONLINE)
     }
 
     fun shutdownLocal() {
-        ServiceProvider.findServiceById(Wrapper.instance.service.id)?.updateState(ServiceStates.STOPPING)
+        ServiceProvider.findServiceById(Wrapper.instance.serviceUUID)?.updateState(ServiceStates.STOPPING)
     }
 
 }

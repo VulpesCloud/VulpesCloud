@@ -60,7 +60,7 @@ class BukkitConnector : KSpigot() {
     private fun registerLocalService() {
         Wrapper.instance.getRC()?.sendMessage(
             ServiceRegistrationMessageBuilder.serviceRegisterBuilder()
-                .setService(ServiceProvider.findServiceById(Wrapper.instance.service.id)!!)
+                .setService(ServiceProvider.findServiceById(Wrapper.instance.serviceUUID)!!)
                 .build(),
             RedisChannelNames.VULPESCLOUD_SERVICE_REGISTER.name
         )
@@ -69,7 +69,7 @@ class BukkitConnector : KSpigot() {
     private fun unregisterLocalService() {
         Wrapper.instance.getRC()?.sendMessage(
             ServiceRegistrationMessageBuilder.serviceUnregisterBuilder()
-                .setService(ServiceProvider.findServiceById(Wrapper.instance.service.id)!!)
+                .setService(ServiceProvider.findServiceById(Wrapper.instance.serviceUUID)!!)
                 .build(),
             RedisChannelNames.VULPESCLOUD_SERVICE_UNREGISTER.name
         )

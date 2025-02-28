@@ -41,7 +41,7 @@ class VelocityEventListener {
         VelocityConnector.instance.wrapper.getRC()?.sendMessage(
             PlayerJoinMessageBuilder
                 .setPlayer(player)
-                .setService(ServiceProvider.findServiceById(Wrapper.instance.service.id)!!)
+                .setService(ServiceProvider.findServiceById(Wrapper.instance.serviceUUID)!!)
                 .build(),
             RedisChannelNames.VULPESCLOUD_PLAYER_EVENT.name
         )

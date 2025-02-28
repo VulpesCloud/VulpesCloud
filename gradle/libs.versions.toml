@@ -13,12 +13,12 @@ annotations = "26.0.2"
 # network
 jedis = "5.2.0"
 hikariCP = "6.2.1"
-mariadb = "3.5.1"
+mariadb = "3.5.2"
 exposed = "0.59.0"
 
 #logging
-slf4j = "2.0.16"
-logback = "1.5.16"
+slf4j = "2.0.17"
+logback = "1.5.17"
 
 # configuration
 gson = "2.12.1"
@@ -78,7 +78,7 @@ cloud-extension = { group = "org.incendo", name = "cloud-kotlin-extensions", ver
 cloud-annotations = { group = "org.incendo", name = "cloud-annotations", version.ref = "cloud"}
 cloud-kotlin-coroutines = { group = "org.incendo", name = "cloud-kotlin-coroutines", version.ref = "cloud"}
 cloud-kotlin-coroutines-annotations = { group = "org.incendo", name = "cloud-kotlin-coroutines-annotations", version.ref = "cloud"}
-cloud-velocity = { group = "org.incendo", name = "cloud-velocity", version.ref = "cloud"}
+cloud-velocity = { group = "org.incendo", name = "cloud-velocity", version = "2.0.0-SNAPSHOT"}
 
 # platforms
 kSpigot = { group = "net.axay", name = "kspigot", version.ref = "kSpigot" }

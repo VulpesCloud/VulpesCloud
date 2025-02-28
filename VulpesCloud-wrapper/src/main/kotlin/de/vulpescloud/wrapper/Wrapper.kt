@@ -48,16 +48,12 @@ class Wrapper(args: Array<String>) {
 
     private var redisController: RedisController? = null
 
-    var service: LocalServiceInformation
+    val serviceName = System.getenv("serviceName")
+    val serviceUUID = UUID.fromString(System.getenv("serviceId"))
 
     init {
 
         instance = this
-
-        service = LocalServiceInformation(
-            UUID.fromString(System.getenv("serviceId")),
-            System.getenv("serviceName")
-        )
 
         redisController = RedisController()
 
@@ -65,8 +61,8 @@ class Wrapper(args: Array<String>) {
 
         json.put("action", ServiceActions.AUTHORIZE.name)
         json.put("secret", System.getenv("secret"))
-        json.put("serviceName", System.getenv("serviceName"))
-        json.put("serviceId", UUID.fromString(System.getenv("serviceId")))
+        json.put("serviceName", serviceName)
+        json.put("serviceId", serviceUUID)
 
         redisController?.sendMessage(
             json.toString(),

@@ -30,7 +30,7 @@ repositories {
 #### build.gradle.kts
 ```kotlin
 repositories {
-    maven("https://repo.vulpescloud.de/snapshots")
+    maven("https://repo.vulpescloud.de/releases")
 }
 
 dependencies {
@@ -41,7 +41,7 @@ dependencies {
     compileOnly("de.vulpescloud:VulpesCloud-wrapper:%version%")
 }
 ```
-#### Replace the `%version%` to the latest version of VulpesCloud (current: `1.0.0-alpha3`)
+#### Replace the `%version%` to the latest version of VulpesCloud (current: `1.0.0`)
 
 ### Snapshots
 Snapshots are available from the snapshot repository!

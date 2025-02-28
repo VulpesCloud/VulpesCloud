@@ -125,6 +125,12 @@ class LocalServiceImpl(
 
         logger.info("The service &8'&f${name()}&8' &7is stopped now&8!")
 
+        val localServices = Node.instance.serviceProvider.localServices()
+
+        localServices.remove(this)
+
+        Node.instance.serviceProvider.updateLocalServices(localServices)
+
         Node.instance.getRC()?.deleteHashField(RedisHashNames.VULPESCLOUD_SERVICES.name, name())
     }
 

@@ -29,8 +29,12 @@ object NodeShutdown {
 
         logger.info("Waiting for Signal to Shutdown!")
         val globalScope = GlobalScope.launch {
-            while (Node.instance.serviceProvider.services().isNotEmpty()) {
-                Node.instance.serviceProvider.services()
+
+            Node.instance.serviceProvider.loggingServices.clear()
+
+            var ttl = Node.instance.config.serviceStopTimeout
+            while (Node.instance.serviceProvider.localServices().isNotEmpty()) {
+                Node.instance.serviceProvider.localServices()
                     .forEach {
                         Node.instance.getRC()?.sendMessage(
                             ServiceActionMessageBuilder
@@ -40,8 +44,18 @@ object NodeShutdown {
                             RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name
                         )
                     }
-                delay(1000)
-                continue
+
+                if (ttl > 0) {
+                    ttl -= 1
+                    delay(1000)
+                    continue
+                } else {
+                    Node.instance.serviceProvider.localServices()
+                        .forEach {
+                            it.destroyService()
+                        }
+                    break
+                }
             }
         }
 

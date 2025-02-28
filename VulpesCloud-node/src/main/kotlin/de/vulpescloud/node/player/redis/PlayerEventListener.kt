@@ -1,10 +1,12 @@
 package de.vulpescloud.node.player.redis
 
+import de.vulpescloud.api.event.events.player.PlayerJoinEvent
 import de.vulpescloud.api.mysql.tables.PlayerTable
 import de.vulpescloud.api.redis.RedisChannelNames
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.networking.redis.RedisJsonParser
 import de.vulpescloud.node.networking.redis.RedisManager
+import de.vulpescloud.node.player.VulpesPlayerImpl
 import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
@@ -42,8 +44,13 @@ object PlayerEventListener {
                                         it[lastLogin] = System.currentTimeMillis()
                                     }
                                 } else {
-                                    logger.warn("PlayerEventListener Line 45 Not Implemented, please report this in the VulpesCloud Discord")
+                                    logger.debug("PlayerEventListener Line 45 Not Implemented, please report this in the VulpesCloud Discord")
                                 }
+                                Node.instance.eventManager.call(
+                                    PlayerJoinEvent(
+                                        Node.instance.playerProvider.players().find { it.name() == splitMSG[3] }!!
+                                    )
+                                )
                             }
                         }
                     }
@@ -51,5 +58,4 @@ object PlayerEventListener {
             }
         }
     }
-
 }

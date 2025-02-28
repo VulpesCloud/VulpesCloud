@@ -1,5 +1,6 @@
 package de.vulpescloud.connector.velocity
 
+import com.velocitypowered.api.command.CommandSource
 import com.velocitypowered.api.event.EventManager
 import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
@@ -15,14 +16,19 @@ import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIVelocityConfig
 import jakarta.inject.Inject
 import net.kyori.adventure.text.minimessage.MiniMessage
+import org.incendo.cloud.SenderMapper
+import org.incendo.cloud.execution.ExecutionCoordinator
+import org.incendo.cloud.velocity.VelocityCommandManager
 
 @Plugin(id = "vulpescloud", name = "VulpesCloud-Connector", authors = ["TheCGuy"])
 @Suppress("unused")
 class VelocityConnector @Inject constructor(
     val eventManager: EventManager,
     val proxyServer: ProxyServer,
-    val pluginsContainer: PluginContainer
+    val pluginsContainer: PluginContainer,
 ) : Connector() {
+
+    private lateinit var commandManager: VelocityCommandManager<CommandSource>
 
     init {
         instance = this
@@ -38,6 +44,15 @@ class VelocityConnector @Inject constructor(
 
         CommandAPI.onLoad(CommandAPIVelocityConfig(proxyServer, this))
 
+        commandManager = VelocityCommandManager(
+            pluginsContainer,
+            proxyServer,
+            ExecutionCoordinator.asyncCoordinator(),
+            SenderMapper.identity()
+        )
+
+        CloudCommand(commandManager).registerCloudCommand()
+
         VelocityRegistrationHandler
         VelocityRedisListener()
         this.eventManager.register(this, VelocityEventListener())
@@ -48,7 +63,7 @@ class VelocityConnector @Inject constructor(
 
         CommandAPI.onEnable()
 
-        CloudCommand()
+        // CloudCommand()
         HubCommand(proxyServer)
 
         finishStart()
