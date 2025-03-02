@@ -1,5 +1,7 @@
 package de.vulpescloud.api.event
 
-interface Event {
+import de.vulpescloud.api.Named
+
+interface Event : Named {
 
 }

@@ -1,7 +1,9 @@
 package de.vulpescloud.node.event
 
+import de.vulpescloud.api.event.Event
 import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.event.annotations.EventHandler
+import org.json.JSONObject
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberFunctions
@@ -10,18 +12,17 @@ import kotlin.reflect.jvm.jvmErasure
 class EventManagerImpl : EventManager {
     private val listeners = mutableMapOf<KClass<*>, MutableList<(Any) -> Unit>>()
 
-    override fun <T : Any> listen(type: KClass<T>, listener: (T) -> Unit) {
+    override fun <T : Event> listen(type: KClass<T>, listener: (T) -> Unit) {
         listeners.computeIfAbsent(type) { mutableListOf() }.add { event ->
             @Suppress("UNCHECKED_CAST")
             listener(event as T)
         }
     }
 
-    inline fun <reified T : Any> listen(noinline listener: (T) -> Unit) {
-        listen(T::class, listener)
-    }
+    override fun call(event: Event) {
+        val json = JSONObject()
+            .put("eventData", JSONObject(event))
 
-    override fun call(event: Any) {
         val eventType = event::class
         listeners[eventType]?.forEach { it.invoke(event) }
     }
