@@ -43,6 +43,7 @@ import org.incendo.cloud.execution.ExecutionCoordinator
 import org.incendo.cloud.key.CloudKey
 import org.incendo.cloud.meta.CommandMeta
 import org.incendo.cloud.processors.cache.CaffeineCache
+import org.incendo.cloud.processors.confirmation.ConfirmationConfiguration
 import org.incendo.cloud.processors.confirmation.ConfirmationManager
 import org.incendo.cloud.processors.confirmation.ImmutableConfirmationConfiguration.CacheBuildStage
 import org.incendo.cloud.processors.confirmation.annotation.ConfirmationBuilderModifier
@@ -103,15 +104,14 @@ class CommandProvider {
             }
         )
 
-
-        ConfirmationBuilderModifier.install(this.annotationParser!!);
-        val confirmationManager: ConfirmationManager<CommandSource> =
-            ConfirmationManager.confirmationManager<CommandSource> { configBuilder: CacheBuildStage<CommandSource?> ->
-                configBuilder
-                    .cache(CaffeineCache.of(Caffeine.newBuilder().expireAfterWrite(Duration.ofSeconds(30)).build()))
-                    .noPendingCommandNotifier { it!!.sendMessage("There are no Commands that need confirmation") }
-                    .confirmationRequiredNotifier { source, _ -> source!!.sendMessage("Type 'confirm' to confirm this command") }
-            }
+        ConfirmationBuilderModifier.install(this.annotationParser!!)
+        val confirmationManager = ConfirmationManager.confirmationManager(
+            ConfirmationConfiguration.builder<CommandSource>()
+                .cache(CaffeineCache.of(Caffeine.newBuilder().expireAfterWrite(Duration.ofSeconds(30)).build()))
+                .noPendingCommandNotifier { it!!.sendMessage("There are no Commands that need confirmation") }
+                .confirmationRequiredNotifier { source, _ -> source!!.sendMessage("Type 'confirm' to confirm this command") }
+                .build()
+        )
         this.commandManager!!.registerCommandPostProcessor(confirmationManager.createPostprocessor())
         this.commandManager!!.command(
             this.commandManager!!.commandBuilder("confirm").handler(confirmationManager.createExecutionHandler())
