@@ -1,6 +1,6 @@
 # VulpesCloud
 
-![build](https://github.com/VulpesCloud/VulpesCloud/actions/workflows/gradle.yml/badge.svg) ![Downloads](https://img.shields.io/github/downloads/VulpesCloud/VulpesCloud/total) ![GitHub Release](https://img.shields.io/github/v/release/VulpesCloud/VulpesCloud?include_prereleases)
+![build](https://jenkins.vulpescloud.de/job/VulpesCloud/badge/icon) ![Downloads](https://img.shields.io/github/downloads/VulpesCloud/VulpesCloud/total) ![GitHub Release](https://img.shields.io/github/v/release/VulpesCloud/VulpesCloud?include_prereleases)
 
 
 
