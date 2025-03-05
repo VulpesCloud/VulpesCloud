@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.cloud.kotlin.coroutines.annotations)
     implementation(libs.cloud.extension)
     implementation(libs.cloud.annotations)
+    implementation(libs.cloud.processors.confirmation)
     compileOnly(libs.kotlin.stdlib)
     compileOnly(libs.hikariCP)
     compileOnly(libs.mariadb.java.client)
