@@ -28,6 +28,7 @@
 
 package de.vulpescloud.node.command.provider
 
+import com.github.benmanes.caffeine.cache.Caffeine
 import com.google.common.collect.Iterables
 import de.vulpescloud.api.command.CommandInfo
 import de.vulpescloud.node.command.CloudCommandManager
@@ -41,13 +42,15 @@ import org.incendo.cloud.execution.CommandResult
 import org.incendo.cloud.execution.ExecutionCoordinator
 import org.incendo.cloud.key.CloudKey
 import org.incendo.cloud.meta.CommandMeta
-import org.incendo.cloud.parser.ParserParameters
+import org.incendo.cloud.processors.cache.CaffeineCache
+import org.incendo.cloud.processors.confirmation.ConfirmationManager
+import org.incendo.cloud.processors.confirmation.ImmutableConfirmationConfiguration.CacheBuildStage
+import org.incendo.cloud.processors.confirmation.annotation.ConfirmationBuilderModifier
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import java.util.*
 import java.util.concurrent.CompletableFuture
-import java.util.function.Function
-import kotlin.collections.HashSet
 
 
 class CommandProvider {
@@ -100,6 +103,29 @@ class CommandProvider {
             }
         )
 
+
+        ConfirmationBuilderModifier.install(this.annotationParser!!);
+        val confirmationManager: ConfirmationManager<CommandSource> =
+            ConfirmationManager.confirmationManager<CommandSource> { configBuilder: CacheBuildStage<CommandSource?> ->
+                configBuilder
+                    .cache(CaffeineCache.of(Caffeine.newBuilder().expireAfterWrite(Duration.ofSeconds(30)).build()))
+                    .noPendingCommandNotifier { it!!.sendMessage("There are no Commands that need confirmation") }
+                    .confirmationRequiredNotifier { source, _ -> source!!.sendMessage("Type 'confirm' to confirm this command") }
+            }
+        this.commandManager!!.registerCommandPostProcessor(confirmationManager.createPostprocessor())
+        this.commandManager!!.command(
+            this.commandManager!!.commandBuilder("confirm").handler(confirmationManager.createExecutionHandler())
+        )
+
+        registeredCommands!!.add(
+            CommandInfo(
+                "confirm",
+                setOf(),
+                "",
+                listOf(""),
+                ""
+            )
+        )
     }
 
     fun suggest(source: CommandSource, input: String): List<String> {
