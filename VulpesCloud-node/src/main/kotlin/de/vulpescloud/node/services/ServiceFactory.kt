@@ -59,6 +59,7 @@ object ServiceFactory {
 
         if (version.versionType == VersionType.SERVER) {
             arguments.add("--nogui")
+            arguments.add("--separateClassLoader")
         }
 
         logger.debug("Printing service arguments: {}", arguments)
@@ -76,10 +77,6 @@ object ServiceFactory {
         processBuilder.environment()["hostname"] = localService.hostname()
         processBuilder.environment()["port"] = localService.port().toString()
         processBuilder.environment()["secret"] = Node.instance.authenticationManager.getAuthToken()
-
-        if (localService.version()?.environment?.name.equals("Velocity", true))
-            processBuilder.environment()["separateClassLoader"] = false.toString()
-        else processBuilder.environment()["separateClassLoader"] = true.toString()
 
         Files.copy(
             Path.of("launcher/dependencies/vulpescloud-connector.jar"),

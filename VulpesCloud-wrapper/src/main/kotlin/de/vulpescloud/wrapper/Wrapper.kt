@@ -81,6 +81,8 @@ class Wrapper(args: Array<String>) {
             ClassLoader.getSystemClassLoader()
         }
 
+        System.setProperty("fabric.systemLibraries", System.getProperty("java.class.path"))
+
         val thread = Thread {
             try {
                 preClassCall(jar, "Premain-Class", classLoader)
