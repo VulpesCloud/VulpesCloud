@@ -69,15 +69,13 @@ class Wrapper(args: Array<String>) {
         //
 
         val file = Path.of(System.getenv("bootstrapFile")).toFile()
-        val jar = JarFile(file)
-
 
         val classLoader = if (Arrays.stream(args)
                 .anyMatch { it.equals("--separateClassLoader", true) }
         ) {
             URLClassLoader(arrayOf(file.toURI().toURL()), ClassLoader.getSystemClassLoader())
         } else {
-            Premain.INSTRUMENTATION.appendToSystemClassLoaderSearch(jar)
+            Premain.INSTRUMENTATION.appendToSystemClassLoaderSearch(JarFile(file))
             ClassLoader.getSystemClassLoader()
         }
 
@@ -85,6 +83,7 @@ class Wrapper(args: Array<String>) {
 
         val thread = Thread {
             try {
+                val jar = JarFile(file)
                 preClassCall(jar, "Premain-Class", classLoader)
                 preClassCall(jar, "Launcher-Agent-Class", classLoader)
 
