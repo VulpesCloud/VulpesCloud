@@ -193,7 +193,11 @@ object ServiceFactory {
 
         arguments.add("-cp")
 
-        val path = "../../launcher/dependencies/"
+        val path = if (clusterService.task.staticService()) {
+            "../../../launcher/dependencies/"
+        } else {
+            "../../../../launcher/dependencies/"
+        }
 
         val neededDependencies = listOf(
             "vulpescloud-api.jar",
