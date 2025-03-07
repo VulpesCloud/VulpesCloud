@@ -61,6 +61,8 @@ object ServiceFactory {
             arguments.add("--nogui")
         }
 
+        logger.debug("Printing service arguments: {}", arguments)
+
         val processBuilder = ProcessBuilder(*arguments.toTypedArray()).directory(localService.runningDir.toFile())
             .redirectErrorStream(true)
 
