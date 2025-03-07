@@ -194,7 +194,9 @@ object ServiceFactory {
         val path = "../../launcher/dependencies/"
 
         val neededDependencies = listOf(
-            "vulpescloud-api.jar"
+            "vulpescloud-api.jar",
+            "vulpescloud-wrapper.jar",
+            "vulpescloud-bridge.jar"
         )
 
         arguments.add(
