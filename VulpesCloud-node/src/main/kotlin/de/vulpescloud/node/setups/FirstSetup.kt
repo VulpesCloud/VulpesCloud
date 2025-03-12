@@ -132,14 +132,14 @@ class FirstSetup : Setup {
             return false
         }
         this.mysqlSSL = boolean
-        Node.instance.terminal.printSetup(Translator.trans("node.setup.node.question.redis.ssl.success"))
+        Node.instance.terminal.printSetup(Translator.trans("node.setup.node.question.mysql.ssl.success"))
         return true
     }
 
     @SetupQuestion(10, "node.setup.node.question.mysql.database", default = ["vulpescloud"])
     fun mysqlDatabase(database: String): Boolean {
         this.mysqlDatabase = database
-        Node.instance.terminal.printSetup(Translator.trans("node.setup.node.question.redis.database.success"))
+        Node.instance.terminal.printSetup(Translator.trans("node.setup.node.question.mysql.database.success"))
         return true
     }
 
