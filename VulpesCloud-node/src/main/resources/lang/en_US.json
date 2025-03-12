@@ -61,6 +61,9 @@
   "node.setup.node.question.redis.port.success": "&2Successfully &7set the Redis Port!",
   "node.setup.node.question.redis.port.invalid": "The entered Port is &cnot &7valid!",
 
+  "node.setup.node.question.language": "What language do you want to use?",
+  "node.setup.node.question.language.success": "&2Successfully &7set the language!",
+
   "node.setup.task.question.name": "What is the name of the Task?",
   "node.setup.task.question.name.long": "The entered name is too long!",
   "node.setup.task.question.name.empty": "Please enter a name!",
