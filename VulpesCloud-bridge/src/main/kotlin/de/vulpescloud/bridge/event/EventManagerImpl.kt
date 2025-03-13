@@ -3,7 +3,6 @@ package de.vulpescloud.bridge.event
 import de.vulpescloud.api.event.Event
 import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.event.annotations.EventHandler
-import org.json.JSONObject
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberFunctions
@@ -17,6 +16,10 @@ object EventManagerImpl : EventManager {
             @Suppress("UNCHECKED_CAST")
             listener(event as T)
         }
+    }
+
+    inline fun <reified T : Event> listen(noinline listener: (T) -> Unit) {
+        listen(T::class, listener)
     }
 
     override fun call(event: Event) {

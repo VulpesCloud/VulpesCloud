@@ -21,6 +21,10 @@ class EventManagerImpl : EventManager {
         }
     }
 
+    inline fun <reified T : Event> listen(noinline listener: (T) -> Unit) {
+        listen(T::class, listener)
+    }
+
     override fun call(event: Event) {
         val json = JSONObject()
             .put("eventName", event.name())
