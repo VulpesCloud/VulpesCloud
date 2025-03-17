@@ -3,9 +3,25 @@ package de.vulpescloud.node.config
 import com.electronwill.nightconfig.core.file.FileConfig
 import com.electronwill.nightconfig.json.JsonFormat
 import de.vulpescloud.api.language.Languages
+import org.slf4j.LoggerFactory
 import java.util.UUID
 
 class ConfigProvider {
+    private val logger = LoggerFactory.getLogger(ConfigProvider::class.java)
+
+    fun <T:Any> getEntry(entry: String, default: T, addIfMissing: Boolean = true): T {
+        if (config.contains(entry)) {
+            return config.get(entry)
+        } else {
+            if (addIfMissing) {
+                config.set<T>(entry, default)
+                config.save()
+                return default
+            }
+            logger.warn("CONFIG: Trying to get entry $entry but it won't be added to the config file!")
+            return default
+        }
+    }
 
     val config: FileConfig = FileConfig.builder("config.json", JsonFormat.fancyInstance())
         .autosave()
@@ -14,47 +30,26 @@ class ConfigProvider {
 
     init {
         config.load()
-
-        if (config.get<String>("name") == null) {
-            config.set<String>("redis.user", "")
-            config.set<String>("redis.hostname", "")
-            config.set<Int>("redis.port", 0)
-            config.set<String>("redis.password", "")
-
-            config.set<String>("mysql.user", "")
-            config.set<String>("mysql.password", "")
-            config.set<String>("mysql.database", "")
-            config.set<String>("mysql.host", "")
-            config.set<Int>("mysql.port", 0)
-            config.set<Boolean>("mysql.ssl", false)
-
-            config.set<String>("name", "FIST_SETUP")
-            config.set<Boolean>("ranFirstSetup", false)
-            config.set<String>("language", Languages.en_US.name)
-            config.set<Int>("service_stop_timeout", 15)
-
-            config.set<String>("uuid", "00000000-0000-0000-0000-000000000000")
-        }
     }
-    val hostname = "0.0.0.0" //todo Add Config entry and make it pull this from there!
+    val hostname = getEntry("hostname", "0.0.0.0")
 
-    val name: String = config.get("name")
-    val uuid: UUID = UUID.fromString(config.get("uuid"))
+    val name = getEntry("name", "UNSET")
+    val uuid: UUID = getEntry("uuid", UUID.fromString("00000000-0000-0000-0000-000000000000"))
     val redis = RedisEndpointData(
-        config.get("redis.user"),
-        config.get("redis.hostname"),
-        config.get("redis.port"),
-        config.get("redis.password")
+        getEntry("redis.user", "default"),
+        getEntry("redis.host", "127.0.0.1"),
+        getEntry("redis.port", 6379),
+        getEntry("redis.password", "")
     )
     val mysql = MySQLEndpointData(
-        config.get("mysql.user"),
-        config.get("mysql.password"),
-        config.get("mysql.database"),
-        config.get("mysql.host"),
-        config.get("mysql.port"),
-        config.get("mysql.ssl")
+        getEntry("mysql.user", "root"),
+        getEntry("mysql.password", ""),
+        getEntry("mysql.database", "vulpescloud"),
+        getEntry("mysql.host", "127.0.0.1"),
+        getEntry("mysql.port",3306),
+        getEntry("mysql.ssl", false)
     )
-    val language = Languages.valueOf(config.get("language"))
-    val ranFirstSetup: Boolean = config.get("ranFirstSetup")
-    val serviceStopTimeout: Int = config.get("service_stop_timeout")
+    val language = Languages.valueOf(getEntry("language", "en_US"))
+    val ranFirstSetup: Boolean = getEntry("ranFirstSetup", false)
+    val serviceStopTimeout: Int = getEntry("service_stop_timeout", 15)
 }
