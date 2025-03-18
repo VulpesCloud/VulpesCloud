@@ -34,7 +34,7 @@ class ConfigProvider {
     val hostname = getEntry("hostname", "0.0.0.0")
 
     val name = getEntry("name", "UNSET")
-    val uuid: UUID = getEntry("uuid", UUID.fromString("00000000-0000-0000-0000-000000000000"))
+    val uuid: UUID = UUID.fromString(getEntry("uuid", "00000000-0000-0000-0000-000000000000"))
     val redis = RedisEndpointData(
         getEntry("redis.user", "default"),
         getEntry("redis.host", "127.0.0.1"),
