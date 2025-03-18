@@ -1,8 +1,12 @@
 package de.vulpescloud.api.utils
 
-object RowFormatter {
+class RowFormatter {
 
-    private val rows = mutableListOf<List<String>>()
+    private var rows = mutableListOf<List<String>>()
+
+    init {
+        rows = mutableListOf()
+    }
 
     fun addRow(vararg columns: String): RowFormatter {
         rows.add(columns.toList())
