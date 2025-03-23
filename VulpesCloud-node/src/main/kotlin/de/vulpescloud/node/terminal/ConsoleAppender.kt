@@ -48,7 +48,8 @@ class ConsoleAppender : ConsoleAppender<ILoggingEvent>() {
             NodeLogEvent(
                 eventObject.message,
                 eventObject.level.levelStr,
-                eventObject.threadName
+                eventObject.threadName,
+                String(super.encoder.encode(eventObject))
             )
         )
     }
