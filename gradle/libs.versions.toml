@@ -4,7 +4,7 @@
 stdlib = "2.1.10"
 
 # google deps
-guava = "33.4.0-jre"
+guava = "33.4.6-jre"
 
 # utils
 lombok = "1.18.36"
