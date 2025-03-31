@@ -32,7 +32,7 @@ plugins {
 }
 
 group = "de.vulpescloud"
-version = "1.0.0"
+version = "1.1.0"
 
 //tasks.register<Jar>("javadocJar") {
 //    dependsOn("dokkaHtmlMultiModule") // Make sure `dokkaHtmlMultiModule` runs first
