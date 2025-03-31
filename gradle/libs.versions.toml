@@ -1,10 +1,10 @@
 [versions]
 # kotlin
 
-stdlib = "2.1.10"
+stdlib = "2.1.20"
 
 # google deps
-guava = "33.4.0-jre"
+guava = "33.4.6-jre"
 
 # utils
 lombok = "1.18.36"
@@ -12,13 +12,13 @@ annotations = "26.0.2"
 
 # network
 jedis = "5.2.0"
-hikariCP = "6.2.1"
-mariadb = "3.5.2"
-exposed = "0.59.0"
+hikariCP = "6.3.0"
+mariadb = "3.5.3"
+exposed = "0.60.0"
 
 #logging
 slf4j = "2.0.17"
-logback = "1.5.17"
+logback = "1.5.18"
 
 # configuration
 gson = "2.12.1"
