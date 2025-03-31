@@ -25,20 +25,15 @@
 package de.vulpescloud.wrapper
 
 import de.vulpescloud.api.redis.RedisChannelNames
-import de.vulpescloud.api.redis.builders.services.ServiceAuthMessageBuilder
 import de.vulpescloud.api.services.ServiceActions
 import de.vulpescloud.wrapper.redis.RedisController
 import org.json.JSONObject
-import java.io.IOException
 import java.lang.instrument.Instrumentation
 import java.net.URLClassLoader
-import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 import java.util.jar.Attributes
-import java.util.jar.JarEntry
 import java.util.jar.JarFile
-import java.util.jar.JarInputStream
 
 
 class Wrapper(args: Array<String>) {
@@ -74,35 +69,38 @@ class Wrapper(args: Array<String>) {
         //
 
         val file = Path.of(System.getenv("bootstrapFile")).toFile()
-        val jar = JarFile(file)
 
-        var loader = ClassLoader.getSystemClassLoader()
-        if (System.getenv("separateClassLoader").toBoolean()) {
-            loader = URLClassLoader(
-                arrayOf(file.toURI().toURL()),
-                ClassLoader.getSystemClassLoader()
-            )
-            preloadClasses(Path.of(System.getenv("bootstrapFile")), loader)
+        val classLoader = if (Arrays.stream(args)
+                .anyMatch { it.equals("--separateClassLoader", true) }
+        ) {
+            URLClassLoader(arrayOf(file.toURI().toURL()), ClassLoader.getSystemClassLoader())
+        } else {
+            Premain.INSTRUMENTATION.appendToSystemClassLoaderSearch(JarFile(file))
+            ClassLoader.getSystemClassLoader()
         }
-        Premain.INSTRUMENTATION.appendToSystemClassLoaderSearch(jar)
+
+        System.setProperty("fabric.systemLibraries", System.getProperty("java.class.path"))
 
         val thread = Thread {
             try {
+                val jar = JarFile(file)
+                preClassCall(jar, "Premain-Class", classLoader)
+                preClassCall(jar, "Launcher-Agent-Class", classLoader)
+
                 val mainClass = jar.manifest.mainAttributes.getValue("Main-Class")
-                val main = Class.forName(mainClass, true, loader)
-                val arguments = Arrays.stream(args).filter { it != "--separateClassLoader" }.toArray {size -> arrayOfNulls<String>(size)}
+                val main = Class.forName(mainClass, true, classLoader).getMethod("main", Array<String>::class.java)
+                val arguments = Arrays.stream(args).filter { it != "--separateClassLoader" }
+                    .toArray { size -> arrayOfNulls<String>(size) }
 
-                main.methods[0].invoke(null, arguments)
-
-                //main.getMethod("main").invoke(null, arguments)
+                main.invoke(null, arguments)
             } catch (e: Exception) {
                 println("Error in new Thread: ->>   " + e.printStackTrace())
             }
         }
 
-        thread.contextClassLoader = loader
+        thread.name = "MinecraftServer-$serviceName"
+        thread.contextClassLoader = classLoader
         thread.start()
-
     }
 
     fun getRC(): RedisController? {
@@ -114,25 +112,6 @@ class Wrapper(args: Array<String>) {
             val preClass = Class.forName(jarFile.manifest.mainAttributes.getValue(attribute), true, loader)
             preClass.getMethod("premain", String::class.java, Instrumentation::class.java)
                 .invoke(null, null, Premain.INSTRUMENTATION)
-        }
-    }
-
-    private fun preloadClasses(file: Path, loader: ClassLoader) {
-        try {
-            JarInputStream(Files.newInputStream(file)).use { stream ->
-                var entry: JarEntry
-                while ((stream.nextJarEntry.also { entry = it }) != null) {
-                    if (!entry.isDirectory && entry.name.endsWith(".class")) {
-                        val className = entry.name.replace('/', '.').replace(".class", "")
-                        try {
-                            Class.forName(className, false, loader)
-                        } catch (ignored: ClassNotFoundException) {
-                        }
-                    }
-                }
-            }
-        } catch (exception: IOException) {
-            throw IllegalStateException("Unable to preload classes in app file", exception)
         }
     }
 }

@@ -10,6 +10,7 @@ import de.vulpescloud.node.services.LocalServiceImpl
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.util.*
+import kotlin.io.path.Path
 
 object ServiceConfig {
     private val logger = LoggerFactory.getLogger(ServiceConfig::class.java)
@@ -48,7 +49,8 @@ object ServiceConfig {
                 }
                 val properties = Properties()
                 try {
-                    properties.load(this::class.java.classLoader.getResourceAsStream("platforms/purpur/server.properties"))
+                    //properties.load(this::class.java.classLoader.getResourceAsStream("platforms/purpur/server.properties"))
+                    properties.load(service.runningDir.resolve("server.properties").toFile().inputStream())
 
                     properties.setProperty("server-ip", service.hostname())
                     properties.setProperty("server-port", service.port().toString())
@@ -94,10 +96,11 @@ object ServiceConfig {
                 val properties = Properties()
                 val logger = LoggerFactory.getLogger(ServiceConfig::class.java)
                 try {
-                    logger.info("Loading Properties")
-                    properties.load(this::class.java.classLoader.getResourceAsStream("platforms/purpur/server.properties"))
+                    //logger.info("Loading Properties")
+                    //properties.load(this::class.java.classLoader.getResourceAsStream("platforms/purpur/server.properties"))
+                    properties.load(service.runningDir.resolve("server.properties").toFile().inputStream())
 
-                    logger.info("Setting server stugg")
+                    //logger.info("Setting server stugg")
                     properties.setProperty("server-ip", service.hostname())
                     properties.setProperty("server-port", service.port().toString())
                     properties.setProperty("motd", "A VulpesCloud Service!")
@@ -105,7 +108,7 @@ object ServiceConfig {
                     properties.setProperty("max-players", service.maxPlayers.toString())
 
 
-                    logger.info("Writing out the File to {}", service.runningDir.resolve("server.properties"))
+                    //logger.info("Writing out the File to {}", service.runningDir.resolve("server.properties"))
                     val out = Files.newOutputStream(service.runningDir.resolve("server.properties"))
                     properties.store(out, "Minecraft server properties - edited by VulpesCloud")
 

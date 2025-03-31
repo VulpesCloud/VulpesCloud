@@ -9,9 +9,14 @@
   "node.setup.node.question.name.answer.long": "Please pick a shorter name!",
   "node.setup.node.question.name.answer.empty": "Please enter a name for this Node!",
   "node.setup.node.question.name.answer.success": "Node name set &2successfully&7!",
-  "node.setup.task.question.version.name": "What Server Software should this task have?",
-  "node.setup.task.question.version.version.success": "&2Successfully &7set the Server Software!",
-  "node.setup.task.question.version.version.invalid": "&cInvalid &7Server Software!",
+
+  "node.setup.task.question.name": "What is the name of the Task?",
+  "node.setup.task.question.name.long": "The entered name is too long!",
+  "node.setup.task.question.name.empty": "Please enter a name!",
+  "node.setup.task.question.name.success": "&2Successfully &7set the Task name!",
+  "node.setup.task.question.environment.name": "What Server Software should this task have?",
+  "node.setup.task.question.environment.success": "&2Successfully &7set the Server Software!",
+  "node.setup.task.question.environment.invalid": "&cInvalid &7Server Software!",
   "node.setup.task.question.memory": "How much Memory should every service on this task have? (in mb)",
   "node.setup.task.question.memory.success": "&2Successfully &7set the Memory!",
   "node.setup.task.question.memory.invalid": "&cInvalid &7number!",
@@ -61,10 +66,8 @@
   "node.setup.node.question.redis.port.success": "&2Successfully &7set the Redis Port!",
   "node.setup.node.question.redis.port.invalid": "The entered Port is &cnot &7valid!",
 
-  "node.setup.task.question.name": "What is the name of the Task?",
-  "node.setup.task.question.name.long": "The entered name is too long!",
-  "node.setup.task.question.name.empty": "Please enter a name!",
-  "node.setup.task.question.name.success": "&2Successfully &7set the Task name!",
+  "node.setup.node.question.language": "What language do you want to use?",
+  "node.setup.node.question.language.success": "&2Successfully &7set the language!",
 
   "node.modules.loading": "",
 

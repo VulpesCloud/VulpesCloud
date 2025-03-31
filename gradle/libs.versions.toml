@@ -1,10 +1,10 @@
 [versions]
 # kotlin
 
-stdlib = "2.1.10"
+stdlib = "2.1.20"
 
 # google deps
-guava = "33.4.0-jre"
+guava = "33.4.6-jre"
 
 # utils
 lombok = "1.18.36"
@@ -12,13 +12,13 @@ annotations = "26.0.2"
 
 # network
 jedis = "5.2.0"
-hikariCP = "6.2.1"
-mariadb = "3.5.2"
-exposed = "0.59.0"
+hikariCP = "6.3.0"
+mariadb = "3.5.3"
+exposed = "0.60.0"
 
 #logging
 slf4j = "2.0.17"
-logback = "1.5.17"
+logback = "1.5.18"
 
 # configuration
 gson = "2.12.1"
@@ -79,6 +79,7 @@ cloud-annotations = { group = "org.incendo", name = "cloud-annotations", version
 cloud-kotlin-coroutines = { group = "org.incendo", name = "cloud-kotlin-coroutines", version.ref = "cloud"}
 cloud-kotlin-coroutines-annotations = { group = "org.incendo", name = "cloud-kotlin-coroutines-annotations", version.ref = "cloud"}
 cloud-velocity = { group = "org.incendo", name = "cloud-velocity", version = "2.0.0-SNAPSHOT"}
+cloud-processors-confirmation = { group = "org.incendo", name = "cloud-processors-confirmation", version = "1.0.0-rc.1"}
 
 # platforms
 kSpigot = { group = "net.axay", name = "kspigot", version.ref = "kSpigot" }

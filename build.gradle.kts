@@ -24,7 +24,7 @@
 
 plugins {
     id("vulpescloud.parent-build-logic")
-    kotlin("jvm") version "2.1.10"
+    kotlin("jvm") version "2.1.20"
     id("org.jetbrains.dokka") version "2.0.0"
     id("signing")
     id("maven-publish")
@@ -32,7 +32,7 @@ plugins {
 }
 
 group = "de.vulpescloud"
-version = "1.0.0"
+version = "1.1.0"
 
 //tasks.register<Jar>("javadocJar") {
 //    dependsOn("dokkaHtmlMultiModule") // Make sure `dokkaHtmlMultiModule` runs first
@@ -46,7 +46,7 @@ allprojects {
     apply(plugin = "org.jetbrains.dokka")
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
-    version = "1.0.0"
+    version = "1.1.0"
     group = "de.vulpescloud"
 
     repositories {

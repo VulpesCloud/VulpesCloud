@@ -1,17 +1,14 @@
-package de.vulpescloud.node.event
+package de.vulpescloud.bridge.event
 
 import de.vulpescloud.api.event.Event
 import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.event.annotations.EventHandler
-import de.vulpescloud.api.redis.RedisChannelNames
-import de.vulpescloud.node.Node
-import org.json.JSONObject
 import kotlin.reflect.KClass
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.memberFunctions
 import kotlin.reflect.jvm.jvmErasure
 
-class EventManagerImpl : EventManager {
+object EventManagerImpl : EventManager {
     private val listeners = mutableMapOf<KClass<*>, MutableList<(Any) -> Unit>>()
 
     override fun <T : Event> listen(type: KClass<T>, listener: (T) -> Unit) {
@@ -26,10 +23,6 @@ class EventManagerImpl : EventManager {
     }
 
     override fun call(event: Event) {
-        val json = JSONObject()
-            .put("eventName", event.name())
-            .put("eventData", JSONObject(event))
-        Node.instance.getRC()?.sendMessage(json.toString(), RedisChannelNames.VULPESCLOUD_EVENTS.name)
         val eventType = event::class
         listeners[eventType]?.forEach { it.invoke(event) }
     }

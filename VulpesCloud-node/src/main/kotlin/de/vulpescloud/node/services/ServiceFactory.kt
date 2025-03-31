@@ -59,7 +59,10 @@ object ServiceFactory {
 
         if (version.versionType == VersionType.SERVER) {
             arguments.add("--nogui")
+            arguments.add("--separateClassLoader")
         }
+
+        logger.debug("Printing service arguments: {}", arguments)
 
         val processBuilder = ProcessBuilder(*arguments.toTypedArray()).directory(localService.runningDir.toFile())
             .redirectErrorStream(true)
@@ -74,10 +77,6 @@ object ServiceFactory {
         processBuilder.environment()["hostname"] = localService.hostname()
         processBuilder.environment()["port"] = localService.port().toString()
         processBuilder.environment()["secret"] = Node.instance.authenticationManager.getAuthToken()
-
-        if (localService.version()?.environment?.name.equals("Velocity", true))
-            processBuilder.environment()["separateClassLoader"] = false.toString()
-        else processBuilder.environment()["separateClassLoader"] = true.toString()
 
         Files.copy(
             Path.of("launcher/dependencies/vulpescloud-connector.jar"),
@@ -191,10 +190,16 @@ object ServiceFactory {
 
         arguments.add("-cp")
 
-        val path = "../../launcher/dependencies/"
+        val path = if (clusterService.task.staticService()) {
+            "../../../launcher/dependencies/"
+        } else {
+            "../../../../launcher/dependencies/"
+        }
 
         val neededDependencies = listOf(
-            "vulpescloud-api.jar"
+            "vulpescloud-api.jar",
+            "vulpescloud-wrapper.jar",
+            "vulpescloud-bridge.jar"
         )
 
         arguments.add(

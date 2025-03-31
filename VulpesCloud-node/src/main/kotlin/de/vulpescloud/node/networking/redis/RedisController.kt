@@ -307,6 +307,27 @@ class RedisController : BinaryJedisPubSub(), Runnable {
         }
     }
 
+    fun setTtlOfKey(key: String, ttl: Long) {
+        logger.debug("&cRedis &8| &9ANY &eSetTTLOfKey &8>> &7(&f$key&7) &7(&d$ttl&7)")
+        jedisPool.resource.use { jedis ->
+            jedis.expire(key, ttl)
+        }
+    }
+
+    fun setHashFieldWithTTL(hashKey: String, field: String, value: String, ttlInSeconds: Long) {
+        jedisPool.resource.use { jedis ->
+            jedis.hset(hashKey, field, value)
+            jedis.hexpire(hashKey, ttlInSeconds, field)
+        }
+        logger.debug("&cRedis &8| &9HASH &eSETwithTTL &8>> &7(&f$hashKey&7) &bField:&m$field &bValue:&m$value&bttl:&m$ttlInSeconds")
+    }
+
+    fun setTtlOfHashField(hashKey: String, field: String, ttl: Long) {
+        jedisPool.resource.use { jedis ->
+            jedis.hexpire(hashKey, ttl, field)
+        }
+    }
+
     fun getList(listName: String): List<String>? {
         return jedisPool.resource.use { jedis ->
             jedis.lrange(listName, 0, -1)

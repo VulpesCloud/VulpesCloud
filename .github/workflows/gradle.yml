@@ -7,52 +7,6 @@ on:
     branches: [ '**' ]
 
 jobs:
-  publish:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4.7.0
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Make Gradle wrapper executable
-        run: chmod +x gradlew
-
-      - name: Build with Gradle
-        if: ${{ github.event_name == 'push' && !startsWith(github.ref, 'refs/heads/renovate/') }}
-        env:
-          REPO_USERNAME: ${{ secrets.REPO_USERNAME }}
-          REPO_PASSWORD: ${{ secrets.REPO_PASSWORD }}
-        run: ./gradlew publishAllPublicationsToVulpesCloudSnapshotsRepository
-
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up JDK 21
-        uses: actions/setup-java@v4.7.0
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Make Gradle wrapper executable
-        run: chmod +x gradlew
-
-      - name: Build with Gradle
-        run: ./gradlew :VulpesCloud-launcher:shadowJar
-
-      - name: Upload a Build Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: VulpesCloud
-          path: VulpesCloud-launcher/build/libs/vulpescloud-launcher.jar
-
   updateMeta:
     runs-on: ubuntu-latest
     steps:

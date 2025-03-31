@@ -23,7 +23,7 @@
  */
 
 plugins {
-    kotlin("jvm") version "2.1.10"
+    kotlin("jvm") version "2.1.20"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.cloud.kotlin.coroutines.annotations)
     implementation(libs.cloud.extension)
     implementation(libs.cloud.annotations)
+    implementation(libs.cloud.processors.confirmation)
     compileOnly(libs.kotlin.stdlib)
     compileOnly(libs.hikariCP)
     compileOnly(libs.mariadb.java.client)
@@ -49,6 +50,7 @@ dependencies {
     compileOnly(libs.nightConfig.yaml)
     compileOnly(libs.exposed.core)
     compileOnly(libs.exposed.jdbc)
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.0")
 }
 
 sourceSets {

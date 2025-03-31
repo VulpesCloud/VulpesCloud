@@ -4,9 +4,9 @@ import kotlin.reflect.KClass
 
 interface EventManager {
 
-    fun <T : Any> listen(type: KClass<T>, listener: (T) -> Unit)
+    fun <T : Event> listen(type: KClass<T>, listener: (T) -> Unit)
 
-    fun call(event: Any)
+    fun call(event: Event)
 
     fun registerListener(listener: Any)
 }

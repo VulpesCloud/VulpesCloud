@@ -48,7 +48,7 @@ class TaskCommand {
         source: CommandSource,
     ) {
         val tasks = Node.instance.taskProvider.tasks()
-        val taskRows = RowFormatter.addRow("Name", "ServiceCount", "Nodes", "Templates", "Static", "StartPort")
+        val taskRows = RowFormatter().addRow("Name", "ServiceCount", "Nodes", "Templates", "Static", "StartPort")
         tasks.forEach {
             taskRows.addRow(
                 it.name(),
