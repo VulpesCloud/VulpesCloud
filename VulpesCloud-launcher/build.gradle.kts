@@ -28,7 +28,7 @@ plugins {
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.10")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.1.20")
     implementation(libs.nightConfig.toml)
     implementation(libs.json)
 }
