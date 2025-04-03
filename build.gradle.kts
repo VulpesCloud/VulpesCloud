@@ -54,8 +54,6 @@ allprojects {
     }
 
     dependencies {
-        "implementation"(rootProject.libs.lombok)
-        "annotationProcessor"(rootProject.libs.lombok)
         "implementation"(rootProject.libs.annotations)
         "implementation"(rootProject.libs.gson)
         "implementation"(rootProject.libs.guava)
