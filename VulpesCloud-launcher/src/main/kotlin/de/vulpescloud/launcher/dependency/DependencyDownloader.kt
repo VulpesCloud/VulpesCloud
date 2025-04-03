@@ -58,8 +58,7 @@ class DependencyDownloader {
                             json.getString("group"),
                             json.getString("artifact"),
                             json.getString("version"),
-                            json.getString("location"),
-                            json.getString("url")
+                            json.getString("location")
                         )
                     )
                 }
