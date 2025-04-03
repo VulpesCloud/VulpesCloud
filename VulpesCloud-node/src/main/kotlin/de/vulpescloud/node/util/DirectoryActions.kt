@@ -1,6 +1,5 @@
 package de.vulpescloud.node.util
 
-import lombok.SneakyThrows
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -12,7 +11,6 @@ import kotlin.io.path.exists
 
 object DirectoryActions {
 
-    @SneakyThrows
     private fun deleteDirectoryContents(directoryPath: File): Boolean {
         if (!directoryPath.exists() || !directoryPath.isDirectory) {
             return false
@@ -54,7 +52,6 @@ object DirectoryActions {
         return deleteDirectoryContents(file.toFile())
     }
 
-    @SneakyThrows
     fun createDirectory(path: Path): Path {
         if (!Files.exists(path)) {
             createDirectory(path)

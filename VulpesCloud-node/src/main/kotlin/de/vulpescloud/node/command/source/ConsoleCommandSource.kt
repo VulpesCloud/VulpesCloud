@@ -21,14 +21,12 @@
 
 package de.vulpescloud.node.command.source
 
-import lombok.NonNull
 import org.slf4j.LoggerFactory
 
 class ConsoleCommandSource : CommandSource {
     /**
      * {@inheritDoc}
      */
-    @NonNull
     override fun name(): String {
         return "Console"
     }
@@ -36,25 +34,25 @@ class ConsoleCommandSource : CommandSource {
     /**
      * {@inheritDoc}
      */
-    override fun sendMessage(@NonNull message: String?) {
-        LOGGER.info(message!!)
+    override fun sendMessage(message: String) {
+        LOGGER.info(message)
     }
 
     /**
      * {@inheritDoc}
      */
-    override fun sendMessage(vararg messages: String?) {
+    override fun sendMessage(vararg messages: String) {
         for (message in messages) {
-            LOGGER.info(message!!)
+            LOGGER.info(message)
         }
     }
 
     /**
      * {@inheritDoc}
      */
-    override fun sendMessage(@NonNull messages: Collection<String?>?) {
-        for (message in messages!!) {
-            LOGGER.info(message!!)
+    override fun sendMessage(messages: Collection<String>) {
+        for (message in messages) {
+            LOGGER.info(message)
         }
     }
 
@@ -63,14 +61,13 @@ class ConsoleCommandSource : CommandSource {
      * @return always true as the console is allowed to execute every command
      * @throws NullPointerException if permission is null.
      */
-    override fun checkPermission(@NonNull permission: String?): Boolean {
+    override fun checkPermission(permission: String): Boolean {
         return true
     }
 
     /**
      * {@inheritDoc}
      */
-    @NonNull
     override fun toString(): String {
         return this.name()
     }

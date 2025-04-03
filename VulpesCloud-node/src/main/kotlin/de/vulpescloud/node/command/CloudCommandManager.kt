@@ -25,7 +25,6 @@
 package de.vulpescloud.node.command
 
 import de.vulpescloud.node.command.source.CommandSource
-import lombok.NonNull
 import org.incendo.cloud.CommandManager
 import org.incendo.cloud.execution.ExecutionCoordinator
 import org.incendo.cloud.internal.CommandRegistrationHandler
@@ -46,8 +45,8 @@ class CloudCommandManager(
     val logger: Logger = LoggerFactory.getLogger(CloudCommandManager::class.java)
 
     fun bootstrap(
-        @NonNull args: @NonNull Array<String?>,
-        @NonNull managerConsumer: Consumer<CommandManager<CommandSource>?>,
+        args: Array<String?>,
+        managerConsumer: Consumer<CommandManager<CommandSource>?>,
     ) {
         val cliCommandManager: CommandManager<CommandSource> =
             CloudCommandManager(ExecutionCoordinator.asyncCoordinator())

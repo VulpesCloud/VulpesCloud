@@ -24,11 +24,9 @@
 
 package de.vulpescloud.node.command
 
-import lombok.NonNull
-
 fun interface PermissionFunction {
 
-    fun alwaysTrue(): @NonNull PermissionFunction {
+    fun alwaysTrue(): PermissionFunction {
         return PermissionFunction { true }
     }
 

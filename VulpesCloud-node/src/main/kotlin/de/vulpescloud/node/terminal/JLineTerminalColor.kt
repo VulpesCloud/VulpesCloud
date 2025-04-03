@@ -24,15 +24,9 @@
 
 package de.vulpescloud.node.terminal
 
-import lombok.AllArgsConstructor
-import lombok.Getter
-import lombok.experimental.Accessors
 import org.jetbrains.annotations.Contract
 import org.jline.jansi.Ansi
 
-@Getter
-@Accessors(fluent = true)
-@AllArgsConstructor
 enum class JLineTerminalColor(internal val key: Char, ansiCode: Ansi) {
 
     MAGENTA('m', Ansi.ansi().reset().fg(Ansi.Color.MAGENTA)),

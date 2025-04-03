@@ -22,26 +22,25 @@
 package de.vulpescloud.node.command.source
 
 import de.vulpescloud.api.Named
-import lombok.NonNull
 
 interface CommandSource : Named {
     /**
      * @param message the message that is sent to the source
      * @throws NullPointerException if message is null.
      */
-    fun sendMessage(@NonNull message: String?)
+    fun sendMessage(message: String)
 
     /**
      * @param messages the messages that are sent to the source
      * @throws NullPointerException if messages is null.
      */
-    fun sendMessage(@NonNull vararg messages: String?)
+    fun sendMessage(vararg messages: String)
 
     /**
      * @param messages the messages that are sent to the source
      * @throws NullPointerException if messages is null.
      */
-    fun sendMessage(@NonNull messages: Collection<String?>?)
+    fun sendMessage(messages: Collection<String>)
 
     /**
      * Used to check if the command source has the given permission
@@ -50,13 +49,12 @@ interface CommandSource : Named {
      * @return whether the source has the permission
      * @throws NullPointerException if permission is null.
      */
-    fun checkPermission(@NonNull permission: String?): Boolean
+    fun checkPermission(permission: String): Boolean
 
     companion object {
         /**
          * @return the console command source instance
          */
-        @NonNull
         fun console(): CommandSource {
             return ConsoleCommandSource.INSTANCE
         }
