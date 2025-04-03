@@ -39,35 +39,31 @@ class DependencyDownloader {
     fun downloadDependency(uri: URI) {
         val jsonArray = JSONObject(String(uri.toURL().openStream().readAllBytes())).getJSONArray("dependencys")
 
-        println("DEBUG: jsonArray")
-        println(jsonArray.toString())
-
-        jsonArray.forEach {
-            JSONObject(it)
-                .let { json ->
-                    println(json.toString())
-                    if (json.getString("location") == "CUSTOM") {
-                        download(
-                            Dependency(
-                                json.getString("group"),
-                                json.getString("artifact"),
-                                json.getString("version"),
-                                json.getString("location"),
-                                json.getString("url")
-                            )
+        for (i in 0 until jsonArray.length()) {
+            jsonArray.getJSONObject(i).let { json ->
+                println(json.toString())
+                if (json.getString("location") == "CUSTOM") {
+                    download(
+                        Dependency(
+                            json.getString("group"),
+                            json.getString("artifact"),
+                            json.getString("version"),
+                            json.getString("location"),
+                            json.getString("url")
                         )
-                    } else {
-                        download(
-                            Dependency(
-                                json.getString("group"),
-                                json.getString("artifact"),
-                                json.getString("version"),
-                                json.getString("location"),
-                                json.getString("url")
-                            )
+                    )
+                } else {
+                    download(
+                        Dependency(
+                            json.getString("group"),
+                            json.getString("artifact"),
+                            json.getString("version"),
+                            json.getString("location"),
+                            json.getString("url")
                         )
-                    }
+                    )
                 }
+            }
         }
     }
 
