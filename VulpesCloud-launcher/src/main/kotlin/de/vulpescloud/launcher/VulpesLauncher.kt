@@ -49,55 +49,8 @@ class VulpesLauncher {
         fun main(args: Array<String>) {
             println("Checking for Dependency's to download")
 
-            // Setting the Dependency's
-            val gsonDependency = Dependency("com.google.code.gson", "gson", "2.12.1")
-            val jLineDependency = Dependency("org.jline", "jline", "3.29.0")
-            val kotlinSTD = Dependency("org.jetbrains.kotlin", "kotlin-stdlib", "2.1.20")
-            val jsonDependency = Dependency("org.json", "json", "20250107")
-            val jedisDependency = Dependency("redis.clients", "jedis", "5.2.0")
-            val slf4jDependency = Dependency("org.slf4j", "slf4j-api", "2.0.17")
-            val logbackCoreDependency = Dependency("ch.qos.logback", "logback-core", "1.5.18")
-            val logbackClassicDependency = Dependency("ch.qos.logback", "logback-classic", "1.5.18")
-            val hikariCP = Dependency("com.zaxxer", "HikariCP", "6.3.0")
-            val mariaDB = Dependency("org.mariadb.jdbc", "mariadb-java-client", "3.5.3")
-            val cloud = Dependency("org.incendo", "cloud-core", "2.0.0")
-            val cloudExtension = Dependency("org.incendo", "cloud-kotlin-extensions", "2.0.0")
-            val cloudAnnotations = Dependency("org.incendo", "cloud-annotations", "2.0.0")
-            val cloudKotlinCoroutines = Dependency("org.incendo", "cloud-kotlin-coroutines", "2.0.0")
-            val cloudKotlinCoroutinesAnnotations = Dependency("org.incendo", "cloud-kotlin-coroutines-annotations", "2.0.0")
-            val jsonConfig = Dependency("com.electronwill.night-config", "json", "3.8.1")
-            val yamlConfig = Dependency("com.electronwill.night-config", "yaml", "3.8.1")
-            val tomlConfig = Dependency("com.electronwill.night-config", "toml", "3.8.1")
-            val coreConfig = Dependency("com.electronwill.night-config", "core", "3.8.1")
-            val exposedCore = Dependency("org.jetbrains.exposed", "exposed-core", "0.60.0")
-            val exposedJDBC = Dependency("org.jetbrains.exposed", "exposed-jdbc", "0.60.0")
-            val snakeYAML = Dependency("org.yaml", "snakeyaml", "2.3")
+            //
 
-            // Downloading the Dependency's
-            DependencyDownloader().download(
-                gsonDependency,
-                jLineDependency,
-                kotlinSTD,
-                jsonDependency,
-                jedisDependency,
-                slf4jDependency,
-                logbackCoreDependency,
-                logbackClassicDependency,
-                hikariCP,
-                mariaDB,
-                cloud,
-                cloudExtension,
-                cloudAnnotations,
-                cloudKotlinCoroutines,
-                cloudKotlinCoroutinesAnnotations,
-                jsonConfig,
-                yamlConfig,
-                tomlConfig,
-                coreConfig,
-                exposedCore,
-                exposedJDBC,
-                snakeYAML,
-            )
             // config.debug()
 
             ChecksumUtil.downloadChecksumJson()
