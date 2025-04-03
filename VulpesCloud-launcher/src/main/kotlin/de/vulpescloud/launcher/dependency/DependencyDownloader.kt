@@ -39,9 +39,13 @@ class DependencyDownloader {
     fun downloadDependency(uri: URI) {
         val jsonArray = JSONObject(String(uri.toURL().openStream().readAllBytes())).getJSONArray("dependencys")
 
+        println("DEBUG: jsonArray")
+        println(jsonArray.toString())
+
         jsonArray.forEach {
             JSONObject(it)
                 .let { json ->
+                    println(json.toString())
                     if (json.getString("location") == "CUSTOM") {
                         download(
                             Dependency(
