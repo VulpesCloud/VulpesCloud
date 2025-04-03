@@ -25,6 +25,7 @@
 package de.vulpescloud.launcher.dependency
 
 import de.vulpescloud.launcher.VulpesLauncher
+import org.json.JSONObject
 import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -34,6 +35,37 @@ import java.nio.file.Path
 
 class DependencyDownloader {
     private val DOWNLOAD_DIR = Path.of("launcher/dependencies")
+
+    fun downloadDependency(uri: URI) {
+        val jsonArray = JSONObject(String(uri.toURL().openStream().readAllBytes())).getJSONArray("dependencys")
+
+        jsonArray.forEach {
+            JSONObject(it)
+                .let { json ->
+                    if (json.getString("location") == "CUSTOM") {
+                        download(
+                            Dependency(
+                                json.getString("group"),
+                                json.getString("artifact"),
+                                json.getString("version"),
+                                json.getString("location"),
+                                json.getString("url")
+                            )
+                        )
+                    } else {
+                        download(
+                            Dependency(
+                                json.getString("group"),
+                                json.getString("artifact"),
+                                json.getString("version"),
+                                json.getString("location"),
+                                json.getString("url")
+                            )
+                        )
+                    }
+                }
+        }
+    }
 
     private fun download(dependency: Dependency) {
         this.DOWNLOAD_DIR.toFile().mkdirs()
