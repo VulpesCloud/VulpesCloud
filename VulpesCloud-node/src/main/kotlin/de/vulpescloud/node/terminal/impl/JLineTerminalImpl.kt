@@ -12,11 +12,12 @@ import org.jline.utils.InfoCmp
 import org.slf4j.LoggerFactory
 import java.nio.charset.StandardCharsets
 
-class JLineTerminalImpl(override var commandReadingThread: CommandReadingThread) : JLineTerminal {
+class JLineTerminalImpl : JLineTerminal {
 
     private val logger = LoggerFactory.getLogger(JLineTerminal::class.java)
     override lateinit var terminal: Terminal
     override lateinit var lineReader: LineReaderImpl
+    override var commandReadingThread: CommandReadingThread = CommandReadingThreadImpl(this)
 
     override fun initTerminal() {
         terminal = TerminalBuilder.builder()
