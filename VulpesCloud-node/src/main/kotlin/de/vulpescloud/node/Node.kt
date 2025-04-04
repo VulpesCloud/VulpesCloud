@@ -1,8 +1,6 @@
 package de.vulpescloud.node
 
-import de.vulpescloud.node.terminal.CommandReadingThread
 import de.vulpescloud.node.terminal.JLineTerminal
-import de.vulpescloud.node.terminal.impl.CommandReadingThreadImpl
 import de.vulpescloud.node.terminal.impl.JLineTerminalImpl
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject

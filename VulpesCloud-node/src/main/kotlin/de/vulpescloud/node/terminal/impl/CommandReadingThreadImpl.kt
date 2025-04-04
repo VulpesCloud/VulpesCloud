@@ -1,5 +1,6 @@
 package de.vulpescloud.node.terminal.impl
 
+import de.vulpescloud.node.NodeShutdown.ctrlCCloud
 import de.vulpescloud.node.terminal.CommandReadingThread
 import de.vulpescloud.node.terminal.JLineTerminal
 import org.jline.reader.EndOfFileException
@@ -35,7 +36,7 @@ class CommandReadingThreadImpl(private val terminal: JLineTerminal) : CommandRea
                     } catch (ignore: EndOfFileException) {
                     }
                 } catch (exception: UserInterruptException) {
-                    //NodeShutdown.forceShutdown(true)
+                    ctrlCCloud()
                 }
             } catch (exception: Exception) {
                 exception.printStackTrace()
