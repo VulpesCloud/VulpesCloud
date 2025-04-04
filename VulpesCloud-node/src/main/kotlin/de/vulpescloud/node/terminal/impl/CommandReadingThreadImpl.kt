@@ -1,12 +1,18 @@
 package de.vulpescloud.node.terminal.impl
 
 import de.vulpescloud.node.NodeShutdown.ctrlCCloud
+import de.vulpescloud.node.command.CommandProvider
+import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.terminal.CommandReadingThread
 import de.vulpescloud.node.terminal.JLineTerminal
 import org.jline.reader.EndOfFileException
 import org.jline.reader.UserInterruptException
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class CommandReadingThreadImpl(private val terminal: JLineTerminal) : CommandReadingThread, Thread() {
+class CommandReadingThreadImpl(private val terminal: JLineTerminal) : CommandReadingThread, KoinComponent, Thread() {
+
+    val commandProvider: CommandProvider by inject()
 
     init {
         contextClassLoader = ClassLoader.getSystemClassLoader()
@@ -30,7 +36,7 @@ class CommandReadingThreadImpl(private val terminal: JLineTerminal) : CommandRea
 //                            }
 //                            Node.instance.setupProvider.input(rawLine)
 //                        } else {
-//                            Node.instance.commandProvider.execute(CommandSource.console(), rawLine)
+                            commandProvider.execute(CommandSource.console(), rawLine)
 //                        }
 
                     } catch (ignore: EndOfFileException) {
@@ -45,7 +51,7 @@ class CommandReadingThreadImpl(private val terminal: JLineTerminal) : CommandRea
     }
 
     private fun prompt(): String {
-        return "# "
+        return "#> "
         //return ("&9" + Node.instance.config.name) + "&8@&7cloud &8» &7"
 
     }
