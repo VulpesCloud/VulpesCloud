@@ -14,4 +14,9 @@ object NodeShutdown : KoinComponent {
         exitProcess(0)
     }
 
+    fun commandShutdown() {
+        terminal.close()
+        exitProcess(0)
+    }
+
 }
