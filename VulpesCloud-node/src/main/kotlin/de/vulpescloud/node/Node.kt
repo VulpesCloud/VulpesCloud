@@ -11,8 +11,8 @@ import org.koin.dsl.module
 
 class Node : KoinComponent {
     private val nodeModule = module {
-        single<CommandReadingThread> { CommandReadingThreadImpl(get()) }
         single<JLineTerminal> { JLineTerminalImpl(get()) }
+        single<CommandReadingThread> { CommandReadingThreadImpl(get()) }
     }
 
     private val terminal: JLineTerminal by inject()
