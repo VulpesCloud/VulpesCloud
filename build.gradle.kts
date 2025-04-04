@@ -52,6 +52,7 @@ allprojects {
         "implementation"(rootProject.libs.gson)
         "implementation"(rootProject.libs.guava)
         "implementation"(kotlin("reflect"))
+        "compileOnly"(rootProject.libs.koin)
     }
 
     publishing {

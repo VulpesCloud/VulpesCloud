@@ -33,6 +33,9 @@ kSpigot = "1.21.0"
 paper = "1.21.1-R0.1-SNAPSHOT"
 velocity = "3.4.0-SNAPSHOT"
 
+# dependency injection
+koin = "4.1.0-Beta6"
+
 # config
 
 night-config = "3.8.1"
@@ -85,6 +88,9 @@ cloud-processors-confirmation = { group = "org.incendo", name = "cloud-processor
 kSpigot = { group = "net.axay", name = "kspigot", version.ref = "kSpigot" }
 paper = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
 velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
+
+# depdendency injection
+koin = { group = "io.insert-koin", name = "koin-core", version.ref = "koin"}
 
 # config
 
