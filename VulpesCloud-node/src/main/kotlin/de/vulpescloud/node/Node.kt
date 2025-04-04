@@ -23,6 +23,8 @@ class Node : KoinComponent {
         }
         terminal.initTerminal()
 
+        terminal.allowInput()
+
     }
 
 }
