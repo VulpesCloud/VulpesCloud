@@ -12,7 +12,7 @@ import org.koin.core.component.inject
 
 class CommandReadingThreadImpl(private val terminal: JLineTerminal) : CommandReadingThread, KoinComponent, Thread() {
 
-    val commandProvider: CommandProvider by inject()
+    private val commandProvider: CommandProvider by inject()
 
     init {
         contextClassLoader = ClassLoader.getSystemClassLoader()

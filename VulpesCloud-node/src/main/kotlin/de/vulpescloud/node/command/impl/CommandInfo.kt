@@ -23,4 +23,13 @@ data class CommandInfo(
     override fun hashCode(): Int {
         return Objects.hash(this.name)
     }
+
+    fun joinNameToAliases(separator: String): String {
+        var result = this.name
+        if (aliases.isNotEmpty()) {
+            result += separator + java.lang.String.join(separator, this.aliases)
+        }
+
+        return result
+    }
 }
