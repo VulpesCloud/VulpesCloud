@@ -4,6 +4,7 @@ import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.command.impl.CommandProviderImpl
 import de.vulpescloud.node.commands.ExitCommand
 import de.vulpescloud.node.commands.HelpCommand
+import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.terminal.JLineTerminal
 import de.vulpescloud.node.terminal.impl.JLineTerminalImpl
 import org.koin.core.component.KoinComponent
@@ -13,18 +14,20 @@ import org.koin.dsl.module
 
 class Node : KoinComponent {
     private val nodeModule = module {
-        single<JLineTerminal> { JLineTerminalImpl() }
-        single<CommandProvider> {CommandProviderImpl()}
+        single<JLineTerminal> { JLineTerminalImpl(get()) }
+        single<CommandProvider> { CommandProviderImpl() }
+        single { NodeConfig() }
     }
 
     private val terminal: JLineTerminal by inject()
     private val commandProvider: CommandProvider by inject()
+    private val config: NodeConfig by inject()
 
     init {
-        startKoin {
-            modules(nodeModule)
-        }
+        startKoin { modules(nodeModule) }
         terminal.initTerminal()
+
+        config.initializeConfig()
 
         commandProvider.initialize()
 
@@ -32,7 +35,5 @@ class Node : KoinComponent {
         commandProvider.register(HelpCommand(commandProvider))
 
         terminal.allowInput()
-
     }
-
 }
