@@ -3,6 +3,7 @@ package de.vulpescloud.node
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.command.impl.CommandProviderImpl
 import de.vulpescloud.node.commands.ExitCommand
+import de.vulpescloud.node.commands.HelpCommand
 import de.vulpescloud.node.terminal.JLineTerminal
 import de.vulpescloud.node.terminal.impl.JLineTerminalImpl
 import org.koin.core.component.KoinComponent
@@ -28,6 +29,7 @@ class Node : KoinComponent {
         commandProvider.initialize()
 
         commandProvider.register(ExitCommand())
+        commandProvider.register(HelpCommand(commandProvider))
 
         terminal.allowInput()
 
