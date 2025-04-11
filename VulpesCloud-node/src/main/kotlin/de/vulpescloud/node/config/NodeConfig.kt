@@ -2,6 +2,7 @@ package de.vulpescloud.node.config
 
 import com.electronwill.nightconfig.core.file.FileConfig
 import com.electronwill.nightconfig.json.JsonFormat
+import de.vulpescloud.api.lang.Languages
 import java.util.*
 import org.slf4j.LoggerFactory
 
@@ -55,7 +56,7 @@ class NodeConfig {
             getEntry("mysql.ssl", false),
         )
 
-    // fun language() = Languages.valueOf(getEntry("language", "en_US"))
+    fun language() = Languages.valueOf(getEntry("language", "en_US"))
     fun ranFirstSetup() = getEntry("ranFirstSetup", false)
 
     fun serviceStopTimeout() = getEntry("service_stop_timeout", 15)

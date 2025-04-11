@@ -1,5 +1,6 @@
 package de.vulpescloud.node
 
+import de.vulpescloud.api.lang.Translator
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.command.impl.CommandProviderImpl
 import de.vulpescloud.node.commands.ExitCommand
@@ -17,17 +18,22 @@ class Node : KoinComponent {
         single<JLineTerminal> { JLineTerminalImpl(get()) }
         single<CommandProvider> { CommandProviderImpl() }
         single { NodeConfig() }
+        single { Translator() }
     }
 
     private val terminal: JLineTerminal by inject()
     private val commandProvider: CommandProvider by inject()
     private val config: NodeConfig by inject()
+    private val translator: Translator by inject()
 
     init {
         startKoin { modules(nodeModule) }
         terminal.initTerminal()
 
         config.initializeConfig()
+
+        translator.setLang(config.language())
+        translator.loadFromDefaultClassPath()
 
         commandProvider.initialize()
 
