@@ -2,6 +2,7 @@ package de.vulpescloud.node.command.impl
 
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.google.common.collect.Iterables
+import de.vulpescloud.api.lang.Translator
 import de.vulpescloud.node.command.CloudCommandManager
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.command.CommandSource
@@ -22,7 +23,9 @@ import java.time.Duration
 import java.util.*
 import java.util.concurrent.CompletableFuture
 
-class CommandProviderImpl : CommandProvider {
+class CommandProviderImpl(
+    private val translator: Translator
+) : CommandProvider {
 
     private val aliasKey: CloudKey<Array<String>>? = CloudKey.of("vulpescloud:alias", Array<String>::class.java)
     private val descriptionKey: CloudKey<String> = CloudKey.of(
@@ -59,7 +62,11 @@ class CommandProviderImpl : CommandProvider {
                 if (description.description.trim { it <= ' ' }.isNotEmpty()) {
                     return@registerBuilderModifier builder.meta<String>(
                         this.descriptionKey,
-                        description.description
+                        if (description.translatable) {
+                            translator.trans(description.description)
+                        } else {
+                            description.description
+                        }
                     )
                 }
                 builder
