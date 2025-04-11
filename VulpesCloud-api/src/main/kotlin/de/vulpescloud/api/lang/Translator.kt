@@ -24,9 +24,9 @@ class Translator {
     @OptIn(DelicateCoroutinesApi::class)
     fun loadFromDefaultClassPath() {
         GlobalScope.launch {
-            Files.createDirectory(langDir)
+            Files.createDirectories(langDir)
             val finalLangDir = langDir.resolve(lang.name)
-            Files.createDirectory(finalLangDir)
+            Files.createDirectories(finalLangDir)
 
             this::class.java.classLoader.getResourceAsStream("lang/${lang.name}").let {
                 if (it == null) {
