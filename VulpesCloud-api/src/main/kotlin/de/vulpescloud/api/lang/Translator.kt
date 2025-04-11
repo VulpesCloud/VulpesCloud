@@ -52,7 +52,7 @@ class Translator {
                         jarFile.getInputStream(entry).use { input ->
                             Files.createDirectories(outPath.parent)
                             Files.copy(input, outPath, StandardCopyOption.REPLACE_EXISTING)
-                            logger.debug("Copied file: &m{} &7to <yellow>{}", entry.name, outPath)
+                            logger.debug("Copied file: &m{} &7to <yellow>{} &7additional &b{}", entry.name, outPath, outPath.toFile().absolutePath)
                         }
                     }
             }
