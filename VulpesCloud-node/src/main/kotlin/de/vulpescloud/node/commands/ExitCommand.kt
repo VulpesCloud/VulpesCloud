@@ -7,7 +7,7 @@ import de.vulpescloud.node.command.annotations.Description
 import org.incendo.cloud.annotations.Command
 
 @Suppress("UNUSED")
-@Description("Shut down the Node(translate)")
+@Description("COMMANDS.DESCRIPTION.exit")
 @Alias(["stop", "shutdown"])
 class ExitCommand {
 

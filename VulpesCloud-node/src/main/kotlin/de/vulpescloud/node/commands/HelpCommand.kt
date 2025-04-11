@@ -5,15 +5,15 @@ import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.annotations.Alias
 import de.vulpescloud.node.command.annotations.Description
 import de.vulpescloud.node.command.impl.CommandInfo
+import java.util.stream.Stream
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
-import java.util.stream.Stream
 
 @Suppress("UNUSED")
-@Description("See all Commands!(translatable please!)", false)
+@Description("COMMANDS.DESCRIPTION.help")
 @Alias(["?"])
 class HelpCommand(private val commandProvider: CommandProvider) {
 
@@ -38,9 +38,7 @@ class HelpCommand(private val commandProvider: CommandProvider) {
     }
 
     @Command("help|? <command>")
-    fun sendSpecificHelp(
-        source: CommandSource,
-        @Argument("command") command: CommandInfo?) {
+    fun sendSpecificHelp(source: CommandSource, @Argument("command") command: CommandInfo?) {
         if (command != null) {
             source.sendMessage("Aliases: &m${command.joinNameToAliases(", ")}")
             source.sendMessage("Description: &m${command.description}")
@@ -50,5 +48,4 @@ class HelpCommand(private val commandProvider: CommandProvider) {
             source.sendMessage("&cInvalid command!")
         }
     }
-
 }
