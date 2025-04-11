@@ -45,9 +45,9 @@ class Translator {
                 val jarFile = connection.jarFile
 
                 jarFile.entries().asSequence()
-                    .filter { it.name.startsWith("lang/${lang.name}") && !it.isDirectory }
+                    .filter { it.name.startsWith("lang/${lang.name}/") && !it.isDirectory }
                     .forEach { entry ->
-                        val relativePath = entry.name.removePrefix("lang/${lang.name}")
+                        val relativePath = entry.name.removePrefix("lang/${lang.name}/")
                         val outPath = finalLangDir.resolve(relativePath)
                         jarFile.getInputStream(entry).use { input ->
                             Files.createDirectories(outPath.parent)
