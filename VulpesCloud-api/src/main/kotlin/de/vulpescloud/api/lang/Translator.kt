@@ -36,7 +36,7 @@ class Translator {
                     logger.error("Cannot get Language data, InputStream is null, check location of Language Data")
                     return@launch
                 }
-                Files.copy(it, finalLangDir, StandardCopyOption.REPLACE_EXISTING)
+                Files.copy(it, finalLangDir.resolve("test"), StandardCopyOption.REPLACE_EXISTING)
             }
             Files.walk(finalLangDir).filter { it.toString().endsWith(".json") }.forEach {
                 logger.debug("Loading JSON from file: &m${it.name}")
