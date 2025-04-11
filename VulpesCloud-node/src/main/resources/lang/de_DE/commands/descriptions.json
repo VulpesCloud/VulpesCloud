@@ -1,4 +1,4 @@
 {
-  "COMMANDS.DESCRIPTION.exit": "Stop the Cloud and all services running on it",
-  "COMMANDS.DESCRIPTION.help": "Shows information about all Commands"
+  "COMMANDS.DESCRIPTION.exit": "Stoppe die Cloud und alle Services die darauf laufen",
+  "COMMANDS.DESCRIPTION.help": "Zeigt informationen über alle commands"
 }

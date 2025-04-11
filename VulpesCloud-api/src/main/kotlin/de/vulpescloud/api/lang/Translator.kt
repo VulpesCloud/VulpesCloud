@@ -8,6 +8,7 @@ import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
+import kotlin.io.path.name
 import kotlin.io.path.readText
 
 class Translator {
@@ -28,6 +29,8 @@ class Translator {
             val finalLangDir = langDir.resolve(lang.name)
             Files.createDirectories(finalLangDir)
 
+            logger.info("Loading files for Language &m${lang.name}")
+
             this::class.java.classLoader.getResourceAsStream("lang/${lang.name}").let {
                 if (it == null) {
                     logger.error("Cannot get Language data, InputStream is null, check location of Language Data")
@@ -36,6 +39,7 @@ class Translator {
                 Files.copy(it, finalLangDir, StandardCopyOption.REPLACE_EXISTING)
             }
             Files.walk(finalLangDir).filter { it.toString().endsWith(".json") }.forEach {
+                logger.debug("Loading JSON from file: &m${it.name}")
                 JSONObject(it.readText()).let { json ->
                     val keys = json.keys()
                     while (keys.hasNext()) {
