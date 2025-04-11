@@ -31,6 +31,10 @@ class Translator {
 
             logger.info("Loading files for Language &m${lang.name}")
 
+            val res = this::class.java.classLoader.getResource("lang/${lang.name}")
+
+            logger.debug("${res.path};;;${res.protocol};;;$res")
+
             this::class.java.classLoader.getResourceAsStream("lang/${lang.name}").let {
                 if (it == null) {
                     logger.error("Cannot get Language data, InputStream is null, check location of Language Data")
