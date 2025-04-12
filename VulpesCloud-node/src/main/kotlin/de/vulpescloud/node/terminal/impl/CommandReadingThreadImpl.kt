@@ -14,11 +14,11 @@ import org.koin.core.component.inject
 
 class CommandReadingThreadImpl(
     private val terminal: JLineTerminal,
-    private val config: NodeConfig,
-    private val setupProvider: SetupProvider
+    private val config: NodeConfig
 ) : CommandReadingThread, KoinComponent, Thread() {
 
     private val commandProvider: CommandProvider by inject()
+    private val setupProvider: SetupProvider by inject()
 
     init {
         contextClassLoader = ClassLoader.getSystemClassLoader()
