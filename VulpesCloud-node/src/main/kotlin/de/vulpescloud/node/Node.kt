@@ -8,7 +8,6 @@ import de.vulpescloud.node.commands.HelpCommand
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.impl.SetupProviderImpl
-import de.vulpescloud.node.setup.setups.FirstSetup
 import de.vulpescloud.node.terminal.JLineTerminal
 import de.vulpescloud.node.terminal.impl.JLineTerminalImpl
 import org.koin.core.component.KoinComponent

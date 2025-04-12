@@ -57,7 +57,7 @@ class Translator {
                     }
             }
             Files.walk(finalLangDir).filter { it.toString().endsWith(".json") }.forEach {
-                logger.debug("Loading JSON from file: &m${it.name}")
+                logger.debug("Loading JSON from file: &m${it.parent.parent.name}/${it.parent.name}/${it.name}")
                 JSONObject(it.readText()).let { json ->
                     val keys = json.keys()
                     while (keys.hasNext()) {

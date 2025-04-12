@@ -19,8 +19,8 @@ class JLineTerminalImpl(config: NodeConfig) : JLineTerminal, KoinComponent {
 
     override lateinit var terminal: Terminal
     override lateinit var lineReader: LineReaderImpl
-    override var commandReadingThread: CommandReadingThread = CommandReadingThreadImpl(this, config)
     private val setupProvider: SetupProvider by inject()
+    override var commandReadingThread: CommandReadingThread = CommandReadingThreadImpl(this, config, setupProvider)
 
     override fun initTerminal() {
         terminal =

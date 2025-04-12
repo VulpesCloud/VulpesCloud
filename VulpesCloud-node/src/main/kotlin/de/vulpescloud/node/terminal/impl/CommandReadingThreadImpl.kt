@@ -4,6 +4,7 @@ import de.vulpescloud.node.NodeShutdown.ctrlCCloud
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.config.NodeConfig
+import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.terminal.CommandReadingThread
 import de.vulpescloud.node.terminal.JLineTerminal
 import org.jline.reader.EndOfFileException
@@ -14,6 +15,7 @@ import org.koin.core.component.inject
 class CommandReadingThreadImpl(
     private val terminal: JLineTerminal,
     private val config: NodeConfig,
+    private val setupProvider: SetupProvider
 ) : CommandReadingThread, KoinComponent, Thread() {
 
     private val commandProvider: CommandProvider by inject()
@@ -36,16 +38,15 @@ class CommandReadingThreadImpl(
                             continue
                         }
 
-                        //                        if (Node.instance.setupProvider.currentSetup !=
-                        // null) {
-                        //                            if (rawLine.equals("exit", true)) {
-                        //                                Node.instance.setupProvider.cancelSetup()
-                        //                                continue
-                        //                            }
-                        //                            Node.instance.setupProvider.input(rawLine)
-                        //                        } else {
-                        commandProvider.execute(CommandSource.console(), rawLine)
-                        //                        }
+                        if (setupProvider.currentSetup != null) {
+                            if (rawLine.equals("exit", true)) {
+                                setupProvider.cancelSetup()
+                                continue
+                            }
+                            setupProvider.input(rawLine)
+                        } else {
+                            commandProvider.execute(CommandSource.console(), rawLine)
+                        }
 
                     } catch (ignore: EndOfFileException) {}
                 } catch (exception: UserInterruptException) {
