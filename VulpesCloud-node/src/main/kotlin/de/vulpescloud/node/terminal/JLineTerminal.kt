@@ -17,6 +17,8 @@ interface JLineTerminal {
 
     fun printLine(line: String)
 
+    fun printSetup(line: String)
+
     fun close()
 
     fun updatePrompt(prompt: String)

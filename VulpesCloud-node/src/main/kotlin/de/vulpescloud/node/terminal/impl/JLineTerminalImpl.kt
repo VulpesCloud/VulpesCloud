@@ -1,6 +1,7 @@
 package de.vulpescloud.node.terminal.impl
 
 import de.vulpescloud.node.config.NodeConfig
+import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.terminal.CommandReadingThread
 import de.vulpescloud.node.terminal.JLineTerminal
 import java.nio.charset.StandardCharsets
@@ -12,7 +13,8 @@ import org.jline.terminal.Terminal
 import org.jline.terminal.TerminalBuilder
 import org.jline.utils.InfoCmp
 
-class JLineTerminalImpl(config: NodeConfig) : JLineTerminal {
+class JLineTerminalImpl(config: NodeConfig, private val setupProvider: SetupProvider) :
+    JLineTerminal {
 
     override lateinit var terminal: Terminal
     override lateinit var lineReader: LineReaderImpl
@@ -65,15 +67,31 @@ class JLineTerminalImpl(config: NodeConfig) : JLineTerminal {
     }
 
     override fun printLine(line: String) {
-        terminal.puts(InfoCmp.Capability.carriage_return)
-        terminal
-            .writer()
-            .println(
-                TerminalColorUtil.replaceColorCodes(line) +
-                    Ansi.ansi().a(Ansi.Attribute.RESET).toString()
-            )
-        terminal.flush()
-        update()
+        if (setupProvider.currentSetup == null) {
+            terminal.puts(InfoCmp.Capability.carriage_return)
+            terminal
+                .writer()
+                .println(
+                    TerminalColorUtil.replaceColorCodes(line) +
+                            Ansi.ansi().a(Ansi.Attribute.RESET).toString()
+                )
+            terminal.flush()
+            update()
+        }
+    }
+
+    override fun printSetup(line: String) {
+        if (setupProvider.currentSetup != null) {
+            terminal.puts(InfoCmp.Capability.carriage_return)
+            terminal
+                .writer()
+                .println(
+                    TerminalColorUtil.replaceColorCodes(line) +
+                            Ansi.ansi().a(Ansi.Attribute.RESET).toString()
+                )
+            terminal.flush()
+            update()
+        }
     }
 
     override fun close() {
