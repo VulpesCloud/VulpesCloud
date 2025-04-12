@@ -18,7 +18,7 @@ import org.koin.dsl.module
 
 class Node : KoinComponent {
     private val nodeModule = module {
-        single<JLineTerminal> { JLineTerminalImpl(get(), get()) }
+        single<JLineTerminal> { JLineTerminalImpl(get()) }
         single<CommandProvider> { CommandProviderImpl(get()) }
         single { NodeConfig() }
         single { Translator() }

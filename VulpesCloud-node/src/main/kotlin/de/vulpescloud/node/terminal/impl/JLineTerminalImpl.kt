@@ -12,13 +12,15 @@ import org.jline.reader.impl.LineReaderImpl
 import org.jline.terminal.Terminal
 import org.jline.terminal.TerminalBuilder
 import org.jline.utils.InfoCmp
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
 
-class JLineTerminalImpl(config: NodeConfig, private val setupProvider: SetupProvider) :
-    JLineTerminal {
+class JLineTerminalImpl(config: NodeConfig) : JLineTerminal, KoinComponent {
 
     override lateinit var terminal: Terminal
     override lateinit var lineReader: LineReaderImpl
     override var commandReadingThread: CommandReadingThread = CommandReadingThreadImpl(this, config)
+    private val setupProvider: SetupProvider by inject()
 
     override fun initTerminal() {
         terminal =
