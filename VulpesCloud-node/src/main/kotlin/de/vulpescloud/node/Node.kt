@@ -46,7 +46,5 @@ class Node : KoinComponent {
         commandProvider.register(HelpCommand(commandProvider))
 
         terminal.allowInput()
-
-        setupProvider.startSetup(FirstSetup())
     }
 }
