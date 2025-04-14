@@ -45,6 +45,7 @@ allprojects {
 
     repositories {
         mavenCentral()
+        maven("https://repo.vulpescloud.de/snapshots")
     }
 
     dependencies {

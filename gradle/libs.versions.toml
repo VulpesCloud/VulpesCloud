@@ -65,7 +65,7 @@ hikariCP = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikariCP" }
 mariadb-java-client = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.ref = "mariadb" }
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
-jedisWrapper = { group = "de.vulpescloud", name = "JedisWraper", version.ref = "jedisWrapper"}
+jedisWrapper = { group = "de.vulpescloud", name = "JedisWrapper", version.ref = "jedisWrapper"}
 
 # logging
 slf4jApi = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
