@@ -3,7 +3,6 @@ package de.vulpescloud.node.setup.setups
 import de.vulpescloud.api.lang.Languages
 import de.vulpescloud.api.lang.Translator
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.NodeShutdown
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.setup.Setup
 import de.vulpescloud.node.setup.annotations.SetupCancel
@@ -15,13 +14,14 @@ import de.vulpescloud.node.terminal.JLineTerminal
 import java.util.*
 import kotlin.concurrent.withLock
 import kotlin.properties.Delegates
+import kotlin.system.exitProcess
 
 @Suppress("Unused")
 class FirstSetup(
     private val terminal: JLineTerminal,
     private val translator: Translator,
     private val config: NodeConfig,
-    private val node: Node
+    private val node: Node,
 ) : Setup {
 
     private lateinit var name: String
@@ -93,12 +93,15 @@ class FirstSetup(
 
     @SetupQuestion(5, "SETUP.first-setup.QUESTION.redis.port", default = ["6379"])
     fun redisPort(port: String): Boolean {
-        val int = try {
-            port.toInt()
-        } catch (e: Exception) {
-            terminal.printSetup(translator.trans("SETUP.first-setup.QUESTION.redis.port.INVALID"))
-            return false
-        }
+        val int =
+            try {
+                port.toInt()
+            } catch (e: Exception) {
+                terminal.printSetup(
+                    translator.trans("SETUP.first-setup.QUESTION.redis.port.INVALID")
+                )
+                return false
+            }
         this.redisPort = int
         terminal.printSetup(translator.trans("SETUP.first-setup.QUESTION.redis.port.SUCCESS"))
         return true
@@ -131,12 +134,15 @@ class FirstSetup(
 
     @SetupQuestion(9, "SETUP.first-setup.QUESTION.mysql.port", default = ["3306"])
     fun mysqlPort(port: String): Boolean {
-        val int = try {
-            port.toInt()
-        } catch (e: Exception) {
-            terminal.printSetup(translator.trans("SETUP.first-setup.QUESTION.mysql.port.INVALID"))
-            return false
-        }
+        val int =
+            try {
+                port.toInt()
+            } catch (e: Exception) {
+                terminal.printSetup(
+                    translator.trans("SETUP.first-setup.QUESTION.mysql.port.INVALID")
+                )
+                return false
+            }
         this.mysqlPort = int
         terminal.printSetup(translator.trans("SETUP.first-setup.QUESTION.mysql.port.SUCCESS"))
         return true
@@ -146,17 +152,28 @@ class FirstSetup(
     fun mysqlSSL(ssl: String): Boolean {
         var newSSL = ssl
         when (newSSL) {
-            "yes" -> { newSSL = true.toString() }
-            "y" -> { newSSL = true.toString() }
-            "no" -> { newSSL = false.toString() }
-            "n" -> { newSSL = false.toString() }
+            "yes" -> {
+                newSSL = true.toString()
+            }
+            "y" -> {
+                newSSL = true.toString()
+            }
+            "no" -> {
+                newSSL = false.toString()
+            }
+            "n" -> {
+                newSSL = false.toString()
+            }
         }
-        val boolean = try {
-            newSSL.toBoolean()
-        } catch (e: Exception) {
-            terminal.printSetup(translator.trans("SETUP.first-setup.QUESTION.mysql.ssl.INVALID"))
-            return false
-        }
+        val boolean =
+            try {
+                newSSL.toBoolean()
+            } catch (e: Exception) {
+                terminal.printSetup(
+                    translator.trans("SETUP.first-setup.QUESTION.mysql.ssl.INVALID")
+                )
+                return false
+            }
         this.mysqlSSL = boolean
         terminal.printSetup(translator.trans("SETUP.first-setup.QUESTION.mysql.ssl.SUCCESS"))
         return true
@@ -172,7 +189,6 @@ class FirstSetup(
     @SetupFinish
     fun finish() {
         node.setupLock.withLock {
-
             config.config.update("redis.user", this.redisUser)
             config.config.update("redis.hostname", this.redisHostname)
             config.config.update("redis.port", this.redisPort)
@@ -196,7 +212,7 @@ class FirstSetup(
 
     @SetupCancel
     fun cancel() {
-        NodeShutdown.ctrlCCloud()
+        terminal.close()
+        exitProcess(0)
     }
-
 }
