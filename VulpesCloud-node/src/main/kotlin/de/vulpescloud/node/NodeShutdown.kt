@@ -1,5 +1,6 @@
 package de.vulpescloud.node
 
+import de.vulpescloud.jediswrapper.JedisWrapper
 import de.vulpescloud.node.terminal.JLineTerminal
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -15,6 +16,8 @@ object NodeShutdown : KoinComponent {
     }
 
     fun commandShutdown() {
+        JedisWrapper.getRC()?.shutdown()
+
         terminal.close()
         exitProcess(0)
     }

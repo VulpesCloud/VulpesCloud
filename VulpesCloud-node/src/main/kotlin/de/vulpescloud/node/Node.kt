@@ -1,6 +1,9 @@
 package de.vulpescloud.node
 
+import de.vulpescloud.api.cluster.AuthenticationProvider
 import de.vulpescloud.api.lang.Translator
+import de.vulpescloud.jediswrapper.JedisWrapper
+import de.vulpescloud.node.cluster.AuthenticationProviderImpl
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.command.impl.CommandProviderImpl
 import de.vulpescloud.node.commands.ExitCommand
@@ -27,6 +30,7 @@ class Node : KoinComponent {
         single { NodeConfig() }
         single { Translator() }
         single<SetupProvider> { SetupProviderImpl(get(), get()) }
+        single<AuthenticationProvider> { AuthenticationProviderImpl() }
     }
 
     private val terminal: JLineTerminal by inject()
@@ -34,6 +38,7 @@ class Node : KoinComponent {
     private val config: NodeConfig by inject()
     private val translator: Translator by inject()
     private val setupProvider: SetupProvider by inject()
+    private val authenticationProvider : AuthenticationProvider by inject()
 
     val setupLock = ReentrantLock()
     val setupCondition: Condition = setupLock.newCondition()
@@ -58,6 +63,16 @@ class Node : KoinComponent {
                 setupCondition.await()
             }
         }
+
+        val authProv = authenticationProvider as AuthenticationProviderImpl
+        authProv.initializeToken()
+
+        JedisWrapper.initializeRedisControllerWithSecret(
+            config.redis().password,
+            config.redis().port,
+            config.redis().hostname,
+            authenticationProvider.getAuthenticationToken()
+        )
 
         commandProvider.initialize()
 
