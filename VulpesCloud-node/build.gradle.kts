@@ -33,6 +33,7 @@ dependencies {
     compileOnly(libs.jline)
     compileOnly(libs.json)
     implementation(libs.jedis)
+    implementation(libs.jedisWrapper)
     compileOnly(libs.slf4jApi)
     implementation(libs.logbackCore)
     implementation(libs.logbackClassic)
