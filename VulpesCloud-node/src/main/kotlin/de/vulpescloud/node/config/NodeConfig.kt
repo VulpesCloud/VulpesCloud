@@ -25,7 +25,7 @@ class NodeConfig {
         }
     }
 
-    private val config: FileConfig =
+    val config: FileConfig =
         FileConfig.builder("config.json", JsonFormat.fancyInstance()).autosave().sync().build()
 
     fun initializeConfig() {

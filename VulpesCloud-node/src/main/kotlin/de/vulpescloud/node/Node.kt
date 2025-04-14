@@ -8,12 +8,17 @@ import de.vulpescloud.node.commands.HelpCommand
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.impl.SetupProviderImpl
+import de.vulpescloud.node.setup.setups.FirstSetup
 import de.vulpescloud.node.terminal.JLineTerminal
 import de.vulpescloud.node.terminal.impl.JLineTerminalImpl
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.locks.Condition
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 class Node : KoinComponent {
     private val nodeModule = module {
@@ -30,6 +35,9 @@ class Node : KoinComponent {
     private val translator: Translator by inject()
     private val setupProvider: SetupProvider by inject()
 
+    val setupLock = ReentrantLock()
+    val setupCondition: Condition = setupLock.newCondition()
+
     init {
         startKoin { modules(nodeModule) }
         terminal.initTerminal()
@@ -38,6 +46,18 @@ class Node : KoinComponent {
 
         translator.setLang(config.language())
         translator.loadFromDefaultClassPath()
+
+        if (!config.ranFirstSetup()) {
+            CompletableFuture.runAsync {
+                setupLock.withLock {
+                    terminal.allowInput()
+                    setupProvider.startSetup(FirstSetup(terminal, translator, config, this))
+                }
+            }
+            setupLock.withLock {
+                setupCondition.await()
+            }
+        }
 
         commandProvider.initialize()
 
