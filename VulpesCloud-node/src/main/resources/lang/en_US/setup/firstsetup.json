@@ -1,0 +1,34 @@
+{
+  "SETUP.first-setup.QUESTION.name": "What will this Node be named?",
+  "SETUP.first-setup.QUESTION.name.ANSWER.LONG": "The Name of the Node is too long!",
+  "SETUP.first-setup.QUESTION.name.ANSWER.EMPTY": "The Name of the Node cannot be empty!",
+  "SETUP.first-setup.QUESTION.name.ANSWER.SUCCESS": "Successfully set the Name of the Node.",
+
+  "SETUP.first-setup.QUESTION.redis.user": "What is the name of the Redis User?",
+  "SETUP.first-setup.QUESTION.redis.user.SUCCESS": "Successfully set the Redis User.",
+  "SETUP.first-setup.QUESTION.redis.password": "What is the Password of the Redis User?",
+  "SETUP.first-setup.QUESTION.redis.password.SUCCESS": "Successfully set the Redis Password.",
+  "SETUP.first-setup.QUESTION.redis.hostname": "What is the hostname of the Redis Server?",
+  "SETUP.first-setup.QUESTION.redis.hostname.SUCCESS": "Successfully set the Hostname of the Redis Server.",
+  "SETUP.first-setup.QUESTION.redis.port": "What is the Port of the Redis Server?",
+  "SETUP.first-setup.QUESTION.redis.port.INVALID": "The entered Port is Invalid!",
+  "SETUP.first-setup.QUESTION.redis.port.SUCCESS": "Successfully set the Port of the Redis Server.",
+
+  "SETUP.first-setup.QUESTION.mysql.user": "What is the name of the MySQL User?",
+  "SETUP.first-setup.QUESTION.mysql.user.SUCCESS": "Successfully set the MySQL User.",
+  "SETUP.first-setup.QUESTION.mysql.password": "What is the Password of the MySQL User?",
+  "SETUP.first-setup.QUESTION.mysql.password.SUCCESS": "Successfully set the MySQL Password.",
+  "SETUP.first-setup.QUESTION.mysql.hostname": "What is the hostname of the MySQL Server?",
+  "SETUP.first-setup.QUESTION.mysql.hostname.SUCCESS": "Successfully set the Hostname of the MySQL Server.",
+  "SETUP.first-setup.QUESTION.mysql.port": "What is the Port of the MySQL Server?",
+  "SETUP.first-setup.QUESTION.mysql.port.INVALID": "The entered Port is Invalid!",
+  "SETUP.first-setup.QUESTION.mysql.port.SUCCESS": "Successfully set the Port of the MySQL Server.",
+  "SETUP.first-setup.QUESTION.mysql.ssl": "Does the MySQL server use SSL?",
+  "SETUP.first-setup.QUESTION.mysql.ssl.INVALID": "The entered Port is Invalid!",
+  "SETUP.first-setup.QUESTION.mysql.ssl.SUCCESS": "Successfully set the Port of the MySQL Server.",
+  "SETUP.first-setup.QUESTION.mysql.database": "What is the name of the MySQL Database?",
+  "SETUP.first-setup.QUESTION.mysql.database.SUCCESS": "Successfully set the name of the MySQL Database.",
+
+  "SETUP.first-setup.QUESTION.language": "What language do you want to use?",
+  "SETUP.first-setup.QUESTION.language.SUCCESS": "Successfully set the Language!"
+}
