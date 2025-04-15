@@ -27,7 +27,7 @@ object JsonUtils : KoinComponent {
     }
 
     fun parsePubSubMessage(string: String): JSONObject {
-        val json =  JSONObject(string)
+        val json = JSONObject(string)
         if (json.has("secret") && json.getString("secret") == authenticationProvider.getAuthenticationToken()) {
             return JSONObject(json.getString("messages"))
         } else {

@@ -3,29 +3,16 @@ package de.vulpescloud.node.cluster
 import de.vulpescloud.api.cluster.AuthenticationProvider
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.jediswrapper.redis.ChannelListener
-import de.vulpescloud.node.utils.JsonUtils.parsePubSubMessage
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 
 class AuthenticationListener(private val authenticationProvider: AuthenticationProvider) :
     ChannelListener("VULPESCLOUD_NODEAUTHENTICATION") {
 
-        private val logger = LoggerFactory.getLogger(AuthenticationListener::class.java)
+    private val logger = LoggerFactory.getLogger(AuthenticationListener::class.java)
 
     override fun onMessage(message: String) {
-        val msg = try {
-            parsePubSubMessage(message)
-        } catch (e: Exception) {
-            val uncheckedJSON = JSONObject(message)
-            getRC()
-                ?.sendMessage(
-                    JSONObject().put("status", "UNAUTHORIZED").toString(),
-                    "VULPESCLOUD_NODEAUTHENTICATION_${uncheckedJSON.getString("nodeName")}",
-                )
-            logger.debug("Rejected Node {}", uncheckedJSON.getString("nodeName"))
-
-            return
-        }
+        val msg = JSONObject(message).getJSONObject("messages")
         val nodeName = msg.getString("nodeName")
         val secret = msg.getString("secret")
 
@@ -44,6 +31,7 @@ class AuthenticationListener(private val authenticationProvider: AuthenticationP
                 )
             logger.debug("Rejected Node $nodeName")
         }
-        // TODO in the future we will add the ability to blacklist nodes by Name and UUID, and we will check for that here
+        // TODO in the future we will add the ability to blacklist nodes by Name and UUID, and we
+        // will check for that here
     }
 }
