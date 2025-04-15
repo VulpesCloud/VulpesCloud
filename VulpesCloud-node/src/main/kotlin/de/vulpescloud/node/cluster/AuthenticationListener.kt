@@ -13,7 +13,19 @@ class AuthenticationListener(private val authenticationProvider: AuthenticationP
         private val logger = LoggerFactory.getLogger(AuthenticationListener::class.java)
 
     override fun onMessage(message: String) {
-        val msg = parsePubSubMessage(message)
+        val msg = try {
+            parsePubSubMessage(message)
+        } catch (e: Exception) {
+            val uncheckedJSON = JSONObject(message)
+            getRC()
+                ?.sendMessage(
+                    JSONObject().put("status", "UNAUTHORIZED").toString(),
+                    "VULPESCLOUD_NODEAUTHENTICATION_${uncheckedJSON.getString("nodeName")}",
+                )
+            logger.debug("Rejected Node {}", uncheckedJSON.getString("nodeName"))
+
+            return
+        }
         val nodeName = msg.getString("nodeName")
         val secret = msg.getString("secret")
 
