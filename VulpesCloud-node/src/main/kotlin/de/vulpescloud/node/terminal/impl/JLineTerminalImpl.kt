@@ -1,5 +1,6 @@
 package de.vulpescloud.node.terminal.impl
 
+import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.terminal.CommandReadingThread
@@ -21,6 +22,7 @@ class JLineTerminalImpl(config: NodeConfig) : JLineTerminal, KoinComponent {
     override lateinit var lineReader: LineReaderImpl
     override var commandReadingThread: CommandReadingThread = CommandReadingThreadImpl(this, config)
     private val setupProvider: SetupProvider by inject()
+    private val commandProvider: CommandProvider by inject()
 
     override fun initTerminal() {
         terminal =
@@ -34,7 +36,7 @@ class JLineTerminalImpl(config: NodeConfig) : JLineTerminal, KoinComponent {
         lineReader =
             LineReaderBuilder.builder()
                 .terminal(terminal)
-                // .completer(JLineCompleter())
+                .completer(JLineTabCompleter(setupProvider, commandProvider))
 
                 .option(LineReader.Option.AUTO_MENU_LIST, true)
                 .option(LineReader.Option.AUTO_GROUP, false)
