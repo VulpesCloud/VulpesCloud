@@ -8,6 +8,7 @@ import de.vulpescloud.node.cluster.AuthenticationProviderImpl
 import de.vulpescloud.node.cluster.ClusterProviderImpl
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.command.impl.CommandProviderImpl
+import de.vulpescloud.node.commands.ClusterCommand
 import de.vulpescloud.node.commands.ExitCommand
 import de.vulpescloud.node.commands.HelpCommand
 import de.vulpescloud.node.config.NodeConfig
@@ -83,6 +84,7 @@ class Node : KoinComponent {
 
         commandProvider.register(ExitCommand())
         commandProvider.register(HelpCommand(commandProvider))
+        commandProvider.register(ClusterCommand(clusterProvider))
 
         terminal.allowInput()
     }

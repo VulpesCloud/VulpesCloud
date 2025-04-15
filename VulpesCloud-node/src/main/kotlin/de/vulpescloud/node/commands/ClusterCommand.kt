@@ -6,7 +6,7 @@ import org.incendo.cloud.annotations.Command
 
 @Suppress("Unused")
 class ClusterCommand(
-    val clusterProvider: ClusterProvider
+    private val clusterProvider: ClusterProvider
 ) {
 
     @Command("cluster list")
