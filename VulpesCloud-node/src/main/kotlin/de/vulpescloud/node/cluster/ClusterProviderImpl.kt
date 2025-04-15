@@ -39,6 +39,28 @@ class ClusterProviderImpl(private val config: NodeConfig) : ClusterProvider {
         TODO("Not yet implemented")
     }
 
+    fun markOnline() {
+        getRC()
+            ?.setHashField(
+                "VULPESCLOUD_NODES",
+                config.name(),
+                JSONObject(
+                    ClusterNode(
+                        config.name(),
+                        config.uuid(),
+                        0,
+                        NodeStates.ONLINE,
+                        0,
+                        0,
+                        "2.0.0",
+                        true,
+                        config.hostname()
+                    )
+                )
+                    .toString(),
+            )
+    }
+
     fun initialize() {
         /**
          * The Plan is to check if there is a HeadNode Present in the Cluster if it is not present,
@@ -66,6 +88,7 @@ class ClusterProviderImpl(private val config: NodeConfig) : ClusterProvider {
                                 0,
                                 "2.0.0",
                                 true,
+                                config.hostname()
                             )
                         )
                         .toString(),
@@ -90,6 +113,7 @@ class ClusterProviderImpl(private val config: NodeConfig) : ClusterProvider {
                             0,
                             "0.0.0",
                             false,
+                            config.hostname()
                         )
                     )
                     .toString(),

@@ -25,6 +25,7 @@ import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
+import org.slf4j.LoggerFactory
 
 class Node : KoinComponent {
     private val nodeModule = module {
@@ -44,6 +45,8 @@ class Node : KoinComponent {
     private val setupProvider: SetupProvider by inject()
     private val authenticationProvider: AuthenticationProvider by inject()
     private val clusterProvider: ClusterProvider by inject()
+
+    private val logger = LoggerFactory.getLogger(Node::class.java)
 
     val setupLock = ReentrantLock()
     val setupCondition: Condition = setupLock.newCondition()
@@ -87,5 +90,12 @@ class Node : KoinComponent {
         commandProvider.register(ClusterCommand(clusterProvider))
 
         terminal.allowInput()
+
+        logger.info(
+            translator.trans("NODE.ONLINE"),
+            System.currentTimeMillis() - System.getProperty("startup").toLong()
+        )
+
+        clusterProv.markOnline()
     }
 }
