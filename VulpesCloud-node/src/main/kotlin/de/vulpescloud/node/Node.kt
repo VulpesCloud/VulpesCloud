@@ -35,7 +35,7 @@ class Node : KoinComponent {
         single { Translator() }
         single<SetupProvider> { SetupProviderImpl(get(), get()) }
         single<AuthenticationProvider> { AuthenticationProviderImpl() }
-        single<ClusterProvider> { ClusterProviderImpl(get()) }
+        single<ClusterProvider> { ClusterProviderImpl(get(), get()) }
     }
 
     private val terminal: JLineTerminal by inject()
