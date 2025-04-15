@@ -55,6 +55,7 @@ class ClusterProviderImpl(private val config: NodeConfig) : ClusterProvider {
         if (getHeadNode() != null && getHeadNode()?.uuid != config.uuid()) {
             // TODO do the authentication stuff
         } else if (getHeadNode() == null) {
+            logger.debug("No HeadNode is present, marking this node as Head")
 
             getRC()
                 ?.setHashField(
