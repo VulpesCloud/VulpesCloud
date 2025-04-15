@@ -12,7 +12,14 @@ class NodeUpdater {
     fun updateNode() {
         val wantedChecksum = ChecksumUtil.returnChecksumJson().getString("node")
         val target = File("launcher/dependencies/vulpescloud-node.jar")
-        val downloadUri = URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-node.jar")
+        val downloadUri =
+            if (config.autoUpdatesBranch() == "jenkins") {
+                URI(
+                    "https://jenkins.vulpescloud.de/job/VulpesCloud/lastSuccessfulBuild/artifact/VulpesCloud-node/build/libs/vulpescloud-node.jar"
+                )
+            } else {
+                URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-node.jar")
+            }
 
         FileUpdaterUtil.updateFile(target, downloadUri, wantedChecksum)
     }

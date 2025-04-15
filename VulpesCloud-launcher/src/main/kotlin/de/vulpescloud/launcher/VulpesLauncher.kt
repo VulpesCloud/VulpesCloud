@@ -39,8 +39,8 @@ import kotlin.system.exitProcess
 class VulpesLauncher {
     companion object {
         val CLASS_LOADER = VulpesClassLoader()
-        val DEPENDENCY_DIR: Path = Path.of("launcher/dependencies")
-        val githubURL = "https://github.com/VulpesCloud/VulpesCloud-meta/raw/"
+        private val DEPENDENCY_DIR: Path = Path.of("launcher/dependencies")
+        const val githubURL = "https://github.com/VulpesCloud/VulpesCloud-meta/raw/"
         val config = Config()
 
         @JvmStatic
@@ -73,32 +73,6 @@ class VulpesLauncher {
                     TimeUnit.SECONDS.sleep(5)
                 }
 
-                val apiFile = Path.of("launcher/dependencies/vulpescloud-api.jar").toFile()
-                val nodeFile = Path.of("launcher/dependencies/vulpescloud-node.jar").toFile()
-                val wrapperFile = Path.of("launcher/dependencies/vulpescloud-wrapper.jar").toFile()
-                val connectorFile = Path.of("launcher/dependencies/vulpescloud-connector.jar").toFile()
-                val bridgeFile = Path.of("launcher/dependencies/vulpescloud-bridge.jar").toFile()
-
-                if (!apiFile.exists()) {
-                    System.err.println("vulpescloud-api.jar not found in dependencies folder! Put the file there, or disable Development mode!")
-                    exitProcess(-1)
-                }
-                if (!nodeFile.exists()) {
-                    System.err.println("vulpescloud-node.jar not found in dependencies folder! Put the file there, or disable Development mode!")
-                    exitProcess(-1)
-                }
-                if (!wrapperFile.exists()) {
-                    System.err.println("vulpescloud-wrapper.jar not found in dependencies folder! Put the file there, or disable Development mode!")
-                    exitProcess(-1)
-                }
-                if (!connectorFile.exists()) {
-                    System.err.println("vulpescloud-connector.jar not found in dependencies folder! Put the file there, or disable Development mode!")
-                    exitProcess(-1)
-                }
-                if (!bridgeFile.exists()) {
-                    System.err.println("vulpescloud-bridge.jar not found in dependencies folder! Put the file there, or disable Development mode!")
-                    exitProcess(-1)
-                }
             } else {
                 APIUpdater().updateAPI()
                 BridgeUpdater().updateBridge()
