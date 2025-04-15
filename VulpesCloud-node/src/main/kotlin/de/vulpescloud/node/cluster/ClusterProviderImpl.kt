@@ -1,16 +1,20 @@
 package de.vulpescloud.node.cluster
 
+import de.vulpescloud.api.cluster.AuthenticationProvider
 import de.vulpescloud.api.cluster.ClusterNode
 import de.vulpescloud.api.cluster.ClusterProvider
 import de.vulpescloud.api.cluster.NodeStates
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.utils.JsonUtils.getClusterNode
+import java.util.*
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
-import java.util.*
 
-class ClusterProviderImpl(private val config: NodeConfig) : ClusterProvider {
+class ClusterProviderImpl(
+    private val config: NodeConfig,
+    private val authenticationProvider: AuthenticationProvider,
+) : ClusterProvider {
 
     private val logger = LoggerFactory.getLogger(ClusterProviderImpl::class.java)
 
@@ -45,18 +49,18 @@ class ClusterProviderImpl(private val config: NodeConfig) : ClusterProvider {
                 "VULPESCLOUD_NODES",
                 config.name(),
                 JSONObject(
-                    ClusterNode(
-                        config.name(),
-                        config.uuid(),
-                        0,
-                        NodeStates.ONLINE,
-                        0,
-                        0,
-                        "2.0.0",
-                        true,
-                        config.hostname()
+                        ClusterNode(
+                            config.name(),
+                            config.uuid(),
+                            0,
+                            NodeStates.ONLINE,
+                            0,
+                            0,
+                            "2.0.0",
+                            true,
+                            config.hostname(),
+                        )
                     )
-                )
                     .toString(),
             )
     }
@@ -70,7 +74,18 @@ class ClusterProviderImpl(private val config: NodeConfig) : ClusterProvider {
          * the authentication as we do not know that this node is a valid node.
          */
         if (getHeadNode() != null && getHeadNode()?.uuid != config.uuid()) {
-            // TODO do the authentication stuff
+
+            TemporaryAuthenticationListener(config)
+
+            getRC()
+                ?.sendMessage(
+                    JSONObject()
+                        .put("nodeName", config.name())
+                        .put("nodeUUID", config.uuid())
+                        .put("secret", authenticationProvider.getAuthenticationToken())
+                        .toString(),
+                    "VULPESCLOUD_NODEAUTHENTICATION",
+                )
         } else if (getHeadNode() == null) {
             logger.debug("No HeadNode is present, marking this node as Head")
 
@@ -88,11 +103,14 @@ class ClusterProviderImpl(private val config: NodeConfig) : ClusterProvider {
                                 0,
                                 "2.0.0",
                                 true,
-                                config.hostname()
+                                config.hostname(),
                             )
                         )
                         .toString(),
                 )
+
+            logger.debug("Starting Authentication Listener")
+            AuthenticationListener(authenticationProvider)
         }
     }
 
@@ -113,7 +131,7 @@ class ClusterProviderImpl(private val config: NodeConfig) : ClusterProvider {
                             0,
                             "0.0.0",
                             false,
-                            config.hostname()
+                            config.hostname(),
                         )
                     )
                     .toString(),
