@@ -88,7 +88,7 @@ class ClusterProviderImpl(private val config: NodeConfig) : ClusterProvider {
                             NodeStates.OFFLINE,
                             0,
                             0,
-                            "2.0.0",
+                            "0.0.0",
                             false,
                         )
                     )

@@ -16,7 +16,7 @@ object JsonUtils {
             json.getInt("currentMemoryUsage"),
             json.getInt("maxMemoryUsage"),
             json.getString("cloudVersion"),
-            json.getBoolean("isHeadNode")
+            json.getBoolean("headNode")
         )
     }
 
