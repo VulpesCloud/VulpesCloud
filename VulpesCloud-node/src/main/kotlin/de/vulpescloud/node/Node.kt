@@ -2,6 +2,7 @@ package de.vulpescloud.node
 
 import de.vulpescloud.api.cluster.AuthenticationProvider
 import de.vulpescloud.api.cluster.ClusterProvider
+import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.lang.Translator
 import de.vulpescloud.jediswrapper.JedisWrapper
 import de.vulpescloud.node.cluster.AuthenticationProviderImpl
@@ -13,6 +14,7 @@ import de.vulpescloud.node.commands.ClusterCommand
 import de.vulpescloud.node.commands.ExitCommand
 import de.vulpescloud.node.commands.HelpCommand
 import de.vulpescloud.node.config.NodeConfig
+import de.vulpescloud.node.event.EventManagerImpl
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.impl.SetupProviderImpl
 import de.vulpescloud.node.setup.setups.FirstSetup
@@ -37,6 +39,7 @@ class Node : KoinComponent {
         single<SetupProvider> { SetupProviderImpl(get(), get()) }
         single<AuthenticationProvider> { AuthenticationProviderImpl() }
         single<ClusterProvider> { ClusterProviderImpl(get(), get()) }
+        single<EventManager> { EventManagerImpl() }
     }
 
     private val terminal: JLineTerminal by inject()
