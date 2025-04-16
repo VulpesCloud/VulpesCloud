@@ -12,7 +12,7 @@ class AuthenticationListener(private val authenticationProvider: AuthenticationP
     private val logger = LoggerFactory.getLogger(AuthenticationListener::class.java)
 
     override fun onMessage(message: String) {
-        val msg = JSONObject(message).getJSONObject("message")
+        val msg = JSONObject(JSONObject(message).getString("message"))
         val nodeName = msg.getString("nodeName")
         val secret = msg.getString("secret")
 
