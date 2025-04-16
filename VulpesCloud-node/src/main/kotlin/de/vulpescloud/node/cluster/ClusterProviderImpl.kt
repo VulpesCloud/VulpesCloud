@@ -4,6 +4,8 @@ import de.vulpescloud.api.cluster.AuthenticationProvider
 import de.vulpescloud.api.cluster.ClusterNode
 import de.vulpescloud.api.cluster.ClusterProvider
 import de.vulpescloud.api.cluster.NodeStates
+import de.vulpescloud.api.event.EventManager
+import de.vulpescloud.api.event.events.cluster.NodeStateChangeEvent
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.utils.JsonUtils.getClusterNode
@@ -14,6 +16,7 @@ import org.slf4j.LoggerFactory
 class ClusterProviderImpl(
     private val config: NodeConfig,
     private val authenticationProvider: AuthenticationProvider,
+    private val eventManager: EventManager,
 ) : ClusterProvider {
 
     private val logger = LoggerFactory.getLogger(ClusterProviderImpl::class.java)
@@ -44,25 +47,20 @@ class ClusterProviderImpl(
     }
 
     fun markOnline() {
-        getRC()
-            ?.setHashField(
-                "VULPESCLOUD_NODES",
+        val node =
+            ClusterNode(
                 config.name(),
-                JSONObject(
-                        ClusterNode(
-                            config.name(),
-                            config.uuid(),
-                            0,
-                            NodeStates.ONLINE,
-                            0,
-                            0,
-                            "2.0.0",
-                            true,
-                            config.hostname(),
-                        )
-                    )
-                    .toString(),
+                config.uuid(),
+                0,
+                NodeStates.ONLINE,
+                0,
+                0,
+                "2.0.0",
+                nodeByUUID(config.uuid())!!.isHeadNode,
+                config.hostname(),
             )
+        getRC()?.setHashField("VULPESCLOUD_NODES", config.name(), JSONObject(node).toString())
+        eventManager.call(NodeStateChangeEvent(node, NodeStates.BOOTING, NodeStates.ONLINE))
     }
 
     fun initialize() {
@@ -75,7 +73,7 @@ class ClusterProviderImpl(
          */
         if (getHeadNode() != null && getHeadNode()?.uuid != config.uuid()) {
 
-            TemporaryAuthenticationListener(config)
+            TemporaryAuthenticationListener(config, eventManager)
 
             getRC()
                 ?.sendMessage(
