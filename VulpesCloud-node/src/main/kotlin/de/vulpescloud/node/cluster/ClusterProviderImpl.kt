@@ -72,6 +72,7 @@ class ClusterProviderImpl(
          * the authentication as we do not know that this node is a valid node.
          */
         if (getHeadNode() != null && getHeadNode()?.uuid != config.uuid()) {
+            logger.debug("Sending Authentication Request to HeadNode. Using secret ${authenticationProvider.getAuthenticationToken()}")
 
             TemporaryAuthenticationListener(config, eventManager)
 
