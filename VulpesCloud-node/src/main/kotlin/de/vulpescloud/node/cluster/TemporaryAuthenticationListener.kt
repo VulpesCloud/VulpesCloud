@@ -19,7 +19,7 @@ class TemporaryAuthenticationListener(
     private val logger = LoggerFactory.getLogger(TemporaryAuthenticationListener::class.java)
 
     override fun onMessage(message: String) {
-        val msg = JSONObject(message).getJSONObject("messages")
+        val msg = JSONObject(message).getJSONObject("message")
         if (msg.getString("status") == "AUTHENTICATED") {
             logger.info("Successfully authenticated with the Head Node!")
 
