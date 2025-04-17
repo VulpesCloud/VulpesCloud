@@ -28,10 +28,11 @@ object JsonUtils : KoinComponent {
 
     fun parsePubSubMessage(string: String): JSONObject {
         val json = JSONObject(string)
-        if (json.has("secret") && json.getString("secret") == authenticationProvider.getAuthenticationToken()) {
-            return JSONObject(json.getString("message"))
+        return if (json.has("secret") && json.getString("secret") == authenticationProvider.getAuthenticationToken()) {
+            JSONObject(json.getString("message"))
         } else {
-            throw IllegalAccessError("trying to parse message while secret is invalid")
+            JSONObject()
+                .put("type", "INVALID_SECRET")
         }
     }
 
