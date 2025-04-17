@@ -1,10 +1,13 @@
 package de.vulpescloud.api.cluster
 
+import de.vulpescloud.api.json.UUIDSerializer
+import kotlinx.serialization.Serializable
 import java.util.UUID
 
+@Serializable
 data class ClusterNode(
     val name: String,
-    val uuid: UUID,
+    @Serializable(with = UUIDSerializer::class) val uuid: UUID,
     var runningServices: Int,
     var state: NodeStates,
     var currentMemoryUsage: Int,
