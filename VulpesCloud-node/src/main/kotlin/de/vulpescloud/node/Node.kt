@@ -16,7 +16,13 @@ import de.vulpescloud.node.commands.HelpCommand
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.event.EventManagerImpl
 import de.vulpescloud.node.event.listeners.cluster.NodeStateChangeEventListener
+import de.vulpescloud.node.event.listeners.module.ModuleLoadEventListener
+import de.vulpescloud.node.event.listeners.module.ModuleStartEventListener
+import de.vulpescloud.node.event.listeners.module.ModuleUnloadEventListener
 import de.vulpescloud.node.event.redis.cluster.NodeStateChangeEventTrigger
+import de.vulpescloud.node.event.redis.module.ModuleLoadEventTrigger
+import de.vulpescloud.node.event.redis.module.ModuleStartEventTrigger
+import de.vulpescloud.node.event.redis.module.ModuleUnloadEventTrigger
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.impl.SetupProviderImpl
 import de.vulpescloud.node.setup.setups.FirstSetup
@@ -90,8 +96,15 @@ class Node : KoinComponent {
         val clusterProv = clusterProvider as ClusterProviderImpl
         clusterProv.initialize()
 
-        eventManager.registerListener(NodeStateChangeEventListener(translator))
         NodeStateChangeEventTrigger(eventManager)
+        ModuleLoadEventTrigger(eventManager)
+        ModuleUnloadEventTrigger(eventManager)
+        ModuleStartEventTrigger(eventManager)
+
+        eventManager.registerListener(NodeStateChangeEventListener(translator))
+        eventManager.registerListener(ModuleLoadEventListener(translator, clusterProvider))
+        eventManager.registerListener(ModuleStartEventListener(translator, clusterProvider))
+        eventManager.registerListener(ModuleUnloadEventListener(translator, clusterProvider))
 
         commandProvider.initialize()
 
