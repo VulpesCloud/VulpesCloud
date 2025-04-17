@@ -15,6 +15,8 @@ import de.vulpescloud.node.commands.ExitCommand
 import de.vulpescloud.node.commands.HelpCommand
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.event.EventManagerImpl
+import de.vulpescloud.node.event.listeners.cluster.NodeStateChangeEventListener
+import de.vulpescloud.node.event.redis.cluster.NodeStateChangeEventTrigger
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.impl.SetupProviderImpl
 import de.vulpescloud.node.setup.setups.FirstSetup
@@ -49,6 +51,7 @@ class Node : KoinComponent {
     private val setupProvider: SetupProvider by inject()
     private val authenticationProvider: AuthenticationProvider by inject()
     private val clusterProvider: ClusterProvider by inject()
+    private val eventManager: EventManager by inject()
 
     private val logger = LoggerFactory.getLogger(Node::class.java)
 
@@ -86,6 +89,9 @@ class Node : KoinComponent {
 
         val clusterProv = clusterProvider as ClusterProviderImpl
         clusterProv.initialize()
+
+        eventManager.registerListener(NodeStateChangeEventListener(translator))
+        NodeStateChangeEventTrigger(eventManager)
 
         commandProvider.initialize()
 
