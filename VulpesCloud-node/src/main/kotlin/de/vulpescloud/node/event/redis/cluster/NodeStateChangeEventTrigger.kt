@@ -24,11 +24,13 @@ class NodeStateChangeEventTrigger(
             return
         }
 
+        val event = msg.getJSONObject("eventData")
+
         eventManager.callLocal(
             NodeStateChangeEvent(
-                getClusterNode(msg.getJSONObject("node")),
-                NodeStates.valueOf(msg.getString("oldState")),
-                NodeStates.valueOf(msg.getString("newState"))
+                getClusterNode(event.getJSONObject("node")),
+                NodeStates.valueOf(event.getString("oldState")),
+                NodeStates.valueOf(event.getString("newState"))
             )
         )
     }
