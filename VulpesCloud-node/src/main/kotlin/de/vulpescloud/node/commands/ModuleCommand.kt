@@ -55,7 +55,7 @@ class ModuleCommand(private val moduleProvider: ModuleProvider) {
     @Command("module|modules load <moduleFile>")
     fun loadModule(
         source: CommandSource,
-        @Argument("moduleFiles", parserName = "modulesPath") file: File
+        @Argument("moduleFile", parserName = "modulesPath") file: File
     ) {
         source.sendMessage("Trying to load the Module!")
         moduleProvider.loadModule(file)
