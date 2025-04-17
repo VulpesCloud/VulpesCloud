@@ -14,4 +14,6 @@ interface ClusterProvider {
 
     fun filterByState(state: NodeStates): List<ClusterNode>
 
+    fun localNode(): ClusterNode
+
 }

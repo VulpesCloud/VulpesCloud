@@ -49,6 +49,10 @@ class ClusterProviderImpl(
         TODO("Not yet implemented")
     }
 
+    override fun localNode(): ClusterNode {
+        return nodeByUUID(config.uuid())!!
+    }
+
     fun markOnline() {
         val node =
             ClusterNode(
