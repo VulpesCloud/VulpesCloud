@@ -7,5 +7,5 @@ import de.vulpescloud.api.event.Event
 data class NodeStateChangeEvent(
     val node: ClusterNode,
     val oldState: NodeStates,
-    val newStates: NodeStates
+    val newState: NodeStates
 ) : Event

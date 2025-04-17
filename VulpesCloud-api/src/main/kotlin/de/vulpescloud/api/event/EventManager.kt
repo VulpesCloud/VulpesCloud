@@ -4,7 +4,7 @@ interface EventManager {
 
     fun registerListener(listener: Any): EventManager
 
-    fun call(event: Event)
+    fun callLocal(event: Event)
 
     fun unregisterListener(listener: Any): EventManager
 

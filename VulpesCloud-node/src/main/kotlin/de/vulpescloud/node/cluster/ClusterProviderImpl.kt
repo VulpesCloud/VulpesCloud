@@ -6,8 +6,10 @@ import de.vulpescloud.api.cluster.ClusterProvider
 import de.vulpescloud.api.cluster.NodeStates
 import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.event.events.cluster.NodeStateChangeEvent
+import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.config.NodeConfig
+import de.vulpescloud.node.event.EventManagerImpl
 import de.vulpescloud.node.utils.JsonUtils.getClusterNode
 import java.util.*
 import org.json.JSONObject
@@ -16,10 +18,11 @@ import org.slf4j.LoggerFactory
 class ClusterProviderImpl(
     private val config: NodeConfig,
     private val authenticationProvider: AuthenticationProvider,
-    private val eventManager: EventManager,
+    eventManager: EventManager,
 ) : ClusterProvider {
 
     private val logger = LoggerFactory.getLogger(ClusterProviderImpl::class.java)
+    private val eventManager = eventManager as EventManagerImpl
 
     override fun nodes(): List<ClusterNode> {
         val nodes = mutableListOf<ClusterNode>()
@@ -59,20 +62,20 @@ class ClusterProviderImpl(
                 nodeByUUID(config.uuid())!!.isHeadNode,
                 config.hostname(),
             )
+
+        eventManager.callGlobal(
+            NodeStateChangeEvent(node, nodeByUUID(config.uuid())!!.state, NodeStates.ONLINE),
+            RedisChannels.VULPESCLOUD_EVENT_CLUSTER_NodeStateChangeEvent,
+        )
+
         getRC()?.setHashField("VULPESCLOUD_NODES", config.name(), JSONObject(node).toString())
-        eventManager.call(NodeStateChangeEvent(node, NodeStates.BOOTING, NodeStates.ONLINE))
     }
 
     fun initialize() {
-        /**
-         * The Plan is to check if there is a HeadNode Present in the Cluster if it is not present,
-         * we will mark this node as HeadNode if it is present, we want to authenticate, this node
-         * will send an auth message into a Redis Channel, where we send the name of the Channel
-         * used for the authentication messages, this is so that other Nodes cannot interfere with
-         * the authentication as we do not know that this node is a valid node.
-         */
         if (getHeadNode() != null && getHeadNode()?.uuid != config.uuid()) {
-            logger.debug("Sending Authentication Request to HeadNode. Using secret ${authenticationProvider.getAuthenticationToken()}")
+            logger.debug(
+                "Sending Authentication Request to HeadNode. Using secret ${authenticationProvider.getAuthenticationToken()}"
+            )
 
             TemporaryAuthenticationListener(config, eventManager)
 

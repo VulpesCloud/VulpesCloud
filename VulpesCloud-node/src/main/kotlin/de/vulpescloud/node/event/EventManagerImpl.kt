@@ -4,6 +4,9 @@ import de.vulpescloud.api.event.Event
 import de.vulpescloud.api.event.EventListener
 import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.event.RegisteredListener
+import de.vulpescloud.api.redis.RedisChannels
+import de.vulpescloud.jediswrapper.JedisWrapper.getRC
+import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import kotlin.reflect.full.*
 import kotlin.reflect.jvm.jvmName
@@ -42,12 +45,22 @@ class EventManagerImpl : EventManager {
         return this
     }
 
-    override fun call(event: Event) {
+    override fun callLocal(event: Event) {
         val allHandlers = listeners.values.flatten().sortedBy { it.order }
 
         for (registered in allHandlers) {
             registered.handler(event)
         }
+    }
+
+    fun callGlobal(event: Event, channel: RedisChannels) {
+        getRC()?.sendMessage(
+            JSONObject()
+                .put("type", "EVENT")
+                .put("eventData", JSONObject(event))
+                .toString(),
+            channel.name
+        )
     }
 
     override fun unregisterListener(listener: Any): EventManager {
