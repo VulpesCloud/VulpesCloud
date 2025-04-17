@@ -9,10 +9,7 @@ import de.vulpescloud.node.cluster.AuthenticationProviderImpl
 import de.vulpescloud.node.cluster.ClusterProviderImpl
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.command.impl.CommandProviderImpl
-import de.vulpescloud.node.commands.ClearCommand
-import de.vulpescloud.node.commands.ClusterCommand
-import de.vulpescloud.node.commands.ExitCommand
-import de.vulpescloud.node.commands.HelpCommand
+import de.vulpescloud.node.commands.*
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.event.EventManagerImpl
 import de.vulpescloud.node.event.listeners.cluster.NodeStateChangeEventListener
@@ -23,6 +20,8 @@ import de.vulpescloud.node.event.redis.cluster.NodeStateChangeEventTrigger
 import de.vulpescloud.node.event.redis.module.ModuleLoadEventTrigger
 import de.vulpescloud.node.event.redis.module.ModuleStartEventTrigger
 import de.vulpescloud.node.event.redis.module.ModuleUnloadEventTrigger
+import de.vulpescloud.node.module.ModuleProvider
+import de.vulpescloud.node.module.impl.ModuleProviderImpl
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.impl.SetupProviderImpl
 import de.vulpescloud.node.setup.setups.FirstSetup
@@ -48,6 +47,7 @@ class Node : KoinComponent {
         single<AuthenticationProvider> { AuthenticationProviderImpl() }
         single<EventManager> { EventManagerImpl() }
         single<ClusterProvider> { ClusterProviderImpl(get(), get(), get()) }
+        single<ModuleProvider> { ModuleProviderImpl(get(), get()) }
     }
 
     private val terminal: JLineTerminal by inject()
@@ -58,6 +58,7 @@ class Node : KoinComponent {
     private val authenticationProvider: AuthenticationProvider by inject()
     private val clusterProvider: ClusterProvider by inject()
     private val eventManager: EventManager by inject()
+    private val moduleProvider: ModuleProvider by inject()
 
     private val logger = LoggerFactory.getLogger(Node::class.java)
 
@@ -112,6 +113,7 @@ class Node : KoinComponent {
         commandProvider.register(HelpCommand(commandProvider))
         commandProvider.register(ClusterCommand(clusterProvider))
         commandProvider.register(ClearCommand(terminal))
+        commandProvider.register(ModuleCommand(moduleProvider))
 
         terminal.allowInput()
 

@@ -17,6 +17,7 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.InputStreamReader
 import java.net.URLClassLoader
+import java.nio.file.Path
 import java.util.jar.JarFile
 import kotlin.io.path.Path
 
@@ -162,5 +163,13 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
     override fun reloadModule(name: String) {
         val module = modules[name] ?: return
         return reloadModule(module)
+    }
+
+    override fun modules(): List<ModuleInfo> {
+        return modules.values.map { it.moduleInfo }
+    }
+
+    override fun moduleFolder(): Path {
+        return moduleFolder
     }
 }

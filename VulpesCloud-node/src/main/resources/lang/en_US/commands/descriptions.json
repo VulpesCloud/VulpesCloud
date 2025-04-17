@@ -1,4 +1,5 @@
 {
   "COMMANDS.DESCRIPTION.exit": "Stop the Cloud and all services running on it",
-  "COMMANDS.DESCRIPTION.help": "Shows information about all Commands"
+  "COMMANDS.DESCRIPTION.help": "Shows information about all Commands",
+  "COMMANDS.DESCRIPTION.module": "Mange the Modules!"
 }

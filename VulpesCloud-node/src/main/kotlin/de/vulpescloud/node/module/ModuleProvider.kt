@@ -1,7 +1,9 @@
 package de.vulpescloud.node.module
 
+import de.vulpescloud.api.module.ModuleInfo
 import de.vulpescloud.node.module.impl.LoadedModule
 import java.io.File
+import java.nio.file.Path
 
 interface ModuleProvider {
 
@@ -24,4 +26,8 @@ interface ModuleProvider {
     fun reloadModule(loadedModule: LoadedModule)
 
     fun unloadAllModules()
+
+    fun modules(): List<ModuleInfo>
+
+    fun moduleFolder(): Path
 }
