@@ -34,6 +34,7 @@ dependencies {
     compileOnly(libs.json)
     compileOnly(libs.exposed.core)
     compileOnly(libs.exposed.jdbc)
+    compileOnly(libs.kotlinx.serialization)
 }
 
 tasks.jar {

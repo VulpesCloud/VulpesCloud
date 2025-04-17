@@ -1,7 +1,7 @@
 [versions]
 # kotlin
-
 stdlib = "2.1.20"
+kotlinx-serialization = "1.8.1"
 
 # google deps
 guava = "33.4.6-jre"
@@ -49,8 +49,8 @@ shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 
 [libraries]
 # kotlin
-
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "stdlib" }
+kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization"}
 
 # google libs
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
