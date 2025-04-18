@@ -61,20 +61,24 @@ class ClusterHeartbeatScheduler(private val clusterProvider: ClusterProvider) : 
             }
 
             val failureHeadNode = clusterProvider.getHeadNode()?.name
-            if (heartBeatFailureMap[failureHeadNode]!! >= heartbeatsUntilNewHead) {
-                logger.error("HeadNode didn't update Heartbeat for more than $heartbeatsUntilNewHead beats!")
-                val newHead = currentBeats?.maxByOrNull { it.value.toLong() }?.key
+            if (heartBeatFailureMap[failureHeadNode] != null) {
+                if (heartBeatFailureMap[failureHeadNode]!! >= heartbeatsUntilNewHead) {
+                    logger.error("HeadNode didn't update Heartbeat for more than $heartbeatsUntilNewHead beats!")
+                    val newHead = currentBeats?.maxByOrNull { it.value.toLong() }?.key
 
-                if (clusterProvider.getHeadNode()?.name != newHead && clusterProvider.getHeadNode()?.name == failureHeadNode) {
-                    logger.debug("Sending Message to promote a new HeadNode: $newHead")
-                    getRC()?.sendMessage(
-                        JSONObject()
-                            .put("sender", clusterProvider.localNode().name)
-                            .put("newHeadNodeName", newHead)
-                            .toString(),
-                        RedisChannels.VULPESCLOUD_CLUSTER_SelectNewHeadNode.name
-                    )
+                    if (clusterProvider.getHeadNode()?.name != newHead && clusterProvider.getHeadNode()?.name == failureHeadNode) {
+                        logger.debug("Sending Message to promote a new HeadNode: $newHead")
+                        getRC()?.sendMessage(
+                            JSONObject()
+                                .put("sender", clusterProvider.localNode().name)
+                                .put("newHeadNodeName", newHead)
+                                .toString(),
+                            RedisChannels.VULPESCLOUD_CLUSTER_SelectNewHeadNode.name
+                        )
+                    }
                 }
+            } else {
+                logger.warn("HeartbeatFailure for headNode is null, should be 0")
             }
 
             delay(heartbeatInterval)
