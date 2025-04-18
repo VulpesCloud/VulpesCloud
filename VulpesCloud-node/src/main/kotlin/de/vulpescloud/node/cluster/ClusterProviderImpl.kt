@@ -42,7 +42,7 @@ class ClusterProviderImpl(
     }
 
     override fun getHeadNode(): ClusterNode? {
-        return nodes().find { it.isHeadNode }
+        return nodes().find { it.headNode }
     }
 
     override fun filterByState(state: NodeStates): List<ClusterNode> {
@@ -63,7 +63,7 @@ class ClusterProviderImpl(
                 0,
                 0,
                 "2.0.0",
-                nodeByUUID(config.uuid())!!.isHeadNode,
+                nodeByUUID(config.uuid())!!.headNode,
                 config.hostname(),
             )
 
