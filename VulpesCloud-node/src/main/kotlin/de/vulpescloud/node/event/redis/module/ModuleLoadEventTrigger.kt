@@ -25,8 +25,8 @@ class ModuleLoadEventTrigger(private val eventManager: EventManager) :
 
         eventManager.callLocal(
             ModuleLoadEvent(
-                Json.decodeFromString(event.getString("module")),
-                Json.decodeFromString(event.getString("node")),
+                Json.decodeFromString(event.getJSONObject("module").toString()),
+                Json.decodeFromString(event.getJSONObject("node").toString()),
             )
         )
     }
