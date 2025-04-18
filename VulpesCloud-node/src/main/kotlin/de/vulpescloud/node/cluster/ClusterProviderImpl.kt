@@ -123,7 +123,7 @@ class ClusterProviderImpl(
 
             logger.debug("Starting Authentication Listener")
             AuthenticationListener(authenticationProvider)
-            HeadNodeClusterHeartbeatScheduler(this)
+            HeadNodeClusterHeartbeatScheduler(this).run()
         }
     }
 
