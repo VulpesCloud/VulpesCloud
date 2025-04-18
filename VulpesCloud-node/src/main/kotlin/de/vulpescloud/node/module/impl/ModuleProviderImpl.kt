@@ -46,7 +46,16 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
                 return null
             }
             val reader = InputStreamReader(jarFile.getInputStream(moduleJson))
-            val moduleInfo = getModuleInfo(JSONObject(reader.readText()))
+            val json = JSONObject(reader.readText())
+
+            val moduleInfo = ModuleInfo(
+                json.getString("name"),
+                json.getJSONArray("authors").map { it as String }.toMutableList(),
+                json.getString("description"),
+                json.getString("main"),
+                json.getString("version"),
+                json.getString("website"),
+            )
 
             val classLoader =
                 URLClassLoader(arrayOf(file.toURI().toURL()), VulpesLauncher.CLASS_LOADER)
