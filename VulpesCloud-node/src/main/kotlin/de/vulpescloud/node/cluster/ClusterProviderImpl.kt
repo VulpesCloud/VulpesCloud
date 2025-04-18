@@ -69,7 +69,7 @@ class ClusterProviderImpl(
                 config.hostname(),
             )
 
-        if (!localNode().headNode) {
+        if (!node.headNode) {
             ClusterHeartbeatScheduler(this).run()
         }
 
