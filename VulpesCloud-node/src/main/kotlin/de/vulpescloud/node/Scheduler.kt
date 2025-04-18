@@ -14,4 +14,8 @@ abstract class Scheduler : CoroutineScope {
     }
 
     abstract fun run(): Job
+
+    fun isActive(): Boolean {
+        return job.isActive
+    }
 }

@@ -4,6 +4,7 @@ import de.vulpescloud.api.cluster.ClusterProvider
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.cluster.ClusterHeartbeatScheduler
 import de.vulpescloud.node.cluster.ClusterProviderImpl
+import de.vulpescloud.node.cluster.HeadNodeClusterHeartbeatScheduler
 import de.vulpescloud.node.module.ModuleProvider
 import de.vulpescloud.node.terminal.JLineTerminal
 import kotlin.system.exitProcess
@@ -23,7 +24,8 @@ object NodeShutdown : KoinComponent {
 
     fun commandShutdown() {
 
-        ClusterHeartbeatScheduler.instance.cancel()
+        if (ClusterHeartbeatScheduler.instance.isActive()) ClusterHeartbeatScheduler.instance.cancel()
+        if (HeadNodeClusterHeartbeatScheduler.instance.isActive()) HeadNodeClusterHeartbeatScheduler.instance.cancel()
 
         getRC()?.deleteHashField("VULPESCLOUD_NODE_HEARTBEAT", clusterProvider.localNode().name)
 
