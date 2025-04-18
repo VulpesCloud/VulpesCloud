@@ -56,10 +56,6 @@ class ClusterProviderImpl(
     fun markOnline() {
         SelectHeadNodeChannelListener(this)
 
-        if (!localNode().headNode) {
-            ClusterHeartbeatScheduler(this).run()
-        }
-
         val node =
             ClusterNode(
                 config.name(),
@@ -72,6 +68,10 @@ class ClusterProviderImpl(
                 nodeByUUID(config.uuid())!!.headNode,
                 config.hostname(),
             )
+
+        if (!localNode().headNode) {
+            ClusterHeartbeatScheduler(this).run()
+        }
 
         eventManager.callGlobal(
             NodeStateChangeEvent(node, nodeByUUID(config.uuid())!!.state, NodeStates.ONLINE),
