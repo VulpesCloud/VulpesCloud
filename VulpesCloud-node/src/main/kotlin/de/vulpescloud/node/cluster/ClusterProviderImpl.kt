@@ -54,6 +54,12 @@ class ClusterProviderImpl(
     }
 
     fun markOnline() {
+        SelectHeadNodeChannelListener(this)
+
+        if (!localNode().headNode) {
+            ClusterHeartbeatScheduler(this).run()
+        }
+
         val node =
             ClusterNode(
                 config.name(),
@@ -142,5 +148,28 @@ class ClusterProviderImpl(
                     )
                     .toString(),
             )
+    }
+
+    fun switchToHeadNode() {
+        getRC()?.setHashField(
+            "VULPESCLOUD_NODES",
+            config.name(),
+            JSONObject(
+                    ClusterNode(
+                        config.name(),
+                        config.uuid(),
+                        localNode().runningServices,
+                        NodeStates.ONLINE,
+                        localNode().currentMemoryUsage,
+                        localNode().maxMemoryUsage,
+                        localNode().cloudVersion,
+                        true,
+                        config.hostname(),
+                    )
+                )
+                .toString(),
+        )
+
+
     }
 }
