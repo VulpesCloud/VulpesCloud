@@ -107,6 +107,9 @@ class Node : KoinComponent {
         eventManager.registerListener(ModuleStartEventListener(translator, clusterProvider))
         eventManager.registerListener(ModuleUnloadEventListener(translator, clusterProvider))
 
+        moduleProvider.loadAllModules()
+        moduleProvider.startAllModules()
+
         commandProvider.initialize()
 
         commandProvider.register(ExitCommand())
