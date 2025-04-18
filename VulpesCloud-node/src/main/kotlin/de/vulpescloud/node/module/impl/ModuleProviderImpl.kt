@@ -72,7 +72,7 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
 
             return loadedModule
         } catch (e: Exception) {
-            logger.error("Exception whilst trying to load Module ${file.name}")
+            logger.error("Exception whilst trying to load Module ${file.name}. Exception: ${e.message}")
             return null
         }
     }
@@ -95,7 +95,7 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
             )
             return loadedModule
         } catch (e: Exception) {
-            logger.warn("Exception whilst trying to start Module ${loadedModule.moduleInfo.name}")
+            logger.warn("Exception whilst trying to start Module ${loadedModule.moduleInfo.name}. Exception: ${e.message}")
             return null
         }
     }
@@ -141,7 +141,7 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
                 RedisChannels.VULPESCLOUD_EVENT_MODULE_ModuleUnloadEvent,
             )
         } catch (e: Exception) {
-            logger.warn("Exception whilst trying to disable module ${loadedModule.moduleInfo.name}")
+            logger.warn("Exception whilst trying to disable module ${loadedModule.moduleInfo.name}. Exception: ${e.message}")
         }
     }
 
