@@ -3,6 +3,8 @@ package de.vulpescloud.node.utils
 import de.vulpescloud.api.cluster.AuthenticationProvider
 import de.vulpescloud.api.cluster.ClusterNode
 import de.vulpescloud.api.cluster.NodeStates
+import de.vulpescloud.api.module.ModuleInfo
+import de.vulpescloud.api.module.ModuleStates
 import org.json.JSONObject
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -23,6 +25,18 @@ object JsonUtils : KoinComponent {
             json.getString("cloudVersion"),
             json.getBoolean("headNode"),
             json.getString("hostname")
+        )
+    }
+
+    fun getModuleInfo(json: JSONObject): ModuleInfo {
+        return ModuleInfo(
+            json.getString("name"),
+            json.getJSONArray("authors").map { it as String }.toMutableList(),
+            json.getString("description"),
+            json.getString("main"),
+            json.getString("version"),
+            json.getString("website"),
+            ModuleStates.valueOf(json.getString("state"))
         )
     }
 

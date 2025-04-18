@@ -51,7 +51,6 @@ dependencies {
     compileOnly(libs.nightConfig.yaml)
     compileOnly(libs.exposed.core)
     compileOnly(libs.exposed.jdbc)
-    implementation(libs.kotlinx.serialization)
     implementation("com.github.ben-manes.caffeine:caffeine:3.2.0")
 }
 

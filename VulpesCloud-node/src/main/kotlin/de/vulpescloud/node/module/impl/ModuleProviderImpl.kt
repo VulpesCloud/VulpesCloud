@@ -12,7 +12,8 @@ import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.launcher.VulpesLauncher
 import de.vulpescloud.node.event.EventManagerImpl
 import de.vulpescloud.node.module.ModuleProvider
-import kotlinx.serialization.json.Json
+import de.vulpescloud.node.utils.JsonUtils.getModuleInfo
+import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.InputStreamReader
@@ -45,7 +46,7 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
                 return null
             }
             val reader = InputStreamReader(jarFile.getInputStream(moduleJson))
-            val moduleInfo = Json.decodeFromString<ModuleInfo>(reader.readText())
+            val moduleInfo = getModuleInfo(JSONObject(reader.readText()))
 
             val classLoader =
                 URLClassLoader(arrayOf(file.toURI().toURL()), VulpesLauncher.CLASS_LOADER)
@@ -72,7 +73,9 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
 
             return loadedModule
         } catch (e: Exception) {
-            logger.error("Exception whilst trying to load Module ${file.name}. Exception: ${e.message}")
+            logger.error(
+                "Exception whilst trying to load Module ${file.name}. Exception: ${e.message}"
+            )
             return null
         }
     }
@@ -95,7 +98,9 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
             )
             return loadedModule
         } catch (e: Exception) {
-            logger.warn("Exception whilst trying to start Module ${loadedModule.moduleInfo.name}. Exception: ${e.message}")
+            logger.warn(
+                "Exception whilst trying to start Module ${loadedModule.moduleInfo.name}. Exception: ${e.message}"
+            )
             return null
         }
     }
@@ -141,7 +146,9 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
                 RedisChannels.VULPESCLOUD_EVENT_MODULE_ModuleUnloadEvent,
             )
         } catch (e: Exception) {
-            logger.warn("Exception whilst trying to disable module ${loadedModule.moduleInfo.name}. Exception: ${e.message}")
+            logger.warn(
+                "Exception whilst trying to disable module ${loadedModule.moduleInfo.name}. Exception: ${e.message}"
+            )
         }
     }
 

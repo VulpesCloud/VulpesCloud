@@ -4,8 +4,9 @@ import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.event.events.modules.ModuleUnloadEvent
 import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.jediswrapper.redis.ChannelListener
+import de.vulpescloud.node.utils.JsonUtils.getClusterNode
+import de.vulpescloud.node.utils.JsonUtils.getModuleInfo
 import de.vulpescloud.node.utils.JsonUtils.parsePubSubMessage
-import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
 class ModuleUnloadEventTrigger(private val eventManager: EventManager) :
@@ -25,8 +26,8 @@ class ModuleUnloadEventTrigger(private val eventManager: EventManager) :
 
         eventManager.callLocal(
             ModuleUnloadEvent(
-                Json.decodeFromString(event.getJSONObject("module").toString()),
-                Json.decodeFromString(event.getJSONObject("node").toString()),
+                getModuleInfo(event.getJSONObject("module")),
+                getClusterNode(event.getJSONObject("node")),
             )
         )
     }

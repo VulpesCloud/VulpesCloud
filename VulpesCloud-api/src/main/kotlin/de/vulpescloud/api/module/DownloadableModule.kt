@@ -1,8 +1,5 @@
 package de.vulpescloud.api.module
 
-import kotlinx.serialization.Serializable
-
-@Serializable
 data class DownloadableModule(
     val name: String,
     val version: String,
@@ -10,5 +7,5 @@ data class DownloadableModule(
     val authors: MutableList<String>,
     val description: String,
     val website: String,
-    val supportURL: String
+    val supportURL: String,
 )

@@ -4,13 +4,12 @@ import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.event.events.modules.ModuleStartEvent
 import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.jediswrapper.redis.ChannelListener
+import de.vulpescloud.node.utils.JsonUtils.getClusterNode
+import de.vulpescloud.node.utils.JsonUtils.getModuleInfo
 import de.vulpescloud.node.utils.JsonUtils.parsePubSubMessage
-import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
-class ModuleStartEventTrigger(
-    private val eventManager: EventManager
-) :
+class ModuleStartEventTrigger(private val eventManager: EventManager) :
     ChannelListener(RedisChannels.VULPESCLOUD_EVENT_MODULE_ModuleStartEvent.name) {
 
     private val logger = LoggerFactory.getLogger(ModuleStartEventTrigger::class.java)
@@ -27,8 +26,8 @@ class ModuleStartEventTrigger(
 
         eventManager.callLocal(
             ModuleStartEvent(
-                Json.decodeFromString(event.getJSONObject("module").toString()),
-                Json.decodeFromString(event.getJSONObject("node").toString()),
+                getModuleInfo(event.getJSONObject("module")),
+                getClusterNode(event.getJSONObject("node")),
             )
         )
     }
