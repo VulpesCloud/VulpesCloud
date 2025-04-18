@@ -9,11 +9,14 @@ import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
+import org.slf4j.LoggerFactory
 import java.io.File
 import kotlin.io.path.name
 
 @Suppress("Unused")
 class ModuleCommand(private val moduleProvider: ModuleProvider) {
+
+    private val logger = LoggerFactory.getLogger("ModuleCommand")
 
     @Parser(suggestions = "modules", name = "modules")
     fun moduleParser(input: CommandInput): ModuleInfo {
@@ -31,6 +34,7 @@ class ModuleCommand(private val moduleProvider: ModuleProvider) {
     @Parser(suggestions = "modulesPath", name = "modulesPath")
     fun parseModuleFiles(input: CommandInput): File {
         val command = input.readString()
+        logger.debug(command + " ddd " + moduleProvider.moduleFolder().find { it.name == command })
         val path =
             moduleProvider.moduleFolder().find { it.name == command } ?: throw IllegalArgumentException()
 
@@ -39,7 +43,7 @@ class ModuleCommand(private val moduleProvider: ModuleProvider) {
 
     @Suggestions("modulesPath")
     fun suggestModuleFiles(): List<String> {
-        return moduleProvider.moduleFolder().toFile().listFiles()?.map { it.name } ?: emptyList()
+        return moduleProvider.moduleFolder().toFile().listFiles()?.filter { it.extension == "jar" }?.map { it.name } ?: emptyList()
     }
 
     @Command("module|modules list")
