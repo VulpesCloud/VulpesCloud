@@ -17,5 +17,6 @@ data class Task(
     val maintenance: Boolean,
     val startPort: Int,
     val fallback: Boolean,
-    val version: Version
+    val version: Version,
+    val copyTemplateToStatic: Boolean
 )

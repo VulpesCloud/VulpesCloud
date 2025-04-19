@@ -6,4 +6,6 @@ interface TemplateStorageProvider {
 
     fun getTemplateStorages(): List<TemplateStorage>
 
+    fun registerTemplateStorage(templateStorage: TemplateStorage)
+
 }

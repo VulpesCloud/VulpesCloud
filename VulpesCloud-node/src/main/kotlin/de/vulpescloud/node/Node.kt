@@ -4,6 +4,7 @@ import de.vulpescloud.api.cluster.AuthenticationProvider
 import de.vulpescloud.api.cluster.ClusterProvider
 import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.lang.Translator
+import de.vulpescloud.api.template.TemplateStorageProvider
 import de.vulpescloud.jediswrapper.JedisWrapper
 import de.vulpescloud.node.cluster.AuthenticationProviderImpl
 import de.vulpescloud.node.cluster.ClusterProviderImpl
@@ -25,6 +26,8 @@ import de.vulpescloud.node.module.impl.ModuleProviderImpl
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.impl.SetupProviderImpl
 import de.vulpescloud.node.setup.setups.FirstSetup
+import de.vulpescloud.node.template.LocalTemplateStorage
+import de.vulpescloud.node.template.TemplateStorageProviderImpl
 import de.vulpescloud.node.terminal.JLineTerminal
 import de.vulpescloud.node.terminal.impl.JLineTerminalImpl
 import java.util.concurrent.CompletableFuture
@@ -48,6 +51,7 @@ class Node : KoinComponent {
         single<EventManager> { EventManagerImpl() }
         single<ClusterProvider> { ClusterProviderImpl(get(), get(), get()) }
         single<ModuleProvider> { ModuleProviderImpl(get(), get()) }
+        single<TemplateStorageProvider> { TemplateStorageProviderImpl() }
     }
 
     private val terminal: JLineTerminal by inject()
@@ -59,6 +63,7 @@ class Node : KoinComponent {
     private val clusterProvider: ClusterProvider by inject()
     private val eventManager: EventManager by inject()
     private val moduleProvider: ModuleProvider by inject()
+    private val templateStorageProvider: TemplateStorageProvider by inject()
 
     private val logger = LoggerFactory.getLogger(Node::class.java)
 
@@ -106,6 +111,8 @@ class Node : KoinComponent {
         eventManager.registerListener(ModuleLoadEventListener(translator, clusterProvider))
         eventManager.registerListener(ModuleStartEventListener(translator, clusterProvider))
         eventManager.registerListener(ModuleUnloadEventListener(translator, clusterProvider))
+
+        templateStorageProvider.registerTemplateStorage(LocalTemplateStorage())
 
         moduleProvider.loadAllModules()
         moduleProvider.startAllModules()
