@@ -23,6 +23,7 @@ import de.vulpescloud.node.event.redis.module.ModuleStartEventTrigger
 import de.vulpescloud.node.event.redis.module.ModuleUnloadEventTrigger
 import de.vulpescloud.node.module.ModuleProvider
 import de.vulpescloud.node.module.impl.ModuleProviderImpl
+import de.vulpescloud.node.mysql.DatabaseProvider
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.impl.SetupProviderImpl
 import de.vulpescloud.node.setup.setups.FirstSetup
@@ -48,6 +49,7 @@ class Node : KoinComponent {
         single { Translator() }
         single<SetupProvider> { SetupProviderImpl(get(), get()) }
         single<AuthenticationProvider> { AuthenticationProviderImpl() }
+        single { DatabaseProvider(get()) }
         single<EventManager> { EventManagerImpl() }
         single<ClusterProvider> { ClusterProviderImpl(get(), get(), get()) }
         single<ModuleProvider> { ModuleProviderImpl(get(), get()) }
@@ -64,6 +66,7 @@ class Node : KoinComponent {
     private val eventManager: EventManager by inject()
     private val moduleProvider: ModuleProvider by inject()
     private val templateStorageProvider: TemplateStorageProvider by inject()
+    private val databaseProvider: DatabaseProvider by inject()
 
     private val logger = LoggerFactory.getLogger(Node::class.java)
 
@@ -98,6 +101,9 @@ class Node : KoinComponent {
             config.redis().hostname,
             authenticationProvider.getAuthenticationToken(),
         )
+
+        databaseProvider.initialize()
+        databaseProvider.generateTables()
 
         val clusterProv = clusterProvider as ClusterProviderImpl
         clusterProv.initialize()
