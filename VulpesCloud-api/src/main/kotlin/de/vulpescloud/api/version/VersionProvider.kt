@@ -8,4 +8,6 @@ interface VersionProvider {
 
     fun getAllRegisteredVersions(): List<Version>
 
+    fun registerCustomVersion(version: Version)
+
 }

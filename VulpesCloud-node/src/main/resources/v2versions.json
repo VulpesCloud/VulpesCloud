@@ -1,0 +1,157 @@
+{
+  "versions": [
+    {
+      "name": "Velocity",
+      "type": "PROXY",
+      "pluginDir": "plugins",
+      "versions": [
+        {
+          "version": "3.4.0-SNAPSHOT",
+          "url": "https://api.papermc.io/v2/projects/velocity/versions/3.4.0-SNAPSHOT/builds/496/downloads/velocity-3.4.0-SNAPSHOT-496.jar"
+        }
+      ]
+    },
+    {
+      "name": "Paper",
+      "type": "SERVER",
+      "pluginDir": "plugins",
+      "versions": [
+        {
+          "version": "1.21.4",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.21.4/builds/224/downloads/paper-1.21.4-224.jar"
+        },
+        {
+          "version": "1.21.1",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.21.1/builds/123/downloads/paper-1.21.1-123.jar"
+        },
+        {
+          "version": "1.21",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.21/builds/130/downloads/paper-1.21-130.jar"
+        },
+        {
+          "version": "1.20.6",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.20.6/builds/150/downloads/paper-1.20.6-150.jar"
+        },
+        {
+          "version": "1.20.5",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.20.5/builds/22/downloads/paper-1.20.5-22.jar"
+        },
+        {
+          "version": "1.20.4",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.20.4/builds/497/downloads/paper-1.20.4-497.jar"
+        },
+        {
+          "version": "1.20.2",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.20.2/builds/318/downloads/paper-1.20.2-318.jar"
+        },
+        {
+          "version": "1.20.1",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.20.1/builds/196/downloads/paper-1.20.1-196.jar"
+        },
+        {
+          "version": "1.20",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.20/builds/17/downloads/paper-1.20-17.jar"
+        },
+        {
+          "version": "1.19.4",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.19.4/builds/550/downloads/paper-1.19.4-550.jar"
+        },
+        {
+          "version": "1.19.3",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.19.3/builds/448/downloads/paper-1.19.3-448.jar"
+        },
+        {
+          "version": "1.19.2",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.19.2/builds/307/downloads/paper-1.19.2-307.jar"
+        },
+        {
+          "version": "1.19.1",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.19.1/builds/111/downloads/paper-1.19.1-111.jar"
+        },
+        {
+          "version": "1.19",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.19/builds/81/downloads/paper-1.19-81.jar"
+        },
+        {
+          "version": "1.18.2",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.18.2/builds/388/downloads/paper-1.18.2-388.jar"
+        },
+        {
+          "version": "1.18.1",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.18.1/builds/216/downloads/paper-1.18.1-216.jar"
+        },
+        {
+          "version": "1.18",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.18/builds/66/downloads/paper-1.18-66.jar"
+        },
+        {
+          "version": "1.17.1",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.17.1/builds/411/downloads/paper-1.17.1-411.jar"
+        },
+        {
+          "version": "1.17",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.17/builds/79/downloads/paper-1.17-79.jar"
+        },
+        {
+          "version": "1.16.5",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.16.5/builds/794/downloads/paper-1.16.5-794.jar"
+        },
+        {
+          "version": "1.16.4",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.16.4/builds/416/downloads/paper-1.16.4-416.jar"
+        },
+        {
+          "version": "1.16.3",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.16.3/builds/253/downloads/paper-1.16.3-253.jar"
+        },
+        {
+          "version": "1.16.2",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.16.2/builds/189/downloads/paper-1.16.2-189.jar"
+        },
+        {
+          "version": "1.16.1",
+          "link": "https://api.papermc.io/v2/projects/paper/versions/1.16.1/builds/138/downloads/paper-1.16.1-138.jar"
+        }
+      ]
+    },
+    {
+      "name": "Purpur",
+      "type": "SERVER",
+      "pluginDir": "plugins",
+      "versions": [
+        {
+          "version": "1.21.4",
+          "link": "https://api.purpurmc.org/v2/purpur/1.21.4/latest/download"
+        },
+        {
+          "version": "1.21.1",
+          "link": "https://api.purpurmc.org/v2/purpur/1.21.1/latest/download"
+        },
+        {
+          "version": "1.21",
+          "link": "https://api.purpurmc.org/v2/purpur/1.21/latest/download"
+        },
+        {
+          "version": "1.20.6",
+          "link": "https://api.purpurmc.org/v2/purpur/1.20.6/latest/download"
+        },
+        {
+          "version": "1.20.4",
+          "link": "https://api.purpurmc.org/v2/purpur/1.20.4/latest/download"
+        },
+        {
+          "version": "1.20.2",
+          "link": "https://api.purpurmc.org/v2/purpur/1.20.2/latest/download"
+        },
+        {
+          "version": "1.20.1",
+          "link": "https://api.purpurmc.org/v2/purpur/1.20.1/latest/download"
+        },
+        {
+          "version": "1.20",
+          "link": "https://api.purpurmc.org/v2/purpur/1.20/latest/download"
+        }
+      ]
+    }
+  ]
+}

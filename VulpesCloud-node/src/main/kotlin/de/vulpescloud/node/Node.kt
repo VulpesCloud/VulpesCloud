@@ -34,6 +34,7 @@ import de.vulpescloud.node.template.LocalTemplateStorage
 import de.vulpescloud.node.template.TemplateStorageProviderImpl
 import de.vulpescloud.node.terminal.JLineTerminal
 import de.vulpescloud.node.terminal.impl.JLineTerminalImpl
+import de.vulpescloud.node.version.VersionProviderImpl
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.locks.Condition
 import java.util.concurrent.locks.ReentrantLock
@@ -58,6 +59,7 @@ class Node : KoinComponent {
         single<ModuleProvider> { ModuleProviderImpl(get(), get()) }
         single<TemplateStorageProvider> { TemplateStorageProviderImpl() }
         single<TaskProvider> { TaskProviderImpl() }
+        single<VersionProvider>  { VersionProviderImpl() }
     }
 
     private val terminal: JLineTerminal by inject()
@@ -123,6 +125,10 @@ class Node : KoinComponent {
         eventManager.registerListener(ModuleLoadEventListener(translator, clusterProvider))
         eventManager.registerListener(ModuleStartEventListener(translator, clusterProvider))
         eventManager.registerListener(ModuleUnloadEventListener(translator, clusterProvider))
+
+        val versionProviderImplementation = versionProvider as VersionProviderImpl
+
+        versionProviderImplementation.initialize()
 
         templateStorageProvider.registerTemplateStorage(LocalTemplateStorage())
 
