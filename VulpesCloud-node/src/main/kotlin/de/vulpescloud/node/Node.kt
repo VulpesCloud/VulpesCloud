@@ -6,6 +6,7 @@ import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.lang.Translator
 import de.vulpescloud.api.task.TaskProvider
 import de.vulpescloud.api.template.TemplateStorageProvider
+import de.vulpescloud.api.version.VersionProvider
 import de.vulpescloud.jediswrapper.JedisWrapper
 import de.vulpescloud.node.cluster.AuthenticationProviderImpl
 import de.vulpescloud.node.cluster.ClusterProviderImpl
@@ -71,6 +72,7 @@ class Node : KoinComponent {
     private val templateStorageProvider: TemplateStorageProvider by inject()
     private val databaseProvider: DatabaseProvider by inject()
     private val taskProvider: TaskProvider by inject()
+    private val versionProvider: VersionProvider by inject()
 
     private val logger = LoggerFactory.getLogger(Node::class.java)
 
@@ -134,6 +136,8 @@ class Node : KoinComponent {
         commandProvider.register(ClusterCommand(clusterProvider))
         commandProvider.register(ClearCommand(terminal))
         commandProvider.register(ModuleCommand(moduleProvider))
+        commandProvider.register(TemplateCommand(templateStorageProvider))
+        commandProvider.register(TaskCommand(setupProvider, taskProvider, translator, terminal, config, versionProvider))
 
         terminal.allowInput()
 
