@@ -69,9 +69,9 @@ class ClusterProviderImpl(
                 config.hostname(),
             )
 
-        if (!node.headNode) {
-            ClusterHeartbeatScheduler(this).run()
-        }
+//        if (!node.headNode) {
+//            ClusterHeartbeatScheduler(this).run()
+//        }
 
         eventManager.callGlobal(
             NodeStateChangeEvent(node, nodeByUUID(config.uuid())!!.state, NodeStates.ONLINE),
@@ -123,7 +123,7 @@ class ClusterProviderImpl(
 
             logger.debug("Starting Authentication Listener")
             AuthenticationListener(authenticationProvider)
-            HeadNodeClusterHeartbeatScheduler(this).run()
+            // HeadNodeClusterHeartbeatScheduler(this).run()
         }
     }
 

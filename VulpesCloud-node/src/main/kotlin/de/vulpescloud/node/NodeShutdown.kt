@@ -26,8 +26,8 @@ object NodeShutdown : KoinComponent {
 
     fun commandShutdown() {
         logger.debug("Canceling Schedulers")
-        if (!clusterProvider.localNode().headNode) { ClusterHeartbeatScheduler.instance.cancel() }
-        if (clusterProvider.localNode().headNode) { HeadNodeClusterHeartbeatScheduler.instance.cancel() }
+        // if (!clusterProvider.localNode().headNode) { ClusterHeartbeatScheduler.instance.cancel() }
+        // if (clusterProvider.localNode().headNode) { HeadNodeClusterHeartbeatScheduler.instance.cancel() }
 
         logger.debug("Deleting Heartbeat")
         getRC()?.deleteHashField("VULPESCLOUD_NODE_HEARTBEAT", clusterProvider.localNode().name)
