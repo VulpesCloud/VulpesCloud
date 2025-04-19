@@ -6,4 +6,6 @@ interface VersionProvider {
 
     fun getVersionsByType(type: VersionType): List<Version>
 
+    fun getAllRegisteredVersions(): List<Version>
+
 }

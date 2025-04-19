@@ -4,5 +4,6 @@ data class Version(
     val name: String,
     val version: String,
     val type: VersionType,
-    val downloadURL: String
+    val downloadURL: String,
+    val pluginsDir: String
 )

@@ -6,4 +6,6 @@ interface TaskProvider {
 
     fun tasks(): List<Task>
 
+    fun updateTask(task: Task)
+
 }

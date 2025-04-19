@@ -4,6 +4,7 @@ import de.vulpescloud.api.cluster.AuthenticationProvider
 import de.vulpescloud.api.cluster.ClusterProvider
 import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.lang.Translator
+import de.vulpescloud.api.task.TaskProvider
 import de.vulpescloud.api.template.TemplateStorageProvider
 import de.vulpescloud.jediswrapper.JedisWrapper
 import de.vulpescloud.node.cluster.AuthenticationProviderImpl
@@ -27,6 +28,7 @@ import de.vulpescloud.node.mysql.DatabaseProvider
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.impl.SetupProviderImpl
 import de.vulpescloud.node.setup.setups.FirstSetup
+import de.vulpescloud.node.task.TaskProviderImpl
 import de.vulpescloud.node.template.LocalTemplateStorage
 import de.vulpescloud.node.template.TemplateStorageProviderImpl
 import de.vulpescloud.node.terminal.JLineTerminal
@@ -54,6 +56,7 @@ class Node : KoinComponent {
         single<ClusterProvider> { ClusterProviderImpl(get(), get(), get()) }
         single<ModuleProvider> { ModuleProviderImpl(get(), get()) }
         single<TemplateStorageProvider> { TemplateStorageProviderImpl() }
+        single<TaskProvider> { TaskProviderImpl() }
     }
 
     private val terminal: JLineTerminal by inject()
@@ -67,6 +70,7 @@ class Node : KoinComponent {
     private val moduleProvider: ModuleProvider by inject()
     private val templateStorageProvider: TemplateStorageProvider by inject()
     private val databaseProvider: DatabaseProvider by inject()
+    private val taskProvider: TaskProvider by inject()
 
     private val logger = LoggerFactory.getLogger(Node::class.java)
 
