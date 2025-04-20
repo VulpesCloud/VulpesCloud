@@ -29,6 +29,7 @@ class TaskProviderImpl : TaskProvider {
     }
 
     override fun updateTask(task: Task) {
+        logger.debug("Starting transaction to update task")
         val taskJson = JSONObject(task)
         transaction {
             logger.debug("Checking if task is already in database")

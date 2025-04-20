@@ -7,8 +7,10 @@ import de.vulpescloud.api.version.Version
 import de.vulpescloud.api.version.VersionProvider
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.setup.Setup
+import de.vulpescloud.node.setup.annotations.SetupCancel
 import de.vulpescloud.node.setup.annotations.SetupFinish
 import de.vulpescloud.node.setup.annotations.SetupQuestion
+import de.vulpescloud.node.setup.answers.BooleanSetupAnswer
 import de.vulpescloud.node.setup.answers.MemorySetupAnswer
 import de.vulpescloud.node.setup.answers.VersionSetupAnswer
 import de.vulpescloud.node.terminal.JLineTerminal
@@ -57,7 +59,7 @@ class TaskSetup(
         return true
     }
 
-    @SetupQuestion(2, "SETUP.task.QUESTION.staticServices")
+    @SetupQuestion(2, "SETUP.task.QUESTION.staticServices", BooleanSetupAnswer::class)
     fun setStatic(staticString: String): Boolean {
         var newStatic = staticString
         when (newStatic) {
@@ -100,7 +102,7 @@ class TaskSetup(
         return true
     }
 
-    @SetupQuestion(4, "SETUP.task.QUESTION.maintenance")
+    @SetupQuestion(4, "SETUP.task.QUESTION.maintenance", BooleanSetupAnswer::class)
     fun setMaintenance(maintenanceString: String): Boolean {
         var newMt = maintenanceString
         when (newMt) {
@@ -191,5 +193,10 @@ class TaskSetup(
                 false,
             )
         )
+    }
+
+    @SetupCancel
+    fun cancel() {
+
     }
 }
