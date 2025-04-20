@@ -10,8 +10,11 @@ import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import org.json.JSONObject
+import org.slf4j.LoggerFactory
 
 class TaskProviderImpl : TaskProvider {
+
+    private val logger = LoggerFactory.getLogger(TaskProviderImpl::class.java)
 
     override fun getTaskByName(name: String): Task? {
         return tasks().find { it.name == name }
@@ -28,11 +31,14 @@ class TaskProviderImpl : TaskProvider {
     override fun updateTask(task: Task) {
         val taskJson = JSONObject(task)
         transaction {
+            logger.debug("Checking if task is already in database")
             val existing = TaskTable.select(TaskTable.name eq task.name).singleOrNull()
 
             if (existing != null) {
+                logger.debug("Task already exists in database, updating")
                 TaskTable.update({ TaskTable.name eq task.name }) { it[json] = taskJson.toString() }
             } else {
+                logger.debug("Task does not exist in database, inserting")
                 TaskTable.insert {
                     it[name] = name
                     it[json] = taskJson.toString()
@@ -40,6 +46,7 @@ class TaskProviderImpl : TaskProvider {
             }
         }
 
+        logger.debug("Syncing to Redis")
         getRC()?.setHashField("VULPESCLOUD_TASKS", task.name, taskJson.toString())
     }
 }
