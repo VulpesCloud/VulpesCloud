@@ -32,7 +32,7 @@ object JsonUtils : KoinComponent {
             json.getBoolean("maintenance"),
             json.getInt("startPort"),
             json.getBoolean("fallback"),
-            getVersion(JSONObject(json.getString("version"))),
+            getSingleVersion(JSONObject(json.getString("version"))),
             json.getBoolean("copyTemplateToStatic")
         )
     }
