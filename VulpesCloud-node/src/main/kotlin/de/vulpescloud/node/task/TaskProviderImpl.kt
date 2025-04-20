@@ -26,17 +26,20 @@ class TaskProviderImpl : TaskProvider {
     }
 
     override fun updateTask(task: Task) {
+        val taskJson = JSONObject(task)
         transaction {
             val existing = TaskTable.select(TaskTable.name eq task.name).singleOrNull()
 
             if (existing != null) {
-                TaskTable.update({ TaskTable.name eq task.name }) { it[json] = json }
+                TaskTable.update({ TaskTable.name eq task.name }) { it[json] = taskJson.toString() }
             } else {
                 TaskTable.insert {
                     it[name] = name
-                    it[json] = json
+                    it[json] = taskJson.toString()
                 }
             }
         }
+
+        getRC()?.setHashField("VULPESCLOUD_TASKS", task.name, taskJson.toString())
     }
 }
