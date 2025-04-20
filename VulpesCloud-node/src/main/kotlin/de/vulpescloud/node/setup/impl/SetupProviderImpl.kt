@@ -23,9 +23,8 @@ class SetupProviderImpl(private val terminal: JLineTerminal, private val transla
     override fun startSetup(setup: Setup) {
         try {
             val questions = mutableListOf<SetupQuestionInfo>()
-            val methods =
-                setup::class.java.methods.filter { it.isAnnotationPresent(SetupQuestion::class.java) }
-            methods.forEach {
+            val methods = setup::class.java.methods
+            methods.filter { it.isAnnotationPresent(SetupQuestion::class.java) }.forEach {
                 check(it.parameters.size == 1) {
                     "Function has @SetupQuestion annotation must have 1 parameter!"
                 }
@@ -42,8 +41,8 @@ class SetupProviderImpl(private val terminal: JLineTerminal, private val transla
             check(cancelMethods.size <= 1) {
                 "There can only be one Function with the @SetupCancel annotation!"
             }
-            val finishMethod = finishMethods.firstOrNull() ?: throw IllegalStateException("No Finish Method found!")
-            val cancelMethod = cancelMethods.firstOrNull() ?: throw IllegalStateException("No Cancel Method found!")
+            val finishMethod = finishMethods.firstOrNull()
+            val cancelMethod = cancelMethods.firstOrNull()
 
             val setupInfo =
                 SetupInfo(
