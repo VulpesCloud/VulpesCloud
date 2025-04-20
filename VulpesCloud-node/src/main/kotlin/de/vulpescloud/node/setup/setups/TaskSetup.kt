@@ -184,9 +184,8 @@ class TaskSetup(
 
     @SetupFinish
     fun finish() {
-        if (version.type == VersionType.SERVER && !taskProvider.tasks().none { it.version.type == VersionType.SERVER }) {
-            fallback = true
-        }
+
+        fallback = version.type == VersionType.SERVER && !taskProvider.tasks().none { it.version.type == VersionType.SERVER }
 
         val task = Task(
             name,
