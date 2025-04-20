@@ -1,8 +1,6 @@
 package de.vulpescloud.api.task
 
-import de.vulpescloud.api.service.Service
-import de.vulpescloud.api.template.Template
-import de.vulpescloud.api.version.Version
+import de.vulpescloud.api.version.SingleVersion
 
 data class Task(
     val name: String,
@@ -17,6 +15,6 @@ data class Task(
     val maintenance: Boolean,
     val startPort: Int,
     val fallback: Boolean,
-    val version: Version,
+    val version: SingleVersion,
     val copyTemplateToStatic: Boolean
 )

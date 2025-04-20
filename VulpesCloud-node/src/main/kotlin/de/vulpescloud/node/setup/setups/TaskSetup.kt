@@ -185,7 +185,7 @@ class TaskSetup(
     @SetupFinish
     fun finish() {
 
-        fallback = version.type == VersionType.SERVER && !taskProvider.tasks().none { it.version.type == VersionType.SERVER }
+        fallback = version.type == VersionType.SERVER && !taskProvider.tasks().none { it.version.name != "Velocity" }
 
         val task = Task(
             name,
@@ -200,7 +200,7 @@ class TaskSetup(
             maintenance,
             startPort,
             fallback,
-            version,
+            version.versions.minByOrNull { it.version }!!,
             false,
         )
 
@@ -212,7 +212,7 @@ class TaskSetup(
                 TaskTable.update({ TaskTable.name eq task.name }) { it[json] = taskJson.toString() }
             } else {
                 TaskTable.insert {
-                    it[name] = name
+                    it[name] = task.name
                     it[json] = taskJson.toString()
                 }
             }
