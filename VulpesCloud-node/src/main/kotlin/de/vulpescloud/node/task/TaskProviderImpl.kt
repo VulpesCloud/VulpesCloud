@@ -21,11 +21,16 @@ class TaskProviderImpl : TaskProvider {
     }
 
     override fun tasks(): List<Task> {
-        val tasks = mutableListOf<Task>()
-        getRC()?.getAllHashValues("VULPESCLOUD_TASKS")?.forEach {
-            tasks.add(getTask(JSONObject(it)))
+        try {
+            val tasks = mutableListOf<Task>()
+            getRC()?.getAllHashValues("VULPESCLOUD_TASKS")?.forEach {
+                tasks.add(getTask(JSONObject(it)))
+            }
+            return tasks
+        } catch (e: Exception) {
+            logger.error("Error while getting tasks from Redis", e)
+            return emptyList()
         }
-        return tasks
     }
 
     override fun updateTask(task: Task) {
