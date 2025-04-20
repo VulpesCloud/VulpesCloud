@@ -21,47 +21,51 @@ class SetupProviderImpl(private val terminal: JLineTerminal, private val transla
     private var currentQuestionIndex = 0
 
     override fun startSetup(setup: Setup) {
-        val questions = mutableListOf<SetupQuestionInfo>()
-        val methods =
-            setup::class.java.methods.filter { it.isAnnotationPresent(SetupQuestion::class.java) }
-        methods.forEach {
-            check(it.parameters.size == 1) {
-                "Function has @SetupQuestion annotation must have 1 parameter!"
+        try {
+            val questions = mutableListOf<SetupQuestionInfo>()
+            val methods =
+                setup::class.java.methods.filter { it.isAnnotationPresent(SetupQuestion::class.java) }
+            methods.forEach {
+                check(it.parameters.size == 1) {
+                    "Function has @SetupQuestion annotation must have 1 parameter!"
+                }
+                questions.add(
+                    SetupQuestionInfo(it.getAnnotation(SetupQuestion::class.java), it, it.parameters[0])
+                )
             }
-            questions.add(
-                SetupQuestionInfo(it.getAnnotation(SetupQuestion::class.java), it, it.parameters[0])
-            )
-        }
 
-        val finishMethods = methods.filter { it.isAnnotationPresent(SetupFinish::class.java) }
-        val cancelMethods = methods.filter { it.isAnnotationPresent(SetupCancel::class.java) }
-        check(finishMethods.size <= 1) {
-            "There can only be one Function with the @SetupFinish annotation!"
-        }
-        check(cancelMethods.size <= 1) {
-            "There can only be one Function with the @SetupCancel annotation!"
-        }
-        val finishMethod = finishMethods.firstOrNull() ?: throw IllegalStateException("No Finish Method found!")
-        val cancelMethod = cancelMethods.firstOrNull() ?: throw IllegalStateException("No Cancel Method found!")
+            val finishMethods = methods.filter { it.isAnnotationPresent(SetupFinish::class.java) }
+            val cancelMethods = methods.filter { it.isAnnotationPresent(SetupCancel::class.java) }
+            check(finishMethods.size <= 1) {
+                "There can only be one Function with the @SetupFinish annotation!"
+            }
+            check(cancelMethods.size <= 1) {
+                "There can only be one Function with the @SetupCancel annotation!"
+            }
+            val finishMethod = finishMethods.firstOrNull() ?: throw IllegalStateException("No Finish Method found!")
+            val cancelMethod = cancelMethods.firstOrNull() ?: throw IllegalStateException("No Cancel Method found!")
 
-        val setupInfo =
-            SetupInfo(
-                setup,
-                finishMethod,
-                cancelMethod,
-                questions.sortedBy { it.setupQuestion.index },
-            )
+            val setupInfo =
+                SetupInfo(
+                    setup,
+                    finishMethod,
+                    cancelMethod,
+                    questions.sortedBy { it.setupQuestion.index },
+                )
 
-        if (currentSetup == null) {
-            currentSetup = setupInfo
-            this.currentQuestion = setupInfo.questions[currentQuestionIndex]
-        } else {
-            return
+            if (currentSetup == null) {
+                currentSetup = setupInfo
+                this.currentQuestion = setupInfo.questions[currentQuestionIndex]
+            } else {
+                return
+            }
+
+            terminal.clear()
+            terminal.printSetup(translator.trans("SETUP.GENERAL.STARTED"))
+            printCurrentQuestion()
+        } catch (e: Exception) {
+            logger.error("Failed to start setup", e)
         }
-
-        terminal.clear()
-        terminal.printSetup(translator.trans("SETUP.GENERAL.STARTED"))
-        printCurrentQuestion()
     }
 
     private fun printCurrentQuestion() {
