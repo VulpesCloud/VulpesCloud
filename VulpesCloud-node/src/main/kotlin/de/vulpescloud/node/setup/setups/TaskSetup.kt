@@ -92,10 +92,10 @@ class TaskSetup(
             try {
                 minCountString.toInt()
             } catch (e: Exception) {
-                terminal.printSetup(translator.trans("SETUP.task.QUESTION.minOnlineCount.invalid"))
+                terminal.printSetup(translator.trans("SETUP.task.QUESTION.minOnlineCount.INVALID"))
                 return false
             }
-        terminal.printSetup(translator.trans("SETUP.task.QUESTION.minOnlineCount.success"))
+        terminal.printSetup(translator.trans("SETUP.task.QUESTION.minOnlineCount.SUCCESS"))
         this.minOnlineCount = minCount
         return true
     }
@@ -129,7 +129,7 @@ class TaskSetup(
         return true
     }
 
-    @SetupQuestion(5, "SETUP.task.QUESTION.startPort", default = ["25565", ""])
+    @SetupQuestion(5, "SETUP.task.QUESTION.startPort", default = ["25565", "26625"])
     fun setStartPort(startPortString: String): Boolean {
         val startPort =
             try {
