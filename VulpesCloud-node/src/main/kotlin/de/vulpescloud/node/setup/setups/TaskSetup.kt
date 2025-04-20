@@ -6,6 +6,7 @@ import de.vulpescloud.api.task.Task
 import de.vulpescloud.api.task.TaskProvider
 import de.vulpescloud.api.version.Version
 import de.vulpescloud.api.version.VersionProvider
+import de.vulpescloud.api.version.VersionType
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.setup.Setup
@@ -31,6 +32,7 @@ class TaskSetup(
     private val versionProvider: VersionProvider,
     private val config: NodeConfig
 ) : Setup {
+
     private lateinit var name: String
     private var maxMemory by Delegates.notNull<Int>()
     private var maxPlayers by Delegates.notNull<Int>()
@@ -182,6 +184,10 @@ class TaskSetup(
 
     @SetupFinish
     fun finish() {
+        if (version.type == VersionType.SERVER && !taskProvider.tasks().none { it.version.type == VersionType.SERVER }) {
+            fallback = true
+        }
+
         val task = Task(
             name,
             listOf(config.name()),
