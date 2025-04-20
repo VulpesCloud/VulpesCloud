@@ -1,10 +1,12 @@
 package de.vulpescloud.node.setup.setups
 
 import de.vulpescloud.api.lang.Translator
+import de.vulpescloud.api.mysql.TaskTable
 import de.vulpescloud.api.task.Task
 import de.vulpescloud.api.task.TaskProvider
 import de.vulpescloud.api.version.Version
 import de.vulpescloud.api.version.VersionProvider
+import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.setup.Setup
 import de.vulpescloud.node.setup.annotations.SetupCancel
@@ -14,6 +16,11 @@ import de.vulpescloud.node.setup.answers.BooleanSetupAnswer
 import de.vulpescloud.node.setup.answers.MemorySetupAnswer
 import de.vulpescloud.node.setup.answers.VersionSetupAnswer
 import de.vulpescloud.node.terminal.JLineTerminal
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
+import org.json.JSONObject
 import kotlin.properties.Delegates
 
 @Suppress("Unused")
@@ -175,24 +182,37 @@ class TaskSetup(
 
     @SetupFinish
     fun finish() {
-        taskProvider.updateTask(
-            Task(
-                name,
-                listOf(config.name()),
-                listOf(name),
-                maxMemory,
-                maxPlayers,
-                staticServices,
-                minOnlineCount,
-                0,
-                emptyList(),
-                maintenance,
-                startPort,
-                fallback,
-                version,
-                false,
-            )
+        val task = Task(
+            name,
+            listOf(config.name()),
+            listOf(name),
+            maxMemory,
+            maxPlayers,
+            staticServices,
+            minOnlineCount,
+            0,
+            emptyList(),
+            maintenance,
+            startPort,
+            fallback,
+            version,
+            false,
         )
+
+        val taskJson = JSONObject(task)
+        transaction {
+            val existing = TaskTable.select(TaskTable.name eq task.name).singleOrNull()
+
+            if (existing != null) {
+                TaskTable.update({ TaskTable.name eq task.name }) { it[json] = taskJson.toString() }
+            } else {
+                TaskTable.insert {
+                    it[name] = name
+                    it[json] = taskJson.toString()
+                }
+            }
+        }
+        getRC()?.setHashField("VULPESCLOUD_TASKS", task.name, taskJson.toString())
     }
 
     @SetupCancel
