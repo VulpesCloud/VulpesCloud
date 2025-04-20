@@ -99,10 +99,10 @@ class SetupProviderImpl(private val terminal: JLineTerminal, private val transla
 
     private fun finishSetup() {
         terminal.clear()
-        this.currentSetup = null
         this.currentQuestion = null
         this.currentQuestionIndex = 0
-        this.currentSetup?.callFinish()
+        this.currentSetup!!.callFinish()
+        this.currentSetup = null
         logger.info("Setup &2Finished")
     }
 
