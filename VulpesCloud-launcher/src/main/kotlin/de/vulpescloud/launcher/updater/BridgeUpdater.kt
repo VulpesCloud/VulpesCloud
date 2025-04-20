@@ -15,7 +15,7 @@ class BridgeUpdater {
         val downloadUri =
             if (config.autoUpdatesBranch() == "jenkins") {
                 URI(
-                    "https://jenkins.vulpescloud.de/job/VulpesCloud/lastSuccessfulBuild/artifact/VulpesCloud-bridge/build/libs/vulpescloud-bridge.jar"
+                    "https://jenkins.vulpescloud.de/job/VulpesCloud/lastSuccessfulBuild/artifact/build/meta-repo/vulpescloud-bridge.jar"
                 )
             } else {
                 URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-bridge.jar")

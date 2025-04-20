@@ -41,8 +41,8 @@ class SetupProviderImpl(private val terminal: JLineTerminal, private val transla
         check(cancelMethods.size <= 1) {
             "There can only be one Function with the @SetupCancel annotation!"
         }
-        val finishMethod = finishMethods.firstOrNull()
-        val cancelMethod = cancelMethods.firstOrNull()
+        val finishMethod = finishMethods.firstOrNull()!!
+        val cancelMethod = cancelMethods.firstOrNull()!!
 
         val setupInfo =
             SetupInfo(

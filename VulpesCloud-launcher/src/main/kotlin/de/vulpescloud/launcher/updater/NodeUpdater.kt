@@ -15,7 +15,7 @@ class NodeUpdater {
         val downloadUri =
             if (config.autoUpdatesBranch() == "jenkins") {
                 URI(
-                    "https://jenkins.vulpescloud.de/job/VulpesCloud/lastSuccessfulBuild/artifact/VulpesCloud-node/build/libs/vulpescloud-node.jar"
+                    "https://jenkins.vulpescloud.de/job/VulpesCloud/lastSuccessfulBuild/artifact/build/meta-repo/vulpescloud-node.jar"
                 )
             } else {
                 URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-node.jar")

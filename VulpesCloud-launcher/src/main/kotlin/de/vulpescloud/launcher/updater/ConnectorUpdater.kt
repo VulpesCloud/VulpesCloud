@@ -15,7 +15,7 @@ class ConnectorUpdater {
         val downloadUri =
             if (config.autoUpdatesBranch() == "jenkins") {
                 URI(
-                    "https://jenkins.vulpescloud.de/job/VulpesCloud/lastSuccessfulBuild/artifact/VulpesCloud-connector/build/libs/vulpescloud-connector.jar"
+                    "https://jenkins.vulpescloud.de/job/VulpesCloud/lastSuccessfulBuild/artifact/build/meta-repo/vulpescloud-connector.jar"
                 )
             } else {
                 URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-connector.jar")
