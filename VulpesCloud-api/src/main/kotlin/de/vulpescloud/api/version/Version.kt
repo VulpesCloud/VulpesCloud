@@ -8,6 +8,7 @@ data class Version(
 )
 
 data class SingleVersion(
+    val name: String,
     val version: String,
     val downloadURL: String
 )

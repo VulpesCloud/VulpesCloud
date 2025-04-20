@@ -47,7 +47,7 @@ class VersionProviderImpl : VersionProvider {
                 val versionObject = versionsArray.getJSONObject(j)
                 val versionName = versionObject.getString("version")
                 val downloadURL = versionObject.getString("url")
-                version.add(SingleVersion(versionName, downloadURL))
+                version.add(SingleVersion(name, versionName, downloadURL))
             }
             
             versions.add(

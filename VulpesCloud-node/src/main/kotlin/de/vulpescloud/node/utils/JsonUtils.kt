@@ -6,6 +6,7 @@ import de.vulpescloud.api.cluster.NodeStates
 import de.vulpescloud.api.module.ModuleInfo
 import de.vulpescloud.api.module.ModuleStates
 import de.vulpescloud.api.task.Task
+import de.vulpescloud.api.version.SingleVersion
 import de.vulpescloud.api.version.Version
 import de.vulpescloud.api.version.VersionType
 import org.json.JSONObject
@@ -37,12 +38,29 @@ object JsonUtils : KoinComponent {
     }
 
     fun getVersion(json: JSONObject): Version {
+        val version = mutableListOf<SingleVersion>()
+        val array = json.getJSONArray("versions")
+
+        for (i in 0 until array.length()) {
+            val versionObject = array.getJSONObject(i)
+            version.add(
+                getSingleVersion(versionObject)
+            )
+        }
+
         return Version(
             json.getString("name"),
-            json.getString("version"),
             VersionType.valueOf(json.getString("type")),
-            json.getString("downloadURL"),
-            json.getString("pluginDir"),
+            json.getString("pluginsDir"),
+            version
+        )
+    }
+
+    fun getSingleVersion(json: JSONObject): SingleVersion {
+        return SingleVersion(
+            json.getString("name"),
+            json.getString("version"),
+            json.getString("downloadURL")
         )
     }
 
