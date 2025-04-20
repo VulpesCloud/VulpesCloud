@@ -95,6 +95,7 @@ tasks.register("copyFilesForMetaRepo") {
     dependsOn(project(":VulpesCloud-node").tasks.shadowJar)
     dependsOn(project(":VulpesCloud-wrapper").tasks.shadowJar)
     dependsOn(project(":VulpesCloud-connector").tasks.shadowJar)
+    dependsOn(project(":VulpesCloud-launcher").tasks.shadowJar)
 
     doLast {
         copy {
@@ -121,6 +122,11 @@ tasks.register("copyFilesForMetaRepo") {
             from(project(":VulpesCloud-connector").buildDir.resolve("libs/vulpescloud-connector.jar"))
             into("$buildDir/meta-repo")
             rename { "vulpescloud-connector.jar" }
+        }
+        copy {
+            from(project(":VulpesCloud-launcher").buildDir.resolve("libs/vulpescloud-launcher.jar"))
+            into("$buildDir/meta-repo")
+            rename { "vulpescloud-launcher.jar" }
         }
 
         generateCheckSums("$buildDir/meta-repo")
