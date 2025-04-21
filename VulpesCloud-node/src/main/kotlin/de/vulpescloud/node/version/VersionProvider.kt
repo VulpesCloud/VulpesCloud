@@ -36,7 +36,7 @@ class VersionProvider {
             for (j in 0 until versionsArray.length()) {
                 val versionObject = versionsArray.getJSONObject(j)
                 val version = versionObject.getString("version")
-                val link = versionObject.getString("link")
+                val link = versionObject.getString("url")
 
                 versions.add(de.vulpescloud.api.version.Version(version, link))
             }
