@@ -5,6 +5,7 @@ import de.vulpescloud.api.template.Template
 import de.vulpescloud.api.template.TemplateStorage
 import de.vulpescloud.node.utils.FileUtils
 import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.io.path.Path
 
 class LocalTemplateStorage : TemplateStorage {
@@ -21,6 +22,10 @@ class LocalTemplateStorage : TemplateStorage {
 
     override fun copyServiceToTemplate(service: Service, template: Template) {
         FileUtils.copyDir(service.path(), templatesPath.resolve(template.name))
+    }
+
+    override fun copyTemplateToPath(template: Template, path: Path) {
+        FileUtils.copyDir(templatesPath.resolve(template.name), path)
     }
 
     override fun copyTemplateToTemplate(template: Template, target: Template) {

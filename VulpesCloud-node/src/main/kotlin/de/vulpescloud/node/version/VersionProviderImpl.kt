@@ -7,13 +7,14 @@ import de.vulpescloud.api.version.VersionType
 import org.json.JSONObject
 import java.net.URI
 import java.nio.file.Files
+import java.nio.file.Path
 import kotlin.io.path.Path
 
 class VersionProviderImpl : VersionProvider {
 
     private val versions = mutableListOf<Version>()
     private val versionURL = "https://raw.githubusercontent.com/VulpesCloud/VulpesCloud-meta/refs/heads/main/versions.json"
-    private val versionsPath = Path("local/versions.json")
+    private val versionsPath = Path("local/versionCache/")
 
     override fun getVersionByName(name: String): Version? {
         return versions.find { it.name == name }
@@ -47,7 +48,7 @@ class VersionProviderImpl : VersionProvider {
                 val versionObject = versionsArray.getJSONObject(j)
                 val versionName = versionObject.getString("version")
                 val downloadURL = versionObject.getString("url")
-                version.add(SingleVersion(name, versionName, downloadURL))
+                version.add(SingleVersion(name, versionName, downloadURL, pluginDir, VersionType.valueOf(versionType)))
             }
             
             versions.add(
@@ -59,7 +60,22 @@ class VersionProviderImpl : VersionProvider {
                 )
             )
         }
+    }
 
+    override fun prepareVersion(version: SingleVersion, servicePath: Path) {
+        versionsPath.toFile().mkdirs()
+        val file = versionsPath.resolve("${version.name}-${version.version}.jar")
+        if (!Files.exists(file)) {
+            Files.copy(
+                URI(version.downloadURL).toURL().openStream(),
+                file
+            )
+        }
+
+        Files.copy(
+            file,
+            servicePath.resolve("server.jar")
+        )
     }
 
 }

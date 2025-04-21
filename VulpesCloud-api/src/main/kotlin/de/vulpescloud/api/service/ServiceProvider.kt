@@ -8,8 +8,6 @@ interface ServiceProvider {
 
     fun getServiceByUUID(uuid: UUID): Service?
 
-    fun getLocalServices(): List<Service>
-
     fun services(): List<Service>
 
 }
