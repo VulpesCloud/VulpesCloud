@@ -28,7 +28,7 @@ class VersionProvider {
         for (i in 0 until versionArray.length()) {
             val jsonObject = versionArray.getJSONObject(i)
             val name = jsonObject.getString("name")
-            val versionType = jsonObject.getString("versionType")
+            val versionType = jsonObject.getString("type")
             val versionsArray = jsonObject.getJSONArray("versions")
 
             val versions: MutableList<de.vulpescloud.api.version.Version> = mutableListOf()
