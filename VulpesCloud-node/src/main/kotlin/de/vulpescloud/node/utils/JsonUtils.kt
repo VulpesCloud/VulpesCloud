@@ -34,11 +34,11 @@ object JsonUtils : KoinComponent {
             json.getInt("onlinePlayerCount"),
             json.getString("name"),
             json.getJSONArray("onlinePlayers").map {
-                val player = JSONObject(it as String)
+                val player = it as JSONObject
                 getPlayer(player)
             },
             json.getJSONArray("environmentVars").map {
-                val pair = JSONObject(it as String)
+                val pair = it as JSONObject
                 pair.getString("key") to pair.getString("value")
             },
         )
@@ -58,7 +58,7 @@ object JsonUtils : KoinComponent {
             json.getString("name"),
             json.getJSONArray("nodes").map { it as String },
             json.getJSONArray("templates").map {
-                val jsonTemplate = JSONObject(it as String)
+                val jsonTemplate = it as JSONObject
                 getTemplate(jsonTemplate)
             },
             json.getInt("maxMemory"),
@@ -67,7 +67,7 @@ object JsonUtils : KoinComponent {
             json.getInt("minOnlineCount"),
             json.getInt("serviceCount"),
             json.getJSONArray("services").map {
-                val serviceJson = JSONObject(it as String)
+                val serviceJson = it as JSONObject
                 getService(serviceJson)
             },
             json.getBoolean("maintenance"),
