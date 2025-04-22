@@ -19,12 +19,16 @@ import org.incendo.cloud.processors.cache.CaffeineCache
 import org.incendo.cloud.processors.confirmation.ConfirmationConfiguration
 import org.incendo.cloud.processors.confirmation.ConfirmationManager
 import org.incendo.cloud.processors.confirmation.annotation.ConfirmationBuilderModifier
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.CompletableFuture
+import java.util.concurrent.CompletionException
+
+
 
 class CommandProviderImpl(
-    private val translator: Translator
+    private val translator: Translator,
 ) : CommandProvider {
 
     private val aliasKey: CloudKey<Array<String>>? = CloudKey.of("vulpescloud:alias", Array<String>::class.java)
@@ -36,6 +40,7 @@ class CommandProviderImpl(
     private var annotationParser: AnnotationParser<CommandSource>? = null
 
     override val commandManager: CommandManager<CommandSource> = CloudCommandManager()
+    private val logger = LoggerFactory.getLogger(CommandProviderImpl::class.java)
 
     override fun initialize() {
         this.annotationParser = AnnotationParser(
@@ -103,7 +108,10 @@ class CommandProviderImpl(
     }
 
     override fun execute(source: CommandSource, input: String): CompletableFuture<CommandResult<CommandSource>> {
-        return commandManager.commandExecutor().executeCommand(source, input)
+        return commandManager.commandExecutor().executeCommand(source, input).exceptionally { exception: Throwable? ->
+            logger.error("Exception while executing command", exception)
+            throw if (exception is CompletionException) exception else CompletionException(exception)
+        }
     }
 
     override fun register(command: Any) {
