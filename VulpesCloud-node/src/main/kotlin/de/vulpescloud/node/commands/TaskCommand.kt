@@ -35,8 +35,13 @@ class TaskCommand(
     private val serviceProvider = serviceProvider as ServiceProviderImpl
 
     @Suggestions("tasks")
-    fun suggestTasks(): List<String> {
-        return taskProvider.tasks().map { it.name }
+    fun suggestTasks(): Stream<String> {
+        try {
+            return taskProvider.tasks().stream().map { it.name }
+        } catch (e: Exception) {
+            e.printStackTrace()
+            return listOf<Task>().stream().map { it.name }
+        }
     }
 
     @Parser(suggestions = "tasks")
