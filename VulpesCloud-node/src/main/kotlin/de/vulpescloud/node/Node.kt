@@ -4,6 +4,7 @@ import de.vulpescloud.api.cluster.AuthenticationProvider
 import de.vulpescloud.api.cluster.ClusterProvider
 import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.lang.Translator
+import de.vulpescloud.api.service.ServiceProvider
 import de.vulpescloud.api.task.TaskProvider
 import de.vulpescloud.api.template.TemplateStorageProvider
 import de.vulpescloud.api.version.VersionProvider
@@ -26,6 +27,9 @@ import de.vulpescloud.node.event.redis.module.ModuleUnloadEventTrigger
 import de.vulpescloud.node.module.ModuleProvider
 import de.vulpescloud.node.module.impl.ModuleProviderImpl
 import de.vulpescloud.node.mysql.DatabaseProvider
+import de.vulpescloud.node.service.ServiceFactory
+import de.vulpescloud.node.service.ServiceFactoryImpl
+import de.vulpescloud.node.service.ServiceProviderImpl
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.impl.SetupProviderImpl
 import de.vulpescloud.node.setup.setups.FirstSetup
@@ -60,6 +64,8 @@ class Node : KoinComponent {
         single<TemplateStorageProvider> { TemplateStorageProviderImpl() }
         single<TaskProvider> { TaskProviderImpl() }
         single<VersionProvider>  { VersionProviderImpl() }
+        single<ServiceProvider> { ServiceProviderImpl() }
+        single<ServiceFactory>  { ServiceFactoryImpl(get(), get(), get(), get(), get(), get()) }
     }
 
     private val terminal: JLineTerminal by inject()
@@ -75,6 +81,8 @@ class Node : KoinComponent {
     private val databaseProvider: DatabaseProvider by inject()
     private val taskProvider: TaskProvider by inject()
     private val versionProvider: VersionProvider by inject()
+    private val serviceFactory: ServiceFactory by inject()
+    private val serviceProvider: ServiceProvider by inject()
 
     private val logger = LoggerFactory.getLogger(Node::class.java)
 
@@ -143,7 +151,7 @@ class Node : KoinComponent {
         commandProvider.register(ClearCommand(terminal))
         commandProvider.register(ModuleCommand(moduleProvider))
         commandProvider.register(TemplateCommand(templateStorageProvider))
-        commandProvider.register(TaskCommand(setupProvider, taskProvider, translator, terminal, config, versionProvider))
+        commandProvider.register(TaskCommand(setupProvider, taskProvider, translator, terminal, config, versionProvider, serviceFactory, serviceProvider))
 
         terminal.allowInput()
 

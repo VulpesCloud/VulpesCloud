@@ -43,6 +43,37 @@ data class LocalService(
 
     fun start() {
         processBuilder?.start()
+
+        Thread {
+            process?.inputStream?.bufferedReader()?.use { reader ->
+                reader.forEachLine { line ->
+//                    if (serviceProvider.isLogging(this)) {
+//                        logger.info("&8[ &m{} &8] &b{}", name(), line.trim())
+//                    } else {
+                        logger.debug("&8[ &m{} &8] &b{}", name, line.trim())
+                    //}
+                }
+            }
+        }.start()
+
+        this.processTracking = Thread {
+            // if player send a stop command from game command system
+            try {
+                synchronized(this) {
+                    process?.waitFor()
+                }
+            } catch (e: InterruptedException) {
+                logger.debug("Exception: {}", e.printStackTrace())
+            }
+            if (state != ServiceStates.STOPPING) {
+                if (process != null) {
+                    process!!.exitValue()
+                }
+                this.postShutdownProcess()
+            }
+        }
+
+        processTracking!!.start()
     }
 
     fun forceStop() {
