@@ -79,6 +79,7 @@ object JsonUtils : KoinComponent {
     }
 
     fun getTemplate(json: JSONObject): Template {
+        println(json)
         return Template(
             json.getString("name"),
             json.getString("storage"),
