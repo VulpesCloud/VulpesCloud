@@ -20,7 +20,7 @@ import java.util.stream.IntStream
 import kotlin.io.path.Path
 
 class ServiceFactoryImpl(
-    private val serviceProvider: ServiceProvider,
+    serviceProvider: ServiceProvider,
     private val clusterProvider: ClusterProvider,
     private val templateStorageProvider: TemplateStorageProvider,
     private val versionProvider: VersionProvider,
@@ -28,6 +28,7 @@ class ServiceFactoryImpl(
     private val authenticationProvider: AuthenticationProvider
 ) : ServiceFactory {
 
+    private val serviceProvider = serviceProvider as ServiceProviderImpl
     private val logger = LoggerFactory.getLogger(ServiceFactoryImpl::class.java)
 
     override fun prepareService(task: Task): Pair<Service, LocalService> {
@@ -41,7 +42,8 @@ class ServiceFactoryImpl(
             task.maxPlayers,
             0,
             environmentVars = emptyList(),
-            onlinePlayers = emptyList()
+            onlinePlayers = emptyList(),
+            serviceProvider = serviceProvider
         )
 
         localService.path().resolve(localService.task.version.pluginDir).toFile().mkdirs()
@@ -94,6 +96,8 @@ class ServiceFactoryImpl(
 
         localService.processBuilder = processBuilder
 
+        serviceProvider.localServices.add(localService)
+
         // todo make configs
 
         return Pair(service, localService)
@@ -109,7 +113,7 @@ class ServiceFactoryImpl(
     }
 
     private fun isIdPresent(task: Task, id: Int): Boolean {
-        val services = task.services ?: return false // Check if services is null
+        val services = task.services // Check if services is null
 
         services.forEach {
             logger.debug(it.name)

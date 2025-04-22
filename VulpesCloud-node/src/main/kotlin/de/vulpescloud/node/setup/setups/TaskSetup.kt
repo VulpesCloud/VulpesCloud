@@ -4,6 +4,7 @@ import de.vulpescloud.api.lang.Translator
 import de.vulpescloud.api.mysql.TaskTable
 import de.vulpescloud.api.task.Task
 import de.vulpescloud.api.task.TaskProvider
+import de.vulpescloud.api.template.Template
 import de.vulpescloud.api.version.Version
 import de.vulpescloud.api.version.VersionProvider
 import de.vulpescloud.api.version.VersionType
@@ -30,7 +31,7 @@ class TaskSetup(
     private val translator: Translator,
     private val terminal: JLineTerminal,
     private val versionProvider: VersionProvider,
-    private val config: NodeConfig
+    private val config: NodeConfig,
 ) : Setup {
 
     private lateinit var name: String
@@ -185,24 +186,27 @@ class TaskSetup(
     @SetupFinish
     fun finish() {
 
-        fallback = version.type == VersionType.SERVER && !taskProvider.tasks().none { it.version.name != "Velocity" }
+        fallback =
+            version.type == VersionType.SERVER &&
+                !taskProvider.tasks().none { it.version.name != "Velocity" }
 
-        val task = Task(
-            name,
-            listOf(config.name()),
-            listOf(name),
-            maxMemory,
-            maxPlayers,
-            staticServices,
-            minOnlineCount,
-            0,
-            emptyList(),
-            maintenance,
-            startPort,
-            fallback,
-            version.versions.minByOrNull { it.version }!!,
-            false,
-        )
+        val task =
+            Task(
+                name,
+                listOf(config.name()),
+                listOf(Template(name, "local")),
+                maxMemory,
+                maxPlayers,
+                staticServices,
+                minOnlineCount,
+                0,
+                emptyList(),
+                maintenance,
+                startPort,
+                fallback,
+                version.versions.minByOrNull { it.version }!!,
+                false,
+            )
 
         val taskJson = JSONObject(task)
         transaction {
@@ -220,8 +224,5 @@ class TaskSetup(
         getRC()?.setHashField("VULPESCLOUD_TASKS", task.name, taskJson.toString())
     }
 
-    @SetupCancel
-    fun cancel() {
-
-    }
+    @SetupCancel fun cancel() {}
 }

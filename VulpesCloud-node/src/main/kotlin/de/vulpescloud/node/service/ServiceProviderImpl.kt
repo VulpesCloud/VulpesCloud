@@ -2,6 +2,9 @@ package de.vulpescloud.node.service
 
 import de.vulpescloud.api.service.Service
 import de.vulpescloud.api.service.ServiceProvider
+import de.vulpescloud.jediswrapper.JedisWrapper.getRC
+import de.vulpescloud.node.utils.JsonUtils.getService
+import org.json.JSONObject
 import java.util.*
 
 class ServiceProviderImpl : ServiceProvider {
@@ -17,7 +20,12 @@ class ServiceProviderImpl : ServiceProvider {
     }
 
     override fun services(): List<Service> {
-        TODO("Not yet implemented")
+        val services = mutableListOf<Service>()
+        getRC()?.getAllHashValues("VULPESCLOUD_SERVICES")?.forEach {
+            services.add(getService(JSONObject(it)))
+        }
+
+        return services
     }
 
 }
