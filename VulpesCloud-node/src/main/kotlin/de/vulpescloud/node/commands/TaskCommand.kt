@@ -18,6 +18,7 @@ import org.incendo.cloud.annotations.Flag
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
+import org.slf4j.LoggerFactory
 import java.util.stream.Stream
 
 @Suppress("Unused")
@@ -33,10 +34,12 @@ class TaskCommand(
 ) {
 
     private val serviceProvider = serviceProvider as ServiceProviderImpl
+    private val logger = LoggerFactory.getLogger(javaClass)
 
     @Suggestions("tasks")
     fun suggestTasks(): Stream<String> {
         try {
+            logger.debug("Trying to suggest tasks")
             return taskProvider.tasks().stream().map { it.name }
         } catch (e: Exception) {
             e.printStackTrace()
