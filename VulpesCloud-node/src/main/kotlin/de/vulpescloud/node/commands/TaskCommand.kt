@@ -40,6 +40,7 @@ class TaskCommand(
     fun suggestTasks(): Stream<String> {
         try {
             logger.debug("Trying to suggest tasks")
+            logger.debug("Tasks: {}", taskProvider.tasks().toString())
             return taskProvider.tasks().stream().map { it.name }
         } catch (e: Exception) {
             e.printStackTrace()
