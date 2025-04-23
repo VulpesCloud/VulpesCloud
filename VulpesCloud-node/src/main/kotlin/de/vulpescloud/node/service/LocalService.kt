@@ -42,7 +42,7 @@ data class LocalService(
     private var processTracking: Thread? = null
 
     fun start() {
-        processBuilder?.start()
+        process = processBuilder?.start()
 
         Thread {
             process?.inputStream?.bufferedReader()?.use { reader ->
@@ -57,7 +57,6 @@ data class LocalService(
         }.start()
 
         this.processTracking = Thread {
-            // if player send a stop command from game command system
             try {
                 synchronized(this) {
                     process?.waitFor()
