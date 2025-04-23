@@ -2,6 +2,7 @@ package de.vulpescloud.node.utils
 
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 
 object FileUtils {
 
@@ -12,7 +13,7 @@ object FileUtils {
             if (Files.isDirectory(sourcePath)) {
                 Files.createDirectories(targetPath)
             } else {
-                Files.copy(sourcePath, targetPath)
+                Files.copy(sourcePath, targetPath, StandardCopyOption.REPLACE_EXISTING)
             }
         }
     }
