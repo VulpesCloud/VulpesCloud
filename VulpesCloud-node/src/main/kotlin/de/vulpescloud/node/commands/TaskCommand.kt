@@ -38,14 +38,7 @@ class TaskCommand(
 
     @Suggestions("tasks")
     fun suggestTasks(): Stream<String> {
-        try {
-            logger.debug("Trying to suggest tasks")
-            logger.debug("Tasks: {}", taskProvider.tasks().toString())
-            return taskProvider.tasks().stream().map { it.name }
-        } catch (e: Exception) {
-            e.printStackTrace()
-            return listOf<Task>().stream().map { it.name }
-        }
+        return taskProvider.tasks().stream().map { it.name }
     }
 
     @Parser(suggestions = "tasks")
