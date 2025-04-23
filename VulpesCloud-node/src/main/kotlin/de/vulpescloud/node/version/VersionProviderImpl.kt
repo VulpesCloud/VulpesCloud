@@ -8,6 +8,7 @@ import org.json.JSONObject
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import kotlin.io.path.Path
 
 class VersionProviderImpl : VersionProvider {
@@ -74,7 +75,8 @@ class VersionProviderImpl : VersionProvider {
 
         Files.copy(
             file,
-            servicePath.resolve("server.jar")
+            servicePath.resolve("server.jar"),
+            StandardCopyOption.REPLACE_EXISTING
         )
     }
 
