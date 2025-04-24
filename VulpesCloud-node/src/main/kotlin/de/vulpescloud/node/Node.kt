@@ -152,6 +152,7 @@ class Node : KoinComponent {
         commandProvider.register(ModuleCommand(moduleProvider))
         commandProvider.register(TemplateCommand(templateStorageProvider))
         commandProvider.register(TaskCommand(setupProvider, taskProvider, translator, terminal, config, versionProvider, serviceFactory, serviceProvider))
+        commandProvider.register(ServiceCommand(serviceProvider))
 
         terminal.allowInput()
 
