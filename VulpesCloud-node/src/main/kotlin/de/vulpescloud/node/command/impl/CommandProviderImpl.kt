@@ -108,10 +108,11 @@ class CommandProviderImpl(
     }
 
     override fun execute(source: CommandSource, input: String): CompletableFuture<CommandResult<CommandSource>> {
-        return commandManager.commandExecutor().executeCommand(source, input).exceptionally { exception: Throwable? ->
-            logger.error("Exception while executing command", exception)
-            throw if (exception is CompletionException) exception else CompletionException(exception)
-        }
+        return commandManager.commandExecutor().executeCommand(source, input)
+//            .exceptionally { exception: Throwable? ->
+//            logger.error("Exception while executing command", exception)
+//            throw if (exception is CompletionException) exception else CompletionException(exception)
+//        }
     }
 
     override fun register(command: Any) {

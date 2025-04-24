@@ -9,7 +9,9 @@ import de.vulpescloud.api.task.Task
 import de.vulpescloud.api.template.TemplateStorageProvider
 import de.vulpescloud.api.version.VersionProvider
 import de.vulpescloud.api.version.VersionType
+import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.config.NodeConfig
+import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.net.ServerSocket
@@ -97,6 +99,7 @@ class ServiceFactoryImpl(
         localService.processBuilder = processBuilder
 
         serviceProvider.localServices.add(localService)
+        getRC()?.setHashField("VULPESCLOUD_SERVICES", service.name, JSONObject(service).toString())
 
         // todo make configs
 
