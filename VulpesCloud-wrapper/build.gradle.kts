@@ -43,7 +43,7 @@ dependencies {
 
 tasks.jar {
     manifest {
-        attributes["Main-Class"] = "de.vulpescloud.wrapper.WrapperLauncher"
+        attributes["Main-Class"] = "de.vulpescloud.wrapper.Wrapper"
         attributes["Premain-Class"] = "de.vulpescloud.wrapper.Premain"
     }
     archiveFileName.set("vulpescloud-wrapper.jar")
@@ -51,7 +51,7 @@ tasks.jar {
 
 tasks.shadowJar {
     manifest {
-        attributes["Main-Class"] = "de.vulpescloud.wrapper.WrapperLauncher"
+        attributes["Main-Class"] = "de.vulpescloud.wrapper.Wrapper"
         attributes["Premain-Class"] = "de.vulpescloud.wrapper.Premain"
     }
     archiveFileName.set("vulpescloud-wrapper.jar")

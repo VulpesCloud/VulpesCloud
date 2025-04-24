@@ -222,7 +222,7 @@ class ServiceFactoryImpl(
         } else {
             arguments.add("-javaagent:../../../../../launcher/dependencies/vulpescloud-wrapper.jar")
         }
-        arguments.add("de.vulpescloud.wrapper.WrapperLauncher")
+        arguments.add("de.vulpescloud.wrapper.Wrapper")
 
         return arguments
     }
