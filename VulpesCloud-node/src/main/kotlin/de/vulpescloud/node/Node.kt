@@ -121,8 +121,8 @@ class Node : KoinComponent {
         databaseProvider.initialize()
         databaseProvider.generateTables()
 
-        val clusterProv = clusterProvider as ClusterProviderImpl
-        clusterProv.initialize()
+        val clusterProviderImpl = clusterProvider as ClusterProviderImpl
+        clusterProviderImpl.initialize()
 
         NodeStateChangeEventTrigger(eventManager)
         ModuleLoadEventTrigger(eventManager)
@@ -152,7 +152,7 @@ class Node : KoinComponent {
         commandProvider.register(ModuleCommand(moduleProvider))
         commandProvider.register(TemplateCommand(templateStorageProvider))
         commandProvider.register(TaskCommand(setupProvider, taskProvider, translator, terminal, config, versionProvider, serviceFactory, serviceProvider))
-        commandProvider.register(ServiceCommand(serviceProvider))
+        commandProvider.register(ServiceCommand(serviceProvider, clusterProvider))
 
         terminal.allowInput()
 
@@ -161,6 +161,6 @@ class Node : KoinComponent {
             System.currentTimeMillis() - System.getProperty("startup").toLong()
         )
 
-        clusterProv.markOnline()
+        clusterProviderImpl.markOnline()
     }
 }
