@@ -36,8 +36,9 @@ dependencies {
     implementation(libs.kotlin.stdlib)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
     implementation(libs.jedis)
-    implementation(libs.logbackCore)
-    implementation(libs.logbackClassic)
+    implementation(libs.jedisWrapper)
+//    implementation(libs.logbackCore)
+//    implementation(libs.logbackClassic)
 }
 
 tasks.jar {
@@ -54,7 +55,4 @@ tasks.shadowJar {
         attributes["Premain-Class"] = "de.vulpescloud.wrapper.Premain"
     }
     archiveFileName.set("vulpescloud-wrapper.jar")
-    if (System.getenv("dev") == "true") {
-        destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
-    }
 }
