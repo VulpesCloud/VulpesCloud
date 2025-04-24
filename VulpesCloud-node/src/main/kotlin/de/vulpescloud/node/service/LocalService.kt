@@ -7,6 +7,8 @@ import de.vulpescloud.api.service.ServiceStates
 import de.vulpescloud.api.task.Task
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import org.slf4j.LoggerFactory
+import java.io.BufferedWriter
+import java.io.OutputStreamWriter
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
@@ -73,6 +75,16 @@ data class LocalService(
         }
 
         processTracking!!.start()
+    }
+
+    fun sendCommand(command: String) {
+        if (process == null || command.isEmpty()) {
+            return
+        }
+        val writer = BufferedWriter(OutputStreamWriter(process!!.outputStream))
+        writer.write(command)
+        writer.newLine()
+        writer.flush()
     }
 
     fun forceStop() {
