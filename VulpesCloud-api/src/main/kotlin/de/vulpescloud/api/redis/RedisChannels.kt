@@ -6,6 +6,7 @@ enum class RedisChannels {
     VULPESCLOUD_EVENT_MODULE_ModuleLoadEvent,
     VULPESCLOUD_EVENT_MODULE_ModuleStartEvent,
     VULPESCLOUD_EVENT_MODULE_ModuleUnloadEvent,
-    VULPESCLOUD_CLUSTER_SelectNewHeadNode;
+    VULPESCLOUD_CLUSTER_SelectNewHeadNode,
+    VULPESCLOUD_NODE_COMMUNICATION;
 
 }

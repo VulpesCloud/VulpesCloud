@@ -1,8 +1,12 @@
 package de.vulpescloud.node.commands
 
+import de.vulpescloud.api.cluster.ClusterProvider
+import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.api.service.Service
+import de.vulpescloud.api.service.ServiceActions
 import de.vulpescloud.api.service.ServiceProvider
 import de.vulpescloud.api.service.ServiceStates
+import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.service.ServiceProviderImpl
 import java.util.stream.Stream
@@ -12,8 +16,10 @@ import org.incendo.cloud.annotations.Flag
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
+import org.json.JSONObject
 
-class ServiceCommand(serviceProvider: ServiceProvider) {
+@Suppress("Unused")
+class ServiceCommand(serviceProvider: ServiceProvider, private val clusterProvider: ClusterProvider) {
     private val serviceProvider = serviceProvider as ServiceProviderImpl
 
     @Suggestions("services")
@@ -50,8 +56,15 @@ class ServiceCommand(serviceProvider: ServiceProvider) {
                 source.sendMessage("Starting service ${service.name}")
                 localService.start()
             } else {
-                source.sendMessage(
-                    "REPORT THIS PLEASE! Starting a service from another node is not implemented yet!"
+                source.sendMessage("Notifying ${service.runningNode.name} to start service ${service.name}")
+                getRC()?.sendMessage(RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name,
+                    JSONObject()
+                        .put("receiver", service.runningNode.name)
+                        .put("sender", clusterProvider.localNode().name)
+                        .put("content", "SERVICE")
+                        .put("action", ServiceActions.START)
+                        .put("service", service.name)
+                        .toString()
                 )
             }
         } else {
@@ -61,7 +74,30 @@ class ServiceCommand(serviceProvider: ServiceProvider) {
 
     @Command("service|services <service> stop")
     fun stopService(source: CommandSource, @Argument("service") service: Service, @Flag("force") force: Boolean) {
-        TODO("Not yet implemented")
+        if (force) {
+            source.sendMessage("Notifying ${service.runningNode.name} to kill service ${service.name}")
+            getRC()?.sendMessage(RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name,
+                JSONObject()
+                    .put("receiver", service.runningNode.name)
+                    .put("sender", clusterProvider.localNode().name)
+                    .put("content", "SERVICE")
+                    .put("action", ServiceActions.KILL)
+                    .put("service", service.name)
+                    .toString()
+            )
+        } else {
+            source.sendMessage("Notifying ${service.runningNode.name} to stop service ${service.name}")
+            getRC()?.sendMessage(RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name,
+                JSONObject()
+                    .put("receiver", service.runningNode.name)
+                    .put("sender", clusterProvider.localNode().name)
+                    .put("content", "SERVICE")
+                    .put("action", ServiceActions.STOP)
+                    .put("service", service.name)
+                    .toString()
+            )
+        }
+
     }
 
     @Command("service|services <service> screen")
