@@ -6,10 +6,10 @@ import de.vulpescloud.node.cluster.ClusterProviderImpl
 import de.vulpescloud.node.module.ModuleProvider
 import de.vulpescloud.node.mysql.DatabaseProvider
 import de.vulpescloud.node.terminal.JLineTerminal
-import kotlin.system.exitProcess
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.slf4j.LoggerFactory
+import kotlin.system.exitProcess
 
 object NodeShutdown : KoinComponent {
 

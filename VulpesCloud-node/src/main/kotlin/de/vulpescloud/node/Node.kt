@@ -11,6 +11,7 @@ import de.vulpescloud.api.version.VersionProvider
 import de.vulpescloud.jediswrapper.JedisWrapper
 import de.vulpescloud.node.cluster.AuthenticationProviderImpl
 import de.vulpescloud.node.cluster.ClusterProviderImpl
+import de.vulpescloud.node.cluster.NodeCommunicationChannelListener
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.command.impl.CommandProviderImpl
 import de.vulpescloud.node.commands.*
@@ -153,6 +154,8 @@ class Node : KoinComponent {
         commandProvider.register(TemplateCommand(templateStorageProvider))
         commandProvider.register(TaskCommand(setupProvider, taskProvider, translator, terminal, config, versionProvider, serviceFactory, serviceProvider))
         commandProvider.register(ServiceCommand(serviceProvider, clusterProvider))
+
+        NodeCommunicationChannelListener(clusterProvider)
 
         terminal.allowInput()
 
