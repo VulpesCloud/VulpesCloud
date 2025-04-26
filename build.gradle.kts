@@ -56,6 +56,7 @@ allprojects {
         "implementation"(rootProject.libs.guava)
         "implementation"(kotlin("reflect"))
         "implementation"(rootProject.libs.koin)
+        "implementation"(rootProject.libs.kotlin.stdlib)
     }
 
     publishing {

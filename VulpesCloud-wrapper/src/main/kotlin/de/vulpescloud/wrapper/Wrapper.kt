@@ -69,7 +69,7 @@ class Wrapper(args: Array<String>) {
 
         thread.name = "MinecraftServer-${System.getenv("serviceName")}"
         thread.contextClassLoader = classLoader
-        thread.setUncaughtExceptionHandler { exceptionThread, exception ->
+        thread.setUncaughtExceptionHandler { exceptionThread, exception ->  
             println("Uncaught exception in thread ${exceptionThread.name}: $exception")
         }
         thread.start()
