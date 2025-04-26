@@ -22,9 +22,9 @@ class Wrapper(args: Array<String>) {
     init {
         startKoin {
             modules(
-//                module {
-//                    single<ServiceProvider> { ServiceProviderImpl() }
-//                }
+                module {
+                    single<ServiceProvider> { ServiceProviderImpl() }
+                }
             )
         }
 
