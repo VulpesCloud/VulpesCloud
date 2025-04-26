@@ -20,13 +20,13 @@ class Wrapper(args: Array<String>) {
     }
 
     init {
-        startKoin {
-            modules(
-                module {
-                    single<ServiceProvider> { ServiceProviderImpl() }
-                }
-            )
-        }
+//        startKoin {
+//            modules(
+//                module {
+//                    single<ServiceProvider> { ServiceProviderImpl() }
+//                }
+//            )
+//        }
 
         JedisWrapper.initializeRedisControllerWithSecret(
             System.getenv("redis_password"),

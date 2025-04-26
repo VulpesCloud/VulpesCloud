@@ -7,7 +7,7 @@ import org.koin.core.component.inject
 
 object VulpesBridge : KoinComponent {
 
-    private val serviceProvider: ServiceProvider by inject()
+    private val serviceProvider: ServiceProvider = ServiceProviderImpl()
 
     fun getServiceProvider(): ServiceProviderImpl = serviceProvider as ServiceProviderImpl
 
