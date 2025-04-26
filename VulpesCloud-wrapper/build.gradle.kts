@@ -39,8 +39,8 @@ dependencies {
     implementation(libs.jedis)
     implementation(libs.jedisWrapper)
     implementation(libs.koin)
-//    implementation(libs.logbackCore)
-//    implementation(libs.logbackClassic)
+    implementation(libs.logbackCore)
+    implementation(libs.logbackClassic)
 }
 
 tasks.jar {
