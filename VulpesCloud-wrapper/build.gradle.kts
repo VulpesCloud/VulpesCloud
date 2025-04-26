@@ -33,10 +33,12 @@ repositories {
 
 dependencies {
     compileOnly(project(":VulpesCloud-api"))
+    compileOnly(project(":VulpesCloud-bridge"))
     implementation(libs.kotlin.stdlib)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
     implementation(libs.jedis)
     implementation(libs.jedisWrapper)
+    implementation(libs.koin)
 //    implementation(libs.logbackCore)
 //    implementation(libs.logbackClassic)
 }

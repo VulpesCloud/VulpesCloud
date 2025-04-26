@@ -54,9 +54,9 @@ dependencies {
     compileOnly(libs.velocity)
     annotationProcessor(libs.velocity)
     compileOnly(libs.jedis)
+    compileOnly(libs.jedisWrapper)
 
     compileOnly(libs.paper)
-    implementation(libs.kSpigot)
 
 }
 
@@ -69,18 +69,9 @@ sourceSets {
 }
 
 //paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
-
-tasks.jar {
-    archiveFileName.set("vulpescloud-connector.jar")
-    destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
-}
-
 tasks.shadowJar {
     archiveFileName.set("vulpescloud-connector.jar")
     dependsOn(":VulpesCloud-api:jar")
     dependsOn(":VulpesCloud-bridge:jar")
-    if (System.getenv("dev") == "true") {
-        destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
-    }
     //relocate("dev.jorel.commandapi", "de.vulpescloud.connector.commandapi")
 }
