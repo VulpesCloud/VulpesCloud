@@ -1,7 +1,11 @@
 package de.vulpescloud.wrapper
 
+import de.vulpescloud.api.service.ServiceProvider
+import de.vulpescloud.bridge.service.ServiceProviderImpl
 import de.vulpescloud.jediswrapper.JedisWrapper
 import de.vulpescloud.wrapper.Premain.preClassCall
+import org.koin.core.context.startKoin
+import org.koin.dsl.module
 import java.net.URLClassLoader
 import java.util.*
 import java.util.jar.JarFile
@@ -22,6 +26,14 @@ class Wrapper(args: Array<String>) {
             System.getenv("redis_hostname"),
             System.getenv("secret")
         )
+
+        startKoin {
+            modules(
+                module {
+                    single<ServiceProvider> { ServiceProviderImpl() }
+                }
+            )
+        }
 
         // TODO send service authentication Message
 
@@ -57,6 +69,9 @@ class Wrapper(args: Array<String>) {
 
         thread.name = "MinecraftServer-${System.getenv("serviceName")}"
         thread.contextClassLoader = classLoader
+        thread.setUncaughtExceptionHandler { exceptionThread, exception ->
+            println("Uncaught exception in thread ${exceptionThread.name}: $exception")
+        }
         thread.start()
     }
 }

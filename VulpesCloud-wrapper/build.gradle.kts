@@ -41,6 +41,7 @@ dependencies {
     implementation(libs.koin)
     implementation(libs.logbackCore)
     implementation(libs.logbackClassic)
+    implementation(libs.slf4jApi)
 }
 
 tasks.jar {
