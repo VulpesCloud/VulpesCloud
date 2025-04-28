@@ -155,7 +155,12 @@ class Node : KoinComponent {
         commandProvider.register(TaskCommand(setupProvider, taskProvider, translator, terminal, config, versionProvider, serviceFactory, serviceProvider))
         commandProvider.register(ServiceCommand(serviceProvider, clusterProvider))
 
-        NodeCommunicationChannelListener(clusterProvider)
+        try {
+            logger.debug("Initializing NodeCommunicationChannelListener")
+            NodeCommunicationChannelListener(clusterProvider)
+        } catch (e: Exception) {
+            logger.error("Something went wrong in NodeCommunicationChannelListener: $e")
+        }
 
         terminal.allowInput()
 

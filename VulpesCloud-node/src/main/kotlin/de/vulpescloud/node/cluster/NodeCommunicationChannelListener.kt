@@ -1,13 +1,12 @@
 package de.vulpescloud.node.cluster
 
 import de.vulpescloud.api.cluster.ClusterProvider
-import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.jediswrapper.redis.ChannelListener
 import de.vulpescloud.node.service.NodeCommunicationServiceHandler.handleServiceMessage
 import de.vulpescloud.node.utils.JsonUtils.parsePubSubMessage
 import org.slf4j.LoggerFactory
 
-class NodeCommunicationChannelListener(private val clusterProvider: ClusterProvider) : ChannelListener(RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name) {
+class NodeCommunicationChannelListener(private val clusterProvider: ClusterProvider) : ChannelListener("VULPESCLOUD_NODE_COMMUNICATION") {
     private val logger = LoggerFactory.getLogger("TempLogger")
     override fun onMessage(message: String) {
         logger.debug("Received message on channel {}: {}", channel, message)
@@ -22,6 +21,5 @@ class NodeCommunicationChannelListener(private val clusterProvider: ClusterProvi
                 }
             }
         }
-
     }
 }
