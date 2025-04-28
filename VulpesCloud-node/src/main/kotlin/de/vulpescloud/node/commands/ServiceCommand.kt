@@ -9,7 +9,6 @@ import de.vulpescloud.api.service.ServiceStates
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.service.ServiceProviderImpl
-import java.util.stream.Stream
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Flag
@@ -17,6 +16,7 @@ import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
 import org.json.JSONObject
+import java.util.stream.Stream
 
 @Suppress("Unused")
 class ServiceCommand(serviceProvider: ServiceProvider, private val clusterProvider: ClusterProvider) {
@@ -57,14 +57,15 @@ class ServiceCommand(serviceProvider: ServiceProvider, private val clusterProvid
                 localService.start()
             } else {
                 source.sendMessage("Notifying ${service.runningNode.name} to start service ${service.name}")
-                getRC()?.sendMessage(RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name,
+                getRC()?.sendMessage(
                     JSONObject()
                         .put("receiver", service.runningNode.name)
                         .put("sender", clusterProvider.localNode().name)
                         .put("content", "SERVICE")
                         .put("action", ServiceActions.START)
                         .put("service", service.name)
-                        .toString()
+                        .toString(),
+                    RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name
                 )
             }
         } else {
@@ -76,25 +77,27 @@ class ServiceCommand(serviceProvider: ServiceProvider, private val clusterProvid
     fun stopService(source: CommandSource, @Argument("service") service: Service, @Flag("force") force: Boolean) {
         if (force) {
             source.sendMessage("Notifying ${service.runningNode.name} to kill service ${service.name}")
-            getRC()?.sendMessage(RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name,
+            getRC()?.sendMessage(
                 JSONObject()
                     .put("receiver", service.runningNode.name)
                     .put("sender", clusterProvider.localNode().name)
                     .put("content", "SERVICE")
                     .put("action", ServiceActions.KILL)
                     .put("service", service.name)
-                    .toString()
+                    .toString(),
+                RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name
             )
         } else {
             source.sendMessage("Notifying ${service.runningNode.name} to stop service ${service.name}")
-            getRC()?.sendMessage(RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name,
+            getRC()?.sendMessage(
                 JSONObject()
                     .put("receiver", service.runningNode.name)
                     .put("sender", clusterProvider.localNode().name)
                     .put("content", "SERVICE")
                     .put("action", ServiceActions.STOP)
                     .put("service", service.name)
-                    .toString()
+                    .toString(),
+                RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name
             )
         }
 

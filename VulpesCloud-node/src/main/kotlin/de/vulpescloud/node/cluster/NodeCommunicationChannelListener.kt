@@ -7,12 +7,8 @@ import de.vulpescloud.node.utils.JsonUtils.parsePubSubMessage
 import org.slf4j.LoggerFactory
 
 class NodeCommunicationChannelListener(private val clusterProvider: ClusterProvider) : ChannelListener("VULPESCLOUD_NODE_COMMUNICATION") {
-    private val logger = LoggerFactory.getLogger("TempLogger")
     override fun onMessage(message: String) {
-        logger.debug("Received message on channel {}: {}", channel, message)
         val msg = parsePubSubMessage(message)
-
-        logger.debug("Triggered NodeCommunicationChannelListener with message: {}, {}", msg, msg.getString("content"))
 
         when (msg.getString("content")) {
             "SERVICE" -> {
