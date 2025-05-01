@@ -2,6 +2,7 @@ package de.vulpescloud.node.service
 
 import de.vulpescloud.api.cluster.AuthenticationProvider
 import de.vulpescloud.api.cluster.ClusterProvider
+import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.service.Service
 import de.vulpescloud.api.service.ServiceProvider
 import de.vulpescloud.api.service.ServiceStates
@@ -27,7 +28,8 @@ class ServiceFactoryImpl(
     private val templateStorageProvider: TemplateStorageProvider,
     private val versionProvider: VersionProvider,
     private val config: NodeConfig,
-    private val authenticationProvider: AuthenticationProvider
+    private val authenticationProvider: AuthenticationProvider,
+    private val eventManager: EventManager
 ) : ServiceFactory {
 
     private val serviceProvider = serviceProvider as ServiceProviderImpl
@@ -45,7 +47,8 @@ class ServiceFactoryImpl(
             0,
             environmentVars = emptyList(),
             onlinePlayers = emptyList(),
-            serviceProvider = serviceProvider
+            serviceProvider = serviceProvider,
+            eventManager = eventManager
         )
 
         localService.path().resolve(localService.task.version.pluginDir).toFile().mkdirs()
@@ -82,6 +85,8 @@ class ServiceFactoryImpl(
             StandardCopyOption.REPLACE_EXISTING
         )
 
+        ServiceConfig.updateConfigs(localService)
+
         val service = Service(
             localService.task,
             localService.uuid,
@@ -100,8 +105,6 @@ class ServiceFactoryImpl(
 
         serviceProvider.localServices.add(localService)
         getRC()?.setHashField("VULPESCLOUD_SERVICES", service.name, JSONObject(service).toString())
-
-        // todo make configs
 
         return Pair(service, localService)
     }

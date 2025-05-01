@@ -49,6 +49,16 @@ object NodeCommunicationServiceHandler : KoinComponent {
             ServiceActions.RESTART -> {
                 logger.warn("Service Restarting is not yet implemented!")
             }
+            ServiceActions.COMMAND ->  {
+                val localService = serviceProviderImpl.localServices.find { it.name == msg.getString("service") }
+                if (localService == null) {
+                    logger.error("Received message to send command to service ${msg.getString("service")}, but it wasn't found in the LocalServices!")
+                    return
+                } else {
+                    logger.debug("Received message to send command to service ${localService.name}")
+                    localService.sendCommand(msg.getString("command"))
+                }
+            }
         }
     }
 

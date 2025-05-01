@@ -21,10 +21,12 @@ import de.vulpescloud.node.event.listeners.cluster.NodeStateChangeEventListener
 import de.vulpescloud.node.event.listeners.module.ModuleLoadEventListener
 import de.vulpescloud.node.event.listeners.module.ModuleStartEventListener
 import de.vulpescloud.node.event.listeners.module.ModuleUnloadEventListener
+import de.vulpescloud.node.event.listeners.service.ServiceLogEventListener
 import de.vulpescloud.node.event.redis.cluster.NodeStateChangeEventTrigger
 import de.vulpescloud.node.event.redis.module.ModuleLoadEventTrigger
 import de.vulpescloud.node.event.redis.module.ModuleStartEventTrigger
 import de.vulpescloud.node.event.redis.module.ModuleUnloadEventTrigger
+import de.vulpescloud.node.event.redis.service.ServiceLogEventTrigger
 import de.vulpescloud.node.module.ModuleProvider
 import de.vulpescloud.node.module.impl.ModuleProviderImpl
 import de.vulpescloud.node.mysql.DatabaseProvider
@@ -39,6 +41,7 @@ import de.vulpescloud.node.template.LocalTemplateStorage
 import de.vulpescloud.node.template.TemplateStorageProviderImpl
 import de.vulpescloud.node.terminal.JLineTerminal
 import de.vulpescloud.node.terminal.impl.JLineTerminalImpl
+import de.vulpescloud.node.utils.StringUtils
 import de.vulpescloud.node.version.VersionProviderImpl
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.locks.Condition
@@ -66,7 +69,7 @@ class Node : KoinComponent {
         single<TaskProvider> { TaskProviderImpl() }
         single<VersionProvider>  { VersionProviderImpl() }
         single<ServiceProvider> { ServiceProviderImpl() }
-        single<ServiceFactory>  { ServiceFactoryImpl(get(), get(), get(), get(), get(), get()) }
+        single<ServiceFactory>  { ServiceFactoryImpl(get(), get(), get(), get(), get(), get(), get()) }
     }
 
     private val terminal: JLineTerminal by inject()
@@ -129,11 +132,13 @@ class Node : KoinComponent {
         ModuleLoadEventTrigger(eventManager)
         ModuleUnloadEventTrigger(eventManager)
         ModuleStartEventTrigger(eventManager)
+        ServiceLogEventTrigger(eventManager)
 
         eventManager.registerListener(NodeStateChangeEventListener(translator))
         eventManager.registerListener(ModuleLoadEventListener(translator, clusterProvider))
         eventManager.registerListener(ModuleStartEventListener(translator, clusterProvider))
         eventManager.registerListener(ModuleUnloadEventListener(translator, clusterProvider))
+        eventManager.registerListener(ServiceLogEventListener(serviceProvider))
 
         val versionProviderImplementation = versionProvider as VersionProviderImpl
 
@@ -165,5 +170,9 @@ class Node : KoinComponent {
         )
 
         clusterProviderImpl.markOnline()
+    }
+
+    companion object {
+        val forwardingSecret = StringUtils.generateRandomString(8)
     }
 }

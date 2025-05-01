@@ -100,12 +100,31 @@ class ServiceCommand(serviceProvider: ServiceProvider, private val clusterProvid
                 RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name
             )
         }
-
     }
 
     @Command("service|services <service> screen")
     fun toggleScreen(source: CommandSource, @Argument("service") service: Service) {
-        TODO("Not yet implemented")
+        if (serviceProvider.toggleServiceLogging(service)) {
+            source.sendMessage("Enabled screen logging for ${service.name}")
+        } else {
+            source.sendMessage("Disabled screen logging for ${service.name}")
+        }
+    }
+
+    @Command("service|services <service> command <command>")
+    fun sendCommandToService(source: CommandSource, @Argument("service") service: Service, @Argument("command") command: String) {
+        source.sendMessage("Notifying ${service.runningNode.name} to send the command to service ${service.name}")
+        getRC()?.sendMessage(
+            JSONObject()
+                .put("receiver", service.runningNode.name)
+                .put("sender", clusterProvider.localNode().name)
+                .put("content", "SERVICE")
+                .put("action", ServiceActions.COMMAND.name)
+                .put("service", service.name)
+                .put("command", command)
+                .toString(),
+            RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name
+        )
     }
 
 }

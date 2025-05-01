@@ -1,18 +1,22 @@
 package de.vulpescloud.node.service
 
 import de.vulpescloud.api.cluster.ClusterNode
+import de.vulpescloud.api.event.EventManager
+import de.vulpescloud.api.event.events.service.ServiceLogEvent
 import de.vulpescloud.api.player.Player
+import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.api.service.ServiceProvider
 import de.vulpescloud.api.service.ServiceStates
 import de.vulpescloud.api.task.Task
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
-import org.slf4j.LoggerFactory
+import de.vulpescloud.node.event.EventManagerImpl
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.exists
+import org.slf4j.LoggerFactory
 
 data class LocalService(
     val task: Task,
@@ -26,10 +30,13 @@ data class LocalService(
     val name: String = "${task.name}-$orderedId",
     val onlinePlayers: List<Player>,
     val environmentVars: List<Pair<String, String>>,
-    private val serviceProvider: ServiceProvider
+    private val serviceProvider: ServiceProvider,
+    private val eventManager: EventManager,
 ) {
     private val serviceProviderImpl = serviceProvider as ServiceProviderImpl
     private val logger = LoggerFactory.getLogger(LocalService::class.java)
+    private val eventManagerImpl = eventManager as EventManagerImpl
+
     fun path(): Path {
         return if (task.staticServices) {
             Path.of("local/services/${task.name}/$name")
@@ -47,22 +54,24 @@ data class LocalService(
         process = processBuilder?.start()
 
         Thread {
-            process?.inputStream?.bufferedReader()?.use { reader ->
-                reader.forEachLine { line ->
-//                    if (serviceProvider.isLogging(this)) {
-//                        logger.info("&8[ &m{} &8] &b{}", name(), line.trim())
-//                    } else {
+                process?.inputStream?.bufferedReader()?.use { reader ->
+                    reader.forEachLine { line ->
+                        eventManagerImpl.callGlobal(
+                            ServiceLogEvent(
+                                serviceProvider.getServiceByUUID(this.uuid)!!,
+                                line.trim(),
+                            ),
+                            RedisChannels.VULPESCLOUD_EVENT_SERVICE_ServiceLogEvent,
+                        )
                         logger.debug("&8[ &m{} &8] &b{}", name, line.trim())
-                    //}
+                    }
                 }
             }
-        }.start()
+            .start()
 
         this.processTracking = Thread {
             try {
-                synchronized(this) {
-                    process?.waitFor()
-                }
+                synchronized(this) { process?.waitFor() }
             } catch (e: InterruptedException) {
                 logger.debug("Exception: {}", e.printStackTrace())
             }
@@ -104,13 +113,12 @@ data class LocalService(
             synchronized(this) {
                 try {
                     Thread.sleep(200)
-                } catch (ignore: InterruptedException) {
-                }
+                } catch (ignore: InterruptedException) {}
                 try {
                     if (path().exists()) {
-                        Files.walk(path())
-                            .sorted(Comparator.reverseOrder())
-                            .forEach { Files.delete(it) }
+                        Files.walk(path()).sorted(Comparator.reverseOrder()).forEach {
+                            Files.delete(it)
+                        }
                     }
                 } catch (e: Exception) {
                     logger.error("Failed to delete directory: ${path()}", e)
@@ -123,6 +131,4 @@ data class LocalService(
         localServices.remove(this)
         getRC()?.deleteHashField("VULPESCLOUD_SERVICES", name)
     }
-
 }
-

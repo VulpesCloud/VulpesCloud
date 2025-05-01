@@ -5,6 +5,7 @@ enum class ServiceActions {
     START,
     STOP,
     KILL,
-    RESTART;
+    RESTART,
+    COMMAND;
 
 }

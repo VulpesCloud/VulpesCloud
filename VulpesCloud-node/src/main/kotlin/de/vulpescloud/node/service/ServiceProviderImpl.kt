@@ -10,6 +10,7 @@ import java.util.*
 class ServiceProviderImpl : ServiceProvider {
 
     val localServices = mutableListOf<LocalService>()
+    val loggingServices = mutableListOf<String>()
 
     override fun getServiceByName(name: String): Service? {
         TODO("Not yet implemented")
@@ -26,6 +27,16 @@ class ServiceProviderImpl : ServiceProvider {
         }
 
         return services
+    }
+
+    fun toggleServiceLogging(service: Service): Boolean {
+        if (loggingServices.contains(service.name)) {
+            loggingServices.remove(service.name)
+            return false
+        } else {
+            loggingServices.add(service.name)
+            return true
+        }
     }
 
 }
