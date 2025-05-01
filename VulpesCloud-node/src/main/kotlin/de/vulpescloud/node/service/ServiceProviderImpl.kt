@@ -13,11 +13,11 @@ class ServiceProviderImpl : ServiceProvider {
     val loggingServices = mutableListOf<String>()
 
     override fun getServiceByName(name: String): Service? {
-        TODO("Not yet implemented")
+        return services().find { it.name == name }
     }
 
     override fun getServiceByUUID(uuid: UUID): Service? {
-        TODO("Not yet implemented")
+        return services().find { it.uuid == uuid }
     }
 
     override fun services(): List<Service> {
