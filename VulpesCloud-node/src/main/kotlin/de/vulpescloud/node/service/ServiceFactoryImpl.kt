@@ -119,7 +119,7 @@ class ServiceFactoryImpl(
     }
 
     private fun isIdPresent(task: Task, id: Int): Boolean {
-        val services = task.services // Check if services is null
+        val services = serviceProvider.services().filter { it.task.name == task.name }
 
         services.forEach {
             logger.debug(it.name)
