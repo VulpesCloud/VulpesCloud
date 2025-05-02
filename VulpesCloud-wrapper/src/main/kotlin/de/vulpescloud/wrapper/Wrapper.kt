@@ -1,9 +1,11 @@
 package de.vulpescloud.wrapper
 
 import de.vulpescloud.api.service.ServiceProvider
+import de.vulpescloud.bridge.VulpesBridge.getEventManager
 import de.vulpescloud.bridge.service.ServiceProviderImpl
 import de.vulpescloud.jediswrapper.JedisWrapper
 import de.vulpescloud.wrapper.Premain.preClassCall
+import de.vulpescloud.wrapper.event.triggers.service.ServiceStateChangeEventTrigger
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import java.net.URLClassLoader
@@ -34,6 +36,8 @@ class Wrapper(args: Array<String>) {
             System.getenv("redis_hostname"),
             System.getenv("secret")
         )
+
+        ServiceStateChangeEventTrigger(getEventManager())
 
         // TODO send service authentication Message
 

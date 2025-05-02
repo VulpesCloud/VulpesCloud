@@ -10,4 +10,6 @@ interface ServiceProvider {
 
     fun services(): List<Service>
 
+    fun getServicesByFilter(filter: ServiceFilter): List<Service>
+
 }
