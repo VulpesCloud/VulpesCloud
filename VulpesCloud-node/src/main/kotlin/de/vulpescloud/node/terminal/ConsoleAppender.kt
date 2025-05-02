@@ -43,15 +43,6 @@ class ConsoleAppender : ConsoleAppender<ILoggingEvent>() {
         } else {
             Node.instance.terminal.printLine(String(super.encoder.encode(eventObject)))
         }
-
-        Node.instance.eventManager.call(
-            NodeLogEvent(
-                eventObject.message,
-                eventObject.level.levelStr,
-                eventObject.threadName,
-                String(super.encoder.encode(eventObject))
-            )
-        )
     }
 
 }
