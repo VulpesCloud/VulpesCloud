@@ -3,12 +3,15 @@ package de.vulpescloud.connector.velocity
 import com.velocitypowered.api.event.EventManager
 import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
+import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.plugin.PluginContainer
 import com.velocitypowered.api.proxy.ProxyServer
+import de.vulpescloud.api.service.ServiceFilter
 import de.vulpescloud.bridge.VulpesBridge
+import de.vulpescloud.bridge.VulpesBridge.getServiceProvider
 import de.vulpescloud.connector.common.Connector
 import jakarta.inject.Inject
 
@@ -36,5 +39,19 @@ constructor(
     @Subscribe(order = PostOrder.FIRST)
     fun onProxyShutdownEvent(event: ProxyShutdownEvent) {
         markStopping()
+    }
+
+    @Subscribe(order = PostOrder.FIRST)
+    fun playerChooseInitialServerEvent(event: PlayerChooseInitialServerEvent) {
+        val fallbackServer = getServiceProvider().getServicesByFilter(ServiceFilter.FALLBACKS)
+
+        if (fallbackServer.isEmpty()) {
+            println("FALLBACK SERVER IS NULL!")
+            event.setInitialServer(null)
+            return
+        }
+
+        //todo get lowest fallback server
+        proxyServer.getServer(fallbackServer[0].name).ifPresent { event.setInitialServer(it) }
     }
 }
