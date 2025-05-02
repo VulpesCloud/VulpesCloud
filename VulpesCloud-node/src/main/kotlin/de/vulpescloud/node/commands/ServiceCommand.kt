@@ -9,6 +9,7 @@ import de.vulpescloud.api.service.ServiceStates
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.service.ServiceProviderImpl
+import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Flag
@@ -112,7 +113,7 @@ class ServiceCommand(serviceProvider: ServiceProvider, private val clusterProvid
     }
 
     @Command("service|services <service> command <command>")
-    fun sendCommandToService(source: CommandSource, @Argument("service") service: Service, @Argument("command") command: String) {
+    fun sendCommandToService(source: CommandSource, @Argument("service") service: Service, @Greedy @Argument("command") command: String) {
         source.sendMessage("Notifying ${service.runningNode.name} to send the command to service ${service.name}")
         getRC()?.sendMessage(
             JSONObject()
