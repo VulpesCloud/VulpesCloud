@@ -4,7 +4,6 @@ import com.velocitypowered.api.event.EventManager
 import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.connection.DisconnectEvent
-import com.velocitypowered.api.event.connection.PostLoginEvent
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
@@ -62,10 +61,7 @@ constructor(
 
         // todo get lowest fallback server
         proxyServer.getServer(fallbackServer[0].name).ifPresent { event.setInitialServer(it) }
-    }
 
-    @Subscribe(order = PostOrder.LAST)
-    fun onPostLoginEvent(event: PostLoginEvent) {
         val player =
             Player(
                 event.player.username,
@@ -74,8 +70,14 @@ constructor(
                 event.player.currentServer.get().serverInfo.name,
             )
 
-        getRC()?.setHashField("VULPESCLOUD_PLAYERS_ONLINE", player.name, JSONObject(player).toString())
-        getRC()?.setHashField("VULPESCLOUD_PLAYERS_REGISTERED", player.name, JSONObject(player).toString())
+        getRC()
+            ?.setHashField("VULPESCLOUD_PLAYERS_ONLINE", player.name, JSONObject(player).toString())
+        getRC()
+            ?.setHashField(
+                "VULPESCLOUD_PLAYERS_REGISTERED",
+                player.name,
+                JSONObject(player).toString(),
+            )
 
         getEventManager()
             .callGlobal(
@@ -86,13 +88,7 @@ constructor(
 
     @Subscribe
     fun onDisconnectEvent(event: DisconnectEvent) {
-        val player =
-            Player(
-                event.player.username,
-                event.player.uniqueId,
-                "N/A",
-                "N/A"
-            )
+        val player = Player(event.player.username, event.player.uniqueId, "N/A", "N/A")
 
         getRC()?.deleteHashField("VULPESCLOUD_PLAYERS_ONLINE", player.name)
 
