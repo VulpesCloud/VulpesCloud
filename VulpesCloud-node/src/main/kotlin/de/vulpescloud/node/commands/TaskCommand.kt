@@ -330,4 +330,24 @@ class TaskCommand(
         taskProvider.updateTask(newTask)
     }
 
+    @Command("task|tasks task <task> info")
+    fun taskInfo(
+        source: CommandSource,
+        @Argument("task") task: Task
+    ) {
+        source.sendMessage("Task &m${task.name} &7Info:")
+        source.sendMessage(" &8- &7Max Memory: &e${task.maxMemory}MB")
+        source.sendMessage(" &8- &7Max Players: &e${task.maxPlayers}")
+        source.sendMessage(" &8- &7Static Services: &e${task.staticServices}")
+        source.sendMessage(" &8- &7Min Online Count: &e${task.minOnlineCount}")
+        source.sendMessage(" &8- &7Service Count: &e${task.serviceCount}")
+        source.sendMessage(" &8- &7Maintenance: &e${task.maintenance}")
+        source.sendMessage(" &8- &7Start Port: &e${task.startPort}")
+        source.sendMessage(" &8- &7Fallback: &e${task.fallback}")
+        source.sendMessage(" &8- &7Version: &e${task.version}")
+        source.sendMessage(" &8- &7Templates: &e${task.templates.joinToString(", ") { it.name }}")
+        source.sendMessage(" &8- &7Services: &e${task.services.joinToString(", ") { it.name }}")
+        source.sendMessage(" &8- &7Nodes: &e${task.nodes.joinToString(", ")}")
+    }
+
 }
