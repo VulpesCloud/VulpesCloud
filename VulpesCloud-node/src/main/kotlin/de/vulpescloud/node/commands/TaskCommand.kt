@@ -24,18 +24,20 @@ import org.incendo.cloud.processors.confirmation.annotation.Confirmation
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.deleteWhere
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.sql.update
+import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import java.util.stream.Stream
 
 @Suppress("Unused")
 class TaskCommand(
-    val setupProvider: SetupProvider,
-    val taskProvider: TaskProvider,
-    val translator: Translator,
-    val terminal: JLineTerminal,
-    val config: NodeConfig,
-    val versionProvider: VersionProvider,
-    val serviceFactory: ServiceFactory,
+    private val setupProvider: SetupProvider,
+    private val taskProvider: TaskProvider,
+    private val translator: Translator,
+    private val terminal: JLineTerminal,
+    private val config: NodeConfig,
+    private val versionProvider: VersionProvider,
+    private val serviceFactory: ServiceFactory,
     serviceProvider: ServiceProvider
 ) {
 
@@ -118,6 +120,214 @@ class TaskCommand(
             TaskTable.deleteWhere { name eq task.name }
         }
         getRC()?.deleteHashField("VULPESCLOUD_TASKS", task.name)
+    }
+
+    @Command("task|tasks task <task> set maxMemory <memory>")
+    fun setMaxMemory(
+        source: CommandSource,
+        @Argument("task") task: Task,
+        @Argument("memory") memory: Int
+    ) {
+        source.sendMessage("Setting max memory for task &m${task.name} to &e$memory MB")
+        val newTask = Task(
+            task.name,
+            task.nodes,
+            task.templates,
+            memory,
+            task.maxPlayers,
+            task.staticServices,
+            task.minOnlineCount,
+            task.serviceCount,
+            task.services,
+            task.maintenance,
+            task.startPort,
+            task.fallback,
+            task.version,
+            task.copyTemplateToStatic
+        )
+        taskProvider.updateTask(newTask)
+    }
+
+    @Command("task|tasks task <task> set maxPlayers <players>")
+    fun setMaxPlayers(
+        source: CommandSource,
+        @Argument("task") task: Task,
+        @Argument("players") players: Int
+    ) {
+        source.sendMessage("Setting max players for task &m${task.name} to &e$players")
+        val newTask = Task(
+            task.name,
+            task.nodes,
+            task.templates,
+            task.maxMemory,
+            players,
+            task.staticServices,
+            task.minOnlineCount,
+            task.serviceCount,
+            task.services,
+            task.maintenance,
+            task.startPort,
+            task.fallback,
+            task.version,
+            task.copyTemplateToStatic
+        )
+        taskProvider.updateTask(newTask)
+    }
+
+    @Command("task|tasks task <task> set staticServices <static>")
+    fun setStaticServices(
+        source: CommandSource,
+        @Argument("task") task: Task,
+        @Argument("static") static: Boolean
+    ) {
+        source.sendMessage("Setting static services for task &m${task.name} to &e$static")
+        val newTask = Task(
+            task.name,
+            task.nodes,
+            task.templates,
+            task.maxMemory,
+            task.maxPlayers,
+            static,
+            task.minOnlineCount,
+            task.serviceCount,
+            task.services,
+            task.maintenance,
+            task.startPort,
+            task.fallback,
+            task.version,
+            task.copyTemplateToStatic
+        )
+        taskProvider.updateTask(newTask)
+    }
+
+    @Command("task|tasks task <task> set minOnlineCount <count>")
+    fun setMinOnlineCount(
+        source: CommandSource,
+        @Argument("task") task: Task,
+        @Argument("count") count: Int
+    ) {
+        source.sendMessage("Setting min online count for task &m${task.name} to &e$count")
+        val newTask = Task(
+            task.name,
+            task.nodes,
+            task.templates,
+            task.maxMemory,
+            task.maxPlayers,
+            task.staticServices,
+            count,
+            task.serviceCount,
+            task.services,
+            task.maintenance,
+            task.startPort,
+            task.fallback,
+            task.version,
+            task.copyTemplateToStatic
+        )
+        taskProvider.updateTask(newTask)
+    }
+
+    @Command("task|tasks task <task> set maintenance <maintenance>")
+    fun setMaintenance(
+        source: CommandSource,
+        @Argument("task") task: Task,
+        @Argument("maintenance") maintenance: Boolean
+    ) {
+        source.sendMessage("Setting maintenance for task &m${task.name} to &e$maintenance")
+        val newTask = Task(
+            task.name,
+            task.nodes,
+            task.templates,
+            task.maxMemory,
+            task.maxPlayers,
+            task.staticServices,
+            task.minOnlineCount,
+            task.serviceCount,
+            task.services,
+            maintenance,
+            task.startPort,
+            task.fallback,
+            task.version,
+            task.copyTemplateToStatic
+        )
+        taskProvider.updateTask(newTask)
+    }
+
+    @Command("task|tasks task <task> set startPort <port>")
+    fun setStartPort(
+        source: CommandSource,
+        @Argument("task") task: Task,
+        @Argument("port") port: Int
+    ) {
+        source.sendMessage("Setting start port for task &m${task.name} to &e$port")
+        val newTask = Task(
+            task.name,
+            task.nodes,
+            task.templates,
+            task.maxMemory,
+            task.maxPlayers,
+            task.staticServices,
+            task.minOnlineCount,
+            task.serviceCount,
+            task.services,
+            task.maintenance,
+            port,
+            task.fallback,
+            task.version,
+            task.copyTemplateToStatic
+        )
+        taskProvider.updateTask(newTask)
+    }
+
+    @Command("task|tasks task <task> set fallback <fallback>")
+    fun setFallback(
+        source: CommandSource,
+        @Argument("task") task: Task,
+        @Argument("fallback") fallback: Boolean
+    ) {
+        source.sendMessage("Setting fallback for task &m${task.name} to &e$fallback")
+        val newTask = Task(
+            task.name,
+            task.nodes,
+            task.templates,
+            task.maxMemory,
+            task.maxPlayers,
+            task.staticServices,
+            task.minOnlineCount,
+            task.serviceCount,
+            task.services,
+            task.maintenance,
+            task.startPort,
+            fallback,
+            task.version,
+            task.copyTemplateToStatic
+        )
+        taskProvider.updateTask(newTask)
+    }
+
+    @Command("task|tasks task <task> set copyTemplateToStatic <copyTemplateToStatic>")
+    fun setCopyTemplateToStatic(
+        source: CommandSource,
+        @Argument("task") task: Task,
+        @Argument("copyTemplateToStatic") copyTemplateToStatic: Boolean
+    ) {
+        source.sendMessage("Setting copy template to static for task &m${task.name} to &e$copyTemplateToStatic")
+        val newTask = Task(
+            task.name,
+            task.nodes,
+            task.templates,
+            task.maxMemory,
+            task.maxPlayers,
+            task.staticServices,
+            task.minOnlineCount,
+            task.serviceCount,
+            task.services,
+            task.maintenance,
+            task.startPort,
+            task.fallback,
+            task.version,
+            copyTemplateToStatic
+        )
+        taskProvider.updateTask(newTask)
     }
 
 }
