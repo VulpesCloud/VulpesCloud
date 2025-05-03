@@ -7,12 +7,12 @@ object CloudVersion {
     }
 
     fun getVersion(): String {
-        return getFullVersion().split("-")[0]
+        return getFullVersion().split("_")[0]
     }
 
     fun getBuildNumber(): Int {
         return try {
-            getFullVersion().split("-")[2].toInt()
+            getFullVersion().split("_")[2].toInt()
         } catch (e: Exception) {
             -1
         }
@@ -20,7 +20,7 @@ object CloudVersion {
 
     fun getGitBranch(): String {
         return try {
-            getFullVersion().split("-")[1].split("@")[0]
+            getFullVersion().split("_")[1].split("@")[0]
         } catch (e: Exception) {
             "unknown"
         }
@@ -28,7 +28,7 @@ object CloudVersion {
 
     fun getGitCommit(): String {
         return try {
-            getFullVersion().split("-")[1].split("@")[1]
+            getFullVersion().split("_")[1].split("@")[1]
         } catch (e: Exception) {
             "unknown"
         }

@@ -16,7 +16,7 @@ enum class JLineTerminalColor(internal val key: Char, internal val string: Strin
     WHITE('f', "<white>", Ansi.ansi().reset().fg(Ansi.Color.WHITE).bold()),
     ORANGE('o', "<orange>", Ansi.ansi().reset().fg(214)),
     BOLD_ORANGE('O', "<bold_orange>", Ansi.ansi().reset().fg(214).bold()),
-    ARCTIC('A', "<arctic>", Ansi.ansi().reset().fg(87).bold());
+    ARCTIC('A', "<arctic>", Ansi.ansi().reset().fg(123).bold());
 
     val ansiCode: String = ansiCode.toString()
 
