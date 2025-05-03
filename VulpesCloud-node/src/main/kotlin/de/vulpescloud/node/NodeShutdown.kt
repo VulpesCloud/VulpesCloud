@@ -33,7 +33,7 @@ object NodeShutdown : KoinComponent {
     fun commandShutdown() {
         logger.debug("Stopping LocalServices")
         serviceProviderImpl.localServices.forEach { it.sendCommand("stop") }
-        serviceProviderImpl.localServices.clear()
+        serviceProviderImpl.loggingServices.clear()
 
         logger.info("Waiting for LocalServices to stop")
         runBlocking {
