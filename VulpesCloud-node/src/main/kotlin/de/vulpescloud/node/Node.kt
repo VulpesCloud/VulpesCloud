@@ -23,6 +23,7 @@ import de.vulpescloud.node.event.listeners.module.ModuleLoadEventListener
 import de.vulpescloud.node.event.listeners.module.ModuleStartEventListener
 import de.vulpescloud.node.event.listeners.module.ModuleUnloadEventListener
 import de.vulpescloud.node.event.listeners.service.ServiceLogEventListener
+import de.vulpescloud.node.event.listeners.service.ServiceStateChangeEventListener
 import de.vulpescloud.node.event.redis.cluster.NodeStateChangeEventTrigger
 import de.vulpescloud.node.event.redis.module.ModuleLoadEventTrigger
 import de.vulpescloud.node.event.redis.module.ModuleStartEventTrigger
@@ -146,6 +147,7 @@ class Node : KoinComponent {
         eventManager.registerListener(ModuleStartEventListener(translator, clusterProvider))
         eventManager.registerListener(ModuleUnloadEventListener(translator, clusterProvider))
         eventManager.registerListener(ServiceLogEventListener(serviceProvider))
+        eventManager.registerListener(ServiceStateChangeEventListener())
 
         val versionProviderImplementation = versionProvider as VersionProviderImpl
 
