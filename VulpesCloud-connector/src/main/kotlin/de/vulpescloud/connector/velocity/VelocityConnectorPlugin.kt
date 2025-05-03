@@ -64,7 +64,7 @@ constructor(
         proxyServer.getServer(fallbackServer[0].name).ifPresent { event.setInitialServer(it) }
     }
 
-    @Subscribe
+    @Subscribe(order = PostOrder.LAST)
     fun onPostLoginEvent(event: PostLoginEvent) {
         val player =
             Player(
