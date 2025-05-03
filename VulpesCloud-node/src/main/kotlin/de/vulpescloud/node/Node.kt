@@ -4,6 +4,7 @@ import de.vulpescloud.api.cluster.AuthenticationProvider
 import de.vulpescloud.api.cluster.ClusterProvider
 import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.lang.Translator
+import de.vulpescloud.api.player.PlayerProvider
 import de.vulpescloud.api.service.ServiceProvider
 import de.vulpescloud.api.task.TaskProvider
 import de.vulpescloud.api.template.TemplateStorageProvider
@@ -30,6 +31,7 @@ import de.vulpescloud.node.event.redis.service.ServiceLogEventTrigger
 import de.vulpescloud.node.module.ModuleProvider
 import de.vulpescloud.node.module.impl.ModuleProviderImpl
 import de.vulpescloud.node.mysql.DatabaseProvider
+import de.vulpescloud.node.player.PlayerProviderImpl
 import de.vulpescloud.node.service.ServiceFactory
 import de.vulpescloud.node.service.ServiceFactoryImpl
 import de.vulpescloud.node.service.ServiceProviderImpl
@@ -70,6 +72,7 @@ class Node : KoinComponent {
         single<VersionProvider>  { VersionProviderImpl() }
         single<ServiceProvider> { ServiceProviderImpl() }
         single<ServiceFactory>  { ServiceFactoryImpl(get(), get(), get(), get(), get(), get(), get()) }
+        single<PlayerProvider> { PlayerProviderImpl() }
     }
 
     private val terminal: JLineTerminal by inject()
@@ -87,6 +90,7 @@ class Node : KoinComponent {
     private val versionProvider: VersionProvider by inject()
     private val serviceFactory: ServiceFactory by inject()
     private val serviceProvider: ServiceProvider by inject()
+    private val playerProvider: PlayerProvider by inject()
 
     private val logger = LoggerFactory.getLogger(Node::class.java)
 
@@ -159,6 +163,7 @@ class Node : KoinComponent {
         commandProvider.register(TemplateCommand(templateStorageProvider))
         commandProvider.register(TaskCommand(setupProvider, taskProvider, translator, terminal, config, versionProvider, serviceFactory, serviceProvider))
         commandProvider.register(ServiceCommand(serviceProvider, clusterProvider))
+        commandProvider.register(PlayerCommand(playerProvider))
 
         NodeCommunicationChannelListener(clusterProvider)
 
