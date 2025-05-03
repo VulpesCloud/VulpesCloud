@@ -1,11 +1,15 @@
 package de.vulpescloud.node
 
 import de.vulpescloud.api.cluster.ClusterProvider
+import de.vulpescloud.api.service.ServiceProvider
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.cluster.ClusterProviderImpl
 import de.vulpescloud.node.module.ModuleProvider
 import de.vulpescloud.node.mysql.DatabaseProvider
+import de.vulpescloud.node.service.ServiceProviderImpl
 import de.vulpescloud.node.terminal.JLineTerminal
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.slf4j.LoggerFactory
@@ -18,6 +22,8 @@ object NodeShutdown : KoinComponent {
     private val clusterProvider: ClusterProvider by inject()
     private val moduleProvider: ModuleProvider by inject()
     private val databaseProvider: DatabaseProvider by inject()
+    private val serviceProvider: ServiceProvider by inject()
+    private val serviceProviderImpl = serviceProvider as ServiceProviderImpl
 
     fun ctrlCCloud() {
         terminal.close()
@@ -25,6 +31,16 @@ object NodeShutdown : KoinComponent {
     }
 
     fun commandShutdown() {
+        logger.debug("Stopping LocalServices")
+        serviceProviderImpl.localServices.forEach { it.sendCommand("stop") }
+
+        runBlocking {
+            while (serviceProviderImpl.localServices.isNotEmpty()) {
+                logger.debug("Waiting for LocalServices to stop")
+                delay(1000)
+            }
+        }
+
         logger.debug("Canceling Schedulers")
         // if (!clusterProvider.localNode().headNode) { ClusterHeartbeatScheduler.instance.cancel()
         // }
