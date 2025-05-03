@@ -7,6 +7,7 @@ import de.vulpescloud.node.cluster.ClusterProviderImpl
 import de.vulpescloud.node.module.ModuleProvider
 import de.vulpescloud.node.mysql.DatabaseProvider
 import de.vulpescloud.node.service.ServiceProviderImpl
+import de.vulpescloud.node.service.ServiceScheduler
 import de.vulpescloud.node.terminal.JLineTerminal
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -31,6 +32,9 @@ object NodeShutdown : KoinComponent {
     }
 
     fun commandShutdown() {
+        logger.debug("Stopping ServiceScheduler")
+        ServiceScheduler.cancel()
+
         logger.debug("Stopping LocalServices")
         serviceProviderImpl.localServices.forEach { it.sendCommand("stop") }
         serviceProviderImpl.loggingServices.clear()

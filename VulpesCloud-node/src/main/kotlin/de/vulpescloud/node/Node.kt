@@ -35,6 +35,7 @@ import de.vulpescloud.node.player.PlayerProviderImpl
 import de.vulpescloud.node.service.ServiceFactory
 import de.vulpescloud.node.service.ServiceFactoryImpl
 import de.vulpescloud.node.service.ServiceProviderImpl
+import de.vulpescloud.node.service.ServiceScheduler
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.impl.SetupProviderImpl
 import de.vulpescloud.node.setup.setups.FirstSetup
@@ -168,14 +169,16 @@ class Node : KoinComponent {
 
         NodeCommunicationChannelListener(clusterProvider)
 
-        terminal.allowInput()
-
         logger.info(
             translator.trans("NODE.ONLINE"),
             System.currentTimeMillis() - System.getProperty("startup").toLong()
         )
 
+        terminal.allowInput()
+
         clusterProviderImpl.markOnline()
+
+        ServiceScheduler.run()
     }
 
     companion object {
