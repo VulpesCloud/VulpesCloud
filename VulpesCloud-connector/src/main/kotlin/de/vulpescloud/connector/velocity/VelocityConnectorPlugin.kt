@@ -3,17 +3,26 @@ package de.vulpescloud.connector.velocity
 import com.velocitypowered.api.event.EventManager
 import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
+import com.velocitypowered.api.event.connection.DisconnectEvent
+import com.velocitypowered.api.event.connection.PostLoginEvent
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.plugin.PluginContainer
 import com.velocitypowered.api.proxy.ProxyServer
+import de.vulpescloud.api.event.events.player.PlayerJoinEvent
+import de.vulpescloud.api.event.events.player.PlayerLeaveEvent
+import de.vulpescloud.api.player.Player
+import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.api.service.ServiceFilter
 import de.vulpescloud.bridge.VulpesBridge
+import de.vulpescloud.bridge.VulpesBridge.getEventManager
 import de.vulpescloud.bridge.VulpesBridge.getServiceProvider
 import de.vulpescloud.connector.common.Connector
+import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import jakarta.inject.Inject
+import org.json.JSONObject
 
 @Plugin(id = "vulpescloud-connector", name = "VulpesCloud-Connector", authors = ["TheCGuy"])
 @Suppress("unused")
@@ -51,7 +60,46 @@ constructor(
             return
         }
 
-        //todo get lowest fallback server
+        // todo get lowest fallback server
         proxyServer.getServer(fallbackServer[0].name).ifPresent { event.setInitialServer(it) }
+    }
+
+    @Subscribe
+    fun onPostLoginEvent(event: PostLoginEvent) {
+        val player =
+            Player(
+                event.player.username,
+                event.player.uniqueId,
+                getServiceProvider().getLocalService().name,
+                event.player.currentServer.get().serverInfo.name,
+            )
+
+        getRC()?.setHashField("VULPESCLOUD_PLAYERS_ONLINE", player.name, JSONObject(player).toString())
+        getRC()?.setHashField("VULPESCLOUD_PLAYERS_REGISTERED", player.name, JSONObject(player).toString())
+
+        getEventManager()
+            .callGlobal(
+                PlayerJoinEvent(player),
+                RedisChannels.VULPESCLOUD_EVENT_PLAYER_PlayerJoinEvent,
+            )
+    }
+
+    @Subscribe
+    fun onDisconnectEvent(event: DisconnectEvent) {
+        val player =
+            Player(
+                event.player.username,
+                event.player.uniqueId,
+                "N/A",
+                "N/A"
+            )
+
+        getRC()?.deleteHashField("VULPESCLOUD_PLAYERS_ONLINE", player.name)
+
+        getEventManager()
+            .callGlobal(
+                PlayerLeaveEvent(player),
+                RedisChannels.VULPESCLOUD_EVENT_PLAYER_PlayerLeaveEvent,
+            )
     }
 }
