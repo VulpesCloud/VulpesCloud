@@ -65,9 +65,9 @@ sourceSets {
 tasks.shadowJar {
     val buildNumber = System.getenv("BUILD_NUMBER")
     val versionString = if (buildNumber != null) {
-        "$version-${getGitBranch()}@${getGitCommit()}-$buildNumber"
+        "${version}_${getGitBranch()}@${getGitCommit()}_$buildNumber"
     } else {
-        "$version-${getGitBranch()}@${getGitCommit()}"
+        "${version}_${getGitBranch()}@${getGitCommit()}"
     }
 
     manifest {
