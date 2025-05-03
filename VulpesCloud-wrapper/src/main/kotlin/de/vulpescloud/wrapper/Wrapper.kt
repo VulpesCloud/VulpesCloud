@@ -5,6 +5,9 @@ import de.vulpescloud.bridge.VulpesBridge.getEventManager
 import de.vulpescloud.bridge.service.ServiceProviderImpl
 import de.vulpescloud.jediswrapper.JedisWrapper
 import de.vulpescloud.wrapper.Premain.preClassCall
+import de.vulpescloud.wrapper.event.triggers.player.PlayerJoinEventTrigger
+import de.vulpescloud.wrapper.event.triggers.player.PlayerLeaveEventTrigger
+import de.vulpescloud.wrapper.event.triggers.player.PlayerSwitchServerEventTrigger
 import de.vulpescloud.wrapper.event.triggers.service.ServiceStateChangeEventTrigger
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
@@ -38,6 +41,9 @@ class Wrapper(args: Array<String>) {
         )
 
         ServiceStateChangeEventTrigger(getEventManager())
+        PlayerJoinEventTrigger(getEventManager())
+        PlayerLeaveEventTrigger(getEventManager())
+        PlayerSwitchServerEventTrigger(getEventManager())
 
         // TODO send service authentication Message
 
