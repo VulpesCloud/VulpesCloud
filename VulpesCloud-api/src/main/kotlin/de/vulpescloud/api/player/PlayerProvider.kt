@@ -4,9 +4,13 @@ import java.util.UUID
 
 interface PlayerProvider {
 
-    fun getPlayerByName(name: String): Player?
+    fun getOnlinePlayerByName(name: String): Player?
 
-    fun getPlayerByUUID(uuid: UUID): Player?
+    fun getOnlinePlayerByUUID(uuid: UUID): Player?
+
+    fun getRegisteredPlayerByName(name: String): Player?
+
+    fun getRegisteredPlayerByUUID(uuid: UUID): Player?
 
     fun getAllRegisteredPlayers(): List<Player>
 
