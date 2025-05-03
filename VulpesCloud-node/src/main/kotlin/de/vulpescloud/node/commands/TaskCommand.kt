@@ -1,10 +1,12 @@
 package de.vulpescloud.node.commands
 
 import de.vulpescloud.api.lang.Translator
+import de.vulpescloud.api.mysql.TaskTable
 import de.vulpescloud.api.service.ServiceProvider
 import de.vulpescloud.api.task.Task
 import de.vulpescloud.api.task.TaskProvider
 import de.vulpescloud.api.version.VersionProvider
+import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.service.ServiceFactory
@@ -18,6 +20,10 @@ import org.incendo.cloud.annotations.Flag
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
+import org.incendo.cloud.processors.confirmation.annotation.Confirmation
+import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.deleteWhere
+import org.jetbrains.exposed.sql.transactions.transaction
 import org.slf4j.LoggerFactory
 import java.util.stream.Stream
 
@@ -99,4 +105,19 @@ class TaskCommand(
             //task.services.forEach { it.stop() }
         }
     }
+
+    @Confirmation
+    @Command("task|tasks task <task> delete")
+    fun deleteTask(
+        source: CommandSource,
+        @Argument("task") task: Task,
+    ) {
+        source.sendMessage("Deleting task &m${task.name}")
+        stopAllServicesOnTask(source, task, true)
+        transaction {
+            TaskTable.deleteWhere { name eq task.name }
+        }
+        getRC()?.deleteHashField("VULPESCLOUD_TASKS", task.name)
+    }
+
 }
