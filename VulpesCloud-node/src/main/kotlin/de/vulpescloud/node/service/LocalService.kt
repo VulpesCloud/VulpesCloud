@@ -3,13 +3,16 @@ package de.vulpescloud.node.service
 import de.vulpescloud.api.cluster.ClusterNode
 import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.event.events.service.ServiceLogEvent
+import de.vulpescloud.api.event.events.service.ServiceStateChangeEvent
 import de.vulpescloud.api.player.Player
 import de.vulpescloud.api.redis.RedisChannels
+import de.vulpescloud.api.service.Service
 import de.vulpescloud.api.service.ServiceProvider
 import de.vulpescloud.api.service.ServiceStates
 import de.vulpescloud.api.task.Task
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.event.EventManagerImpl
+import org.json.JSONObject
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 import java.nio.file.Files
@@ -51,6 +54,29 @@ data class LocalService(
     private var processTracking: Thread? = null
 
     fun start() {
+        val service = Service(
+            task,
+            uuid,
+            orderedId,
+            port,
+            runningNode,
+            ServiceStates.STARTING,
+            maxPlayers,
+            onlinePlayerCount,
+            name,
+            onlinePlayers,
+            environmentVars,
+        )
+        getRC()?.setHashField("VULPESCLOUD_SERVICES", name, JSONObject(service).toString())
+        eventManagerImpl.callGlobal(
+            ServiceStateChangeEvent(
+                service,
+                ServiceStates.PREPARED,
+                ServiceStates.STARTING
+            ),
+            RedisChannels.VULPESCLOUD_EVENT_SERVICE_ServiceStateChangeEvent
+        )
+
         process = processBuilder?.start()
 
         Thread {

@@ -28,6 +28,7 @@ import de.vulpescloud.node.event.redis.module.ModuleLoadEventTrigger
 import de.vulpescloud.node.event.redis.module.ModuleStartEventTrigger
 import de.vulpescloud.node.event.redis.module.ModuleUnloadEventTrigger
 import de.vulpescloud.node.event.redis.service.ServiceLogEventTrigger
+import de.vulpescloud.node.event.redis.service.ServiceStateChangeEventTrigger
 import de.vulpescloud.node.module.ModuleProvider
 import de.vulpescloud.node.module.impl.ModuleProviderImpl
 import de.vulpescloud.node.mysql.DatabaseProvider
@@ -138,6 +139,7 @@ class Node : KoinComponent {
         ModuleUnloadEventTrigger(eventManager)
         ModuleStartEventTrigger(eventManager)
         ServiceLogEventTrigger(eventManager)
+        ServiceStateChangeEventTrigger(eventManager)
 
         eventManager.registerListener(NodeStateChangeEventListener(translator))
         eventManager.registerListener(ModuleLoadEventListener(translator, clusterProvider))
