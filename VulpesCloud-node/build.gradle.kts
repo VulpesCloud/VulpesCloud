@@ -62,22 +62,17 @@ sourceSets {
     }
 }
 
-
-
-tasks.jar {
-    manifest {
-        attributes["Main-Class"] = "de.vulpescloud.node.NodeLauncher"
-    }
-    archiveFileName.set("vulpescloud-node.jar")
-    destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
-}
-
 tasks.shadowJar {
+    val buildNumber = System.getenv("BUILD_NUMBER")
+    val versionString = if (buildNumber != null) {
+        "$version-${getGitBranch()}@${getGitCommit()}-$buildNumber"
+    } else {
+        "$version-${getGitBranch()}@${getGitCommit()}"
+    }
+
     manifest {
         attributes["Main-Class"] = "de.vulpescloud.node.NodeLauncher"
+        attributes["Implementation-Version"] = versionString
     }
     archiveFileName.set("vulpescloud-node.jar")
-    if (System.getenv("dev") == "true") {
-        destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
-    }
 }

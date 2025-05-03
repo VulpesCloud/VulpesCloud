@@ -164,6 +164,7 @@ class Node : KoinComponent {
         commandProvider.register(TaskCommand(setupProvider, taskProvider, translator, terminal, config, versionProvider, serviceFactory, serviceProvider))
         commandProvider.register(ServiceCommand(serviceProvider, clusterProvider))
         commandProvider.register(PlayerCommand(playerProvider))
+        commandProvider.register(InfoCommand())
 
         NodeCommunicationChannelListener(clusterProvider)
 

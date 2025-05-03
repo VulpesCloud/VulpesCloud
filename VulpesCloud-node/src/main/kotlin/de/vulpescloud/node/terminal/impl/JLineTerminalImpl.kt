@@ -1,5 +1,6 @@
 package de.vulpescloud.node.terminal.impl
 
+import de.vulpescloud.node.CloudVersion
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.setup.SetupProvider
@@ -108,8 +109,8 @@ class JLineTerminalImpl(config: NodeConfig) : JLineTerminal, KoinComponent {
 
     private fun print() {
         printLine("")
-        printLine("   &oVulpesCloud &8- &72.0.0")
-        printLine("        &8[&OFennek&8]")
+        printLine("   &oVulpesCloud &8- &7${CloudVersion.getVersion()}#${CloudVersion.getGitCommit()}")
+        printLine("        &8[&AArctic&8]")
         printLine("")
     }
 }

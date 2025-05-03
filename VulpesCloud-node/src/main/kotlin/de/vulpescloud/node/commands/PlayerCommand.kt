@@ -1,6 +1,7 @@
 package de.vulpescloud.node.commands
 
 import de.vulpescloud.api.player.PlayerProvider
+import de.vulpescloud.node.command.CommandSource
 import org.incendo.cloud.annotations.Command
 
 @Suppress("unused")
@@ -9,20 +10,24 @@ class PlayerCommand(
 ) {
 
     @Command("player|players online list")
-    fun listOnlinePlayers() {
+    fun listOnlinePlayers(
+        source: CommandSource
+    ) {
         val onlinePlayers = playerProvider.getAllOnlinePlayers()
-        println("A total of ${onlinePlayers.size} player(s) are online:")
+        source.sendMessage("A total of ${onlinePlayers.size} player(s) are online:")
         onlinePlayers.forEach { player ->
-            println(" &8- &m${player.name} &7Proxy: &8${player.currentProxy} &7Service: &8${player.currentServer} &7UUID: &8${player.uuid}")
+            source.sendMessage(" &8- &m${player.name} &7Proxy: &8${player.currentProxy} &7Service: &8${player.currentServer} &7UUID: &8${player.uuid}")
         }
     }
 
     @Command("player|players registered list")
-    fun listRegisteredPlayers() {
+    fun listRegisteredPlayers(
+        source: CommandSource
+    ) {
         val registeredPlayers = playerProvider.getAllRegisteredPlayers()
-        println("A total of ${registeredPlayers.size} player(s) are registered:")
+        source.sendMessage("A total of ${registeredPlayers.size} player(s) are registered:")
         registeredPlayers.forEach { player ->
-            println(" &8- &m${player.name} &7UUID: &8${player.uuid}")
+            source.sendMessage(" &8- &m${player.name} &7UUID: &8${player.uuid}")
         }
     }
 
