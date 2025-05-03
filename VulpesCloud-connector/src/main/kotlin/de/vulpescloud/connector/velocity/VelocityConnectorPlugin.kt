@@ -39,7 +39,7 @@ constructor(
     fun onLastProxyInitialize(event: ProxyInitializeEvent) {
 
         velocityServerRegistrationHandler = VelocityServerRegistrationHandler(proxyServer)
-        VulpesBridge.getEventManager().registerListener(velocityServerRegistrationHandler)
+        getEventManager().registerListener(velocityServerRegistrationHandler)
 
         markOnline()
     }
@@ -67,7 +67,7 @@ constructor(
                 event.player.username,
                 event.player.uniqueId,
                 getServiceProvider().getLocalService().name,
-                event.player.currentServer.get().serverInfo.name,
+                fallbackServer[0].name,
             )
 
         getRC()
