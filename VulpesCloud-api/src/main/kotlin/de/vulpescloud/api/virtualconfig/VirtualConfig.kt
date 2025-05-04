@@ -6,6 +6,7 @@ import de.vulpescloud.api.mysql.TaskTable
 import de.vulpescloud.api.mysql.VirtualConfigTable
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.sql.insert
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import org.json.JSONObject
@@ -86,10 +87,21 @@ class VirtualConfig(val name: String) {
      * Publishes the current config to the MySQL Database
      */
     fun publish() {
+        val configName = name
         transaction {
             SchemaUtils.create(VirtualConfigTable)
-            VirtualConfigTable.update({ VirtualConfigTable.name eq name }) {
-                it[json] = JSONObject(path.toFile().readText()).toString()
+
+            val row = VirtualConfigTable.select(VirtualConfigTable.name eq name).firstOrNull()
+
+            if (row != null) {
+                VirtualConfigTable.update({ VirtualConfigTable.name eq name }) {
+                    it[json] = JSONObject(path.toFile().readText()).toString()
+                }
+            } else {
+                VirtualConfigTable.insert {
+                    it[name] = configName
+                    it[json] = JSONObject(path.toFile().readText()).toString()
+                }
             }
         }
     }
