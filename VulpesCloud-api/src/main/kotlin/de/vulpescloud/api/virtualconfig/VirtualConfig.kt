@@ -33,6 +33,9 @@ class VirtualConfig(val name: String) {
         config.load()
     }
 
+    /**
+     * Returns the Value from the Entry and sets the Value if it does not exist
+     */
     fun <T : Any> getEntry(entry: String, default: T, addIfMissing: Boolean = true): T {
         if (config.contains(entry)) {
             return config.get(entry)
@@ -49,10 +52,17 @@ class VirtualConfig(val name: String) {
         }
     }
 
+    /**
+     * Sets the Entry specified to a Value
+     * NOTE: This will not update the config in the Database, you have to manually call publish()
+     */
     fun <T : Any> setEntry(entry: String, value: T) {
         config.set<T>(entry, value)
     }
 
+    /**
+     * Pulls the config from MySQL
+     */
     fun pull() {
         transaction {
             SchemaUtils.create(VirtualConfigTable)
@@ -71,6 +81,9 @@ class VirtualConfig(val name: String) {
         }
     }
 
+    /**
+     * Publishes the current config to the MySQL Database
+     */
     fun publish() {
         transaction {
             SchemaUtils.create(VirtualConfigTable)
@@ -80,6 +93,9 @@ class VirtualConfig(val name: String) {
         }
     }
 
+    /**
+     * Reloads the data from the Json File
+     */
     fun loadLocalChanges() {
         config.load()
     }
