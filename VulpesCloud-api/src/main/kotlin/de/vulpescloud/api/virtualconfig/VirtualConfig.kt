@@ -23,11 +23,11 @@ class VirtualConfig(val name: String) {
         path.parent.toFile().mkdirs()
         transaction {
             SchemaUtils.create(VirtualConfigTable)
-            val row = VirtualConfigTable.select(VirtualConfigTable.name eq name).firstOrNull()
+            val row = VirtualConfigTable.select(VirtualConfigTable.name eq name).singleOrNull()
             if (row != null) {
-                val data = row[VirtualConfigTable.json]
-
-                path.toFile().writeText(JSONObject(data).toString(4))
+                row[VirtualConfigTable.json].let { data ->
+                    path.toFile().writeText(JSONObject(data).toString(4))
+                }
             }
         }
 
