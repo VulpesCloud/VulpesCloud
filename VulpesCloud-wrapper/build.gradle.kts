@@ -16,6 +16,10 @@ dependencies {
     implementation(libs.jedis)
     implementation(libs.logbackCore)
     implementation(libs.logbackClassic)
+    implementation(libs.hikariCP)
+    implementation(libs.mariadb.java.client)
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
 }
 
 tasks.jar {
