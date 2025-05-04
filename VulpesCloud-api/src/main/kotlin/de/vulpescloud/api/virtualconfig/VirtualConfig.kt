@@ -15,7 +15,7 @@ import kotlin.io.path.Path
 class VirtualConfig(val name: String) {
 
     private val path = Path("temp-configs/$name.json")
-    private val config = FileConfig.builder(path, JsonFormat.fancyInstance()).build()
+    private val config = FileConfig.builder(path, JsonFormat.fancyInstance()).sync().build()
 
     private val logger = LoggerFactory.getLogger("VirtualConfig - $name")
 
