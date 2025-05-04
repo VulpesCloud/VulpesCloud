@@ -2,7 +2,6 @@ package de.vulpescloud.api.virtualconfig
 
 import com.electronwill.nightconfig.core.file.FileConfig
 import com.electronwill.nightconfig.json.JsonFormat
-import de.vulpescloud.api.mysql.TaskTable
 import de.vulpescloud.api.mysql.VirtualConfigTable
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -26,7 +25,7 @@ class VirtualConfig(val name: String) {
             SchemaUtils.create(VirtualConfigTable)
             val row = VirtualConfigTable.select(VirtualConfigTable.name eq name).firstOrNull()
             if (row != null) {
-                val data = row[TaskTable.json]
+                val data = row[VirtualConfigTable.json]
 
                 path.toFile().writeText(JSONObject(data).toString(4))
             }
@@ -70,7 +69,7 @@ class VirtualConfig(val name: String) {
             SchemaUtils.create(VirtualConfigTable)
             val row = VirtualConfigTable.select(VirtualConfigTable.name eq name).firstOrNull()
             if (row != null) {
-                val data = row[TaskTable.json]
+                val data = row[VirtualConfigTable.json]
 
                 path.toFile().writeText(JSONObject(data).toString(4))
 
