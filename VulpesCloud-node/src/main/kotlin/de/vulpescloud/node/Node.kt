@@ -156,9 +156,10 @@ class Node : KoinComponent {
         templateStorageProvider.registerTemplateStorage(LocalTemplateStorage())
 
         moduleProvider.loadAllModules()
-        moduleProvider.startAllModules()
 
         commandProvider.initialize()
+
+        moduleProvider.startAllModules()
 
         commandProvider.register(ExitCommand())
         commandProvider.register(HelpCommand(commandProvider))
