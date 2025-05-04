@@ -83,7 +83,7 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
             return loadedModule
         } catch (e: Exception) {
             logger.error(
-                "Exception whilst trying to load Module ${file.name}. Exception: ${e.message}"
+                "Exception whilst trying to load Module ${file.name}. Exception: $e"
             )
             return null
         }
@@ -108,7 +108,7 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
             return loadedModule
         } catch (e: Exception) {
             logger.warn(
-                "Exception whilst trying to start Module ${loadedModule.moduleInfo.name}. Exception: ${e.message}"
+                "Exception whilst trying to start Module ${loadedModule.moduleInfo.name}. Exception: $e"
             )
             return null
         }
