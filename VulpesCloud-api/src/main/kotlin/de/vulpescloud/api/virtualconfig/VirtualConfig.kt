@@ -20,6 +20,7 @@ class VirtualConfig(val name: String) {
     private val logger = LoggerFactory.getLogger("VirtualConfig - $name")
 
     init {
+        path.parent.toFile().mkdirs()
         transaction {
             SchemaUtils.create(VirtualConfigTable)
             val row = VirtualConfigTable.select(VirtualConfigTable.name eq name).firstOrNull()
@@ -94,7 +95,7 @@ class VirtualConfig(val name: String) {
     }
 
     /**
-     * Reloads the data from the Json File
+     * Reloads the data from the JSON File
      */
     fun loadLocalChanges() {
         config.load()
