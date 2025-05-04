@@ -113,13 +113,17 @@ data class LocalService(
     }
 
     fun sendCommand(command: String) {
-        if (process == null || command.isEmpty()) {
-            return
+        try {
+            if (process == null || command.isEmpty()) {
+                return
+            }
+            val writer = BufferedWriter(OutputStreamWriter(process!!.outputStream))
+            writer.write(command)
+            writer.newLine()
+            writer.flush()
+        } catch (e: Exception) {
+            logger.error("Sending command to process failed: ", e)
         }
-        val writer = BufferedWriter(OutputStreamWriter(process!!.outputStream))
-        writer.write(command)
-        writer.newLine()
-        writer.flush()
     }
 
     fun forceStop() {
