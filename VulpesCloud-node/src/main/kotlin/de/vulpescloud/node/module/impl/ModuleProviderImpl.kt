@@ -12,7 +12,6 @@ import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.launcher.VulpesLauncher
 import de.vulpescloud.node.event.EventManagerImpl
 import de.vulpescloud.node.module.ModuleProvider
-import de.vulpescloud.node.utils.JsonUtils.getModuleInfo
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -20,7 +19,7 @@ import java.io.InputStreamReader
 import java.net.URLClassLoader
 import java.nio.file.Path
 import java.util.jar.JarFile
-import kotlin.io.path.Path
+import kotlin.io.path.Path  
 
 class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider: ClusterProvider) :
     ModuleProvider {
@@ -83,7 +82,7 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
             return loadedModule
         } catch (e: Exception) {
             logger.error(
-                "Exception whilst trying to load Module ${file.name}. Exception: $e"
+                "Exception whilst trying to load Module ${file.name}. Exception: ${e.stackTraceToString()}"
             )
             return null
         }
@@ -108,7 +107,7 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
             return loadedModule
         } catch (e: Exception) {
             logger.warn(
-                "Exception whilst trying to start Module ${loadedModule.moduleInfo.name}. Exception: $e"
+                "Exception whilst trying to start Module ${loadedModule.moduleInfo.name}. Exception: ${e.stackTraceToString()}"
             )
             return null
         }
