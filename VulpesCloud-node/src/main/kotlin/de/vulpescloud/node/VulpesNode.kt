@@ -8,6 +8,7 @@ import de.vulpescloud.api.service.ServiceProvider
 import de.vulpescloud.api.task.TaskProvider
 import de.vulpescloud.api.template.TemplateStorageProvider
 import de.vulpescloud.api.version.VersionProvider
+import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.module.ModuleProvider
 import org.koin.core.component.KoinComponent
@@ -25,5 +26,6 @@ object VulpesNode : KoinComponent {
     val translator: Translator by inject()
     val templateStorageProvider: TemplateStorageProvider by inject()
     val versionProvider: VersionProvider by inject()
+    val commandProvider: CommandProvider by inject()
 
 }
