@@ -3,6 +3,8 @@ package de.vulpescloud.node.service
 import de.vulpescloud.api.cluster.AuthenticationProvider
 import de.vulpescloud.api.cluster.ClusterProvider
 import de.vulpescloud.api.event.EventManager
+import de.vulpescloud.api.event.events.service.ServiceStateChangeEvent
+import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.api.service.Service
 import de.vulpescloud.api.service.ServiceProvider
 import de.vulpescloud.api.service.ServiceStates
@@ -12,6 +14,7 @@ import de.vulpescloud.api.version.VersionProvider
 import de.vulpescloud.api.version.VersionType
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.config.NodeConfig
+import de.vulpescloud.node.event.EventManagerImpl
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.nio.file.Files
@@ -120,6 +123,16 @@ class ServiceFactoryImpl(
 
         serviceProvider.localServices.add(localService)
         getRC()?.setHashField("VULPESCLOUD_SERVICES", service.name, JSONObject(service).toString())
+
+        val emi = eventManager as EventManagerImpl
+        emi.callGlobal(
+            ServiceStateChangeEvent(
+                service,
+                ServiceStates.PREPARED,
+                ServiceStates.PREPARED,
+            ),
+            RedisChannels.VULPESCLOUD_EVENT_SERVICE_ServiceStateChangeEvent
+        )
 
         return Pair(service, localService)
     }
