@@ -112,4 +112,12 @@ class VirtualConfig(val name: String) {
     fun loadLocalChanges() {
         config.load()
     }
+
+    /**
+     * Closes the config and deletes the temp file
+     */
+    fun close() {
+        config.close()
+        path.toFile().delete()
+    }
 }

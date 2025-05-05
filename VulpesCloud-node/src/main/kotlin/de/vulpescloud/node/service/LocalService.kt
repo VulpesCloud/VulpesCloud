@@ -20,6 +20,7 @@ import java.nio.file.Path
 import java.util.*
 import kotlin.io.path.exists
 import org.slf4j.LoggerFactory
+import java.io.IOException
 
 data class LocalService(
     val task: Task,
@@ -121,8 +122,12 @@ data class LocalService(
             writer.write(command)
             writer.newLine()
             writer.flush()
-        } catch (e: Exception) {
-            logger.error("Sending command to process failed: ", e)
+        } catch (e: IOException) {
+            if (serviceProvider.getServiceByUUID(this.uuid)?.state != ServiceStates.STOPPING) {
+                logger.error("Failed to send command to process: $name", e)
+            } else {
+                logger.debug("Failed to send command to process: $name", e)
+            }
         }
     }
 
