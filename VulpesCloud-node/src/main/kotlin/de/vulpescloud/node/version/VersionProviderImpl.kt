@@ -5,6 +5,7 @@ import de.vulpescloud.api.version.Version
 import de.vulpescloud.api.version.VersionProvider
 import de.vulpescloud.api.version.VersionType
 import org.json.JSONObject
+import org.slf4j.LoggerFactory
 import java.net.URI
 import java.nio.file.Files
 import java.nio.file.Path
@@ -14,8 +15,9 @@ import kotlin.io.path.Path
 class VersionProviderImpl : VersionProvider {
 
     private val versions = mutableListOf<Version>()
-    private val versionURL = "https://raw.githubusercontent.com/VulpesCloud/VulpesCloud-meta/refs/heads/main/versions.json"
+    private val versionURL = System.getProperty("versionURL", "https://raw.githubusercontent.com/VulpesCloud/VulpesCloud-meta/refs/heads/main/versions.json")
     private val versionsPath = Path("local/versionCache/")
+    private val logger = LoggerFactory.getLogger(VersionProviderImpl::class.java)
 
     override fun getVersionByName(name: String): Version? {
         return versions.find { it.name == name }
@@ -64,20 +66,26 @@ class VersionProviderImpl : VersionProvider {
     }
 
     override fun prepareVersion(version: SingleVersion, servicePath: Path) {
-        versionsPath.toFile().mkdirs()
-        val file = versionsPath.resolve("${version.name}-${version.version}.jar")
-        if (!Files.exists(file)) {
+        if (version.version == "CUSTOM") {
+            if (!servicePath.resolve("server.jar").toFile().exists()) {
+                logger.error("Version is set to CUSTOM but no server.jar found in service path, this service WILL NOT start!")
+            }
+        } else {
+            versionsPath.toFile().mkdirs()
+            val file = versionsPath.resolve("${version.name}-${version.version}.jar")
+            if (!Files.exists(file)) {
+                Files.copy(
+                    URI(version.downloadURL).toURL().openStream(),
+                    file
+                )
+            }
+
             Files.copy(
-                URI(version.downloadURL).toURL().openStream(),
-                file
+                file,
+                servicePath.resolve("server.jar"),
+                StandardCopyOption.REPLACE_EXISTING
             )
         }
-
-        Files.copy(
-            file,
-            servicePath.resolve("server.jar"),
-            StandardCopyOption.REPLACE_EXISTING
-        )
     }
 
 }
