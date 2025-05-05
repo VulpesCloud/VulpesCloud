@@ -6,6 +6,7 @@ import de.vulpescloud.api.mysql.VirtualConfigTable
 import org.jetbrains.exposed.sql.SchemaUtils
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
 import org.jetbrains.exposed.sql.insert
+import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.jetbrains.exposed.sql.update
 import org.json.JSONObject
@@ -23,7 +24,7 @@ class VirtualConfig(val name: String) {
         path.parent.toFile().mkdirs()
         transaction {
             SchemaUtils.create(VirtualConfigTable)
-            val row = VirtualConfigTable.select(VirtualConfigTable.name eq name).singleOrNull()
+            val row = VirtualConfigTable.selectAll().where { VirtualConfigTable.name eq name }.firstOrNull()
             if (row != null) {
                 row[VirtualConfigTable.json].let { data ->
                     path.toFile().writeText(JSONObject(data).toString(4))
@@ -67,7 +68,7 @@ class VirtualConfig(val name: String) {
     fun pull() {
         transaction {
             SchemaUtils.create(VirtualConfigTable)
-            val row = VirtualConfigTable.select(VirtualConfigTable.name eq name).firstOrNull()
+            val row = VirtualConfigTable.selectAll().where { VirtualConfigTable.name eq name }.firstOrNull()
             if (row != null) {
                 val data = row[VirtualConfigTable.json]
 
