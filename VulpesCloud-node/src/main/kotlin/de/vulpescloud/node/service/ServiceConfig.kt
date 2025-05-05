@@ -133,6 +133,9 @@ object ServiceConfig : KoinComponent {
 
                 Files.writeString(service.path().resolve("forwarding.secret"), Node.forwardingSecret)
             }
+            "minestom" -> {
+                Files.writeString(service.path().resolve("forwarding.secret"), Node.forwardingSecret)
+            }
         }
     }
 }
