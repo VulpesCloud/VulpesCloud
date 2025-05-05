@@ -35,6 +35,7 @@ repositories {
     maven {
         url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
     }
+    maven("https://jitpack.io")
 }
 
 dependencies {
@@ -51,13 +52,12 @@ dependencies {
     implementation(libs.cloud.annotations)
     implementation(libs.cloud.extension)
 
-    compileOnly(libs.velocity)
-    annotationProcessor(libs.velocity)
     compileOnly(libs.jedis)
     compileOnly(libs.jedisWrapper)
 
     compileOnly(libs.paper)
-
+    compileOnly(libs.velocity)
+    annotationProcessor(libs.velocity)
 }
 
 sourceSets {

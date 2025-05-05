@@ -87,7 +87,6 @@ cloud-velocity = { group = "org.incendo", name = "cloud-velocity", version = "2.
 cloud-processors-confirmation = { group = "org.incendo", name = "cloud-processors-confirmation", version = "1.0.0-rc.1"}
 
 # platforms
-kSpigot = { group = "net.axay", name = "kspigot", version.ref = "kSpigot" }
 paper = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
 velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
 

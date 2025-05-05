@@ -18,13 +18,13 @@ repositories {
 ```
 ### Artifacts
 
-| artifact id            | usage                                                                                                        |
-|------------------------|--------------------------------------------------------------------------------------------------------------|
-| VulpesCloud-api        | When developing almost anything related to VulpesCloud                                                       |
-| VulpesCloud-bridge     | When developing Minecraft plugins for VulpesCloud                                                            |
-| VulpesCloud-connector  | When developing something that needs access to the Main Plugin                                               |
-| VulpesCloud-node       | When developing modules for the Cloud                                                                        |
-| VulpesCloud-wrapper    | When developing a plugin that needs more access to the service than what the bridge can offer                |
+| artifact id           | usage                                                                                         |
+|-----------------------|-----------------------------------------------------------------------------------------------|
+| VulpesCloud-api       | When developing almost anything related to VulpesCloud                                        |
+| VulpesCloud-bridge    | When developing Minecraft plugins for VulpesCloud                                             |
+| VulpesCloud-connector | When developing something that needs access to the Main Plugin, for example a Minestom Server |
+| VulpesCloud-node      | When developing modules for the Cloud                                                         |
+| VulpesCloud-wrapper   | Generally no usage for Developers                                                             |
 
 ### Adding VulpesCloud to the Dependencies 
 #### build.gradle.kts
@@ -41,7 +41,7 @@ dependencies {
     compileOnly("de.vulpescloud:VulpesCloud-wrapper:%version%")
 }
 ```
-#### Replace the `%version%` to the latest version of VulpesCloud (current: `1.0.0`)
+#### Replace the `%version%` to the latest version of VulpesCloud (current: `2.0.0-ALPHA)
 
 ### Snapshots
 Snapshots are available from the snapshot repository!
