@@ -20,6 +20,7 @@ dependencies {
     implementation(libs.mariadb.java.client)
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
+    implementation(libs.nightConfig.json)
 }
 
 tasks.jar {
