@@ -72,24 +72,20 @@ class Wrapper(args: Array<String>) {
         System.setProperty("fabric.systemLibraries", System.getProperty("java.class.path"))
 
         val thread = Thread {
-            try {
-                val jar = JarFile(file)
-                preClassCall(jar, "Premain-Class", classLoader)
-                preClassCall(jar, "Launcher-Agent-Class", classLoader)
+            val jar = JarFile(file)
+            preClassCall(jar, "Premain-Class", classLoader)
+            preClassCall(jar, "Launcher-Agent-Class", classLoader)
 
-                val mainClass = jar.manifest.mainAttributes.getValue("Main-Class")
-                val main =
-                    Class.forName(mainClass, true, classLoader)
-                        .getMethod("main", Array<String>::class.java)
-                val arguments =
-                    Arrays.stream(args)
-                        .filter { it != "--separateClassLoader" }
-                        .toArray { size -> arrayOfNulls<String>(size) }
+            val mainClass = jar.manifest.mainAttributes.getValue("Main-Class")
+            val main =
+                Class.forName(mainClass, true, classLoader)
+                    .getMethod("main", Array<String>::class.java)
+            val arguments =
+                Arrays.stream(args)
+                    .filter { it != "--separateClassLoader" }
+                    .toArray { size -> arrayOfNulls<String>(size) }
 
-                main.invoke(null, arguments)
-            } catch (e: Exception) {
-                println("Error in new Thread: ->>   " + e.printStackTrace())
-            }
+            main.invoke(null, arguments)
         }
 
         thread.name = "MinecraftServer-${System.getenv("serviceName")}"
