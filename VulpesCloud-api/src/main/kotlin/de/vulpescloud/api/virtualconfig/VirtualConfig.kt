@@ -60,6 +60,7 @@ class VirtualConfig(val name: String) {
      */
     fun <T : Any> setEntry(entry: String, value: T) {
         config.set<T>(entry, value)
+        config.save()
     }
 
     /**
