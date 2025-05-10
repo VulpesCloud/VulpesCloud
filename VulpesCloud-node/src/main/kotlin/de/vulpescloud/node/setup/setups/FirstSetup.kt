@@ -190,7 +190,7 @@ class FirstSetup(
     fun finish() {
         node.setupLock.withLock {
             config.config.update("redis.user", this.redisUser)
-            config.config.update("redis.hostname", this.redisHostname)
+            config.config.update("redis.host", this.redisHostname)
             config.config.update("redis.port", this.redisPort)
             config.config.update("redis.password", this.redisPassword)
 
