@@ -118,18 +118,6 @@ object JsonUtils {
         )
     }
 
-    fun getModuleInfo(json: JSONObject): ModuleInfo {
-        return ModuleInfo(
-            json.getString("name"),
-            json.getJSONArray("authors").map { it as String }.toMutableList(),
-            json.getString("description"),
-            json.getString("main"),
-            json.getString("version"),
-            json.getString("website"),
-            ModuleStates.valueOf(json.getString("state")),
-        )
-    }
-
     fun parsePubSubMessage(string: String): JSONObject {
         val json = JSONObject(string)
         return if (json.has("secret") && json.getString("secret") == System.getenv("secret")) {
