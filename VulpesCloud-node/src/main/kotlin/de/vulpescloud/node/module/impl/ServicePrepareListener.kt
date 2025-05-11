@@ -22,11 +22,11 @@ class ServicePrepareListener {
                             it.platforms.contains(event.service.task.version.name.lowercase())
                     ) {
                         Files.copy(
-                            moduleProvider.moduleFolder.resolve(it.name),
+                            moduleProvider.moduleFolder.resolve("${it.name}.jar"),
                             event.service
                                 .path()
                                 .resolve(event.service.task.version.pluginDir)
-                                .resolve(it.name),
+                                .resolve("${it.name}.jar"),
                         )
                     }
                 }
