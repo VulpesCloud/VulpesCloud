@@ -1,5 +1,6 @@
 package de.vulpescloud.node.module
 
+import de.vulpescloud.api.module.DownloadableModule
 import de.vulpescloud.api.module.ModuleInfo
 import de.vulpescloud.node.module.impl.LoadedModule
 import java.io.File
@@ -28,6 +29,8 @@ interface ModuleProvider {
     fun unloadAllModules()
 
     fun modules(): List<ModuleInfo>
+
+    fun downloadableModules(): List<DownloadableModule>
 
     fun moduleFolder(): Path
 }

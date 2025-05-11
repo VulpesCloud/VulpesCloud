@@ -13,10 +13,10 @@ import de.vulpescloud.api.template.Template
 import de.vulpescloud.api.version.SingleVersion
 import de.vulpescloud.api.version.Version
 import de.vulpescloud.api.version.VersionType
-import java.util.*
 import org.json.JSONObject
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import java.util.*
 
 object JsonUtils : KoinComponent {
 
@@ -134,7 +134,10 @@ object JsonUtils : KoinComponent {
             json.getString("main"),
             json.getString("version"),
             json.getString("website"),
-            ModuleStates.valueOf(json.getString("state")),
+            json.getBoolean("headNodeOnly"),
+            json.getBoolean("copyToServices"),
+            json.getJSONArray("platforms").map { it as String },
+            ModuleStates.valueOf(json.getString("state"))
         )
     }
 

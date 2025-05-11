@@ -5,6 +5,7 @@ import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.event.events.modules.ModuleLoadEvent
 import de.vulpescloud.api.event.events.modules.ModuleStartEvent
 import de.vulpescloud.api.event.events.modules.ModuleUnloadEvent
+import de.vulpescloud.api.module.DownloadableModule
 import de.vulpescloud.api.module.ModuleInfo
 import de.vulpescloud.api.module.ModuleStates
 import de.vulpescloud.api.module.VulpesModule
@@ -16,10 +17,12 @@ import org.json.JSONObject
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.InputStreamReader
+import java.net.URI
 import java.net.URLClassLoader
+import java.nio.file.Files
 import java.nio.file.Path
 import java.util.jar.JarFile
-import kotlin.io.path.Path  
+import kotlin.io.path.Path
 
 class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider: ClusterProvider) :
     ModuleProvider {
@@ -27,8 +30,13 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
     private val modules = mutableMapOf<String, LoadedModule>()
     private val loadedFiles = mutableMapOf<String, File>()
     private val classLoaders = mutableMapOf<String, URLClassLoader>()
+    private val moduleJsonURL =
+        URI(
+                "https://raw.githubusercontent.com/VulpesCloud/VulpesCloud-meta/refs/heads/main/modules.json"
+            )
+            .toURL()
 
-    private val moduleFolder = Path("modules")
+    val moduleFolder = Path("modules")
 
     private val eventManager = eventManager as EventManagerImpl
 
@@ -47,14 +55,27 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
             val reader = InputStreamReader(jarFile.getInputStream(moduleJson))
             val json = JSONObject(reader.readText())
 
-            val moduleInfo = ModuleInfo(
-                json.getString("name"),
-                json.getJSONArray("authors").map { it as String }.toMutableList(),
-                json.getString("description"),
-                json.getString("main"),
-                json.getString("version"),
-                json.getString("website"),
-            )
+            val moduleInfo =
+                ModuleInfo(
+                    json.getString("name"),
+                    json.getJSONArray("authors").map { it as String }.toMutableList(),
+                    json.getString("description"),
+                    json.getString("main"),
+                    json.getString("version"),
+                    json.getString("website"),
+                    json.getBoolean("headNodeOnly"),
+                    json.getBoolean("copyToServices"),
+                    json.getJSONArray("platforms").map { it as String },
+                )
+
+            if (moduleInfo.headNodeOnly) {
+                if (!clusterProvider.localNode().headNode) {
+                    logger.warn(
+                        "Refusing to load module ${moduleInfo.name} as it is head node only"
+                    )
+                    return null
+                }
+            }
 
             val classLoader =
                 URLClassLoader(arrayOf(file.toURI().toURL()), VulpesLauncher.CLASS_LOADER)
@@ -186,5 +207,32 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
 
     override fun moduleFolder(): Path {
         return moduleFolder
+    }
+
+    override fun downloadableModules(): List<DownloadableModule> {
+        val downloadableModules = mutableListOf<DownloadableModule>()
+
+        Files.writeString(
+            Path("launcher/modules.json"),
+            String(moduleJsonURL.openStream().readAllBytes()),
+        )
+        val json =
+            JSONObject(Files.readString(Path("launcher/modules.json"))).getJSONArray("modules")
+        for (i in 0 until json.length()) {
+            val obj = json.getJSONObject(i)
+            val downloadableModule =
+                DownloadableModule(
+                    obj.getString("name"),
+                    obj.getString("version"),
+                    obj.getString("installURL"),
+                    obj.getJSONArray("authors").map { it as String }.toMutableList(),
+                    obj.getString("description"),
+                    obj.getString("website"),
+                    obj.getString("supportURL"),
+                )
+            downloadableModules.add(downloadableModule)
+        }
+
+        return downloadableModules
     }
 }

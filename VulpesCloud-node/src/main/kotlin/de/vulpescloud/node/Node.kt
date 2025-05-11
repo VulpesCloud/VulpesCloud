@@ -32,6 +32,7 @@ import de.vulpescloud.node.event.redis.service.ServiceLogEventTrigger
 import de.vulpescloud.node.event.redis.service.ServiceStateChangeEventTrigger
 import de.vulpescloud.node.module.ModuleProvider
 import de.vulpescloud.node.module.impl.ModuleProviderImpl
+import de.vulpescloud.node.module.impl.ServicePrepareListener
 import de.vulpescloud.node.mysql.DatabaseProvider
 import de.vulpescloud.node.player.PlayerProviderImpl
 import de.vulpescloud.node.service.ServiceFactory
@@ -173,6 +174,8 @@ class Node : KoinComponent {
         commandProvider.register(InfoCommand())
 
         NodeCommunicationChannelListener(clusterProvider)
+
+        eventManager.registerListener(ServicePrepareListener())
 
         logger.info(
             translator.trans("NODE.ONLINE"),
