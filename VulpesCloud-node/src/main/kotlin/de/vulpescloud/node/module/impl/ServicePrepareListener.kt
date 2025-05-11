@@ -6,6 +6,7 @@ import de.vulpescloud.api.service.ServiceStates
 import de.vulpescloud.node.VulpesNode
 import de.vulpescloud.node.service.ServiceProviderImpl
 import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 
 class ServicePrepareListener {
 
@@ -27,6 +28,7 @@ class ServicePrepareListener {
                                 .path()
                                 .resolve(event.service.task.version.pluginDir)
                                 .resolve("${it.name}.jar"),
+                            StandardCopyOption.REPLACE_EXISTING
                         )
                     }
                 }
