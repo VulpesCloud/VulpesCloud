@@ -15,11 +15,15 @@ import de.vulpescloud.api.event.events.player.PlayerLeaveEvent
 import de.vulpescloud.api.player.Player
 import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.api.service.ServiceFilter
-import de.vulpescloud.bridge.VulpesBridge
+import de.vulpescloud.api.virtualconfig.VirtualConfig
 import de.vulpescloud.bridge.VulpesBridge.getEventManager
 import de.vulpescloud.bridge.VulpesBridge.getServiceProvider
 import de.vulpescloud.connector.common.Connector
+import de.vulpescloud.connector.velocity.commands.CloudCommand
+import de.vulpescloud.connector.velocity.commands.HubCommand
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
+import dev.jorel.commandapi.CommandAPI
+import dev.jorel.commandapi.CommandAPIVelocityConfig
 import jakarta.inject.Inject
 import org.json.JSONObject
 
@@ -34,12 +38,26 @@ constructor(
 ) : Connector {
 
     private lateinit var velocityServerRegistrationHandler: VelocityServerRegistrationHandler
+    private lateinit var config: VirtualConfig
 
     @Subscribe(order = PostOrder.LAST)
     fun onLastProxyInitialize(event: ProxyInitializeEvent) {
 
         velocityServerRegistrationHandler = VelocityServerRegistrationHandler(proxyServer)
         getEventManager().registerListener(velocityServerRegistrationHandler)
+
+        CommandAPI.onLoad(CommandAPIVelocityConfig(proxyServer, this))
+
+        config =
+            VirtualConfig(
+                "Cloud-Command",
+                "This config holds the command messages for the cloud command",
+            )
+
+        config.init()
+
+        HubCommand(proxyServer)
+        CloudCommand(config, proxyServer)
 
         markOnline()
     }
@@ -97,5 +115,17 @@ constructor(
                 PlayerLeaveEvent(player),
                 RedisChannels.VULPESCLOUD_EVENT_PLAYER_PlayerLeaveEvent,
             )
+    }
+
+    fun makeDefaultConfig() {
+        config.getEntry(
+            "commands.cloud.service.notfound",
+            "<gray>The Service could <red>not</red> be found!</gray>",
+        )
+        config.getEntry("commands.cloud.service.list.header", "<gray>Available Services:</gray>")
+        config.getEntry(
+            "commands.cloud.service.list.services",
+            "<gray> - <white>%service%</white> State: <yellow>%state%</yellow> Running Node: <yellow>%runningNode%</yellow></gray>",
+        )
     }
 }
