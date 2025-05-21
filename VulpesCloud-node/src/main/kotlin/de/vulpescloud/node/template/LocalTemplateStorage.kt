@@ -17,18 +17,30 @@ class LocalTemplateStorage : TemplateStorage {
     }
 
     override fun copyTemplateToService(template: Template, service: Service) {
-        FileUtils.copyDir(templatesPath.resolve(template.name), service.path())
+        val templatePath = templatesPath.resolve(template.name)
+        templatePath.toFile().mkdirs()
+        FileUtils.copyDir(templatePath, service.path())
     }
 
     override fun copyServiceToTemplate(service: Service, template: Template) {
-        FileUtils.copyDir(service.path(), templatesPath.resolve(template.name))
+        val templatePath = templatesPath.resolve(template.name)
+        templatePath.toFile().mkdirs()
+        FileUtils.copyDir(service.path(), templatePath)
     }
 
     override fun copyTemplateToPath(template: Template, path: Path) {
-        FileUtils.copyDir(templatesPath.resolve(template.name), path)
+        val templatePath = templatesPath.resolve(template.name)
+        templatePath.toFile().mkdirs()
+        FileUtils.copyDir(templatePath, path)
     }
 
     override fun copyTemplateToTemplate(template: Template, target: Template) {
+        val fistTemplate = templatesPath.resolve(template.name)
+        val secondTemplate = templatesPath.resolve(target.name)
+
+        secondTemplate.toFile().mkdirs()
+        fistTemplate.toFile().mkdirs()
+
         FileUtils.copyDir(
             templatesPath.resolve(template.name),
             templatesPath.resolve(templatesPath.resolve(template.name)),
