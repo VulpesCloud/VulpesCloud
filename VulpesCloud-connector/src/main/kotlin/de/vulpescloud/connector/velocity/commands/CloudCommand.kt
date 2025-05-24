@@ -26,17 +26,7 @@ class CloudCommand(config: VirtualConfig, proxyServer: ProxyServer) {
                 withAliases("services")
                 literalArgument("list") {
                     executesPlayer(
-                        PlayerCommandExecutor { player, commandArguments ->
-                            val serviceName = commandArguments[0] as String
-                            val service = getServiceProvider().getServiceByName(serviceName)
-
-                            if (service == null) {
-                                player.sendMessage(
-                                    CommandConfigOptions.CLOUD_SERVICE_NOTFOUND.get(config)
-                                )
-                                return@PlayerCommandExecutor
-                            }
-
+                        PlayerCommandExecutor { player, _ ->
                             player.sendMessage(
                                 CommandConfigOptions.CLOUD_SERVICE_LIST_HEADER.get(config)
                             )
@@ -86,6 +76,13 @@ class CloudCommand(config: VirtualConfig, proxyServer: ProxyServer) {
                                             .toString(),
                                         RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name,
                                     )
+
+                                player.sendMessage(
+                                    CommandConfigOptions.CLOUD_SERVICE_STOP_SUCCESS.getService(
+                                        config,
+                                        service,
+                                    )
+                                )
                             }
                         )
                     }

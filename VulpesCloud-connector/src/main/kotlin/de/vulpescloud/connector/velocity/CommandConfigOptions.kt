@@ -11,8 +11,8 @@ enum class CommandConfigOptions(val path: String, val default: String) {
     CLOUD_SERVICE_LIST_HEADER("commands.cloud.service.list.header", "<gray>Available Services:</gray>"),
     CLOUD_SERVICE_LIST_SERVICE("commands.cloud.service.list.services", "<gray> - <white>%service%</white> State: <yellow>%state%</yellow> Running Node: <yellow>%runningNode%</yellow></gray>"),
     CLOUD_SERVICE_CONNECT_SUCCESS("commands.cloud.service.connect.success","<gray>Connecting to <white>%service%</white>...</gray>"),
-    CLOUD_SERVICE_CONNECT_ERROR("commands.cloud.service.connect.error","<gray>Could not connect to <white>%service%</white>! Check the Proxy Console for more information!</gray>");
-
+    CLOUD_SERVICE_CONNECT_ERROR("commands.cloud.service.connect.error","<gray>Could not connect to <white>%service%</white>! Check the Proxy Console for more information!</gray>"),
+    CLOUD_SERVICE_STOP_SUCCESS("commands.cloud.service.stop.success", "<gray>Stopping Service <white>%service%</white>!</gray>");
 
     fun getService(config: VirtualConfig, service: Service): Component {
         val miniMessage = MiniMessage.miniMessage()
