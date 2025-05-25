@@ -6,6 +6,7 @@ import de.vulpescloud.api.event.EventListener
 import de.vulpescloud.api.event.events.service.ServiceStateChangeEvent
 import de.vulpescloud.api.service.ServiceFilter
 import de.vulpescloud.api.service.ServiceStates
+import de.vulpescloud.api.version.VersionType
 import de.vulpescloud.bridge.VulpesBridge
 import java.net.InetSocketAddress
 
@@ -18,7 +19,7 @@ class VelocityServerRegistrationHandler(private val proxyServer: ProxyServer) {
         }
 
         VulpesBridge.getServiceProvider().getServicesByFilter(ServiceFilter.SERVERS).forEach {
-            if (it.state == ServiceStates.ONLINE) {
+            if (it.state == ServiceStates.ONLINE && it.task.version.type != VersionType.PROXY) {
                 this.registerServer(it.name, it.runningNode.hostname, it.port)
             }
         }
