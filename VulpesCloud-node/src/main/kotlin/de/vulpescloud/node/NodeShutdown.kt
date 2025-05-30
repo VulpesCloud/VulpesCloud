@@ -33,6 +33,13 @@ object NodeShutdown : KoinComponent {
         exitProcess(0)
     }
 
+    fun shutdownDueConnectionLost() {
+        logger.warn("Force stopping all LocalServices.")
+        serviceProviderImpl.localServices.forEach { it.forceStop() }
+        terminal.close()
+        exitProcess(0)
+    }
+
     @OptIn(DelicateCoroutinesApi::class)
     fun commandShutdown() {
         GlobalScope.launch {

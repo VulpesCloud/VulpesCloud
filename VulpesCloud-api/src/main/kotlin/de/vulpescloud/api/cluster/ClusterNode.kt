@@ -10,7 +10,7 @@ data class ClusterNode(
     var state: NodeStates,
     var currentMemoryUsage: Int,
     var maxMemoryUsage: Int,
-    val cloudVersion: String,
+    val cloudVersion: NodeCloudVersion,
     val headNode: Boolean,
     val hostname: String
 )
