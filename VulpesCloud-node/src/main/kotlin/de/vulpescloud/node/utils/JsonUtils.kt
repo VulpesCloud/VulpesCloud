@@ -2,6 +2,7 @@ package de.vulpescloud.node.utils
 
 import de.vulpescloud.api.cluster.AuthenticationProvider
 import de.vulpescloud.api.cluster.ClusterNode
+import de.vulpescloud.api.cluster.NodeCloudVersion
 import de.vulpescloud.api.cluster.NodeStates
 import de.vulpescloud.api.module.ModuleInfo
 import de.vulpescloud.api.module.ModuleStates
@@ -13,10 +14,10 @@ import de.vulpescloud.api.template.Template
 import de.vulpescloud.api.version.SingleVersion
 import de.vulpescloud.api.version.Version
 import de.vulpescloud.api.version.VersionType
+import java.util.*
 import org.json.JSONObject
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import java.util.*
 
 object JsonUtils : KoinComponent {
 
@@ -79,10 +80,7 @@ object JsonUtils : KoinComponent {
     }
 
     fun getTemplate(json: JSONObject): Template {
-        return Template(
-            json.getString("name"),
-            json.getString("storage"),
-        )
+        return Template(json.getString("name"), json.getString("storage"))
     }
 
     fun getVersion(json: JSONObject): Version {
@@ -108,7 +106,7 @@ object JsonUtils : KoinComponent {
             json.getString("version"),
             json.getString("downloadURL"),
             json.getString("pluginDir"),
-            VersionType.valueOf(json.getString("type"))
+            VersionType.valueOf(json.getString("type")),
         )
     }
 
@@ -120,9 +118,19 @@ object JsonUtils : KoinComponent {
             NodeStates.valueOf(json.getString("state")),
             json.getInt("currentMemoryUsage"),
             json.getInt("maxMemoryUsage"),
-            json.getString("cloudVersion"),
+            getCloudVersion(json.getJSONObject("cloudVersion")),
             json.getBoolean("headNode"),
             json.getString("hostname"),
+        )
+    }
+
+    fun getCloudVersion(json: JSONObject): NodeCloudVersion {
+        return NodeCloudVersion(
+            json.getString("fullVersion"),
+            json.getString("version"),
+            json.getInt("buildNumber"),
+            json.getString("gitBranch"),
+            json.getString("gitCommit"),
         )
     }
 
@@ -137,7 +145,7 @@ object JsonUtils : KoinComponent {
             json.getBoolean("headNodeOnly"),
             json.getBoolean("copyToServices"),
             json.getJSONArray("platforms").map { it as String },
-            ModuleStates.valueOf(json.getString("state"))
+            ModuleStates.valueOf(json.getString("state")),
         )
     }
 
