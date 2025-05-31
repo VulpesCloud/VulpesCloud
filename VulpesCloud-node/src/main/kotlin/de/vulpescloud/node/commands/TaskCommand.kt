@@ -68,10 +68,13 @@ class TaskCommand(
 
     @Command("task|tasks list")
     fun listTasks(source: CommandSource) {
-        source.sendMessage("The following ${taskProvider.tasks().size} task(s) are registered:")
-        taskProvider.tasks().forEach {
+        val tasks = taskProvider.tasks()
+        val maxNameLength = tasks.maxOfOrNull { it.name.length } ?: 0
+        source.sendMessage("The following ${tasks.size} task(s) are registered:")
+        tasks.forEach {
+            val paddedName = it.name.padEnd(maxNameLength)
             source.sendMessage(
-                " &8- &m${it.name} &7Maintenance: &e${it.maintenance}&8, &7MaxPlayers: &e${it.maxPlayers}&8, &7MaxMemory: &e${it.maxMemory}MB&8, &7Static: &e${it.staticServices}&8, &7Fallback: &e${it.fallback}&8, &7StartPort: &e${it.startPort}&8, &7Version: &e${it.version.name}-${it.version.version}"
+                " &8- &m$paddedName &7Maintenance: &e${it.maintenance}&8, &7MaxPlayers: &e${it.maxPlayers}&8, &7MaxMemory: &e${it.maxMemory}MB&8, &7Static: &e${it.staticServices}&8, &7Fallback: &e${it.fallback}&8, &7StartPort: &e${it.startPort}&8, &7Version: &e${it.version.name}-${it.version.version}"
             )
         }
     }
