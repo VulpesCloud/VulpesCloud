@@ -4,6 +4,7 @@ import de.vulpescloud.api.module.DownloadableModule
 import de.vulpescloud.api.module.ModuleInfo
 import de.vulpescloud.launcher.util.FileUpdaterUtil
 import de.vulpescloud.node.command.CommandSource
+import de.vulpescloud.node.command.annotations.Description
 import de.vulpescloud.node.module.ModuleProvider
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
@@ -20,6 +21,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.name
 
 @Suppress("Unused")
+@Description("COMMANDS.DESCRIPTION.module")
 class ModuleCommand(private val moduleProvider: ModuleProvider) {
 
     private val logger = LoggerFactory.getLogger("ModuleCommand")

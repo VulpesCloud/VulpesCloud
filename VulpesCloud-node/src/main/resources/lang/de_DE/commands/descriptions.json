@@ -1,4 +1,12 @@
 {
-  "COMMANDS.DESCRIPTION.exit": "Stoppe die Cloud und alle Services die darauf laufen",
-  "COMMANDS.DESCRIPTION.help": "Zeigt informationen über alle commands"
+  "COMMANDS.DESCRIPTION.exit": "Stoppt die Cloud und alle darauf laufenden Services",
+  "COMMANDS.DESCRIPTION.help": "Zeigt Informationen über alle Befehle an",
+  "COMMANDS.DESCRIPTION.module": "Verwalte die Module!",
+  "COMMANDS.DESCRIPTION.clear": "Leert das Terminal",
+  "COMMANDS.DESCRIPTION.cluster": "Verwalte den Cluster",
+  "COMMANDS.DESCRIPTION.info": "Zeigt Informationen über die Cloud an",
+  "COMMANDS.DESCRIPTION.player": "Verwalte Spieler",
+  "COMMANDS.DESCRIPTION.service": "Verwalte Services",
+  "COMMANDS.DESCRIPTION.task": "Verwalte Tasks",
+  "COMMANDS.DESCRIPTION.template": "Verwalte Vorlagen"
 }

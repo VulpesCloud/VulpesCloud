@@ -1,5 +1,12 @@
 {
   "COMMANDS.DESCRIPTION.exit": "Stop the Cloud and all services running on it",
   "COMMANDS.DESCRIPTION.help": "Shows information about all Commands",
-  "COMMANDS.DESCRIPTION.module": "Mange the Modules!"
+  "COMMANDS.DESCRIPTION.module": "Mange the Modules!",
+  "COMMANDS.DESCRIPTION.clear": "Clears the terminal",
+  "COMMANDS.DESCRIPTION.cluster": "Manage the Cluster",
+  "COMMANDS.DESCRIPTION.info": "Shows information about the Cloud",
+  "COMMANDS.DESCRIPTION.player": "Manage Players",
+  "COMMANDS.DESCRIPTION.service": "Manage Services",
+  "COMMANDS.DESCRIPTION.task": "Manage Tasks",
+  "COMMANDS.DESCRIPTION.template": "Manage Templates"
 }
