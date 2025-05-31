@@ -59,7 +59,7 @@ class TaskCommand(
         return task
     }
 
-    @Command("task|tasks create")
+    @Command("task|tasks setup|create")
     fun startSetup() {
         setupProvider.startSetup(
             TaskSetup(taskProvider, translator, terminal, versionProvider, config)
@@ -71,7 +71,7 @@ class TaskCommand(
         source.sendMessage("The following ${taskProvider.tasks().size} task(s) are registered:")
         taskProvider.tasks().forEach {
             source.sendMessage(
-                " &8- &m${it.name} &7Version: &e${it.version} &7MaxPlayers: &e${it.maxPlayers} &7MaxMemory: &e${it.maxMemory}MB &7Static: &e${it.staticServices}"
+                " &8- &m${it.name} &7Maintenance: &e${it.maintenance}&8, &7MaxPlayers: &e${it.maxPlayers}&8, &7MaxMemory: &e${it.maxMemory}MB&8, &7Static: &e${it.staticServices}&8, &7Fallback: &e${it.fallback}&8, &7StartPort: &e${it.startPort}&8, &7Version: &e${it.version.name}-${it.version.version}"
             )
         }
     }
