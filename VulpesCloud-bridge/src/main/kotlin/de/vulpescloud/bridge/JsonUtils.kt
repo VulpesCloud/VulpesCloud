@@ -1,9 +1,8 @@
 package de.vulpescloud.bridge
 
 import de.vulpescloud.api.cluster.ClusterNode
+import de.vulpescloud.api.cluster.NodeCloudVersion
 import de.vulpescloud.api.cluster.NodeStates
-import de.vulpescloud.api.module.ModuleInfo
-import de.vulpescloud.api.module.ModuleStates
 import de.vulpescloud.api.player.Player
 import de.vulpescloud.api.service.Service
 import de.vulpescloud.api.service.ServiceStates
@@ -112,9 +111,19 @@ object JsonUtils {
             NodeStates.valueOf(json.getString("state")),
             json.getInt("currentMemoryUsage"),
             json.getInt("maxMemoryUsage"),
-            json.getString("cloudVersion"),
+            getCloudVersion(json.getJSONObject("cloudVersion")),
             json.getBoolean("headNode"),
             json.getString("hostname"),
+        )
+    }
+
+    fun getCloudVersion(json: JSONObject): NodeCloudVersion {
+        return NodeCloudVersion(
+            json.getString("fullVersion"),
+            json.getString("version"),
+            json.getInt("buildNumber"),
+            json.getString("gitBranch"),
+            json.getString("gitCommit"),
         )
     }
 
