@@ -31,14 +31,15 @@ class HeartBeatScheduler(private val clusterProvider: ClusterProvider) : Schedul
                 )
             localBeat++
 
-            val localBeatFromRedis = getRC()?.getHashField("VULPESCLOUD_NODE_HEARTBEAT", clusterProvider.localNode().name)?.toLong() ?: 0L
+            val localBeatFromRedis =
+                getRC()
+                    ?.getHashField("VULPESCLOUD_NODE_HEARTBEAT", clusterProvider.localNode().name)
+                    ?.toLong() ?: 0L
             if (localBeatFromRedis == localBeat) {
                 localConnectionLostCount = 0
             } else {
                 localNodeLostConnection()
             }
-
-
 
             delay(heartbeatInterval)
         }
@@ -46,7 +47,9 @@ class HeartBeatScheduler(private val clusterProvider: ClusterProvider) : Schedul
 
     private fun localNodeLostConnection() {
         if (localConnectionLostCount >= connectionLostCountUntilShutdown) {
-            logger.error("Connection to Redis seems to be lost for too long, shutting down local node.")
+            logger.error(
+                "Connection to Redis seems to be lost for too long, shutting down local node."
+            )
             NodeShutdown.shutdownDueConnectionLost()
         } else {
             localConnectionLostCount++
@@ -58,6 +61,8 @@ class HeartBeatScheduler(private val clusterProvider: ClusterProvider) : Schedul
         // Checks heartbeats of normal nodes in cluster and handles failures
         val currentBeats = getRC()?.getHashValuesAsPair("VULPESCLOUD_NODE_HEARTBEAT")
         currentBeats?.forEach { (name, beat) ->
+            if (name == clusterProvider.localNode().name) return@forEach
+
             val oldBeat = oldHeartbeatMap[name] ?: 0L
 
             if (oldBeat < beat.toLong()) {
@@ -66,22 +71,23 @@ class HeartBeatScheduler(private val clusterProvider: ClusterProvider) : Schedul
             } else {
                 heartBeatFailureMap[name] = (heartBeatFailureMap[name] ?: 0) + 1
                 if (heartBeatFailureMap[name]!! >= heartbeatInvervalsUntilNodeLost) {
-                    logger.error("Node $name didn't send heartbeat for ${heartBeatFailureMap[name]} beats! Considering it lost.")
+                    logger.error(
+                        "Node $name didn't send heartbeat for ${heartBeatFailureMap[name]} beats! Considering it lost."
+                    )
                     val node = clusterProvider.nodeByName(name)!!
                     node.state = NodeStates.LOST
                     getRC()?.setHashField("VULPESCLOUD_NODES", name, JSONObject(node).toString())
-
                 } else if (heartBeatFailureMap[name]!! < heartbeatInvervalsUntilNodeLost) {
-                    logger.warn("Node $name didn't send heartbeat for ${heartBeatFailureMap[name]} beats!")
+                    logger.warn(
+                        "Node $name didn't send heartbeat for ${heartBeatFailureMap[name]} beats!"
+                    )
                 }
             }
         }
-
     }
 
     private fun checkHeartbeatsAsNormalNode() {
         // Checks heartbeats of head node and handles head node failure
-
 
     }
 }

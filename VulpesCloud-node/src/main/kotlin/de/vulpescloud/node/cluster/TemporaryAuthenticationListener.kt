@@ -8,6 +8,7 @@ import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.jediswrapper.redis.ChannelListener
 import de.vulpescloud.node.NodeShutdown
+import de.vulpescloud.node.cluster.ClusterProviderImpl.Companion.makeNodeVersion
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.event.EventManagerImpl
 import org.json.JSONObject
@@ -32,7 +33,7 @@ class TemporaryAuthenticationListener(private val config: NodeConfig, eventManag
                     NodeStates.BOOTING,
                     0,
                     0,
-                    "2.0.0",
+                    makeNodeVersion(),
                     false,
                     config.hostname(),
                 )

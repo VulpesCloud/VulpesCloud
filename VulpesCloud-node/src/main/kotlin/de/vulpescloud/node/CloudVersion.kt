@@ -1,5 +1,7 @@
 package de.vulpescloud.node
 
+import de.vulpescloud.api.cluster.NodeCloudVersion
+
 object CloudVersion {
 
     fun getFullVersion(): String {

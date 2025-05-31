@@ -1,13 +1,11 @@
 package de.vulpescloud.node.cluster
 
-import de.vulpescloud.api.cluster.AuthenticationProvider
-import de.vulpescloud.api.cluster.ClusterNode
-import de.vulpescloud.api.cluster.ClusterProvider
-import de.vulpescloud.api.cluster.NodeStates
+import de.vulpescloud.api.cluster.*
 import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.event.events.cluster.NodeStateChangeEvent
 import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
+import de.vulpescloud.node.CloudVersion
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.event.EventManagerImpl
 import de.vulpescloud.node.utils.JsonUtils.getClusterNode
@@ -46,7 +44,7 @@ class ClusterProviderImpl(
     }
 
     override fun filterByState(state: NodeStates): List<ClusterNode> {
-        TODO("Not yet implemented")
+        return nodes().filter { it.state == state }
     }
 
     override fun localNode(): ClusterNode {
@@ -64,14 +62,10 @@ class ClusterProviderImpl(
                 NodeStates.ONLINE,
                 0,
                 0,
-                "2.0.0",
+                makeNodeVersion(),
                 nodeByUUID(config.uuid())!!.headNode,
                 config.hostname(),
             )
-
-//        if (!node.headNode) {
-//            ClusterHeartbeatScheduler(this).run()
-//        }
 
         eventManager.callGlobal(
             NodeStateChangeEvent(node, nodeByUUID(config.uuid())!!.state, NodeStates.ONLINE),
@@ -82,7 +76,14 @@ class ClusterProviderImpl(
     }
 
     fun initialize() {
+        // Hash 'VULPESCLOUD_NODES' == empty -> make this node HeadNode
+        // else
+        // Hash 'VULPESCLOUD_NODES' != empty && Field 'localNode.name' == empty -> request
+        // authentication from HeadNode
+        // Hash 'VULPESCLOUD_NODES' != empty && Field 'localNode.name' != empty -> Refuse startup
+
         if (getHeadNode() != null && getHeadNode()?.uuid != config.uuid()) {
+            logger.info("Requesting Authentication from HeadNode &8(&m${getHeadNode()?.name}&8)")
             logger.debug(
                 "Sending Authentication Request to HeadNode. Using secret ${authenticationProvider.getAuthenticationToken()}"
             )
@@ -113,7 +114,7 @@ class ClusterProviderImpl(
                                 NodeStates.BOOTING,
                                 0,
                                 0,
-                                "2.0.0",
+                                makeNodeVersion(),
                                 true,
                                 config.hostname(),
                             )
@@ -123,7 +124,6 @@ class ClusterProviderImpl(
 
             logger.debug("Starting Authentication Listener")
             AuthenticationListener(authenticationProvider)
-            // HeadNodeClusterHeartbeatScheduler(this).run()
         }
     }
 
@@ -142,7 +142,7 @@ class ClusterProviderImpl(
                             NodeStates.OFFLINE,
                             0,
                             0,
-                            "0.0.0",
+                            makeNodeVersion(),
                             false,
                             config.hostname(),
                         )
@@ -152,25 +152,36 @@ class ClusterProviderImpl(
     }
 
     fun switchToHeadNode() {
-        getRC()?.setHashField(
-            "VULPESCLOUD_NODES",
-            config.name(),
-            JSONObject(
-                    ClusterNode(
-                        config.name(),
-                        config.uuid(),
-                        localNode().runningServices,
-                        NodeStates.ONLINE,
-                        localNode().currentMemoryUsage,
-                        localNode().maxMemoryUsage,
-                        localNode().cloudVersion,
-                        true,
-                        config.hostname(),
+        getRC()
+            ?.setHashField(
+                "VULPESCLOUD_NODES",
+                config.name(),
+                JSONObject(
+                        ClusterNode(
+                            config.name(),
+                            config.uuid(),
+                            localNode().runningServices,
+                            NodeStates.ONLINE,
+                            localNode().currentMemoryUsage,
+                            localNode().maxMemoryUsage,
+                            localNode().cloudVersion,
+                            true,
+                            config.hostname(),
+                        )
                     )
-                )
-                .toString(),
-        )
+                    .toString(),
+            )
+    }
 
-
+    companion object {
+        fun makeNodeVersion(): NodeCloudVersion {
+            return NodeCloudVersion(
+                version = CloudVersion.getVersion(),
+                buildNumber = CloudVersion.getBuildNumber(),
+                gitBranch = CloudVersion.getGitBranch(),
+                gitCommit = CloudVersion.getGitCommit(),
+                fullVersion = CloudVersion.getFullVersion(),
+            )
+        }
     }
 }
