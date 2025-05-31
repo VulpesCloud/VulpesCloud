@@ -54,6 +54,19 @@ class ServiceCommand(
         source.sendMessage("Port: ${service.port}")
     }
 
+    @Command("service|services list")
+    fun listServices(source: CommandSource) {
+        val services = serviceProvider.services()
+        val maxNameLength = services.maxOfOrNull { it.name.length } ?: 0
+        source.sendMessage("A total of ${services.size} service(s) are available:")
+        services.forEach {
+            val paddedName = it.name.padEnd(maxNameLength)
+            source.sendMessage(
+                " &8- &m$paddedName &7State: &e${it.state}&8, &7OnlinePlayerCount: &e${it.onlinePlayerCount}&8, &7MaxPlayers: &e${it.maxPlayers}&8, &7RunningNode: &e${it.runningNode.name}&8, &7Port: &e${it.port}"
+            )
+        }
+    }
+
     @Command("service|services <service> start")
     fun startService(source: CommandSource, @Argument("service") service: Service) {
         if (service.state == ServiceStates.PREPARED) {
