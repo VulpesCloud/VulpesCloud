@@ -25,13 +25,13 @@ class HeartBeatScheduler(private val clusterProvider: ClusterProvider) : Schedul
 
     override fun run() = launch {
         while (true) {
+            localBeat++
             getRC()
                 ?.setHashField(
                     "VULPESCLOUD_NODE_HEARTBEAT",
                     clusterProvider.localNode().name,
                     localBeat.toString(),
                 )
-            localBeat++
 
             val localBeatFromRedis =
                 getRC()

@@ -35,6 +35,7 @@ object NodeShutdown : KoinComponent {
 
     fun shutdownDueConnectionLost() {
         logger.warn("Force stopping all LocalServices.")
+        ServiceScheduler.cancel()
         serviceProviderImpl.localServices.forEach { it.forceStop() }
         terminal.close()
         exitProcess(0)
