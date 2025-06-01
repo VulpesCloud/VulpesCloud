@@ -46,6 +46,10 @@ object NodeShutdown : KoinComponent {
             logger.debug("Stopping ServiceScheduler")
             ServiceScheduler.cancel()
 
+            logger.debug("Shutting down ClusterProvider")
+            val clusterProv = clusterProvider as ClusterProviderImpl
+            clusterProv.shutdown()
+
             logger.debug("Stopping LocalServices")
             serviceProviderImpl.localServices.forEach { it.sendCommand("stop") }
             serviceProviderImpl.loggingServices.clear()
@@ -57,22 +61,11 @@ object NodeShutdown : KoinComponent {
                 delay(1000)
             }
 
-
-            logger.debug("Canceling Schedulers")
-            // if (!clusterProvider.localNode().headNode) { ClusterHeartbeatScheduler.instance.cancel()
-            // }
-            // if (clusterProvider.localNode().headNode) {
-            // HeadNodeClusterHeartbeatScheduler.instance.cancel() }
-
             logger.debug("Deleting Heartbeat")
             getRC()?.deleteHashField("VULPESCLOUD_NODE_HEARTBEAT", clusterProvider.localNode().name)
 
             logger.debug("Unloading Modules")
             moduleProvider.unloadAllModules()
-
-            logger.debug("Shutting down ClusterProvider")
-            val clusterProv = clusterProvider as ClusterProviderImpl
-            clusterProv.shutdown()
 
             logger.debug("Shutting down DatabaseProvider")
             databaseProvider.close()

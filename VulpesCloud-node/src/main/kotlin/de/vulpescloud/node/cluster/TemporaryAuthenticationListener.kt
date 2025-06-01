@@ -46,6 +46,7 @@ class TemporaryAuthenticationListener(private val config: NodeConfig, eventManag
             this.unregister()
         } else {
             logger.error("Unable to authenticate with the Head Node!")
+            logger.error("Reason: ${msg.getString("reason")}")
             NodeShutdown.ctrlCCloud()
         }
     }

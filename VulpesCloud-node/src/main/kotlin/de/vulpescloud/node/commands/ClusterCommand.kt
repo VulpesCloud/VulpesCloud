@@ -11,12 +11,14 @@ class ClusterCommand(private val clusterProvider: ClusterProvider) {
 
     @Command("cluster list")
     fun displayClusterInfo(source: CommandSource) {
-        source.sendMessage("Showing &m${clusterProvider.nodes().size} &7nodes&8:")
-        clusterProvider.nodes().forEach {
+        val nodes = clusterProvider.nodes().sortedBy { it.name }
+        val maxNodeNameLength = nodes.maxOfOrNull { it.name.length } ?: 0
+        source.sendMessage("Showing &m${nodes.size} &7node(s)&8:")
+        nodes.forEach {
+            val paddedName = it.name.padEnd(maxNodeNameLength)
             source.sendMessage(
-                " &8- &m${it.name} &7Version&8:<yellow>${it.cloudVersion.fullVersion} &7HeadNode&8:<yellow>${it.headNode}"
+                " &8- &m$paddedName &7State&8: &e${it.state.name}&8, &7Version&8: &e${it.cloudVersion.fullVersion}&8, &7HeadNode&8: &e${it.headNode}"
             )
         }
     }
-
 }

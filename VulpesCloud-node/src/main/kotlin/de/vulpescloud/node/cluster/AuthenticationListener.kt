@@ -3,6 +3,7 @@ package de.vulpescloud.node.cluster
 import de.vulpescloud.api.cluster.AuthenticationProvider
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.jediswrapper.redis.ChannelListener
+import java.util.UUID
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 
@@ -14,6 +15,7 @@ class AuthenticationListener(private val authenticationProvider: AuthenticationP
     override fun onMessage(message: String) {
         val msg = JSONObject(JSONObject(message).getString("message"))
         val nodeName = msg.getString("nodeName")
+        val nodeUUID = UUID.fromString(msg.getString("nodeUUID"))
         val secret = msg.getString("secret")
 
         if (secret == authenticationProvider.getAuthenticationToken()) {
@@ -22,16 +24,17 @@ class AuthenticationListener(private val authenticationProvider: AuthenticationP
                     JSONObject().put("status", "AUTHENTICATED").toString(),
                     "VULPESCLOUD_NODEAUTHENTICATION_$nodeName",
                 )
-            logger.debug("Authenticated Node $nodeName")
+            logger.info("Node {} ({}) has been authenticated successfully!", nodeName, nodeUUID)
         } else {
             getRC()
                 ?.sendMessage(
-                    JSONObject().put("status", "UNAUTHORIZED").toString(),
+                    JSONObject()
+                        .put("status", "UNAUTHORIZED")
+                        .put("reason", "Invalid Secret!")
+                        .toString(),
                     "VULPESCLOUD_NODEAUTHENTICATION_$nodeName",
                 )
-            logger.debug("Rejected Node $nodeName")
+            logger.info("Node {} ({}) has been rejected due to invalid secret.", nodeName, nodeUUID)
         }
-        // TODO in the future we will add the ability to blacklist nodes by Name and UUID, and we
-        // will check for that here
     }
 }

@@ -6,6 +6,7 @@ import de.vulpescloud.api.event.events.cluster.NodeStateChangeEvent
 import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.CloudVersion
+import de.vulpescloud.node.HeartBeatScheduler
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.event.EventManagerImpl
 import de.vulpescloud.node.utils.JsonUtils.getClusterNode
@@ -21,6 +22,8 @@ class ClusterProviderImpl(
 
     private val logger = LoggerFactory.getLogger(ClusterProviderImpl::class.java)
     private val eventManager = eventManager as EventManagerImpl
+
+    private val heartbeatScheduler = HeartBeatScheduler(this)
 
     override fun nodes(): List<ClusterNode> {
         val nodes = mutableListOf<ClusterNode>()
@@ -72,6 +75,8 @@ class ClusterProviderImpl(
             RedisChannels.VULPESCLOUD_EVENT_CLUSTER_NodeStateChangeEvent,
         )
 
+        heartbeatScheduler.run()
+
         getRC()?.setHashField("VULPESCLOUD_NODES", config.name(), JSONObject(node).toString())
     }
 
@@ -82,25 +87,8 @@ class ClusterProviderImpl(
         // authentication from HeadNode
         // Hash 'VULPESCLOUD_NODES' != empty && Field 'localNode.name' != empty -> Refuse startup
 
-        if (getHeadNode() != null && getHeadNode()?.uuid != config.uuid()) {
-            logger.info("Requesting Authentication from HeadNode &8(&m${getHeadNode()?.name}&8)")
-            logger.debug(
-                "Sending Authentication Request to HeadNode. Using secret ${authenticationProvider.getAuthenticationToken()}"
-            )
-
-            TemporaryAuthenticationListener(config, eventManager)
-
-            getRC()
-                ?.sendMessage(
-                    JSONObject()
-                        .put("nodeName", config.name())
-                        .put("nodeUUID", config.uuid())
-                        .put("secret", authenticationProvider.getAuthenticationToken())
-                        .toString(),
-                    "VULPESCLOUD_NODEAUTHENTICATION",
-                )
-        } else if (getHeadNode() == null) {
-            logger.debug("No HeadNode is present, marking this node as Head")
+        if (getHeadNode() == null) {
+            logger.info("Redis Hash empty, marking this node as HeadNode!")
 
             getRC()
                 ?.setHashField(
@@ -121,9 +109,24 @@ class ClusterProviderImpl(
                         )
                         .toString(),
                 )
-
-            logger.debug("Starting Authentication Listener")
             AuthenticationListener(authenticationProvider)
+        } else {
+            logger.info("Requesting Authentication from HeadNode &8(&m${getHeadNode()?.name}&8)")
+            logger.debug(
+                "Sending Authentication Request to HeadNode. Using secret ${authenticationProvider.getAuthenticationToken()}"
+            )
+
+            TemporaryAuthenticationListener(config, eventManager)
+
+            getRC()
+                ?.sendMessage(
+                    JSONObject()
+                        .put("nodeName", config.name())
+                        .put("nodeUUID", config.uuid())
+                        .put("secret", authenticationProvider.getAuthenticationToken())
+                        .toString(),
+                    "VULPESCLOUD_NODEAUTHENTICATION",
+                )
         }
     }
 
@@ -149,6 +152,8 @@ class ClusterProviderImpl(
                     )
                     .toString(),
             )
+
+        heartbeatScheduler.cancel()
     }
 
     fun switchToHeadNode() {
