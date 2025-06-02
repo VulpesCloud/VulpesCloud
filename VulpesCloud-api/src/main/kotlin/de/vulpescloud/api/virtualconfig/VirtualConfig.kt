@@ -15,7 +15,7 @@ import org.jetbrains.exposed.sql.update
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 
-class VirtualConfig(val name: String, val description: String = "none") {
+class VirtualConfig(val name: String, var description: String = "none") {
 
     private val path = Path("temp-configs/$name.json")
     private val config = FileConfig.builder(path, JsonFormat.fancyInstance()).sync().build()
@@ -30,7 +30,7 @@ class VirtualConfig(val name: String, val description: String = "none") {
      * Initializes the VirtualConfig This will create the temp file and load the config from MySQL
      * or create an empty config
      */
-    fun init() {
+    fun init(defaultConfig: JSONObject = JSONObject()) {
         path.parent.toFile().mkdirs()
         transaction {
             SchemaUtils.create(VirtualConfigTable)
@@ -43,8 +43,10 @@ class VirtualConfig(val name: String, val description: String = "none") {
                     path.toFile().writeText(JSONObject(data).toString(4))
                 }
                 lastModified = row[VirtualConfigTable.lastModified]
+                description = row[VirtualConfigTable.description]
             } else {
-                lastModified = -1
+                lastModified = System.currentTimeMillis()
+                path.toFile().writeText(defaultConfig.toString(4))
             }
         }
 
@@ -148,7 +150,6 @@ class VirtualConfig(val name: String, val description: String = "none") {
 
     /** Closes the config and deletes the temp file */
     fun close() {
-
         virtualConfigReloadChannelListener.unregister()
 
         config.close()
