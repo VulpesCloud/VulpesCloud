@@ -10,6 +10,7 @@ import de.vulpescloud.api.task.TaskProvider
 import de.vulpescloud.api.template.TemplateStorageProvider
 import de.vulpescloud.api.version.VersionProvider
 import de.vulpescloud.jediswrapper.JedisWrapper
+import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.cluster.AuthenticationProviderImpl
 import de.vulpescloud.node.cluster.ClusterProviderImpl
 import de.vulpescloud.node.cluster.NodeCommunicationChannelListener
@@ -190,6 +191,15 @@ class Node : KoinComponent {
     }
 
     companion object {
-        val forwardingSecret = StringUtils.generateRandomString(8)
+        fun getForwardingSecret(): String {
+            return if (getRC()?.getString("VULPESCLOUD_FORWARDING_SECRET") != null) {
+                getRC()?.getString("VULPESCLOUD_FORWARDING_SECRET")
+            } else {
+                val secret = StringUtils.generateRandomString(8)
+                getRC()?.setString("VULPESCLOUD_FORWARDING_SECRET", secret)
+                secret
+            }
+        }
+
     }
 }

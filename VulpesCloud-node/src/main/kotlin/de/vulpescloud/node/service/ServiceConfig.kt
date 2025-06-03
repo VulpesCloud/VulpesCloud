@@ -56,7 +56,7 @@ object ServiceConfig : KoinComponent {
                         .defaultData(this::class.java.classLoader.getResource("platforms/purpur/paper-global.yml"))
                         .build()
                     globalConf.load()
-                    globalConf.set<String>("proxies.velocity.secret", Node.forwardingSecret)
+                    globalConf.set<String>("proxies.velocity.secret", Node.getForwardingSecret())
                     globalConf.set<Boolean>("proxies.velocity.enabled", true)
                     globalConf.save()
                 } catch (e: Exception) {
@@ -100,7 +100,7 @@ object ServiceConfig : KoinComponent {
                         .defaultData(this::class.java.classLoader.getResource("platforms/purpur/paper-global.yml"))
                         .build()
                     globalConf.load()
-                    globalConf.set<String>("proxies.velocity.secret", Node.forwardingSecret)
+                    globalConf.set<String>("proxies.velocity.secret", Node.getForwardingSecret())
                     globalConf.set<Boolean>("proxies.velocity.enabled", true)
                     globalConf.save()
                 } catch (e: Exception) {
@@ -131,10 +131,10 @@ object ServiceConfig : KoinComponent {
                 // save the config
                 velocityConfig.save()
 
-                Files.writeString(service.path().resolve("forwarding.secret"), Node.forwardingSecret)
+                Files.writeString(service.path().resolve("forwarding.secret"), Node.getForwardingSecret())
             }
             "minestom" -> {
-                Files.writeString(service.path().resolve("forwarding.secret"), Node.forwardingSecret)
+                Files.writeString(service.path().resolve("forwarding.secret"), Node.getForwardingSecret())
             }
         }
     }
