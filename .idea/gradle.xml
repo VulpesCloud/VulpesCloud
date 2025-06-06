@@ -16,7 +16,7 @@
           </compositeBuild>
         </compositeConfiguration>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleJvm" value="22" />
+        <option name="gradleJvm" value="temurin-21" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
@@ -24,8 +24,6 @@
             <option value="$PROJECT_DIR$/VulpesCloud-bridge" />
             <option value="$PROJECT_DIR$/VulpesCloud-connector" />
             <option value="$PROJECT_DIR$/VulpesCloud-launcher" />
-            <option value="$PROJECT_DIR$/VulpesCloud-modules" />
-            <option value="$PROJECT_DIR$/VulpesCloud-modules/VulpesCloud-example-module" />
             <option value="$PROJECT_DIR$/VulpesCloud-node" />
             <option value="$PROJECT_DIR$/VulpesCloud-wrapper" />
             <option value="$PROJECT_DIR$/build-helper" />

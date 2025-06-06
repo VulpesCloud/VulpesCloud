@@ -12,9 +12,15 @@ class APIUpdater {
     fun updateAPI() {
         val wantedChecksum = ChecksumUtil.returnChecksumJson().getString("api")
         val target = File("launcher/dependencies/vulpescloud-api.jar")
-        val downloadUri = URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-api.jar")
+        val downloadUri =
+            if (config.autoUpdatesBranch() == "jenkins") {
+                URI(
+                    "https://jenkins.vulpescloud.de/job/VulpesCloud/lastSuccessfulBuild/artifact/build/meta-repo/vulpescloud-api.jar"
+                )
+            } else {
+                URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-api.jar")
+            }
 
         FileUpdaterUtil.updateFile(target, downloadUri, wantedChecksum)
     }
-
 }

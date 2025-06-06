@@ -1,7 +1,7 @@
 [versions]
 # kotlin
-
 stdlib = "2.1.20"
+kotlinx-serialization = "1.8.1"
 
 # google deps
 guava = "33.4.6-jre"
@@ -14,10 +14,11 @@ annotations = "26.0.2"
 jedis = "5.2.0"
 hikariCP = "6.3.0"
 mariadb = "3.5.3"
-exposed = "0.61.0"
+exposed = "0.60.0"
+jedisWrapper = "1.1.1"
 
 #logging
-slf4j = "2.0.17"
+slf4j = "2.1.0-alpha1"
 logback = "1.5.18"
 
 # configuration
@@ -33,6 +34,9 @@ kSpigot = "1.21.0"
 paper = "1.21.1-R0.1-SNAPSHOT"
 velocity = "3.4.0-SNAPSHOT"
 
+# dependency injection
+koin = "4.1.0-Beta7"
+
 # config
 
 night-config = "3.8.2"
@@ -45,8 +49,8 @@ shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 
 [libraries]
 # kotlin
-
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "stdlib" }
+kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization"}
 
 # google libs
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
@@ -61,6 +65,7 @@ hikariCP = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikariCP" }
 mariadb-java-client = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.ref = "mariadb" }
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
+jedisWrapper = { group = "de.vulpescloud", name = "JedisWrapper", version.ref = "jedisWrapper"}
 
 # logging
 slf4jApi = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
@@ -82,9 +87,11 @@ cloud-velocity = { group = "org.incendo", name = "cloud-velocity", version = "2.
 cloud-processors-confirmation = { group = "org.incendo", name = "cloud-processors-confirmation", version = "1.0.0-rc.1"}
 
 # platforms
-kSpigot = { group = "net.axay", name = "kspigot", version.ref = "kSpigot" }
 paper = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
 velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
+
+# depdendency injection
+koin = { group = "io.insert-koin", name = "koin-core", version.ref = "koin"}
 
 # config
 

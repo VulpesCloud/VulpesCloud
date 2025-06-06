@@ -1,0 +1,5 @@
+{
+  "EVENTS.ModuleLoadEvent.MESSAGE": "Module &m{} &7has been loaded!",
+  "EVENTS.ModuleStartEvent.MESSAGE": "Module &m{} &7has been successfully started!",
+  "EVENTS.ModuleUnloadEvent.MESSAGE": "Module &m{} &7has been unloaded!"
+}

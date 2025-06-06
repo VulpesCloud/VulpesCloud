@@ -1,0 +1,3 @@
+{
+  "EVENTS.NodeStateChangeEvent.MESSAGE": "Der Status von Node &m{} &7wurde zu &2{} &7geändert."
+}

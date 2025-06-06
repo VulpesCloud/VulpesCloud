@@ -1,18 +1,14 @@
 package de.vulpescloud.node.commands
 
-import de.vulpescloud.node.Node
-import de.vulpescloud.node.command.annotations.Alias
 import de.vulpescloud.node.command.annotations.Description
+import de.vulpescloud.node.terminal.JLineTerminal
 import org.incendo.cloud.annotations.Command
 
-@Suppress("UNUSED")
-@Description("Clear the Screen(translate)")
-@Alias(["cls"])
-class ClearCommand {
+@Description("COMMANDS.DESCRIPTION.clear")
+class ClearCommand(private val terminal: JLineTerminal) {
 
     @Command("clear|cls")
     fun clear() {
-        Node.instance.terminal.clear()
+        terminal.clear()
     }
-
 }

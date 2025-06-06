@@ -33,9 +33,9 @@ repositories {
 
 dependencies {
     compileOnly(project(":VulpesCloud-api"))
-    compileOnly(project(":VulpesCloud-wrapper"))
     compileOnly(rootProject.libs.annotations)
     compileOnly(libs.jedis)
+    compileOnly(libs.jedisWrapper)
 }
 
 tasks.jar {

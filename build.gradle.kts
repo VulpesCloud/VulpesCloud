@@ -32,13 +32,7 @@ plugins {
 }
 
 group = "de.vulpescloud"
-version = "1.1.0"
-
-//tasks.register<Jar>("javadocJar") {
-//    dependsOn("dokkaHtmlMultiModule") // Make sure `dokkaHtmlMultiModule` runs first
-//    from(buildDir.resolve("dokka/htmlMultiModule")) // Use the specified output directory
-//    archiveClassifier.set("javadoc")
-//}
+version = "2.0.0-ALPHA"
 
 allprojects {
     apply(plugin = "java-library")
@@ -46,20 +40,21 @@ allprojects {
     apply(plugin = "org.jetbrains.dokka")
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
-    version = "1.1.0"
+    version = "2.0.0-ALPHA"
     group = "de.vulpescloud"
 
     repositories {
         mavenCentral()
+        maven("https://repo.vulpescloud.de/snapshots")
     }
 
     dependencies {
-        "implementation"(rootProject.libs.lombok)
-        "annotationProcessor"(rootProject.libs.lombok)
         "implementation"(rootProject.libs.annotations)
         "implementation"(rootProject.libs.gson)
         "implementation"(rootProject.libs.guava)
         "implementation"(kotlin("reflect"))
+        "implementation"(rootProject.libs.koin)
+        "implementation"(rootProject.libs.kotlin.stdlib)
     }
 
     publishing {
@@ -91,6 +86,12 @@ allprojects {
             }
         }
     }
+
+    kotlin {
+        jvmToolchain {
+            languageVersion.set(JavaLanguageVersion.of(21))
+        }
+    }
 }
 
 tasks.register("copyFilesForMetaRepo") {
@@ -99,6 +100,7 @@ tasks.register("copyFilesForMetaRepo") {
     dependsOn(project(":VulpesCloud-node").tasks.shadowJar)
     dependsOn(project(":VulpesCloud-wrapper").tasks.shadowJar)
     dependsOn(project(":VulpesCloud-connector").tasks.shadowJar)
+    dependsOn(project(":VulpesCloud-launcher").tasks.shadowJar)
 
     doLast {
         copy {
@@ -125,6 +127,11 @@ tasks.register("copyFilesForMetaRepo") {
             from(project(":VulpesCloud-connector").buildDir.resolve("libs/vulpescloud-connector.jar"))
             into("$buildDir/meta-repo")
             rename { "vulpescloud-connector.jar" }
+        }
+        copy {
+            from(project(":VulpesCloud-launcher").buildDir.resolve("libs/vulpescloud-launcher.jar"))
+            into("$buildDir/meta-repo")
+            rename { "vulpescloud-launcher.jar" }
         }
 
         generateCheckSums("$buildDir/meta-repo")

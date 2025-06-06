@@ -12,7 +12,14 @@ class BridgeUpdater {
     fun updateBridge() {
         val wantedChecksum = ChecksumUtil.returnChecksumJson().getString("bridge")
         val target = File("launcher/dependencies/vulpescloud-bridge.jar")
-        val downloadUri = URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-bridge.jar")
+        val downloadUri =
+            if (config.autoUpdatesBranch() == "jenkins") {
+                URI(
+                    "https://jenkins.vulpescloud.de/job/VulpesCloud/lastSuccessfulBuild/artifact/build/meta-repo/vulpescloud-bridge.jar"
+                )
+            } else {
+                URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-bridge.jar")
+            }
 
         FileUpdaterUtil.updateFile(target, downloadUri, wantedChecksum)
     }

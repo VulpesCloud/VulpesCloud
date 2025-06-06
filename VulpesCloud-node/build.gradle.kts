@@ -33,6 +33,7 @@ dependencies {
     compileOnly(libs.jline)
     compileOnly(libs.json)
     implementation(libs.jedis)
+    implementation(libs.jedisWrapper)
     compileOnly(libs.slf4jApi)
     implementation(libs.logbackCore)
     implementation(libs.logbackClassic)
@@ -61,22 +62,17 @@ sourceSets {
     }
 }
 
-
-
-tasks.jar {
-    manifest {
-        attributes["Main-Class"] = "de.vulpescloud.node.NodeLauncher"
-    }
-    archiveFileName.set("vulpescloud-node.jar")
-    destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
-}
-
 tasks.shadowJar {
+    val buildNumber = System.getenv("BUILD_NUMBER")
+    val versionString = if (buildNumber != null) {
+        "${version}_${getGitBranch()}@${getGitCommit()}_$buildNumber"
+    } else {
+        "${version}_${getGitBranch()}@${getGitCommit()}"
+    }
+
     manifest {
         attributes["Main-Class"] = "de.vulpescloud.node.NodeLauncher"
+        attributes["Implementation-Version"] = versionString
     }
     archiveFileName.set("vulpescloud-node.jar")
-    if (System.getenv("dev") == "true") {
-        destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
-    }
 }

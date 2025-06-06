@@ -31,7 +31,11 @@ object ChecksumUtil {
         Files.writeString(
             Path("launcher/checksums.json"),
             String(
-                URI(githubURL + config.autoUpdatesBranch() + "/checksums.json")
+                if (config.autoUpdatesBranch() == "jenkins") {
+                    URI("https://jenkins.vulpescloud.de/job/VulpesCloud/lastSuccessfulBuild/artifact/build/meta-repo/checksums.json")
+                } else {
+                    URI(githubURL + config.autoUpdatesBranch() + "/checksums.json")
+                }
                 .toURL()
                 .openStream()
                 .readAllBytes()

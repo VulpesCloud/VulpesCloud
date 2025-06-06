@@ -1,125 +1,168 @@
 package de.vulpescloud.node.commands
 
-import de.vulpescloud.api.language.Translator
-import de.vulpescloud.api.redis.RedisChannelNames
-import de.vulpescloud.api.redis.builders.services.ServiceActionMessageBuilder
-import de.vulpescloud.api.services.Service
-import de.vulpescloud.api.services.ServiceActions
-import de.vulpescloud.api.services.ServiceStates
-import de.vulpescloud.node.Node
-import de.vulpescloud.node.command.source.CommandSource
+import de.vulpescloud.api.cluster.ClusterProvider
+import de.vulpescloud.api.redis.RedisChannels
+import de.vulpescloud.api.service.Service
+import de.vulpescloud.api.service.ServiceActions
+import de.vulpescloud.api.service.ServiceProvider
+import de.vulpescloud.api.service.ServiceStates
+import de.vulpescloud.jediswrapper.JedisWrapper.getRC
+import de.vulpescloud.node.command.CommandSource
+import de.vulpescloud.node.command.annotations.Description
+import de.vulpescloud.node.service.ServiceProviderImpl
 import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
+import org.incendo.cloud.annotations.Flag
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
+import org.json.JSONObject
 import java.util.stream.Stream
 
-@Suppress("UNUSED")
-class ServiceCommand {
+@Suppress("Unused")
+@Description("COMMANDS.DESCRIPTION.services")
+class ServiceCommand(
+    serviceProvider: ServiceProvider,
+    private val clusterProvider: ClusterProvider,
+) {
+    private val serviceProvider = serviceProvider as ServiceProviderImpl
+
+    @Suggestions("services")
+    fun suggestServices(): Stream<String> {
+        return serviceProvider.services().stream().map { it.name }
+    }
 
     @Parser(suggestions = "services")
     fun serviceParser(input: CommandInput): Service {
         val command = input.readString()
-        val task = Node.instance.serviceProvider.findServiceByName(command) ?: throw IllegalArgumentException(Translator.trans("node.commands.service.not-exist"))
+        val service =
+            serviceProvider.services().find { it.name.equals(command, true) }
+                ?: throw IllegalArgumentException("Service does not exist!")
 
-        return task
+        return service
     }
 
-    @Suggestions("services")
-    fun suggestServices(): Stream<String> {
-        return Node.instance.serviceProvider.services().stream().map { it.name() }
+    @Command("service|services <service>")
+    fun showServiceInfo(source: CommandSource, @Argument("service") service: Service) {
+        source.sendMessage("Service: ${service.name}")
+        source.sendMessage("UUID: ${service.uuid}")
+        source.sendMessage("State: ${service.state}")
+        source.sendMessage("Version: ${service.task.version.name}-${service.task.version.version}")
+        source.sendMessage("Node: ${service.runningNode.name}")
+        source.sendMessage("PlayerCount: ${service.onlinePlayerCount}/${service.maxPlayers}")
+        source.sendMessage("Port: ${service.port}")
     }
 
-    @Command("service|services|ser list")
-    fun sendServiceHelp(source: CommandSource) {
-        source.sendMessage("The following &b${Node.instance.serviceProvider.services().size} &7services are registered&8:")
-        Node.instance.serviceProvider.services()
-            .forEach { service -> source.sendMessage("&8- &f${service.name()} &8: (&7${service.details()}&8)") }
-    }
-
-    @Command("service|services|ser stopAll")
-    fun stopAll(source: CommandSource) {
-        source.sendMessage("Stopping all Services!")
-        Node.instance.serviceProvider.services()
-           .forEach {
-                Node.instance.getRC()?.sendMessage(
-                    ServiceActionMessageBuilder
-                       .setService(it)
-                       .setAction(ServiceActions.STOP)
-                       .build(),
-                    RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name
-                )
-           }
-    }
-
-    @Command("service|services|ser <service> stop")
-    fun sendServiceInfo(
-        source: CommandSource,
-        @Argument("service") service: Service
-    ) {
-        source.sendMessage("Trying to stop the Service!")
-        Node.instance.getRC()?.sendMessage(
-            ServiceActionMessageBuilder
-                .setService(service)
-                .setAction(ServiceActions.STOP)
-                .build(),
-            RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name
-        )
-    }
-
-    @Command("service|services|ser <service> screen")
-    fun toggleScreen(
-        source: CommandSource,
-        @Argument("service") service: Service
-    ) {
-        val ser = Node.instance.serviceProvider.findServiceById(service.id())!!
-        if (Node.instance.serviceProvider.isLogging(ser)) {
-            source.sendMessage("Disabling Screen for &m${service.name()}")
-            Node.instance.serviceProvider.loggingServices.remove(ser.name())
-        } else {
-            source.sendMessage("Enabling Screen for &m${service.name()}")
-            Node.instance.serviceProvider.loggingServices.add(ser.name())
+    @Command("service|services list")
+    fun listServices(source: CommandSource) {
+        val services = serviceProvider.services()
+        val maxNameLength = services.maxOfOrNull { it.name.length } ?: 0
+        source.sendMessage("A total of ${services.size} service(s) are available:")
+        services.forEach {
+            val paddedName = it.name.padEnd(maxNameLength)
+            source.sendMessage(
+                " &8- &m$paddedName &7State: &e${it.state}&8, &7OnlinePlayerCount: &e${it.onlinePlayerCount}&8, &7MaxPlayers: &e${it.maxPlayers}&8, &7RunningNode: &e${it.runningNode.name}&8, &7Port: &e${it.port}"
+            )
         }
     }
 
-    @Command("service|services|ser <service> command <command>")
-    fun sendCommand(
+    @Command("service|services <service> start")
+    fun startService(source: CommandSource, @Argument("service") service: Service) {
+        if (service.state == ServiceStates.PREPARED) {
+            val localService = serviceProvider.localServices.find { it.name == service.name }
+            if (localService != null) {
+                source.sendMessage("Starting service ${service.name}")
+                localService.start()
+            } else {
+                source.sendMessage(
+                    "Notifying ${service.runningNode.name} to start service ${service.name}"
+                )
+                getRC()
+                    ?.sendMessage(
+                        JSONObject()
+                            .put("receiver", service.runningNode.name)
+                            .put("sender", clusterProvider.localNode().name)
+                            .put("content", "SERVICE")
+                            .put("action", ServiceActions.START)
+                            .put("service", service.name)
+                            .toString(),
+                        RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name,
+                    )
+            }
+        } else {
+            source.sendMessage("Service is already running!")
+        }
+    }
+
+    @Command("service|services <service> stop")
+    fun stopService(
+        source: CommandSource,
+        @Argument("service") service: Service,
+        @Flag("force") force: Boolean,
+    ) {
+        if (force) {
+            source.sendMessage(
+                "Notifying ${service.runningNode.name} to kill service ${service.name}"
+            )
+            getRC()
+                ?.sendMessage(
+                    JSONObject()
+                        .put("receiver", service.runningNode.name)
+                        .put("sender", clusterProvider.localNode().name)
+                        .put("content", "SERVICE")
+                        .put("action", ServiceActions.KILL)
+                        .put("service", service.name)
+                        .toString(),
+                    RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name,
+                )
+        } else {
+            source.sendMessage(
+                "Notifying ${service.runningNode.name} to stop service ${service.name}"
+            )
+            getRC()
+                ?.sendMessage(
+                    JSONObject()
+                        .put("receiver", service.runningNode.name)
+                        .put("sender", clusterProvider.localNode().name)
+                        .put("content", "SERVICE")
+                        .put("action", ServiceActions.STOP)
+                        .put("service", service.name)
+                        .toString(),
+                    RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name,
+                )
+        }
+    }
+
+    @Command("service|services <service> screen")
+    fun toggleScreen(source: CommandSource, @Argument("service") service: Service) {
+        if (serviceProvider.toggleServiceLogging(service)) {
+            source.sendMessage("Enabled screen logging for ${service.name}")
+        } else {
+            source.sendMessage("Disabled screen logging for ${service.name}")
+        }
+    }
+
+    @Command("service|services <service> command <command>")
+    fun sendCommandToService(
+        source: CommandSource,
         @Argument("service") service: Service,
         @Greedy @Argument("command") command: String,
     ) {
-        if (Node.instance.serviceProvider.findLocalServiceById(service.id()) == null) {
-            Node.instance.getRC()?.sendMessage(
-                ServiceActionMessageBuilder
-                    .setService(service)
-                    .setAction(ServiceActions.COMMAND)
-                    .setParameter(command)
-                    .build(),
-                RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name
+        source.sendMessage(
+            "Notifying ${service.runningNode.name} to send the command to service ${service.name}"
+        )
+        getRC()
+            ?.sendMessage(
+                JSONObject()
+                    .put("receiver", service.runningNode.name)
+                    .put("sender", clusterProvider.localNode().name)
+                    .put("content", "SERVICE")
+                    .put("action", ServiceActions.COMMAND.name)
+                    .put("service", service.name)
+                    .put("command", command)
+                    .toString(),
+                RedisChannels.VULPESCLOUD_NODE_COMMUNICATION.name,
             )
-        } else {
-            Node.instance.serviceProvider.findLocalServiceById(service.id())!!
-                .executeCommand(command)
-        }
-    }
-
-    @Command("service|services|ser <service> start")
-    fun startService(
-        source: CommandSource,
-        @Argument("service") service: Service,
-    ) {
-        if (service.state() == ServiceStates.PREPARED) {
-            source.sendMessage("Starting Service: ${service.name()}")
-            val pair = Node.instance.serviceProvider.preparedServices.find { it.second.name() == service.name() }!!
-            pair.second.start(pair.first)
-//            Node.instance.getRC()?.sendMessage(
-//                ServiceActionMessageBuilder
-//                    .setService(service)
-//                    .setAction(ServiceActions.START)
-//                    .build(),
-//                RedisChannelNames.VULPESCLOUD_SERVICE_ACTION.name
-//            )
-        }
     }
 }

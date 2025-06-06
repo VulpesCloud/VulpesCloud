@@ -35,6 +35,7 @@ repositories {
     maven {
         url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
     }
+    maven("https://jitpack.io")
 }
 
 dependencies {
@@ -46,18 +47,13 @@ dependencies {
     implementation("dev.jorel:commandapi-velocity-shade:9.6.2-SNAPSHOT")
     implementation("dev.jorel:commandapi-bukkit-kotlin:9.7.0")
 
-    implementation(libs.cloud)
-    implementation(libs.cloud.velocity)
-    implementation(libs.cloud.annotations)
-    implementation(libs.cloud.extension)
 
-    compileOnly(libs.velocity)
-    annotationProcessor(libs.velocity)
     compileOnly(libs.jedis)
+    compileOnly(libs.jedisWrapper)
 
     compileOnly(libs.paper)
-    implementation(libs.kSpigot)
-
+    compileOnly(libs.velocity)
+    annotationProcessor(libs.velocity)
 }
 
 sourceSets {
@@ -69,18 +65,9 @@ sourceSets {
 }
 
 //paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
-
-tasks.jar {
-    archiveFileName.set("vulpescloud-connector.jar")
-    destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
-}
-
 tasks.shadowJar {
     archiveFileName.set("vulpescloud-connector.jar")
     dependsOn(":VulpesCloud-api:jar")
     dependsOn(":VulpesCloud-bridge:jar")
-    if (System.getenv("dev") == "true") {
-        destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
-    }
     //relocate("dev.jorel.commandapi", "de.vulpescloud.connector.commandapi")
 }

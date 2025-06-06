@@ -1,0 +1,16 @@
+package de.vulpescloud.node.event.listeners.service
+
+import de.vulpescloud.api.event.EventListener
+import de.vulpescloud.api.event.events.service.ServiceStateChangeEvent
+import org.slf4j.LoggerFactory
+
+class ServiceStateChangeEventListener {
+
+    private val logger = LoggerFactory.getLogger(javaClass)
+
+    @EventListener
+    fun onServiceStateChangeEvent(event: ServiceStateChangeEvent) {
+        logger.info("Service &m${event.service.name} &7is now &e${event.newState}")
+    }
+
+}
