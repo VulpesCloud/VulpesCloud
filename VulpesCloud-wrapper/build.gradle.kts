@@ -12,7 +12,7 @@ dependencies {
     compileOnly(project(":VulpesCloud-bridge"))
     implementation(libs.jedisWrapper)
     implementation(libs.kotlin.stdlib)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation(libs.jedis)
     implementation(libs.logbackCore)
     implementation(libs.logbackClassic)
