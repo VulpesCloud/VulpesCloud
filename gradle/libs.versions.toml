@@ -22,7 +22,7 @@ slf4j = "2.1.0-alpha1"
 logback = "1.5.18"
 
 # configuration
-gson = "2.12.1"
+gson = "2.13.1"
 json = "20250107"
 
 # console
@@ -39,7 +39,7 @@ koin = "4.1.0-Beta7"
 
 # config
 
-night-config = "3.8.1"
+night-config = "3.8.2"
 
 # shadowJar
 shadow = "8.1.1"
