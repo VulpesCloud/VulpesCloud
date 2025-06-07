@@ -23,6 +23,7 @@ import de.vulpescloud.connector.common.Connector
 import de.vulpescloud.connector.velocity.commands.CloudCommand
 import de.vulpescloud.connector.velocity.commands.HubCommand
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
+import de.vulpescloud.wrapper.Wrapper
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIVelocityConfig
 import jakarta.inject.Inject
@@ -49,12 +50,12 @@ constructor(
 
         CommandAPI.onLoad(CommandAPIVelocityConfig(proxyServer, this))
 
-        val config = VirtualConfigProvider.getConfig("Cloud-Command", "This config holds the command messages for the cloud command")
-
-        makeDefaultConfig()
+        val config = VirtualConfigProvider.getConfig("Cloud-Command", "This config holds the command messages for the cloud command", Wrapper.instance.databaseProvider.getDatabase())
 
         HubCommand(proxyServer)
         CloudCommand(config, proxyServer)
+
+        makeDefaultConfig()
 
         markOnline()
     }
