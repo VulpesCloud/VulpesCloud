@@ -14,7 +14,7 @@ annotations = "26.0.2"
 jedis = "5.2.0"
 hikariCP = "6.3.0"
 mariadb = "3.5.3"
-exposed = "0.61.0"
+exposed = "1.0.0-beta-2"
 jedisWrapper = "1.1.1"
 
 #logging
@@ -30,7 +30,6 @@ jline = "3.30.4"
 cloud = "2.0.0"
 
 # platforms
-kSpigot = "1.21.0"
 paper = "1.21.1-R0.1-SNAPSHOT"
 velocity = "3.4.0-SNAPSHOT"
 

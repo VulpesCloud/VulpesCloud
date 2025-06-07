@@ -4,14 +4,15 @@ import com.electronwill.nightconfig.core.file.FileConfig
 import com.electronwill.nightconfig.json.JsonFormat
 import de.vulpescloud.api.mysql.VirtualConfigTable
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
+import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
 import kotlin.io.path.Path
 import kotlin.properties.Delegates
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
+import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.select
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.update
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 

@@ -1,8 +1,8 @@
 package de.vulpescloud.api.virtualconfig
 
 import de.vulpescloud.api.mysql.VirtualConfigTable
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
 object VirtualConfigProvider {
 

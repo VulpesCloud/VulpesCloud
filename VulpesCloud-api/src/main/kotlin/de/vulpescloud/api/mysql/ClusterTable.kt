@@ -1,6 +1,6 @@
 package de.vulpescloud.api.mysql
 
-import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.v1.core.Table
 
 object ClusterTable : Table("cluster") {
     val id = integer("id").autoIncrement()

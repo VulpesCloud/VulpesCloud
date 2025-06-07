@@ -1,6 +1,6 @@
 package de.vulpescloud.api.mysql
 
-import org.jetbrains.exposed.sql.Table
+import org.jetbrains.exposed.v1.core.Table
 
 object VirtualConfigTable : Table("virtual-configs") {
     val id = integer("id").autoIncrement()
