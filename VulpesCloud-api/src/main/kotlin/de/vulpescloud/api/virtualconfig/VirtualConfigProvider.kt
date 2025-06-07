@@ -1,6 +1,7 @@
 package de.vulpescloud.api.virtualconfig
 
 import de.vulpescloud.api.mysql.VirtualConfigTable
+import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.selectAll
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 
@@ -19,13 +20,13 @@ object VirtualConfigProvider {
         }
     }
 
-    fun getAllConfigNames(): List<String> {
-        return transaction { VirtualConfigTable.selectAll().map { it[VirtualConfigTable.name] } }
+    fun getAllConfigNames(database: Database? = null): List<String> {
+        return transaction(database) { VirtualConfigTable.selectAll().map { it[VirtualConfigTable.name] } }
     }
 
-    fun getAllConfigs(): List<VirtualConfig> {
+    fun getAllConfigs(database: Database? = null): List<VirtualConfig> {
         val configs = mutableListOf<VirtualConfig>()
-        transaction {
+        transaction(database) {
             VirtualConfigTable.selectAll().forEach {
                 val config = getConfig(it[VirtualConfigTable.name])
                 configs.add(config)
