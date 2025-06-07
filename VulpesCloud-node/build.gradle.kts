@@ -49,8 +49,8 @@ dependencies {
     compileOnly(libs.nightConfig.json)
     compileOnly(libs.nightConfig.toml)
     compileOnly(libs.nightConfig.yaml)
-    compileOnly(libs.exposed.core)
-    compileOnly(libs.exposed.jdbc)
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
     implementation("com.github.ben-manes.caffeine:caffeine:3.2.0")
 }
 

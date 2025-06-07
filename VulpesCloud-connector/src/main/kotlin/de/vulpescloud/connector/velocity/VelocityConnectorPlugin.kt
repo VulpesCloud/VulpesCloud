@@ -127,5 +127,7 @@ constructor(
             "commands.cloud.service.list.services",
             "<gray> - <white>%service%</white> State: <yellow>%state%</yellow> Running Node: <yellow>%runningNode%</yellow></gray>",
         )
+
+        config.publish()
     }
 }
