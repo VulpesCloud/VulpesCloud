@@ -9,11 +9,11 @@ object VirtualConfigProvider {
 
     private val configs = mutableMapOf<String, VirtualConfig>()
 
-    fun getConfig(name: String): VirtualConfig {
+    fun getConfig(name: String, description: String = "<none>", database: Database? = null): VirtualConfig {
         return if (configs.containsKey(name)) {
             configs[name]!!
         } else {
-            val config = VirtualConfig(name)
+            val config = VirtualConfig(name, description, database)
             config.init()
             configs[name] = config
             config

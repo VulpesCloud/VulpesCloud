@@ -51,6 +51,9 @@ dependencies {
     compileOnly(libs.jedis)
     compileOnly(libs.jedisWrapper)
 
+    compileOnly(libs.exposed.jdbc)
+    compileOnly(libs.exposed.core)
+
     compileOnly(libs.paper)
     compileOnly(libs.velocity)
     annotationProcessor(libs.velocity)
