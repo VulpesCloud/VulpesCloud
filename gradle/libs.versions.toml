@@ -11,7 +11,7 @@ lombok = "1.18.36"
 annotations = "26.0.2"
 
 # network
-jedis = "5.2.0"
+jedis = "6.0.0"
 hikariCP = "6.3.0"
 mariadb = "3.5.3"
 exposed = "0.61.0"
