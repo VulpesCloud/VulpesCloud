@@ -50,7 +50,7 @@ constructor(
 
         CommandAPI.onLoad(CommandAPIVelocityConfig(proxyServer, this))
 
-        val config = VirtualConfigProvider.getConfig("Cloud-Command", "This config holds the command messages for the cloud command", Wrapper.instance.databaseProvider.getDatabase())
+        config = VirtualConfigProvider.getConfig("Cloud-Command", "This config holds the command messages for the cloud command", Wrapper.instance.databaseProvider.getDatabase())
 
         HubCommand(proxyServer)
         CloudCommand(config, proxyServer)
