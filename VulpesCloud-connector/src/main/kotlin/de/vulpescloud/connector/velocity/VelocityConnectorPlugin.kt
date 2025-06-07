@@ -49,7 +49,7 @@ constructor(
 
         CommandAPI.onLoad(CommandAPIVelocityConfig(proxyServer, this))
 
-        VirtualConfigProvider.getConfig("Cloud-Command", "This config holds the command messages for the cloud command")
+        val config = VirtualConfigProvider.getConfig("Cloud-Command", "This config holds the command messages for the cloud command")
 
         makeDefaultConfig()
 
