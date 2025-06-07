@@ -38,6 +38,11 @@ dependencies {
     compileOnly(libs.jedisWrapper)
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 tasks.jar {
     archiveFileName.set("vulpescloud-api.jar")
     if (System.getenv("dev") == "true") {

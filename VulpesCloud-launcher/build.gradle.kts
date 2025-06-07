@@ -33,6 +33,11 @@ dependencies {
     implementation(libs.json)
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 tasks.jar {
     dependsOn(project(":VulpesCloud-api").tasks.jar)
     dependsOn(project(":VulpesCloud-bridge").tasks.jar)

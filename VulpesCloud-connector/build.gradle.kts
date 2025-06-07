@@ -56,6 +56,11 @@ dependencies {
     annotationProcessor(libs.velocity)
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 sourceSets {
     getByName("main") {
         kotlin {

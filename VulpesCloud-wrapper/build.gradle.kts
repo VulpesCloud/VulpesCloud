@@ -23,6 +23,11 @@ dependencies {
     implementation(libs.nightConfig.json)
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 tasks.jar {
     manifest {
         attributes["Main-Class"] = "de.vulpescloud.wrapper.Wrapper"

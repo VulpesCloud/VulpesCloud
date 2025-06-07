@@ -31,6 +31,11 @@ repositories {
     mavenCentral()
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 dependencies {
     compileOnly(project(":VulpesCloud-api"))
     compileOnly(rootProject.libs.annotations)

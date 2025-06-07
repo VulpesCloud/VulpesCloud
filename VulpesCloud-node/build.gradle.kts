@@ -62,6 +62,11 @@ sourceSets {
     }
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 tasks.shadowJar {
     val buildNumber = System.getenv("BUILD_NUMBER")
     val versionString = if (buildNumber != null) {
