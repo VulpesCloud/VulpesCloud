@@ -34,7 +34,7 @@ paper = "1.21.1-R0.1-SNAPSHOT"
 velocity = "3.4.0-SNAPSHOT"
 
 # dependency injection
-koin = "4.1.0-RC1"
+koin = "4.1.0"
 
 # config
 
