@@ -117,17 +117,19 @@ class VirtualConfig(val name: String, var description: String = "none", val data
         transaction(database) {
             SchemaUtils.create(VirtualConfigTable)
 
-            val row = VirtualConfigTable.select(VirtualConfigTable.name eq name).firstOrNull()
+            val row = VirtualConfigTable.select(VirtualConfigTable.name eq configName).firstOrNull()
 
             if (row != null) {
+                logger.debug("VirtualConfig - $name: Updating MySQL")
                 val updateTime = System.currentTimeMillis()
-                VirtualConfigTable.update({ VirtualConfigTable.name eq name }) {
+                VirtualConfigTable.update({ VirtualConfigTable.name eq configName }) {
                     it[json] = JSONObject(path.toFile().readText()).toString()
                     it[lastModified] = updateTime
                 }
 
                 lastModified = updateTime
             } else {
+                logger.debug("VirtualConfig - $name: Inserting into MySQL")
                 val updateTime = System.currentTimeMillis()
                 VirtualConfigTable.insert {
                     it[name] = configName
