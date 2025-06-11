@@ -5,7 +5,7 @@ import de.vulpescloud.api.cluster.ClusterProvider
 import de.vulpescloud.api.event.EventManager
 import de.vulpescloud.api.event.events.service.ServiceStateChangeEvent
 import de.vulpescloud.api.redis.RedisChannels
-import de.vulpescloud.api.service.Service
+import de.vulpescloud.api.service.ServiceFactory
 import de.vulpescloud.api.service.ServiceProvider
 import de.vulpescloud.api.service.ServiceStates
 import de.vulpescloud.api.task.Task
@@ -15,6 +15,8 @@ import de.vulpescloud.api.version.VersionType
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.event.EventManagerImpl
+import org.json.JSONObject
+import org.slf4j.LoggerFactory
 import java.net.InetSocketAddress
 import java.net.ServerSocket
 import java.nio.file.Files
@@ -22,10 +24,8 @@ import java.nio.file.StandardCopyOption
 import java.util.*
 import java.util.stream.IntStream
 import kotlin.io.path.Path
-import org.json.JSONObject
-import org.slf4j.LoggerFactory
 
-class ServiceFactoryImpl(
+class LocalServiceFactory(
     serviceProvider: ServiceProvider,
     private val clusterProvider: ClusterProvider,
     private val templateStorageProvider: TemplateStorageProvider,
@@ -36,45 +36,44 @@ class ServiceFactoryImpl(
 ) : ServiceFactory {
 
     private val serviceProvider = serviceProvider as ServiceProviderImpl
-    private val logger = LoggerFactory.getLogger(ServiceFactoryImpl::class.java)
+    private val logger = LoggerFactory.getLogger(LocalServiceFactory::class.java)
 
-    override fun prepareService(task: Task): Pair<Service, LocalService> {
-        val localService =
-            LocalService(
-                task,
-                UUID.randomUUID(),
-                generateOrderedId(task),
-                detectServicePort(task),
-                clusterProvider.localNode(),
-                ServiceStates.PREPARED,
-                task.maxPlayers,
-                0,
-                environmentVars = emptyList(),
-                onlinePlayers = emptyList(),
-                serviceProvider = serviceProvider,
-                eventManager = eventManager,
-            )
+    override fun name() = "local"
+
+    override fun prepareService(task: Task): LocalService {
+        val localService = LocalService(
+            task,
+            UUID.randomUUID(),
+            generateOrderedId(task),
+            detectServicePort(task),
+            clusterProvider.localNode(),
+            ServiceStates.PREPARED,
+            task.maxPlayers,
+            0,
+            environmentVars = task.environmentVars,
+            onlinePlayers = emptyList(),
+            serviceProvider = serviceProvider,
+            eventManager = eventManager,
+        )
 
         localService.path().resolve(localService.task.version.pluginDir).toFile().mkdirs()
 
-        task.templates.forEach {
-            templateStorageProvider
-                .getTemplateStorageByName(it.storage)
-                ?.copyTemplateToPath(it, localService.path())
+        task.templates.forEach { template ->
+            templateStorageProvider.getTemplateStorageByName(template.storage).let {
+                    it?.createTemplate(template)
+                    it?.copyTemplateToPath(template, localService.path())
+                }
         }
         versionProvider.prepareVersion(task.version, localService.path())
 
         val arguments = generateServiceArguments(localService)
-
         if (task.version.type == VersionType.SERVER) {
             arguments.add("--nogui")
             arguments.add("--separateClassLoader")
         }
 
         val processBuilder =
-            ProcessBuilder(*arguments.toTypedArray())
-                .directory(localService.path().toFile())
-                .redirectErrorStream(true)
+            ProcessBuilder(*arguments.toTypedArray()).directory(localService.path().toFile()).redirectErrorStream(true)
 
         processBuilder.environment()["bootstrapFile"] = "server.jar"
         processBuilder.environment()["redis_user"] = config.redis().user
@@ -95,62 +94,36 @@ class ServiceFactoryImpl(
 
         Files.copy(
             Path("launcher/dependencies/vulpescloud-connector.jar"),
-            localService
-                .path()
-                .resolve(localService.task.version.pluginDir)
-                .resolve("vulpescloud-connector.jar"),
+            localService.path().resolve(localService.task.version.pluginDir).resolve("vulpescloud-connector.jar"),
             StandardCopyOption.REPLACE_EXISTING,
         )
 
         ServiceConfig.updateConfigs(localService)
 
-        val service =
-            Service(
-                localService.task,
-                localService.uuid,
-                localService.orderedId,
-                localService.port,
-                localService.runningNode,
-                localService.state,
-                localService.maxPlayers,
-                localService.onlinePlayerCount,
-                localService.name,
-                localService.onlinePlayers,
-                localService.environmentVars,
-            )
-
         localService.processBuilder = processBuilder
-
         serviceProvider.localServices.add(localService)
-        getRC()?.setHashField("VULPESCLOUD_SERVICES", service.name, JSONObject(service).toString())
+
+        getRC()?.setHashField("VULPESCLOUD_SERVICES", localService.name, JSONObject(localService).toString())
 
         val emi = eventManager as EventManagerImpl
         emi.callGlobal(
             ServiceStateChangeEvent(
-                service,
+                localService.getServiceInfo(),
                 ServiceStates.PREPARED,
                 ServiceStates.PREPARED,
-            ),
-            RedisChannels.VULPESCLOUD_EVENT_SERVICE_ServiceStateChangeEvent
+            ), RedisChannels.VULPESCLOUD_EVENT_SERVICE_ServiceStateChangeEvent
         )
 
-        return Pair(service, localService)
+        return localService
     }
 
     private fun generateOrderedId(task: Task): Int {
-        return IntStream.iterate(1) { i: Int -> i + 1 }
-            .filter { id: Int -> !isIdPresent(task, id) }
-            .findFirst()
+        return IntStream.iterate(1) { i: Int -> i + 1 }.filter { id: Int -> !isIdPresent(task, id) }.findFirst()
             .orElseThrow()
     }
 
     private fun isIdPresent(task: Task, id: Int): Boolean {
         val services = serviceProvider.services().filter { it.task.name == task.name }
-
-        services.forEach {
-            logger.debug(it.name)
-            logger.debug(it.orderedId.toString())
-        }
 
         return services.stream().anyMatch { it!!.orderedId == id }
     }
@@ -181,8 +154,8 @@ class ServiceFactoryImpl(
         }
     }
 
-    private fun generateServiceArguments(clusterService: LocalService): MutableList<String> {
-        val arguments = LinkedList<String>()
+    private fun generateServiceArguments(localService: LocalService): MutableList<String> {
+        val arguments = mutableListOf<String>()
 
         arguments.add("java")
 
@@ -220,31 +193,28 @@ class ServiceFactoryImpl(
             )
         )
 
-        arguments.add("-Xms" + clusterService.task.maxMemory + "M")
-        arguments.add("-Xmx" + clusterService.task.maxMemory + "M")
+        arguments.add("-Xms" + localService.task.maxMemory + "M")
+        arguments.add("-Xmx" + localService.task.maxMemory + "M")
 
         arguments.add("-cp")
 
-        val path =
-            if (clusterService.task.staticServices) {
-                "../../../../launcher/dependencies/"
-            } else {
-                "../../../../../launcher/dependencies/"
-            }
+        val path = if (localService.task.staticServices) {
+            "../../../../launcher/dependencies/"
+        } else {
+            "../../../../../launcher/dependencies/"
+        }
 
-        val neededDependencies =
-            listOf("vulpescloud-api.jar", "vulpescloud-wrapper.jar", "vulpescloud-bridge.jar")
+        val neededDependencies = listOf("vulpescloud-api.jar", "vulpescloud-wrapper.jar", "vulpescloud-bridge.jar")
 
         arguments.add(
             java.lang.String.join(
-                if (System.getProperty("os.name").lowercase(Locale.getDefault()).contains("win"))
-                    ";"
+                if (System.getProperty("os.name").lowercase(Locale.getDefault()).contains("win")) ";"
                 else ":",
                 neededDependencies.stream().map { it: String -> path + it }.toList(),
             )
         )
 
-        if (clusterService.task.staticServices) {
+        if (localService.task.staticServices) {
             arguments.add("-javaagent:../../../../launcher/dependencies/vulpescloud-wrapper.jar")
         } else {
             arguments.add("-javaagent:../../../../../launcher/dependencies/vulpescloud-wrapper.jar")
@@ -253,4 +223,5 @@ class ServiceFactoryImpl(
 
         return arguments
     }
+
 }

@@ -14,8 +14,8 @@ class ServiceLogEventListener(
 
     @EventListener
     fun handleServiceLogEvent(event: ServiceLogEvent) {
-        if (serviceProvider.loggingServices.contains(event.service.name)) {
-            logger.info("&8[ &m{} &8] &b{}", event.service.name, event.rawMessage)
+        if (serviceProvider.loggingServices.contains(event.serviceInfo.name)) {
+            logger.info("&8[ &m{} &8] &b{}", event.serviceInfo.name, event.rawMessage)
         }
     }
 }

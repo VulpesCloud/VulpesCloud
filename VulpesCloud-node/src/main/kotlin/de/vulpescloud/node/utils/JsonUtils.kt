@@ -7,7 +7,7 @@ import de.vulpescloud.api.cluster.NodeStates
 import de.vulpescloud.api.module.ModuleInfo
 import de.vulpescloud.api.module.ModuleStates
 import de.vulpescloud.api.player.Player
-import de.vulpescloud.api.service.Service
+import de.vulpescloud.api.service.ServiceInfo
 import de.vulpescloud.api.service.ServiceStates
 import de.vulpescloud.api.task.Task
 import de.vulpescloud.api.template.Template
@@ -23,8 +23,8 @@ object JsonUtils : KoinComponent {
 
     private val authenticationProvider: AuthenticationProvider by inject()
 
-    fun getService(json: JSONObject): Service {
-        return Service(
+    fun getService(json: JSONObject): ServiceInfo {
+        return ServiceInfo(
             getTask(json.getJSONObject("task")),
             UUID.fromString(json.getString("uuid")),
             json.getInt("orderedId"),

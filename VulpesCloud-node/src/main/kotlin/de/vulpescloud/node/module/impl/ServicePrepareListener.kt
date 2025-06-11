@@ -16,17 +16,17 @@ class ServicePrepareListener {
     @EventListener
     fun onServiceStateChangeEvent(event: ServiceStateChangeEvent) {
         if (event.newState == ServiceStates.PREPARED) {
-            if (serviceProvider.localServices.find { it.name == event.service.name } != null) {
+            if (serviceProvider.localServices.find { it.name == event.serviceInfo.name } != null) {
                 moduleProvider.modules().forEach {
                     if (
                         it.copyToServices &&
-                            it.platforms.contains(event.service.task.version.name.lowercase())
+                            it.platforms.contains(event.serviceInfo.task.version.name.lowercase())
                     ) {
                         Files.copy(
                             moduleProvider.moduleFolder.resolve("${it.name}.jar"),
-                            event.service
+                            event.serviceInfo
                                 .path()
-                                .resolve(event.service.task.version.pluginDir)
+                                .resolve(event.serviceInfo.task.version.pluginDir)
                                 .resolve("${it.name}.jar"),
                             StandardCopyOption.REPLACE_EXISTING
                         )

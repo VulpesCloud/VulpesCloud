@@ -6,40 +6,38 @@ import de.vulpescloud.api.event.events.service.ServiceLogEvent
 import de.vulpescloud.api.event.events.service.ServiceStateChangeEvent
 import de.vulpescloud.api.player.Player
 import de.vulpescloud.api.redis.RedisChannels
-import de.vulpescloud.api.service.Service
+import de.vulpescloud.api.service.AbstractService
 import de.vulpescloud.api.service.ServiceProvider
 import de.vulpescloud.api.service.ServiceStates
 import de.vulpescloud.api.task.Task
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.event.EventManagerImpl
 import org.json.JSONObject
-import java.io.BufferedWriter
-import java.io.OutputStreamWriter
-import java.nio.file.Files
-import java.nio.file.Path
-import java.util.*
-import kotlin.io.path.exists
 import org.slf4j.LoggerFactory
+import java.io.BufferedWriter
 import java.io.IOException
+import java.io.OutputStreamWriter
+import java.nio.file.Path
+import java.util.UUID
+import kotlin.io.path.exists
 
-data class LocalService(
-    val task: Task,
-    val uuid: UUID,
-    val orderedId: Int,
-    val port: Int,
-    val runningNode: ClusterNode,
-    var state: ServiceStates,
-    val maxPlayers: Int,
-    val onlinePlayerCount: Int,
-    val name: String = "${task.name}-$orderedId",
-    val onlinePlayers: List<Player>,
-    val environmentVars: List<Pair<String, String>>,
+class LocalService(
+    override val task: Task,
+    override val uuid: UUID,
+    override val orderedId: Int,
+    override val port: Int,
+    override val runningNode: ClusterNode,
+    override var state: ServiceStates,
+    override val maxPlayers: Int,
+    override val onlinePlayerCount: Int,
+    override val onlinePlayers: List<Player>,
+    override val environmentVars: List<Pair<String, String>>,
+
     private val serviceProvider: ServiceProvider,
     private val eventManager: EventManager,
-) {
-    private val serviceProviderImpl = serviceProvider as ServiceProviderImpl
-    private val logger = LoggerFactory.getLogger(LocalService::class.java)
+) : AbstractService() {
     private val eventManagerImpl = eventManager as EventManagerImpl
+    private val logger = LoggerFactory.getLogger("LocalService-$name")
 
     fun path(): Path {
         return if (task.staticServices) {
@@ -54,24 +52,16 @@ data class LocalService(
     private var process: Process? = null
     private var processTracking: Thread? = null
 
-    fun start() {
-        val service = Service(
-            task,
-            uuid,
-            orderedId,
-            port,
-            runningNode,
-            ServiceStates.STARTING,
-            maxPlayers,
-            onlinePlayerCount,
-            name,
-            onlinePlayers,
-            environmentVars,
-        )
-        getRC()?.setHashField("VULPESCLOUD_SERVICES", name, JSONObject(service).toString())
+    override fun start() {
+        if (state != ServiceStates.PREPARED) {
+            return
+        }
+
+        state = ServiceStates.STARTING
+        getRC()?.setHashField("VULPESCLOUD_SERVICES", name, JSONObject(getServiceInfo()).toString())
         eventManagerImpl.callGlobal(
             ServiceStateChangeEvent(
-                service,
+                getServiceInfo(),
                 ServiceStates.PREPARED,
                 ServiceStates.STARTING
             ),
@@ -81,27 +71,23 @@ data class LocalService(
         process = processBuilder?.start()
 
         Thread {
-                process?.inputStream?.bufferedReader()?.use { reader ->
-                    reader.forEachLine { line ->
-                        eventManagerImpl.callGlobal(
-                            ServiceLogEvent(
-                                serviceProvider.getServiceByUUID(this.uuid)!!,
-                                line.trim(),
-                            ),
-                            RedisChannels.VULPESCLOUD_EVENT_SERVICE_ServiceLogEvent,
-                        )
-                        logger.debug("&8[ &m{} &8] &b{}", name, line.trim())
-                    }
+            process?.inputStream?.bufferedReader()?.use { reader ->
+                reader.forEachLine { line ->
+                    eventManagerImpl.callGlobal(
+                        ServiceLogEvent(
+                            getServiceInfo(),
+                            line.trim(),
+                        ),
+                        RedisChannels.VULPESCLOUD_EVENT_SERVICE_ServiceLogEvent,
+                    )
                 }
             }
-            .start()
+        }.start()
 
         this.processTracking = Thread {
             try {
                 synchronized(this) { process?.waitFor() }
-            } catch (e: InterruptedException) {
-                logger.debug("Exception: {}", e.printStackTrace())
-            }
+            } catch (_: InterruptedException) {}
             if (state != ServiceStates.STOPPING) {
                 if (process != null) {
                     process!!.exitValue()
@@ -113,7 +99,7 @@ data class LocalService(
         processTracking!!.start()
     }
 
-    fun sendCommand(command: String) {
+    override fun sendCommand(command: String) {
         try {
             if (process == null || command.isEmpty()) {
                 return
@@ -125,15 +111,17 @@ data class LocalService(
         } catch (e: IOException) {
             if (serviceProvider.getServiceByUUID(this.uuid)?.state != ServiceStates.STOPPING) {
                 logger.error("Failed to send command to process: $name", e)
-            } else {
-                logger.debug("Failed to send command to process: $name", e)
             }
         }
     }
 
-    fun forceStop() {
+    override fun forceStop() {
         process?.toHandle()?.destroyForcibly()
         postShutdownProcess()
+    }
+
+    override fun stop() {
+        sendCommand("stop")
     }
 
     private fun postShutdownProcess() {
@@ -148,12 +136,10 @@ data class LocalService(
             synchronized(this) {
                 try {
                     Thread.sleep(200)
-                } catch (ignore: InterruptedException) {}
+                } catch (_: InterruptedException) {}
                 try {
                     if (path().exists()) {
-                        Files.walk(path()).sorted(Comparator.reverseOrder()).forEach {
-                            Files.delete(it)
-                        }
+                        path().toFile().deleteRecursively()
                     }
                 } catch (e: Exception) {
                     logger.error("Failed to delete directory: ${path()}", e)
@@ -162,8 +148,8 @@ data class LocalService(
         }
 
         logger.info("The service &8'&f${name}&8' &7is stopped now&8!")
-        val localServices = serviceProviderImpl.localServices
-        localServices.remove(this)
+        (serviceProvider as ServiceProviderImpl).localServices.remove(this)
         getRC()?.deleteHashField("VULPESCLOUD_SERVICES", name)
     }
+
 }
