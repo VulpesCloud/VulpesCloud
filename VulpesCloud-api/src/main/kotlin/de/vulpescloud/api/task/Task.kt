@@ -1,6 +1,6 @@
 package de.vulpescloud.api.task
 
-import de.vulpescloud.api.service.Service
+import de.vulpescloud.api.service.ServiceInfo
 import de.vulpescloud.api.template.Template
 import de.vulpescloud.api.version.SingleVersion
 
@@ -13,12 +13,14 @@ data class Task(
     val staticServices: Boolean,
     val minOnlineCount: Int,
     val serviceCount: Int,
-    val services: List<Service>,
+    val services: List<ServiceInfo>,
     val maintenance: Boolean,
     val startPort: Int,
     val fallback: Boolean,
     val version: SingleVersion,
     val copyTemplateToStatic: Boolean,
+    val serviceFactoryName: String,
+    val environmentVars: MutableList<Pair<String, String>>
 ) {
     fun update(
         name: String = this.name,
@@ -29,7 +31,7 @@ data class Task(
         staticServices: Boolean = this.staticServices,
         minOnlineCount: Int = this.minOnlineCount,
         serviceCount: Int = this.serviceCount,
-        services: List<Service> = this.services,
+        services: List<ServiceInfo> = this.services,
         maintenance: Boolean = this.maintenance,
         startPort: Int = this.startPort,
         fallback: Boolean = this.fallback,
@@ -51,6 +53,8 @@ data class Task(
             fallback,
             version,
             copyTemplateToStatic,
+            serviceFactoryName,
+            environmentVars
         )
     }
 }

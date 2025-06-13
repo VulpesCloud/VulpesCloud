@@ -4,12 +4,12 @@ import java.util.UUID
 
 interface ServiceProvider {
 
-    fun getServiceByName(name: String): Service?
+    fun getServiceByName(name: String): ServiceInfo?
 
-    fun getServiceByUUID(uuid: UUID): Service?
+    fun getServiceByUUID(uuid: UUID): ServiceInfo?
 
-    fun services(): List<Service>
+    fun services(): List<ServiceInfo>
 
-    fun getServicesByFilter(filter: ServiceFilter): List<Service>
+    fun getServicesByFilter(filter: ServiceFilter): List<ServiceInfo>
 
 }

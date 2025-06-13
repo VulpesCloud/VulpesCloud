@@ -10,7 +10,7 @@ import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.annotations.Description
 import de.vulpescloud.node.config.NodeConfig
-import de.vulpescloud.node.service.ServiceFactory
+import de.vulpescloud.node.service.LocalServiceFactory
 import de.vulpescloud.node.service.ServiceProviderImpl
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.setups.TaskSetup
@@ -37,7 +37,6 @@ class TaskCommand(
     private val terminal: JLineTerminal,
     private val config: NodeConfig,
     private val versionProvider: VersionProvider,
-    private val serviceFactory: ServiceFactory,
     serviceProvider: ServiceProvider,
 ) {
 
@@ -87,10 +86,20 @@ class TaskCommand(
     ) {
         if (startService) {
             source.sendMessage("Preparing and starting service for task &m${task.name}")
-            serviceFactory.prepareService(task).second.start()
+            val factory = serviceProvider.serviceFactories.find { it.name() == task.serviceFactoryName }
+            if (factory == null) {
+                source.sendMessage("Could not start Service: ServiceFactory &m${task.serviceFactoryName}&7 was not found!")
+                return
+            }
+            factory.prepareService(task).start()
         } else {
             source.sendMessage("Preparing service for task &m${task.name}")
-            serviceFactory.prepareService(task).second
+            val factory = serviceProvider.serviceFactories.find { it.name() == task.serviceFactoryName }
+            if (factory == null) {
+                source.sendMessage("Could not prepare Service: ServiceFactory &m${task.serviceFactoryName}&7 was not found!")
+                return
+            }
+            factory.prepareService(task)
         }
     }
 
@@ -146,6 +155,8 @@ class TaskCommand(
                 task.fallback,
                 task.version,
                 task.copyTemplateToStatic,
+                task.serviceFactoryName,
+                task.environmentVars
             )
         taskProvider.updateTask(newTask)
     }
@@ -173,6 +184,8 @@ class TaskCommand(
                 task.fallback,
                 task.version,
                 task.copyTemplateToStatic,
+                task.serviceFactoryName,
+                task.environmentVars
             )
         taskProvider.updateTask(newTask)
     }
@@ -200,6 +213,8 @@ class TaskCommand(
                 task.fallback,
                 task.version,
                 task.copyTemplateToStatic,
+                task.serviceFactoryName,
+                task.environmentVars
             )
         taskProvider.updateTask(newTask)
     }
@@ -227,6 +242,8 @@ class TaskCommand(
                 task.fallback,
                 task.version,
                 task.copyTemplateToStatic,
+                task.serviceFactoryName,
+                task.environmentVars
             )
         taskProvider.updateTask(newTask)
     }
@@ -254,6 +271,8 @@ class TaskCommand(
                 task.fallback,
                 task.version,
                 task.copyTemplateToStatic,
+                task.serviceFactoryName,
+                task.environmentVars
             )
         taskProvider.updateTask(newTask)
     }
@@ -281,6 +300,8 @@ class TaskCommand(
                 task.fallback,
                 task.version,
                 task.copyTemplateToStatic,
+                task.serviceFactoryName,
+                task.environmentVars
             )
         taskProvider.updateTask(newTask)
     }
@@ -308,6 +329,8 @@ class TaskCommand(
                 fallback,
                 task.version,
                 task.copyTemplateToStatic,
+                task.serviceFactoryName,
+                task.environmentVars
             )
         taskProvider.updateTask(newTask)
     }
@@ -337,6 +360,8 @@ class TaskCommand(
                 task.fallback,
                 task.version,
                 copyTemplateToStatic,
+                task.serviceFactoryName,
+                task.environmentVars
             )
         taskProvider.updateTask(newTask)
     }
@@ -356,5 +381,8 @@ class TaskCommand(
         source.sendMessage(" &8- &7Templates: &e${task.templates.joinToString(", ") { it.name }}")
         source.sendMessage(" &8- &7Services: &e${task.services.joinToString(", ") { it.name }}")
         source.sendMessage(" &8- &7Nodes: &e${task.nodes.joinToString(", ")}")
+        source.sendMessage(" &8- &7Copy Template To Static: &e${task.copyTemplateToStatic}")
+        source.sendMessage(" &8- &7Service Factory: &e${task.serviceFactoryName}")
+        source.sendMessage(" &8- &7Environment Variables: &e${task.environmentVars.joinToString(", ") {it.first + "=" + it.second} }")
     }
 }

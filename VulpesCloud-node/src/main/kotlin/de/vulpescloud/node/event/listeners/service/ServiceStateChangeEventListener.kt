@@ -10,7 +10,7 @@ class ServiceStateChangeEventListener {
 
     @EventListener
     fun onServiceStateChangeEvent(event: ServiceStateChangeEvent) {
-        logger.info("Service &m${event.service.name} &7is now &e${event.newState}")
+        logger.info("Service &m${event.serviceInfo.name} &7is now &e${event.newState}")
     }
 
 }

@@ -1,6 +1,7 @@
 package de.vulpescloud.node.service
 
-import de.vulpescloud.api.service.Service
+import de.vulpescloud.api.service.AbstractService
+import de.vulpescloud.api.service.ServiceInfo
 import de.vulpescloud.api.service.ServiceFilter
 import de.vulpescloud.api.service.ServiceProvider
 import de.vulpescloud.api.service.ServiceStates
@@ -13,19 +14,20 @@ import kotlin.jvm.optionals.toList
 
 class ServiceProviderImpl : ServiceProvider {
 
-    val localServices = mutableListOf<LocalService>()
+    val localServices = mutableListOf<AbstractService>()
     val loggingServices = mutableListOf<String>()
+    val serviceFactories = mutableListOf<LocalServiceFactory>()
 
-    override fun getServiceByName(name: String): Service? {
+    override fun getServiceByName(name: String): ServiceInfo? {
         return services().find { it.name == name }
     }
 
-    override fun getServiceByUUID(uuid: UUID): Service? {
+    override fun getServiceByUUID(uuid: UUID): ServiceInfo? {
         return services().find { it.uuid == uuid }
     }
 
-    override fun services(): List<Service> {
-        val services = mutableListOf<Service>()
+    override fun services(): List<ServiceInfo> {
+        val services = mutableListOf<ServiceInfo>()
         getRC()?.getAllHashValues("VULPESCLOUD_SERVICES")?.forEach {
             services.add(getService(JSONObject(it)))
         }
@@ -33,17 +35,17 @@ class ServiceProviderImpl : ServiceProvider {
         return services
     }
 
-    fun toggleServiceLogging(service: Service): Boolean {
-        if (loggingServices.contains(service.name)) {
-            loggingServices.remove(service.name)
+    fun toggleServiceLogging(serviceInfo: ServiceInfo): Boolean {
+        if (loggingServices.contains(serviceInfo.name)) {
+            loggingServices.remove(serviceInfo.name)
             return false
         } else {
-            loggingServices.add(service.name)
+            loggingServices.add(serviceInfo.name)
             return true
         }
     }
 
-    override fun getServicesByFilter(filter: ServiceFilter): List<Service> {
+    override fun getServicesByFilter(filter: ServiceFilter): List<ServiceInfo> {
         return when (filter) {
             ServiceFilter.PREPARED_SERVICES -> {
                 services().filter { it.state == ServiceStates.PREPARED }
@@ -61,7 +63,7 @@ class ServiceProviderImpl : ServiceProvider {
                 services()
                     .filter { it.task.fallback }
                     .stream()
-                    .min(Comparator.comparingInt(Service::onlinePlayerCount))
+                    .min(Comparator.comparingInt(ServiceInfo::onlinePlayerCount))
                     .toList()
             }
             ServiceFilter.ONLINE_SERVICES -> {

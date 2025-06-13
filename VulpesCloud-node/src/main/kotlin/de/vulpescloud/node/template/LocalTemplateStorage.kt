@@ -1,6 +1,5 @@
 package de.vulpescloud.node.template
 
-import de.vulpescloud.api.service.Service
 import de.vulpescloud.api.template.Template
 import de.vulpescloud.api.template.TemplateStorage
 import de.vulpescloud.node.utils.FileUtils
@@ -16,36 +15,18 @@ class LocalTemplateStorage : TemplateStorage {
         templatesPath.toFile().mkdirs()
     }
 
-    override fun copyTemplateToService(template: Template, service: Service) {
-        val templatePath = templatesPath.resolve(template.name)
-        templatePath.toFile().mkdirs()
-        FileUtils.copyDir(templatePath, service.path())
-    }
-
-    override fun copyServiceToTemplate(service: Service, template: Template) {
-        val templatePath = templatesPath.resolve(template.name)
-        templatePath.toFile().mkdirs()
-        FileUtils.copyDir(service.path(), templatePath)
-    }
-
     override fun copyTemplateToPath(template: Template, path: Path) {
         val templatePath = templatesPath.resolve(template.name)
         templatePath.toFile().mkdirs()
         FileUtils.copyDir(templatePath, path)
     }
 
-    override fun copyTemplateToTemplate(template: Template, target: Template) {
-        val fistTemplate = templatesPath.resolve(template.name)
-        val secondTemplate = templatesPath.resolve(target.name)
-
-        secondTemplate.toFile().mkdirs()
-        fistTemplate.toFile().mkdirs()
-
-        FileUtils.copyDir(
-            templatesPath.resolve(template.name),
-            templatesPath.resolve(templatesPath.resolve(template.name)),
-        )
+    override fun copyPathToTemplate(path: Path, template: Template) {
+        val templatePath = templatesPath.resolve(template.name)
+        templatePath.toFile().mkdirs()
+        FileUtils.copyDir(path, templatePath)
     }
+
 
     override fun deleteTemplate(template: Template) {
         FileUtils.deleteDir(templatesPath.resolve(template.name))
@@ -60,11 +41,8 @@ class LocalTemplateStorage : TemplateStorage {
     }
 
     override fun templates(): List<Template> {
-        return templatesPath
-            .toFile()
-            .listFiles()
-            ?.filter { it.isDirectory }
-            ?.map { Template(it.name, "local") } ?: emptyList()
+        return templatesPath.toFile().listFiles()?.filter { it.isDirectory }?.map { Template(it.name, "local") }
+            ?: emptyList()
     }
 
     override fun name(): String {
