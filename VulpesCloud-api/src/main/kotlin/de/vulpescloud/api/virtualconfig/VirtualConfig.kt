@@ -4,18 +4,20 @@ import com.electronwill.nightconfig.core.file.FileConfig
 import com.electronwill.nightconfig.json.JsonFormat
 import de.vulpescloud.api.mysql.VirtualConfigTable
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
+import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.v1.jdbc.Database
 import kotlin.io.path.Path
 import kotlin.properties.Delegates
-import org.jetbrains.exposed.sql.SchemaUtils
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
+import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.select
+import org.jetbrains.exposed.v1.jdbc.selectAll
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.update
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 
-class VirtualConfig(val name: String, var description: String = "none") {
+class VirtualConfig(val name: String, var description: String = "none", val database: Database? = null) {
 
     private val path = Path("temp-configs/$name.json")
     private val config = FileConfig.builder(path, JsonFormat.fancyInstance()).sync().build()
@@ -32,7 +34,7 @@ class VirtualConfig(val name: String, var description: String = "none") {
      */
     fun init(defaultConfig: JSONObject = JSONObject()) {
         path.parent.toFile().mkdirs()
-        transaction {
+        transaction(database) {
             SchemaUtils.create(VirtualConfigTable)
             val row =
                 VirtualConfigTable.selectAll()
@@ -87,7 +89,7 @@ class VirtualConfig(val name: String, var description: String = "none") {
 
     /** Pulls the config from MySQL */
     fun pull() {
-        transaction {
+        transaction(database) {
             SchemaUtils.create(VirtualConfigTable)
             val row =
                 VirtualConfigTable.selectAll()
@@ -112,20 +114,22 @@ class VirtualConfig(val name: String, var description: String = "none") {
     /** Publishes the current config to the MySQL Database */
     fun publish() {
         val configName = name
-        transaction {
+        transaction(database) {
             SchemaUtils.create(VirtualConfigTable)
 
-            val row = VirtualConfigTable.select(VirtualConfigTable.name eq name).firstOrNull()
+            val row = VirtualConfigTable.select(VirtualConfigTable.name eq configName).firstOrNull()
 
             if (row != null) {
+                logger.debug("VirtualConfig - $name: Updating MySQL")
                 val updateTime = System.currentTimeMillis()
-                VirtualConfigTable.update({ VirtualConfigTable.name eq name }) {
+                VirtualConfigTable.update({ VirtualConfigTable.name eq configName }) {
                     it[json] = JSONObject(path.toFile().readText()).toString()
                     it[lastModified] = updateTime
                 }
 
                 lastModified = updateTime
             } else {
+                logger.debug("VirtualConfig - $name: Inserting into MySQL")
                 val updateTime = System.currentTimeMillis()
                 VirtualConfigTable.insert {
                     it[name] = configName

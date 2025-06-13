@@ -27,6 +27,7 @@
             <option value="$PROJECT_DIR$/VulpesCloud-node" />
             <option value="$PROJECT_DIR$/VulpesCloud-wrapper" />
             <option value="$PROJECT_DIR$/build-helper" />
+            <option value="$PROJECT_DIR$/dokka" />
           </set>
         </option>
       </GradleProjectSettings>
