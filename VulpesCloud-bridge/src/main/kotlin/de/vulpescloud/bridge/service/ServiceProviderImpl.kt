@@ -22,12 +22,12 @@ class ServiceProviderImpl : ServiceProvider {
     }
 
     override fun services(): List<ServiceInfo> {
-        val serviceInfos = mutableListOf<ServiceInfo>()
+        val services = mutableListOf<ServiceInfo>()
         getRC()?.getAllHashValues("VULPESCLOUD_SERVICES")?.forEach {
-            serviceInfos.add(getService(JSONObject(it)))
+            services.add(getService(JSONObject(it)))
         }
 
-        return serviceInfos
+        return services
     }
 
     fun getLocalService(): ServiceInfo {

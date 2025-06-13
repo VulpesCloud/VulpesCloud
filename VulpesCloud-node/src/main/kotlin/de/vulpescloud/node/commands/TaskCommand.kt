@@ -149,7 +149,7 @@ class TaskCommand(
                 task.staticServices,
                 task.minOnlineCount,
                 task.serviceCount,
-                task.serviceInfos,
+                task.services,
                 task.maintenance,
                 task.startPort,
                 task.fallback,
@@ -178,7 +178,7 @@ class TaskCommand(
                 task.staticServices,
                 task.minOnlineCount,
                 task.serviceCount,
-                task.serviceInfos,
+                task.services,
                 task.maintenance,
                 task.startPort,
                 task.fallback,
@@ -207,7 +207,7 @@ class TaskCommand(
                 static,
                 task.minOnlineCount,
                 task.serviceCount,
-                task.serviceInfos,
+                task.services,
                 task.maintenance,
                 task.startPort,
                 task.fallback,
@@ -236,7 +236,7 @@ class TaskCommand(
                 task.staticServices,
                 count,
                 task.serviceCount,
-                task.serviceInfos,
+                task.services,
                 task.maintenance,
                 task.startPort,
                 task.fallback,
@@ -265,7 +265,7 @@ class TaskCommand(
                 task.staticServices,
                 task.minOnlineCount,
                 task.serviceCount,
-                task.serviceInfos,
+                task.services,
                 maintenance,
                 task.startPort,
                 task.fallback,
@@ -294,7 +294,7 @@ class TaskCommand(
                 task.staticServices,
                 task.minOnlineCount,
                 task.serviceCount,
-                task.serviceInfos,
+                task.services,
                 task.maintenance,
                 port,
                 task.fallback,
@@ -323,7 +323,7 @@ class TaskCommand(
                 task.staticServices,
                 task.minOnlineCount,
                 task.serviceCount,
-                task.serviceInfos,
+                task.services,
                 task.maintenance,
                 task.startPort,
                 fallback,
@@ -354,7 +354,7 @@ class TaskCommand(
                 task.staticServices,
                 task.minOnlineCount,
                 task.serviceCount,
-                task.serviceInfos,
+                task.services,
                 task.maintenance,
                 task.startPort,
                 task.fallback,
@@ -379,7 +379,7 @@ class TaskCommand(
         source.sendMessage(" &8- &7Fallback: &e${task.fallback}")
         source.sendMessage(" &8- &7Version: &e${task.version}")
         source.sendMessage(" &8- &7Templates: &e${task.templates.joinToString(", ") { it.name }}")
-        source.sendMessage(" &8- &7Services: &e${task.serviceInfos.joinToString(", ") { it.name }}")
+        source.sendMessage(" &8- &7Services: &e${task.services.joinToString(", ") { it.name }}")
         source.sendMessage(" &8- &7Nodes: &e${task.nodes.joinToString(", ")}")
         source.sendMessage(" &8- &7Copy Template To Static: &e${task.copyTemplateToStatic}")
         source.sendMessage(" &8- &7Service Factory: &e${task.serviceFactoryName}")
