@@ -15,7 +15,7 @@ abstract class AbstractService {
     abstract var state: ServiceStates
     abstract val maxPlayers: Int
     abstract val onlinePlayerCount: Int
-    val name: String = "${task.name}-$orderedId"
+    abstract val name: String
     abstract val onlinePlayers: List<Player>
     abstract val environmentVars: List<Pair<String, String>>
 

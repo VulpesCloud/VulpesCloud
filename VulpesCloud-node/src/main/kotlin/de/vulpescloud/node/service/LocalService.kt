@@ -30,6 +30,7 @@ class LocalService(
     override var state: ServiceStates,
     override val maxPlayers: Int,
     override val onlinePlayerCount: Int,
+    override val name: String = "${task.name}-$orderedId",
     override val onlinePlayers: List<Player>,
     override val environmentVars: List<Pair<String, String>>,
 
