@@ -28,7 +28,7 @@ class ServiceStateChangeEventTrigger(
 
         eventManager.callLocal(
             ServiceStateChangeEvent(
-                getService(event.getJSONObject("service")),
+                getService(event.getJSONObject("serviceInfo")),
                 ServiceStates.valueOf(event.getString("oldState")),
                 ServiceStates.valueOf(event.getString("newState"))
             )

@@ -25,7 +25,7 @@ class ServiceLogEventTrigger(private val eventManager: EventManager) :
 
         eventManager.callLocal(
             ServiceLogEvent(
-                getService(event.getJSONObject("service")),
+                getService(event.getJSONObject("serviceInfo")),
                 event.getString("rawMessage"),
             )
         )
