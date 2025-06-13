@@ -37,7 +37,6 @@ class TaskCommand(
     private val terminal: JLineTerminal,
     private val config: NodeConfig,
     private val versionProvider: VersionProvider,
-    private val serviceFactory: LocalServiceFactory,
     serviceProvider: ServiceProvider,
 ) {
 
@@ -87,10 +86,20 @@ class TaskCommand(
     ) {
         if (startService) {
             source.sendMessage("Preparing and starting service for task &m${task.name}")
-            serviceFactory.prepareService(task).start()
+            val factory = serviceProvider.serviceFactories.find { it.name() == task.serviceFactoryName }
+            if (factory == null) {
+                source.sendMessage("Could not start Service: ServiceFactory &m${task.serviceFactoryName}&7 was not found!")
+                return
+            }
+            factory.prepareService(task).start()
         } else {
             source.sendMessage("Preparing service for task &m${task.name}")
-            serviceFactory.prepareService(task)
+            val factory = serviceProvider.serviceFactories.find { it.name() == task.serviceFactoryName }
+            if (factory == null) {
+                source.sendMessage("Could not prepare Service: ServiceFactory &m${task.serviceFactoryName}&7 was not found!")
+                return
+            }
+            factory.prepareService(task)
         }
     }
 

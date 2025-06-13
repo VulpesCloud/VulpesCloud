@@ -162,6 +162,8 @@ class Node : KoinComponent {
 
         moduleProvider.startAllModules()
 
+        (serviceProvider as ServiceProviderImpl).serviceFactories.add(serviceFactory)
+
         commandProvider.register(ExitCommand())
         commandProvider.register(HelpCommand(commandProvider))
         commandProvider.register(ClusterCommand(clusterProvider))
@@ -176,7 +178,6 @@ class Node : KoinComponent {
                 terminal,
                 config,
                 versionProvider,
-                serviceFactory,
                 serviceProvider,
             )
         )
