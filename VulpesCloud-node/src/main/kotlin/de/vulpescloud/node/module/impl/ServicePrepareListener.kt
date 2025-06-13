@@ -4,6 +4,7 @@ import de.vulpescloud.api.event.EventListener
 import de.vulpescloud.api.event.events.service.ServiceStateChangeEvent
 import de.vulpescloud.api.service.ServiceStates
 import de.vulpescloud.node.VulpesNode
+import de.vulpescloud.node.service.LocalService
 import de.vulpescloud.node.service.ServiceProviderImpl
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -16,7 +17,10 @@ class ServicePrepareListener {
     @EventListener
     fun onServiceStateChangeEvent(event: ServiceStateChangeEvent) {
         if (event.newState == ServiceStates.PREPARED) {
-            if (serviceProvider.localServices.find { it.name == event.serviceInfo.name } != null) {
+            val abstractService =
+                serviceProvider.localServices.find { it.name == event.serviceInfo.name }
+            if (abstractService != null) {
+                if (abstractService !is LocalService) return
                 moduleProvider.modules().forEach {
                     if (
                         it.copyToServices &&
@@ -24,11 +28,11 @@ class ServicePrepareListener {
                     ) {
                         Files.copy(
                             moduleProvider.moduleFolder.resolve("${it.name}.jar"),
-                            event.serviceInfo
+                            abstractService
                                 .path()
                                 .resolve(event.serviceInfo.task.version.pluginDir)
                                 .resolve("${it.name}.jar"),
-                            StandardCopyOption.REPLACE_EXISTING
+                            StandardCopyOption.REPLACE_EXISTING,
                         )
                     }
                 }

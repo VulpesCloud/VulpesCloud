@@ -36,8 +36,7 @@ import de.vulpescloud.node.module.impl.ModuleProviderImpl
 import de.vulpescloud.node.module.impl.ServicePrepareListener
 import de.vulpescloud.node.mysql.DatabaseProvider
 import de.vulpescloud.node.player.PlayerProviderImpl
-import de.vulpescloud.node.service.ServiceFactory
-import de.vulpescloud.node.service.ServiceFactoryImpl
+import de.vulpescloud.node.service.LocalServiceFactory
 import de.vulpescloud.node.service.ServiceProviderImpl
 import de.vulpescloud.node.service.ServiceScheduler
 import de.vulpescloud.node.setup.SetupProvider
@@ -50,15 +49,15 @@ import de.vulpescloud.node.terminal.JLineTerminal
 import de.vulpescloud.node.terminal.impl.JLineTerminalImpl
 import de.vulpescloud.node.utils.StringUtils
 import de.vulpescloud.node.version.VersionProviderImpl
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.locks.Condition
-import java.util.concurrent.locks.ReentrantLock
-import kotlin.concurrent.withLock
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.context.startKoin
 import org.koin.dsl.module
 import org.slf4j.LoggerFactory
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.locks.Condition
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.withLock
 
 class Node : KoinComponent {
     private val nodeModule = module {
@@ -74,10 +73,10 @@ class Node : KoinComponent {
         single<ModuleProvider> { ModuleProviderImpl(get(), get()) }
         single<TemplateStorageProvider> { TemplateStorageProviderImpl() }
         single<TaskProvider> { TaskProviderImpl() }
-        single<VersionProvider>  { VersionProviderImpl() }
+        single<VersionProvider> { VersionProviderImpl() }
         single<ServiceProvider> { ServiceProviderImpl() }
-        single<ServiceFactory>  { ServiceFactoryImpl(get(), get(), get(), get(), get(), get(), get()) }
         single<PlayerProvider> { PlayerProviderImpl() }
+        single { LocalServiceFactory(get(), get(), get(), get(), get(), get(), get()) }
     }
 
     private val terminal: JLineTerminal by inject()
@@ -93,7 +92,7 @@ class Node : KoinComponent {
     private val databaseProvider: DatabaseProvider by inject()
     private val taskProvider: TaskProvider by inject()
     private val versionProvider: VersionProvider by inject()
-    private val serviceFactory: ServiceFactory by inject()
+    private val serviceFactory: LocalServiceFactory by inject()
     private val serviceProvider: ServiceProvider by inject()
     private val playerProvider: PlayerProvider by inject()
 
@@ -169,7 +168,18 @@ class Node : KoinComponent {
         commandProvider.register(ClearCommand(terminal))
         commandProvider.register(ModuleCommand(moduleProvider))
         commandProvider.register(TemplateCommand(templateStorageProvider))
-        commandProvider.register(TaskCommand(setupProvider, taskProvider, translator, terminal, config, versionProvider, serviceFactory, serviceProvider))
+        commandProvider.register(
+            TaskCommand(
+                setupProvider,
+                taskProvider,
+                translator,
+                terminal,
+                config,
+                versionProvider,
+                serviceFactory,
+                serviceProvider,
+            )
+        )
         commandProvider.register(ServiceCommand(serviceProvider, clusterProvider))
         commandProvider.register(PlayerCommand(playerProvider))
         commandProvider.register(InfoCommand())
@@ -180,7 +190,7 @@ class Node : KoinComponent {
 
         logger.info(
             translator.trans("NODE.ONLINE"),
-            System.currentTimeMillis() - System.getProperty("startup").toLong()
+            System.currentTimeMillis() - System.getProperty("startup").toLong(),
         )
 
         terminal.allowInput()
@@ -200,6 +210,5 @@ class Node : KoinComponent {
                 secret
             }
         }
-
     }
 }

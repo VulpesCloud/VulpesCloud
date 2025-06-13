@@ -13,7 +13,6 @@ import org.slf4j.LoggerFactory
 object ServiceScheduler: Scheduler(), KoinComponent {
 
     private val taskProvider: TaskProvider by inject()
-    private val serviceFactory: ServiceFactory by inject()
     private val serviceProvider: ServiceProvider by inject()
     private val clusterProvider: ClusterProvider by inject()
     private val logger = LoggerFactory.getLogger(ServiceScheduler::class.java)
@@ -21,15 +20,22 @@ object ServiceScheduler: Scheduler(), KoinComponent {
     override fun run() = launch {
         while (true) {
             taskProvider.tasks().forEach { task ->
-                val currentServices = serviceProvider.services().filter { it.task.name == task.name }.size
-                val wantedServices = task.minOnlineCount
-
                 if (task.maintenance) return@forEach
                 if (!task.nodes.contains(clusterProvider.localNode().name)) return@forEach
 
+                val currentServices = serviceProvider.services().filter { it.task.name == task.name }.size
+                val wantedServices = task.minOnlineCount
+
                 if (wantedServices > currentServices) {
                     logger.info("Starting new service on task ${task.name}!")
-                    serviceFactory.prepareService(task).second.start()
+                    val factory = (serviceProvider as ServiceProviderImpl).serviceFactories.find { it.name() == task.serviceFactoryName }
+
+                    if (factory == null) {
+                        logger.error("Tried to start service on task ${task.name}, but ServiceFactory ${task.serviceFactoryName} was not found!")
+                        return@forEach
+                    }
+
+                    factory.prepareService(task).start()
                 }
             }
             delay(1000)

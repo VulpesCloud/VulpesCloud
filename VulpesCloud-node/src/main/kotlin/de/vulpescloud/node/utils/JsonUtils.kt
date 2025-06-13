@@ -76,6 +76,11 @@ object JsonUtils : KoinComponent {
             json.getBoolean("fallback"),
             getSingleVersion(json.getJSONObject("version")),
             json.getBoolean("copyTemplateToStatic"),
+            json.getString("serviceFactoryName"),
+            json.getJSONArray("environmentVars").map {
+                it as JSONObject
+                it.getString("first") to it.getString("second")
+            } as MutableList<Pair<String, String>>
         )
     }
 

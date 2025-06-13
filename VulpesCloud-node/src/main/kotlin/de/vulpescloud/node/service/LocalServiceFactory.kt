@@ -56,6 +56,8 @@ class LocalServiceFactory(
             eventManager = eventManager,
         )
 
+        getRC()?.setHashField("VULPESCLOUD_SERVICES", localService.name, JSONObject(localService.getServiceInfo()).toString())
+
         localService.path().resolve(localService.task.version.pluginDir).toFile().mkdirs()
 
         task.templates.forEach { template ->
@@ -102,8 +104,6 @@ class LocalServiceFactory(
 
         localService.processBuilder = processBuilder
         serviceProvider.localServices.add(localService)
-
-        getRC()?.setHashField("VULPESCLOUD_SERVICES", localService.name, JSONObject(localService).toString())
 
         val emi = eventManager as EventManagerImpl
         emi.callGlobal(

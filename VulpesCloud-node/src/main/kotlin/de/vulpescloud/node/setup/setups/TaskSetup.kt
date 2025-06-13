@@ -206,6 +206,8 @@ class TaskSetup(
                 fallback,
                 version.versions.minByOrNull { it.version }!!,
                 false,
+                "local",
+                mutableListOf()
             )
 
         val taskJson = JSONObject(task)

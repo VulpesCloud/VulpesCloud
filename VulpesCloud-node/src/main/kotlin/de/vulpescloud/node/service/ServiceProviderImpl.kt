@@ -16,6 +16,7 @@ class ServiceProviderImpl : ServiceProvider {
 
     val localServices = mutableListOf<AbstractService>()
     val loggingServices = mutableListOf<String>()
+    val serviceFactories = mutableListOf<LocalServiceFactory>()
 
     override fun getServiceByName(name: String): ServiceInfo? {
         return services().find { it.name == name }
