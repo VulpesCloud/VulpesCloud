@@ -67,7 +67,7 @@ object JsonUtils : KoinComponent {
             json.getBoolean("staticServices"),
             json.getInt("minOnlineCount"),
             json.getInt("serviceCount"),
-            json.getJSONArray("serviceInfo").map {
+            json.getJSONArray("services").map {
                 val serviceJson = it as JSONObject
                 getService(serviceJson)
             },
