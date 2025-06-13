@@ -30,6 +30,7 @@
             <option value="$PROJECT_DIR$/dokka" />
           </set>
         </option>
+        <option name="resolveExternalAnnotations" value="true" />
       </GradleProjectSettings>
     </option>
   </component>

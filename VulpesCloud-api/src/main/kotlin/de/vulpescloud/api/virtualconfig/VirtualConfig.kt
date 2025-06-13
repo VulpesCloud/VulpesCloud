@@ -114,15 +114,11 @@ class VirtualConfig(val name: String, var description: String = "none", val data
     /** Publishes the current config to the MySQL Database */
     fun publish() {
         val configName = name
-        logger.info("VirtualConfig - $name: Publishing, using Database: $database")
         transaction(database) {
-            logger.info("VirtualConfig - $name: Creating Table")
             SchemaUtils.create(VirtualConfigTable)
 
-            val row = VirtualConfigTable.select(VirtualConfigTable.name eq configName).firstOrNull()
-            logger.info("VirtualConfig - $name: selecting row ->>> $row")
+            val row = VirtualConfigTable.selectAll().where {VirtualConfigTable.name eq configName }.firstOrNull()
             if (row != null) {
-                logger.info("VirtualConfig - $name: Updating MySQL")
                 val updateTime = System.currentTimeMillis()
                 VirtualConfigTable.update({ VirtualConfigTable.name eq configName }) {
                     it[json] = JSONObject(path.toFile().readText()).toString()
@@ -131,7 +127,6 @@ class VirtualConfig(val name: String, var description: String = "none", val data
 
                 lastModified = updateTime
             } else {
-                logger.info("VirtualConfig - $name: Inserting into MySQL")
                 val updateTime = System.currentTimeMillis()
                 VirtualConfigTable.insert {
                     it[name] = configName
@@ -143,7 +138,6 @@ class VirtualConfig(val name: String, var description: String = "none", val data
             }
         }
 
-        logger.info("VirtualConfig - $name: Sending Reload message")
         getRC()?.sendMessage("VCONFIG_RELOAD_$name", "VCONFIG_RELOAD_$name")
     }
 
