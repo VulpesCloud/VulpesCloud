@@ -60,7 +60,7 @@ object JsonUtils {
             json.getBoolean("staticServices"),
             json.getInt("minOnlineCount"),
             json.getInt("serviceCount"),
-            json.getJSONArray("services").map {
+            json.getJSONArray("serviceInfo").map {
                 val serviceJson = it as JSONObject
                 getService(serviceJson)
             },
