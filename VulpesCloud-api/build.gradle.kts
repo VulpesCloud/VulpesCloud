@@ -23,7 +23,7 @@
  */
 
 plugins {
-    kotlin("jvm") version "2.1.20"
+    kotlin("jvm") version "2.1.21"
 }
 
 dependencies {
@@ -36,6 +36,11 @@ dependencies {
     compileOnly(libs.exposed.jdbc)
     compileOnly(libs.kotlinx.serialization)
     compileOnly(libs.jedisWrapper)
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
 }
 
 tasks.jar {

@@ -36,3 +36,5 @@ include("VulpesCloud-launcher")
 include("VulpesCloud-wrapper")
 include("VulpesCloud-connector")
 include("VulpesCloud-bridge")
+
+include("dokka")

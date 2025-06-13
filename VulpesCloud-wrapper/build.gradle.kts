@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.1.20"
+    kotlin("jvm") version "2.1.21"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -12,7 +12,7 @@ dependencies {
     compileOnly(project(":VulpesCloud-bridge"))
     implementation(libs.jedisWrapper)
     implementation(libs.kotlin.stdlib)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
     implementation(libs.jedis)
     implementation(libs.logbackCore)
     implementation(libs.logbackClassic)
@@ -21,6 +21,11 @@ dependencies {
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
     implementation(libs.nightConfig.json)
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
 }
 
 tasks.jar {

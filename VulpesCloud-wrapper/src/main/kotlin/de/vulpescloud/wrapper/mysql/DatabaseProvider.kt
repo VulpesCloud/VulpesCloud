@@ -2,7 +2,7 @@ package de.vulpescloud.wrapper.mysql
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
-import org.jetbrains.exposed.sql.Database
+import org.jetbrains.exposed.v1.jdbc.Database
 import org.slf4j.LoggerFactory
 
 class DatabaseProvider(
@@ -12,7 +12,7 @@ class DatabaseProvider(
     password: String,
     database: String
 ) {
-
+    private var database: Database
     private var dataSource: HikariDataSource
     private val logger = LoggerFactory.getLogger(DatabaseProvider::class.java)
 
@@ -29,10 +29,12 @@ class DatabaseProvider(
 
         dataSource = HikariDataSource(hikariConfig)
 
-        Database.connect(dataSource)
+        this.database = Database.connect(dataSource)
 
         logger.info("Successfully connected to MySQL database.")
     }
+
+    fun getDatabase(): Database = database
 
     fun close() {
         logger.info("Closing MySQL database connection...")

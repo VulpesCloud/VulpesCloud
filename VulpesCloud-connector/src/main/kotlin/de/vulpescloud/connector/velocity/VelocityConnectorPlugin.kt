@@ -16,12 +16,14 @@ import de.vulpescloud.api.player.Player
 import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.api.service.ServiceFilter
 import de.vulpescloud.api.virtualconfig.VirtualConfig
+import de.vulpescloud.api.virtualconfig.VirtualConfigProvider
 import de.vulpescloud.bridge.VulpesBridge.getEventManager
 import de.vulpescloud.bridge.VulpesBridge.getServiceProvider
 import de.vulpescloud.connector.common.Connector
 import de.vulpescloud.connector.velocity.commands.CloudCommand
 import de.vulpescloud.connector.velocity.commands.HubCommand
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
+import de.vulpescloud.wrapper.Wrapper
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIVelocityConfig
 import jakarta.inject.Inject
@@ -48,16 +50,12 @@ constructor(
 
         CommandAPI.onLoad(CommandAPIVelocityConfig(proxyServer, this))
 
-        config =
-            VirtualConfig(
-                "Cloud-Command",
-                "This config holds the command messages for the cloud command",
-            )
-
-        config.init()
+        config = VirtualConfigProvider.getConfig("Cloud-Command", "This config holds the command messages for the cloud command", Wrapper.instance.databaseProvider.getDatabase())
 
         HubCommand(proxyServer)
         CloudCommand(config, proxyServer)
+
+        makeDefaultConfig()
 
         markOnline()
     }
@@ -118,14 +116,10 @@ constructor(
     }
 
     fun makeDefaultConfig() {
-        config.getEntry(
-            "commands.cloud.service.notfound",
-            "<gray>The Service could <red>not</red> be found!</gray>",
-        )
-        config.getEntry("commands.cloud.service.list.header", "<gray>Available Services:</gray>")
-        config.getEntry(
-            "commands.cloud.service.list.services",
-            "<gray> - <white>%service%</white> State: <yellow>%state%</yellow> Running Node: <yellow>%runningNode%</yellow></gray>",
-        )
+        CommandConfigOptions.entries.forEach {
+            config.getEntry(it.path, it.default)
+        }
+
+        config.publish()
     }
 }

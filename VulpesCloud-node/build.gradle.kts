@@ -23,7 +23,7 @@
  */
 
 plugins {
-    kotlin("jvm") version "2.1.20"
+    kotlin("jvm") version "2.1.21"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -49,9 +49,9 @@ dependencies {
     compileOnly(libs.nightConfig.json)
     compileOnly(libs.nightConfig.toml)
     compileOnly(libs.nightConfig.yaml)
-    compileOnly(libs.exposed.core)
-    compileOnly(libs.exposed.jdbc)
-    implementation("com.github.ben-manes.caffeine:caffeine:3.2.0")
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.1")
 }
 
 sourceSets {
@@ -60,6 +60,11 @@ sourceSets {
             srcDir("src/main/kotlin")
         }
     }
+}
+
+java {
+    withSourcesJar()
+    withJavadocJar()
 }
 
 tasks.shadowJar {

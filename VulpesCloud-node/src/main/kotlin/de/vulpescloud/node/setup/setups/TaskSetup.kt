@@ -18,10 +18,11 @@ import de.vulpescloud.node.setup.answers.BooleanSetupAnswer
 import de.vulpescloud.node.setup.answers.MemorySetupAnswer
 import de.vulpescloud.node.setup.answers.VersionSetupAnswer
 import de.vulpescloud.node.terminal.JLineTerminal
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.transactions.transaction
-import org.jetbrains.exposed.sql.update
+import org.jetbrains.exposed.v1.core.SqlExpressionBuilder.eq
+import org.jetbrains.exposed.v1.jdbc.insert
+import org.jetbrains.exposed.v1.jdbc.select
+import org.jetbrains.exposed.v1.jdbc.transactions.transaction
+import org.jetbrains.exposed.v1.jdbc.update
 import org.json.JSONObject
 import kotlin.properties.Delegates
 
