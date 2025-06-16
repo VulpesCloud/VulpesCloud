@@ -39,11 +39,20 @@ class VelocityServerRegistrationHandler(private val proxyServer: ProxyServer) {
 
     @EventListener
     fun onServiceStateChangeEvent(event: ServiceStateChangeEvent) {
-        if (event.newState == ServiceStates.ONLINE) {
-            registerServer(event.serviceInfo.name, event.serviceInfo.runningNode.hostname, event.serviceInfo.port)
-        } else if (event.newState == ServiceStates.STOPPING) {
+        if (
+            event.newState == ServiceStates.ONLINE &&
+                event.serviceInfo.task.version.type != VersionType.PROXY
+        ) {
+            registerServer(
+                event.serviceInfo.name,
+                event.serviceInfo.runningNode.hostname,
+                event.serviceInfo.port,
+            )
+        } else if (
+            event.newState == ServiceStates.STOPPING &&
+                event.serviceInfo.task.version.type != VersionType.PROXY
+        ) {
             unregisterServer(event.serviceInfo.name)
         }
     }
-
 }
