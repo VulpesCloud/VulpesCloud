@@ -18,7 +18,6 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.InputStreamReader
 import java.net.URI
-import java.net.URLClassLoader
 import java.nio.file.Files
 import java.nio.file.Path
 import java.util.jar.JarFile
@@ -29,7 +28,7 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
 
     private val modules = mutableMapOf<String, LoadedModule>()
     private val loadedFiles = mutableMapOf<String, File>()
-    private val classLoaders = mutableMapOf<String, URLClassLoader>()
+    private val classLoaders = mutableMapOf<String, ModuleClassLoader>()
     private val moduleJsonURL =
         URI(
                 "https://raw.githubusercontent.com/VulpesCloud/VulpesCloud-meta/refs/heads/main/modules.json"
@@ -78,7 +77,11 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
             }
 
             val classLoader =
-                URLClassLoader(arrayOf(file.toURI().toURL()), VulpesLauncher.CLASS_LOADER)
+                ModuleClassLoader(
+                    arrayOf(file.toURI().toURL()),
+                    VulpesLauncher.CLASS_LOADER,
+                    classLoaders,
+                )
             val clazz = classLoader.loadClass(moduleInfo.main)
             if (!VulpesModule::class.java.isAssignableFrom(clazz)) {
                 logger.warn("Class ${moduleInfo.main} does not implement VulpesModule")
