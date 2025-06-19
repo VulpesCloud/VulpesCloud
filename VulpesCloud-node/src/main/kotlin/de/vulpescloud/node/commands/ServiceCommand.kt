@@ -37,6 +37,7 @@ class ServiceCommand(
     @Parser(suggestions = "services")
     fun serviceParser(input: CommandInput): List<ServiceInfo> {
         val regexPattern = input.readString()
+        regexPattern.replace("*", ".*")
         val regex = Regex(regexPattern)
         return serviceProvider.services().filter { regex.matches(it.name) }
     }
