@@ -28,14 +28,14 @@ class HeartBeatScheduler(private val clusterProvider: ClusterProvider) : Schedul
             localBeat++
             getRC()
                 ?.setHashField(
-                    "VULPESCLOUD_NODE_HEARTBEAT",
+                    "VULPESCLOUD:NODE:HEARTBEAT",
                     clusterProvider.localNode().name,
                     localBeat.toString(),
                 )
 
             val localBeatFromRedis =
                 getRC()
-                    ?.getHashField("VULPESCLOUD_NODE_HEARTBEAT", clusterProvider.localNode().name)
+                    ?.getHashField("VULPESCLOUD:NODE:HEARTBEAT", clusterProvider.localNode().name)
                     ?.toLong() ?: 0L
             if (localBeatFromRedis == localBeat) {
                 localConnectionLostCount = 0
@@ -66,7 +66,7 @@ class HeartBeatScheduler(private val clusterProvider: ClusterProvider) : Schedul
     }
 
     private fun checkHeartbeatsAsHeadNode() {
-        val currentBeats = getRC()?.getHashValuesAsPair("VULPESCLOUD_NODE_HEARTBEAT")
+        val currentBeats = getRC()?.getHashValuesAsPair("VULPESCLOUD:NODE:HEARTBEAT")
         currentBeats?.forEach { (name, beat) ->
             if (name == clusterProvider.localNode().name) return@forEach
 
@@ -83,7 +83,7 @@ class HeartBeatScheduler(private val clusterProvider: ClusterProvider) : Schedul
                     )
                     val node = clusterProvider.nodeByName(name)!!
                     node.state = NodeStates.LOST
-                    getRC()?.setHashField("VULPESCLOUD_NODES", name, JSONObject(node).toString())
+                    getRC()?.setHashField("VULPESCLOUD:NODES", name, JSONObject(node).toString())
                 } else if (heartBeatFailureMap[name]!! < heartbeatIntervalsUntilNodeLost) {
                     logger.warn(
                         "Node $name didn't send heartbeat for ${heartBeatFailureMap[name]} beats!"
@@ -99,10 +99,10 @@ class HeartBeatScheduler(private val clusterProvider: ClusterProvider) : Schedul
     private fun checkHeartbeatsAsNormalNode() {
         val headNodeName = clusterProvider.getHeadNode()?.name ?: return
         val currentHeadNodeBeat =
-            getRC()?.getHashField("VULPESCLOUD_NODE_HEARTBEAT", headNodeName)?.toLongOrNull() ?: 0L
+            getRC()?.getHashField("VULPESCLOUD:NODE:HEARTBEAT", headNodeName)?.toLongOrNull() ?: 0L
         val oldHeadBeat = oldHeartbeatMap[headNodeName] ?: 0L
         val currentBeats =
-            getRC()?.getHashValuesAsPair("VULPESCLOUD_NODE_HEARTBEAT")?.toMutableMap()
+            getRC()?.getHashValuesAsPair("VULPESCLOUD:NODE:HEARTBEAT")?.toMutableMap()
 
         if (oldHeadBeat < currentHeadNodeBeat) {
             logger.debug("Head node $headNodeName is still alive!")

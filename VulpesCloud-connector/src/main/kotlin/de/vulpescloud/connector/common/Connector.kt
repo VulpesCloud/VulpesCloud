@@ -15,7 +15,7 @@ interface Connector {
         oldService.state = ServiceStates.ONLINE
         getRC()
             ?.setHashField(
-                "VULPESCLOUD_SERVICES",
+                "VULPESCLOUD:SERVICES",
                 oldService.name,
                 JSONObject(oldService).toString(),
             )
@@ -34,7 +34,7 @@ interface Connector {
         oldService.state = ServiceStates.STOPPING
         getRC()
             ?.setHashField(
-                "VULPESCLOUD_SERVICES",
+                "VULPESCLOUD:SERVICES",
                 oldService.name,
                 JSONObject(oldService).toString(),
             )

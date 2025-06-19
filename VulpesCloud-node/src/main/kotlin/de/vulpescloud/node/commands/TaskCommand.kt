@@ -134,7 +134,7 @@ class TaskCommand(
             source.sendMessage("Deleting task &m${task.name}")
             stopAllServicesOnTask(source, listOf(task), true)
             transaction { TaskTable.deleteWhere { name eq task.name } }
-            getRC()?.deleteHashField("VULPESCLOUD_TASKS", task.name)
+            getRC()?.deleteHashField("VULPESCLOUD:TASKS", task.name)
         }
     }
 

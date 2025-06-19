@@ -224,7 +224,7 @@ class TaskSetup(
                 }
             }
         }
-        getRC()?.setHashField("VULPESCLOUD_TASKS", task.name, taskJson.toString())
+        getRC()?.setHashField("VULPESCLOUD:TASKS", task.name, taskJson.toString())
     }
 
     @SetupCancel fun cancel() {}

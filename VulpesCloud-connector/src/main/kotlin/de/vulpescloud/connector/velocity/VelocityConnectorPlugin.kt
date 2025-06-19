@@ -90,7 +90,7 @@ constructor(
             ?.setHashField("VULPESCLOUD_PLAYERS_ONLINE", player.name, JSONObject(player).toString())
         getRC()
             ?.setHashField(
-                "VULPESCLOUD_PLAYERS_REGISTERED",
+                "VULPESCLOUD:PLAYERS:REGISTERED",
                 player.name,
                 JSONObject(player).toString(),
             )

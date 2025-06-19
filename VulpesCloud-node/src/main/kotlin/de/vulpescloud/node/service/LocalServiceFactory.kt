@@ -56,7 +56,7 @@ class LocalServiceFactory(
             eventManager = eventManager,
         )
 
-        getRC()?.setHashField("VULPESCLOUD_SERVICES", localService.name, JSONObject(localService.getServiceInfo()).toString())
+        getRC()?.setHashField("VULPESCLOUD:SERVICES", localService.name, JSONObject(localService.getServiceInfo()).toString())
 
         localService.path().resolve(localService.task.version.pluginDir).toFile().mkdirs()
 

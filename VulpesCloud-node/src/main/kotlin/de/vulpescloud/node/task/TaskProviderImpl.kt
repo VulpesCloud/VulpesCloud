@@ -24,7 +24,7 @@ class TaskProviderImpl : TaskProvider {
     override fun tasks(): List<Task> {
         try {
             val tasks = mutableListOf<Task>()
-            getRC()?.getAllHashValues("VULPESCLOUD_TASKS")?.forEach {
+            getRC()?.getAllHashValues("VULPESCLOUD:TASKS")?.forEach {
                 tasks.add(getTask(JSONObject(it)))
             }
             return tasks
@@ -54,6 +54,6 @@ class TaskProviderImpl : TaskProvider {
         }
 
         logger.debug("Syncing to Redis")
-        getRC()?.setHashField("VULPESCLOUD_TASKS", task.name, taskJson.toString())
+        getRC()?.setHashField("VULPESCLOUD:TASKS", task.name, taskJson.toString())
     }
 }

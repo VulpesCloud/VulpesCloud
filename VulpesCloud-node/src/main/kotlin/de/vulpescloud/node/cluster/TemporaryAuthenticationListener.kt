@@ -37,7 +37,7 @@ class TemporaryAuthenticationListener(private val config: NodeConfig, eventManag
                     false,
                     config.hostname(),
                 )
-            getRC()?.setHashField("VULPESCLOUD_NODES", config.name(), JSONObject(node).toString())
+            getRC()?.setHashField("VULPESCLOUD:NODES", config.name(), JSONObject(node).toString())
             eventManager.callGlobal(
                 NodeStateChangeEvent(node, NodeStates.OFFLINE, NodeStates.BOOTING),
                 RedisChannels.VULPESCLOUD_EVENT_CLUSTER_NodeStateChangeEvent,

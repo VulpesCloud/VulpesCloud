@@ -27,7 +27,7 @@ class ClusterProviderImpl(
 
     override fun nodes(): List<ClusterNode> {
         val nodes = mutableListOf<ClusterNode>()
-        getRC()?.getAllHashValues("VULPESCLOUD_NODES")?.forEach {
+        getRC()?.getAllHashValues("VULPESCLOUD:NODES")?.forEach {
             nodes.add(getClusterNode(JSONObject(it)))
         }
 
@@ -77,22 +77,22 @@ class ClusterProviderImpl(
 
         heartbeatScheduler.run()
 
-        getRC()?.setHashField("VULPESCLOUD_NODES", config.name(), JSONObject(node).toString())
+        getRC()?.setHashField("VULPESCLOUD:NODES", config.name(), JSONObject(node).toString())
     }
 
     fun initialize() {
-        // Hash 'VULPESCLOUD_NODES' == empty -> make this node HeadNode
+        // Hash 'VULPESCLOUD:NODES' == empty -> make this node HeadNode
         // else
-        // Hash 'VULPESCLOUD_NODES' != empty && Field 'localNode.name' == empty -> request
+        // Hash 'VULPESCLOUD:NODES' != empty && Field 'localNode.name' == empty -> request
         // authentication from HeadNode
-        // Hash 'VULPESCLOUD_NODES' != empty && Field 'localNode.name' != empty -> Refuse startup
+        // Hash 'VULPESCLOUD:NODES' != empty && Field 'localNode.name' != empty -> Refuse startup
 
         if (getHeadNode() == null) {
             logger.info("Redis Hash empty, marking this node as HeadNode!")
 
             getRC()
                 ?.setHashField(
-                    "VULPESCLOUD_NODES",
+                    "VULPESCLOUD:NODES",
                     config.name(),
                     JSONObject(
                             ClusterNode(
@@ -135,7 +135,7 @@ class ClusterProviderImpl(
         // and promote it to Head
         getRC()
             ?.setHashField(
-                "VULPESCLOUD_NODES",
+                "VULPESCLOUD:NODES",
                 config.name(),
                 JSONObject(
                         ClusterNode(
@@ -159,7 +159,7 @@ class ClusterProviderImpl(
     fun switchToHeadNode() {
         getRC()
             ?.setHashField(
-                "VULPESCLOUD_NODES",
+                "VULPESCLOUD:NODES",
                 config.name(),
                 JSONObject(
                         ClusterNode(

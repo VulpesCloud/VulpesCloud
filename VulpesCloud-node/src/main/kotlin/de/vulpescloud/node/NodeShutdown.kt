@@ -63,7 +63,7 @@ object NodeShutdown : KoinComponent {
             }
 
             logger.debug("Deleting Heartbeat")
-            getRC()?.deleteHashField("VULPESCLOUD_NODE_HEARTBEAT", clusterProvider.localNode().name)
+            getRC()?.deleteHashField("VULPESCLOUD:NODE:HEARTBEAT", clusterProvider.localNode().name)
 
             logger.debug("Unloading Modules")
             moduleProvider.unloadAllModules()

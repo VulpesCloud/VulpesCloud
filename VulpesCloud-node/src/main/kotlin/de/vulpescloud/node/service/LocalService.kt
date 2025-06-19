@@ -59,7 +59,7 @@ class LocalService(
         }
 
         state = ServiceStates.STARTING
-        getRC()?.setHashField("VULPESCLOUD_SERVICES", name, JSONObject(getServiceInfo()).toString())
+        getRC()?.setHashField("VULPESCLOUD:SERVICES", name, JSONObject(getServiceInfo()).toString())
         eventManagerImpl.callGlobal(
             ServiceStateChangeEvent(
                 getServiceInfo(),
@@ -150,7 +150,7 @@ class LocalService(
 
         logger.info("The service &8'&f${name}&8' &7is stopped now&8!")
         (serviceProvider as ServiceProviderImpl).localServices.remove(this)
-        getRC()?.deleteHashField("VULPESCLOUD_SERVICES", name)
+        getRC()?.deleteHashField("VULPESCLOUD:SERVICES", name)
     }
 
 }

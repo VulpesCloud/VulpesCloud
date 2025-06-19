@@ -207,11 +207,11 @@ class Node : KoinComponent {
 
     companion object {
         fun getForwardingSecret(): String {
-            return if (getRC()?.getString("VULPESCLOUD_FORWARDING_SECRET") != null) {
-                getRC()?.getString("VULPESCLOUD_FORWARDING_SECRET")!!
+            return if (getRC()?.getString("VULPESCLOUD:FORWARDING:SECRET") != null) {
+                getRC()?.getString("VULPESCLOUD:FORWARDING:SECRET")!!
             } else {
                 val secret = StringUtils.generateRandomString(8)
-                getRC()?.setString("VULPESCLOUD_FORWARDING_SECRET", secret)
+                getRC()?.setString("VULPESCLOUD:FORWARDING:SECRET", secret)
                 secret
             }
         }
