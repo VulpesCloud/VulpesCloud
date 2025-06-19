@@ -9,6 +9,7 @@ import de.vulpescloud.api.service.ServiceStates
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.annotations.Description
+import de.vulpescloud.node.service.ServiceLogBuffer
 import de.vulpescloud.node.service.ServiceProviderImpl
 import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotations.Argument
@@ -147,6 +148,9 @@ class ServiceCommand(
     fun toggleScreen(source: CommandSource, @Argument("services") services: List<ServiceInfo>) {
         services.forEach { serviceInfo ->
             if (serviceProvider.toggleServiceLogging(serviceInfo)) {
+                ServiceLogBuffer.getLogs(serviceInfo.name).forEach { line ->
+                    source.sendMessage("&8[ &m${serviceInfo.name} &8] &b$line")
+                }
                 source.sendMessage("Enabled screen logging for ${serviceInfo.name}")
             } else {
                 source.sendMessage("Disabled screen logging for ${serviceInfo.name}")

@@ -25,6 +25,7 @@ import de.vulpescloud.node.event.listeners.module.ModuleStartEventListener
 import de.vulpescloud.node.event.listeners.module.ModuleUnloadEventListener
 import de.vulpescloud.node.event.listeners.service.ServiceLogEventListener
 import de.vulpescloud.node.event.listeners.service.ServiceStateChangeEventListener
+import de.vulpescloud.node.event.redis.cluster.NodeLogEventTrigger
 import de.vulpescloud.node.event.redis.cluster.NodeStateChangeEventTrigger
 import de.vulpescloud.node.event.redis.module.ModuleLoadEventTrigger
 import de.vulpescloud.node.event.redis.module.ModuleStartEventTrigger
@@ -37,6 +38,7 @@ import de.vulpescloud.node.module.impl.ServicePrepareListener
 import de.vulpescloud.node.mysql.DatabaseProvider
 import de.vulpescloud.node.player.PlayerProviderImpl
 import de.vulpescloud.node.service.LocalServiceFactory
+import de.vulpescloud.node.service.ServiceLogBuffer
 import de.vulpescloud.node.service.ServiceProviderImpl
 import de.vulpescloud.node.service.ServiceScheduler
 import de.vulpescloud.node.setup.SetupProvider
@@ -142,6 +144,7 @@ class Node : KoinComponent {
         ModuleStartEventTrigger(eventManager)
         ServiceLogEventTrigger(eventManager)
         ServiceStateChangeEventTrigger(eventManager)
+        NodeLogEventTrigger(eventManager)
 
         eventManager.registerListener(NodeStateChangeEventListener(translator))
         eventManager.registerListener(ModuleLoadEventListener(translator, clusterProvider))
@@ -199,6 +202,7 @@ class Node : KoinComponent {
         clusterProviderImpl.markOnline()
 
         ServiceScheduler.run()
+        ServiceLogBuffer
     }
 
     companion object {
