@@ -16,7 +16,7 @@ class ModuleStartEventListener(
     @EventListener
     fun handleModuleStartEventListener(event: ModuleStartEvent) {
         if (event.node == clusterProvider.localNode()) {
-            logger.info(translator.trans("EVENTS.ModuleStart.MESSAGE"), event.module.name)
+            logger.info(translator.trans("EVENTS.ModuleStartEvent.MESSAGE"), event.module.name)
         }
     }
 }

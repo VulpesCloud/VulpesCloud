@@ -13,8 +13,6 @@ import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.launcher.VulpesLauncher
 import de.vulpescloud.node.event.EventManagerImpl
 import de.vulpescloud.node.module.ModuleProvider
-import org.json.JSONObject
-import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.InputStreamReader
 import java.net.URI
@@ -22,6 +20,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.util.jar.JarFile
 import kotlin.io.path.Path
+import org.json.JSONObject
+import org.slf4j.LoggerFactory
 
 class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider: ClusterProvider) :
     ModuleProvider {
@@ -163,15 +163,18 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
     override fun unloadModule(loadedModule: LoadedModule) {
         try {
             logger.debug("Trying to unload Module ${loadedModule.moduleInfo.name}")
-            if (loadedModule.moduleInfo.state == ModuleStates.STARTED) {
-                loadedModule.module.onDisable()
+
+            synchronized(this) {
+                if (loadedModule.moduleInfo.state == ModuleStates.STARTED) {
+                    loadedModule.module.onDisable()
+                }
+
+                modules.remove(loadedModule.moduleInfo.name)
+                classLoaders.remove(loadedModule.moduleInfo.name)
+                loadedFiles.remove(loadedModule.moduleInfo.name)
+
+                loadedModule.classLoader.close()
             }
-
-            modules.remove(loadedModule.moduleInfo.name)
-            classLoaders.remove(loadedModule.moduleInfo.name)
-            loadedFiles.remove(loadedModule.moduleInfo.name)
-
-            loadedModule.classLoader.close()
 
             eventManager.callGlobal(
                 ModuleUnloadEvent(loadedModule.moduleInfo, clusterProvider.localNode()),
@@ -190,7 +193,9 @@ class ModuleProviderImpl(eventManager: EventManager, private val clusterProvider
     }
 
     override fun unloadAllModules() {
-        modules.forEach { unloadModule(it.value) }
+        // Erstelle eine neue Liste, um ConcurrentModificationException zu vermeiden
+        val modulesToUnload = modules.values.toList()
+        modulesToUnload.forEach { unloadModule(it) }
     }
 
     override fun reloadModule(loadedModule: LoadedModule) {

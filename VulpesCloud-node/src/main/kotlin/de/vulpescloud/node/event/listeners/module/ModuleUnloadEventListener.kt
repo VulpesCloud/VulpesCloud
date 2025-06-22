@@ -16,7 +16,7 @@ class ModuleUnloadEventListener(
     @EventListener
     fun handleModuleUnloadEventListener(event: ModuleUnloadEvent) {
         if (event.node == clusterProvider.localNode()) {
-            logger.info(translator.trans("EVENTS.ModuleLoadEvent.MESSAGE"), event.module.name)
+            logger.info(translator.trans("EVENTS.ModuleUnloadEvent.MESSAGE"), event.module.name)
         }
     }
 }
