@@ -1,5 +1,6 @@
 package de.vulpescloud.node.service
 
+import de.vulpescloud.api.service.ServiceFactory
 import de.vulpescloud.api.service.AbstractService
 import de.vulpescloud.api.service.ServiceInfo
 import de.vulpescloud.api.service.ServiceFilter
@@ -16,7 +17,7 @@ class ServiceProviderImpl : ServiceProvider {
 
     val localServices = mutableListOf<AbstractService>()
     val loggingServices = mutableListOf<String>()
-    val serviceFactories = mutableListOf<LocalServiceFactory>()
+    val serviceFactories = mutableListOf<ServiceFactory>()
 
     override fun getServiceByName(name: String): ServiceInfo? {
         return services().find { it.name == name }
