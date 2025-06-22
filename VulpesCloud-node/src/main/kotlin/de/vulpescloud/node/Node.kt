@@ -151,7 +151,9 @@ class Node : KoinComponent {
         eventManager.registerListener(ModuleStartEventListener(translator, clusterProvider))
         eventManager.registerListener(ModuleUnloadEventListener(translator, clusterProvider))
         eventManager.registerListener(ServiceLogEventListener(serviceProvider))
-        eventManager.registerListener(ServiceStateChangeEventListener())
+        eventManager.registerListener(
+            ServiceStateChangeEventListener(serviceProvider, taskProvider, clusterProvider)
+        )
 
         val versionProviderImplementation = versionProvider as VersionProviderImpl
 

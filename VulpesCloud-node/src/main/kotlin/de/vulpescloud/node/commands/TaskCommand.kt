@@ -50,7 +50,7 @@ class TaskCommand(
     fun taskParser(input: CommandInput): List<Task> {
         val regexPattern = input.readString()
         regexPattern.replace("*", ".*")
-        val regex = Regex(regexPattern)
+        val regex = Regex(regexPattern) 
         return taskProvider.tasks().filter { regex.matches(it.name) }
     }
 

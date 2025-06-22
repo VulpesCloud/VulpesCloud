@@ -35,7 +35,7 @@ class PlayerProviderImpl : PlayerProvider {
 
     override fun getAllOnlinePlayers(): List<Player> {
         val players = mutableListOf<Player>()
-        getRC()?.getAllHashValues("VULPESCLOUD_PLAYERS_ONLINE")?.forEach {
+        getRC()?.getAllHashValues("VULPESCLOUD:PLAYERS:ONLINE")?.forEach {
             players.add(getPlayer(JSONObject(it)))
         }
 

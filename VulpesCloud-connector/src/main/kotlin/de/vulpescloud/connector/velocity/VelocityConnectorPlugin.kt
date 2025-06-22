@@ -50,7 +50,12 @@ constructor(
 
         CommandAPI.onLoad(CommandAPIVelocityConfig(proxyServer, this))
 
-        config = VirtualConfigProvider.getConfig("Cloud-Command", "This config holds the command messages for the cloud command", Wrapper.instance.databaseProvider.getDatabase())
+        config =
+            VirtualConfigProvider.getConfig(
+                "Cloud-Command",
+                "This config holds the command messages for the cloud command",
+                Wrapper.instance.databaseProvider.getDatabase(),
+            )
 
         HubCommand(proxyServer)
         CloudCommand(config, proxyServer)
@@ -87,7 +92,7 @@ constructor(
             )
 
         getRC()
-            ?.setHashField("VULPESCLOUD_PLAYERS_ONLINE", player.name, JSONObject(player).toString())
+            ?.setHashField("VULPESCLOUD:PLAYERS:ONLINE", player.name, JSONObject(player).toString())
         getRC()
             ?.setHashField(
                 "VULPESCLOUD:PLAYERS:REGISTERED",
@@ -100,25 +105,39 @@ constructor(
                 PlayerJoinEvent(player),
                 RedisChannels.VULPESCLOUD_EVENT_PLAYER_PlayerJoinEvent,
             )
+
+        val proxyName = getServiceProvider().getLocalService().name
+        updateLocalJson(
+            proxyServer.playerCount,
+            proxyServer.allPlayers.map {
+                Player(it.username, it.uniqueId, proxyName, it.currentServer.get().serverInfo.name)
+            },
+        )
     }
 
     @Subscribe
     fun onDisconnectEvent(event: DisconnectEvent) {
         val player = Player(event.player.username, event.player.uniqueId, "N/A", "N/A")
 
-        getRC()?.deleteHashField("VULPESCLOUD_PLAYERS_ONLINE", player.name)
+        getRC()?.deleteHashField("VULPESCLOUD:PLAYERS:ONLINE", player.name)
 
         getEventManager()
             .callGlobal(
                 PlayerLeaveEvent(player),
                 RedisChannels.VULPESCLOUD_EVENT_PLAYER_PlayerLeaveEvent,
             )
+
+        val proxyName = getServiceProvider().getLocalService().name
+        updateLocalJson(
+            proxyServer.playerCount,
+            proxyServer.allPlayers.map {
+                Player(it.username, it.uniqueId, proxyName, it.currentServer.get().serverInfo.name)
+            },
+        )
     }
 
     fun makeDefaultConfig() {
-        CommandConfigOptions.entries.forEach {
-            config.getEntry(it.path, it.default)
-        }
+        CommandConfigOptions.entries.forEach { config.getEntry(it.path, it.default) }
 
         config.publish()
     }
