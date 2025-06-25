@@ -10,6 +10,7 @@ import org.jetbrains.exposed.v1.jdbc.insert
 import org.jetbrains.exposed.v1.jdbc.select
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.jetbrains.exposed.v1.jdbc.update
+import org.json.JSONException
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 
@@ -25,7 +26,11 @@ class TaskProviderImpl : TaskProvider {
         try {
             val tasks = mutableListOf<Task>()
             getRC()?.getAllHashValues("VULPESCLOUD:TASKS")?.forEach {
-                tasks.add(getTask(JSONObject(it)))
+                try {
+                    tasks.add(getTask(JSONObject(it)))
+                } catch (e: JSONException) {
+                    logger.error("Error while parsing task from Redis")
+                }
             }
             return tasks
         } catch (e: Exception) {
