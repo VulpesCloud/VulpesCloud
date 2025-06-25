@@ -28,9 +28,15 @@ class ServiceStateChangeEventListener(
                 it.runningNode.name == clusterProvider.localNode().name
             }
 
-        event.serviceInfo.task
-            .copy(serviceCount = servicesOnTask.size, services = servicesOnTask)
-            .let { taskProvider.updateTask(it) }
+        val task = taskProvider.getTaskByName(event.serviceInfo.task.name)
+        if (task == null) {
+            logger.error("Received ServiceStateChangeEvent for a task that is not registered!")
+            return
+        }
+        task.copy(serviceCount = servicesOnTask.size, services = servicesOnTask).let {
+            taskProvider.updateTask(it)
+        }
+
         clusterProvider.localNode().copy(runningServices = servicesOnNode.size).let {
             getRC()?.setHashField("VULPESCLOUD:NODES", it.name, JSONObject(it).toString())
         }
