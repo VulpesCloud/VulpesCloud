@@ -27,6 +27,7 @@ import de.vulpescloud.wrapper.Wrapper
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIVelocityConfig
 import jakarta.inject.Inject
+import kotlin.jvm.optionals.getOrNull
 import org.json.JSONObject
 
 @Plugin(id = "vulpescloud-connector", name = "VulpesCloud-Connector", authors = ["TheCGuy"])
@@ -110,7 +111,12 @@ constructor(
         updateLocalJson(
             proxyServer.playerCount,
             proxyServer.allPlayers.map {
-                Player(it.username, it.uniqueId, proxyName, it.currentServer.get().serverInfo.name)
+                Player(
+                    it.username,
+                    it.uniqueId,
+                    proxyName,
+                    it.currentServer.getOrNull()?.serverInfo?.name ?: "N/A",
+                )
             },
         )
     }
