@@ -44,7 +44,7 @@ dependencies {
     implementation(project(":VulpesCloud-bridge"))
     compileOnly(project(":VulpesCloud-wrapper"))
 
-    implementation("dev.jorel:commandapi-velocity-shade:10.0.1")
+    implementation("dev.jorel:commandapi-velocity-shade:10.1.0")
     implementation("dev.jorel:commandapi-bukkit-kotlin:10.0.1")
 
 
