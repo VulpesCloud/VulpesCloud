@@ -24,7 +24,7 @@
 
 plugins {
     id("java")
-    kotlin("jvm") version "2.1.21"
+    kotlin("jvm") version "2.2.0"
     //id("io.papermc.paperweight.userdev") version "1.7.4"
     id("com.gradleup.shadow") version "8.3.7"
 }
