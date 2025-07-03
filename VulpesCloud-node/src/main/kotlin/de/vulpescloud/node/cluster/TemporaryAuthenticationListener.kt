@@ -7,6 +7,7 @@ import de.vulpescloud.api.event.events.cluster.NodeStateChangeEvent
 import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.jediswrapper.redis.ChannelListener
+import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeShutdown
 import de.vulpescloud.node.cluster.ClusterProviderImpl.Companion.makeNodeVersion
 import de.vulpescloud.node.config.NodeConfig
@@ -14,7 +15,7 @@ import de.vulpescloud.node.event.EventManagerImpl
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 
-class TemporaryAuthenticationListener(private val config: NodeConfig, eventManager: EventManager) :
+class TemporaryAuthenticationListener(private val config: NodeConfig, eventManager: EventManager, private val node: Node) :
     ChannelListener("VULPESCLOUD_NODEAUTHENTICATION_${config.name()}") {
 
     private val logger = LoggerFactory.getLogger(TemporaryAuthenticationListener::class.java)
@@ -23,7 +24,7 @@ class TemporaryAuthenticationListener(private val config: NodeConfig, eventManag
     override fun onMessage(message: String) {
         val msg = JSONObject(JSONObject(message).getString("message"))
         if (msg.getString("status") == "AUTHENTICATED") {
-            logger.info("Successfully authenticated with the Head Node!")
+            logger.info("<green>Successfully <gray>authenticated with the Head Node!")
 
             val node =
                 ClusterNode(
@@ -44,6 +45,8 @@ class TemporaryAuthenticationListener(private val config: NodeConfig, eventManag
             )
 
             this.unregister()
+
+            this.node.setupCondition.signalAll()
         } else {
             logger.error("Unable to authenticate with the Head Node!")
             logger.error("Reason: ${msg.getString("reason")}")

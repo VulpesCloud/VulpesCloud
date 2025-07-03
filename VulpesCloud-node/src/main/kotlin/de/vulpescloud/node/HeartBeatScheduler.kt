@@ -84,6 +84,7 @@ class HeartBeatScheduler(private val clusterProvider: ClusterProvider) : Schedul
                     val node = clusterProvider.nodeByName(name)!!
                     node.state = NodeStates.LOST
                     getRC()?.setHashField("VULPESCLOUD:NODES", name, JSONObject(node).toString())
+                    getRC()?.deleteHashField("VULPESCLOUD:NODE:HEARTBEAT", name)
                 } else if (heartBeatFailureMap[name]!! < heartbeatIntervalsUntilNodeLost) {
                     logger.warn(
                         "Node $name didn't send heartbeat for ${heartBeatFailureMap[name]} beats!"

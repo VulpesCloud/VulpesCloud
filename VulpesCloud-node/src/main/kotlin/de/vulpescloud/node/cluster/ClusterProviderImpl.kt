@@ -7,12 +7,13 @@ import de.vulpescloud.api.redis.RedisChannels
 import de.vulpescloud.jediswrapper.JedisWrapper.getRC
 import de.vulpescloud.node.CloudVersion
 import de.vulpescloud.node.HeartBeatScheduler
+import de.vulpescloud.node.Node
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.event.EventManagerImpl
 import de.vulpescloud.node.utils.JsonUtils.getClusterNode
-import java.util.*
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
+import java.util.*
 
 class ClusterProviderImpl(
     private val config: NodeConfig,
@@ -116,7 +117,7 @@ class ClusterProviderImpl(
                 "Sending Authentication Request to HeadNode. Using secret ${authenticationProvider.getAuthenticationToken()}"
             )
 
-            TemporaryAuthenticationListener(config, eventManager)
+            TemporaryAuthenticationListener(config, eventManager, Node.instance)
 
             getRC()
                 ?.sendMessage(

@@ -104,6 +104,7 @@ class Node : KoinComponent {
     val setupCondition: Condition = setupLock.newCondition()
 
     init {
+        instance = this
         startKoin { modules(nodeModule) }
         terminal.initTerminal()
 
@@ -136,7 +137,9 @@ class Node : KoinComponent {
         databaseProvider.generateTables()
 
         val clusterProviderImpl = clusterProvider as ClusterProviderImpl
-        clusterProviderImpl.initialize()
+
+        CompletableFuture.runAsync { setupLock.withLock { clusterProviderImpl.initialize() } }
+        setupLock.withLock { setupCondition.await() }
 
         NodeStateChangeEventTrigger(eventManager)
         ModuleLoadEventTrigger(eventManager)
@@ -208,6 +211,8 @@ class Node : KoinComponent {
     }
 
     companion object {
+        lateinit var instance: Node
+
         fun getForwardingSecret(): String {
             return if (getRC()?.getString("VULPESCLOUD:FORWARDING:SECRET") != null) {
                 getRC()?.getString("VULPESCLOUD:FORWARDING:SECRET")!!

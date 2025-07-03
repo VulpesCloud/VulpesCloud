@@ -25,6 +25,7 @@ class AuthenticationListener(private val authenticationProvider: AuthenticationP
                     "VULPESCLOUD_NODEAUTHENTICATION_$nodeName",
                 )
             logger.info("Node {} ({}) has been authenticated successfully!", nodeName, nodeUUID)
+
         } else {
             getRC()
                 ?.sendMessage(

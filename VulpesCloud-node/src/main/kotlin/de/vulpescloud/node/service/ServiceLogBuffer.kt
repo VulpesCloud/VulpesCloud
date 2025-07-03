@@ -5,9 +5,10 @@ import de.vulpescloud.api.event.events.service.ServiceLogEvent
 import de.vulpescloud.node.VulpesNode
 import java.util.concurrent.ConcurrentHashMap
 
+@Suppress("unused")
 object ServiceLogBuffer {
     private val logBuffers = ConcurrentHashMap<String, MutableList<String>>()
-    private const val MAX_BUFFER_SIZE = 1000
+    private const val MAX_BUFFER_SIZE = 250
 
     init {
         VulpesNode.eventManager.registerListener(this)
@@ -34,9 +35,5 @@ object ServiceLogBuffer {
 
     fun clearLogs(serviceName: String) {
         logBuffers.remove(serviceName)
-    }
-
-    fun isBuffering(serviceName: String): Boolean {
-        return logBuffers.containsKey(serviceName)
     }
 }
