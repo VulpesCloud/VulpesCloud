@@ -14,7 +14,6 @@ import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.event.EventManagerImpl
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
-import kotlin.concurrent.withLock
 
 class TemporaryAuthenticationListener(
     private val config: NodeConfig,
@@ -26,38 +25,33 @@ class TemporaryAuthenticationListener(
     private val eventManager = eventManager as EventManagerImpl
 
     override fun onMessage(message: String) {
-        node.setupLock.withLock {
-            val msg = JSONObject(JSONObject(message).getString("message"))
-            if (msg.getString("status") == "AUTHENTICATED") {
-                logger.info("<green>Successfully <gray>authenticated with the Head Node!")
+        val msg = JSONObject(JSONObject(message).getString("message"))
+        if (msg.getString("status") == "AUTHENTICATED") {
+            logger.info("<green>Successfully <gray>authenticated with the Head Node!")
 
-                val node =
-                    ClusterNode(
-                        config.name(),
-                        config.uuid(),
-                        0,
-                        NodeStates.BOOTING,
-                        0,
-                        0,
-                        makeNodeVersion(),
-                        false,
-                        config.hostname(),
-                    )
-                getRC()
-                    ?.setHashField("VULPESCLOUD:NODES", config.name(), JSONObject(node).toString())
-                eventManager.callGlobal(
-                    NodeStateChangeEvent(node, NodeStates.OFFLINE, NodeStates.BOOTING),
-                    RedisChannels.VULPESCLOUD_EVENT_CLUSTER_NodeStateChangeEvent,
+            val node =
+                ClusterNode(
+                    config.name(),
+                    config.uuid(),
+                    0,
+                    NodeStates.BOOTING,
+                    0,
+                    0,
+                    makeNodeVersion(),
+                    false,
+                    config.hostname(),
                 )
+            getRC()?.setHashField("VULPESCLOUD:NODES", config.name(), JSONObject(node).toString())
+            eventManager.callGlobal(
+                NodeStateChangeEvent(node, NodeStates.OFFLINE, NodeStates.BOOTING),
+                RedisChannels.VULPESCLOUD_EVENT_CLUSTER_NodeStateChangeEvent,
+            )
 
-                this.unregister()
-
-                this.node.setupCondition.signalAll()
-            } else {
-                logger.error("Unable to authenticate with the Head Node!")
-                logger.error("Reason: ${msg.getString("reason")}")
-                NodeShutdown.ctrlCCloud()
-            }
+            this.unregister()
+        } else {
+            logger.error("Unable to authenticate with the Head Node!")
+            logger.error("Reason: ${msg.getString("reason")}")
+            NodeShutdown.ctrlCCloud()
         }
     }
 }

@@ -138,8 +138,7 @@ class Node : KoinComponent {
 
         val clusterProviderImpl = clusterProvider as ClusterProviderImpl
 
-        CompletableFuture.runAsync { setupLock.withLock { clusterProviderImpl.initialize() } }
-        setupLock.withLock { setupCondition.await() }
+        clusterProviderImpl.initialize()
 
         NodeStateChangeEventTrigger(eventManager)
         ModuleLoadEventTrigger(eventManager)
