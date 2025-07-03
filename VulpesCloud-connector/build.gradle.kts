@@ -24,9 +24,9 @@
 
 plugins {
     id("java")
-    kotlin("jvm") version "2.1.21"
+    kotlin("jvm") version "2.2.0"
     //id("io.papermc.paperweight.userdev") version "1.7.4"
-    id("com.gradleup.shadow") version "8.3.6"
+    id("com.gradleup.shadow") version "8.3.8"
 }
 
 repositories {
@@ -44,8 +44,8 @@ dependencies {
     implementation(project(":VulpesCloud-bridge"))
     compileOnly(project(":VulpesCloud-wrapper"))
 
-    implementation("dev.jorel:commandapi-velocity-shade:10.0.1")
-    implementation("dev.jorel:commandapi-bukkit-kotlin:10.0.1")
+    implementation("dev.jorel:commandapi-velocity-shade:10.1.1")
+    implementation("dev.jorel:commandapi-bukkit-kotlin:10.1.1")
 
 
     compileOnly(libs.jedis)
