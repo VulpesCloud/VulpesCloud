@@ -1,6 +1,5 @@
 package de.vulpescloud.node.cluster
 
-import co.touchlab.stately.concurrency.withLock
 import de.vulpescloud.api.cluster.ClusterNode
 import de.vulpescloud.api.cluster.NodeStates
 import de.vulpescloud.api.event.EventManager
@@ -15,6 +14,7 @@ import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.event.EventManagerImpl
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
+import kotlin.concurrent.withLock
 
 class TemporaryAuthenticationListener(
     private val config: NodeConfig,
