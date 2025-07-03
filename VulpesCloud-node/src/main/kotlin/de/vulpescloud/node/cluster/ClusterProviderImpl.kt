@@ -111,6 +111,7 @@ class ClusterProviderImpl(
                         .toString(),
                 )
             AuthenticationListener(authenticationProvider)
+            Node.instance.setupCondition.signalAll()
         } else {
             logger.info("Requesting Authentication from HeadNode &8(&m${getHeadNode()?.name}&8)")
             logger.debug(
