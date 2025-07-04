@@ -32,7 +32,7 @@ plugins {
 }
 
 group = "de.vulpescloud"
-version = "2.0.0-ALPHA"
+version = "2.0.0"
 
 allprojects {
     apply(plugin = "java-library")
@@ -40,7 +40,7 @@ allprojects {
     apply(plugin = "org.jetbrains.dokka")
     apply(plugin = "org.jetbrains.kotlin.jvm")
 
-    version = "2.0.0-ALPHA"
+    version = "2.0.0"
     group = "de.vulpescloud"
 
     repositories {
