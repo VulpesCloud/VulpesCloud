@@ -1,12 +1,7 @@
 package de.vulpescloud.api.event.events.modules
 
+import de.vulpescloud.api.cluster.ClusterNode
 import de.vulpescloud.api.event.Event
-import de.vulpescloud.api.modules.VulpesModule
+import de.vulpescloud.api.module.ModuleInfo
 
-data class ModuleLoadEvent(
-    val module: VulpesModule
-) : Event {
-    override fun name(): String {
-        return "ModuleLoadEvent"
-    }
-}
+data class ModuleLoadEvent(val module: ModuleInfo, val node: ClusterNode) : Event

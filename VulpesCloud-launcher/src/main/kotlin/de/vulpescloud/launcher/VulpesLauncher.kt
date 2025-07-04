@@ -25,11 +25,9 @@
 package de.vulpescloud.launcher
 
 import de.vulpescloud.launcher.config.Config
-import de.vulpescloud.launcher.dependency.Dependency
 import de.vulpescloud.launcher.dependency.DependencyDownloader
 import de.vulpescloud.launcher.updater.*
 import de.vulpescloud.launcher.util.ChecksumUtil
-import de.vulpescloud.launcher.util.FileUpdaterUtil
 import java.io.File
 import java.net.URI
 import java.nio.file.Path
@@ -41,69 +39,20 @@ import kotlin.system.exitProcess
 class VulpesLauncher {
     companion object {
         val CLASS_LOADER = VulpesClassLoader()
-        val DEPENDENCY_DIR: Path = Path.of("launcher/dependencies")
-        val githubURL = "https://github.com/VulpesCloud/VulpesCloud-meta/raw/"
+        private val DEPENDENCY_DIR: Path = Path.of("launcher/dependencies")
+        const val githubURL = "https://github.com/VulpesCloud/VulpesCloud-meta/raw/"
         val config = Config()
 
         @JvmStatic
         fun main(args: Array<String>) {
             println("Checking for Dependency's to download")
 
-            // Setting the Dependency's
-            val gsonDependency = Dependency("com.google.code.gson", "gson", "2.12.1")
-            val jLineDependency = Dependency("org.jline", "jline", "3.29.0")
-            val kotlinSTD = Dependency("org.jetbrains.kotlin", "kotlin-stdlib", "2.1.20")
-            val jsonDependency = Dependency("org.json", "json", "20250107")
-            val jedisDependency = Dependency("redis.clients", "jedis", "5.2.0")
-            val slf4jDependency = Dependency("org.slf4j", "slf4j-api", "2.0.17")
-            val logbackCoreDependency = Dependency("ch.qos.logback", "logback-core", "1.5.18")
-            val logbackClassicDependency = Dependency("ch.qos.logback", "logback-classic", "1.5.18")
-            val hikariCP = Dependency("com.zaxxer", "HikariCP", "6.3.0")
-            val mariaDB = Dependency("org.mariadb.jdbc", "mariadb-java-client", "3.5.3")
-            val cloud = Dependency("org.incendo", "cloud-core", "2.0.0")
-            val cloudExtension = Dependency("org.incendo", "cloud-kotlin-extensions", "2.0.0")
-            val cloudAnnotations = Dependency("org.incendo", "cloud-annotations", "2.0.0")
-            val cloudKotlinCoroutines = Dependency("org.incendo", "cloud-kotlin-coroutines", "2.0.0")
-            val cloudKotlinCoroutinesAnnotations = Dependency("org.incendo", "cloud-kotlin-coroutines-annotations", "2.0.0")
-            val jsonConfig = Dependency("com.electronwill.night-config", "json", "3.8.1")
-            val yamlConfig = Dependency("com.electronwill.night-config", "yaml", "3.8.1")
-            val tomlConfig = Dependency("com.electronwill.night-config", "toml", "3.8.1")
-            val coreConfig = Dependency("com.electronwill.night-config", "core", "3.8.1")
-            val exposedCore = Dependency("org.jetbrains.exposed", "exposed-core", "0.60.0")
-            val exposedJDBC = Dependency("org.jetbrains.exposed", "exposed-jdbc", "0.60.0")
-            val snakeYAML = Dependency("org.yaml", "snakeyaml", "2.3")
-
-            // Downloading the Dependency's
-            DependencyDownloader().download(
-                gsonDependency,
-                jLineDependency,
-                kotlinSTD,
-                jsonDependency,
-                jedisDependency,
-                slf4jDependency,
-                logbackCoreDependency,
-                logbackClassicDependency,
-                hikariCP,
-                mariaDB,
-                cloud,
-                cloudExtension,
-                cloudAnnotations,
-                cloudKotlinCoroutines,
-                cloudKotlinCoroutinesAnnotations,
-                jsonConfig,
-                yamlConfig,
-                tomlConfig,
-                coreConfig,
-                exposedCore,
-                exposedJDBC,
-                snakeYAML,
-            )
-            // config.debug()
+            // Download Dependency's
+            DependencyDownloader().downloadDependency(URI("https://raw.githubusercontent.com/VulpesCloud/VulpesCloud-meta/refs/heads/main/dependency.json"))
 
             ChecksumUtil.downloadChecksumJson()
 
-            val devMode = System.getProperty("devMode")
-            if (devMode != null && devMode.toBoolean() || !config.autoUpdatesEnabled()) {
+            if (!config.autoUpdatesEnabled()) {
                 System.err.println("╭────────────────────────────────────────────────────────╮")
                 System.err.println("│                                                        │")
                 System.err.println("│                      INFORMATION                       │")
@@ -124,32 +73,6 @@ class VulpesLauncher {
                     TimeUnit.SECONDS.sleep(5)
                 }
 
-                val apiFile = Path.of("launcher/dependencies/vulpescloud-api.jar").toFile()
-                val nodeFile = Path.of("launcher/dependencies/vulpescloud-node.jar").toFile()
-                val wrapperFile = Path.of("launcher/dependencies/vulpescloud-wrapper.jar").toFile()
-                val connectorFile = Path.of("launcher/dependencies/vulpescloud-connector.jar").toFile()
-                val bridgeFile = Path.of("launcher/dependencies/vulpescloud-bridge.jar").toFile()
-
-                if (!apiFile.exists()) {
-                    System.err.println("vulpescloud-api.jar not found in dependencies folder! Put the file there, or disable Development mode!")
-                    exitProcess(-1)
-                }
-                if (!nodeFile.exists()) {
-                    System.err.println("vulpescloud-node.jar not found in dependencies folder! Put the file there, or disable Development mode!")
-                    exitProcess(-1)
-                }
-                if (!wrapperFile.exists()) {
-                    System.err.println("vulpescloud-wrapper.jar not found in dependencies folder! Put the file there, or disable Development mode!")
-                    exitProcess(-1)
-                }
-                if (!connectorFile.exists()) {
-                    System.err.println("vulpescloud-connector.jar not found in dependencies folder! Put the file there, or disable Development mode!")
-                    exitProcess(-1)
-                }
-                if (!bridgeFile.exists()) {
-                    System.err.println("vulpescloud-bridge.jar not found in dependencies folder! Put the file there, or disable Development mode!")
-                    exitProcess(-1)
-                }
             } else {
                 APIUpdater().updateAPI()
                 BridgeUpdater().updateBridge()
@@ -169,11 +92,6 @@ class VulpesLauncher {
         }
 
         private fun bootFile(): File {
-//            val devMode = System.getProperty("devMode")
-//            if (devMode == null || !devMode.toBoolean()) {
-//                getCloudFilesFromGithub()
-//            }
-
             return DEPENDENCY_DIR.resolve("vulpescloud-node.jar").toFile()
         }
 
@@ -191,34 +109,6 @@ class VulpesLauncher {
             } catch (e: Exception) {
                 throw RuntimeException(e)
             }
-        }
-
-        private fun getCloudFilesFromGithub() {
-            FileUpdaterUtil.get(
-                URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-api.jar"),
-                FileUpdaterUtil.filePathHandler(Path.of("launcher/dependencies/vulpescloud-api.jar")
-                )
-            )
-            FileUpdaterUtil.get(
-                URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-node.jar"),
-                FileUpdaterUtil.filePathHandler(Path.of("launcher/dependencies/vulpescloud-node.jar")
-                )
-            )
-            FileUpdaterUtil.get(
-                URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-wrapper.jar"),
-                FileUpdaterUtil.filePathHandler(Path.of("launcher/dependencies/vulpescloud-wrapper.jar")
-                )
-            )
-            FileUpdaterUtil.get(
-                URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-connector.jar"),
-                FileUpdaterUtil.filePathHandler(Path.of("launcher/dependencies/vulpescloud-connector.jar")
-                )
-            )
-            FileUpdaterUtil.get(
-                URI(githubURL + config.autoUpdatesBranch() + "/vulpescloud-bridge.jar"),
-                FileUpdaterUtil.filePathHandler(Path.of("launcher/dependencies/vulpescloud-bridge.jar")
-                )
-            )
         }
     }
 }

@@ -31,13 +31,19 @@ class Dependency(
     val groupId: String,
     val artifactId: String,
     val version: String,
+    val repository: String,
+    val url: String? = null
 ) {
 
     fun downloadUrl(): String {
-        return String.format(
-            Repository.MAVEN_CENTRAL.repository,
-            groupId.replace(".", "/"), artifactId, version, artifactId, version
-        )
+        if (repository == "CUSTOM" && url != null) {
+            return url
+        } else {
+            return String.format(
+                Repository.valueOf(repository).repository,
+                groupId.replace(".", "/"), artifactId, version, artifactId, version
+            )
+        }
     }
 
     @Contract(pure = true)

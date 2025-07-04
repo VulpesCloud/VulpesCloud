@@ -1,0 +1,21 @@
+package de.vulpescloud.api.redis
+
+@Suppress("EnumEntryName")
+enum class RedisChannels {
+
+    VULPESCLOUD_EVENT_CLUSTER_NodeStateChangeEvent,
+    VULPESCLOUD_EVENT_MODULE_ModuleLoadEvent,
+    VULPESCLOUD_EVENT_MODULE_ModuleStartEvent,
+    VULPESCLOUD_EVENT_MODULE_ModuleUnloadEvent,
+    VULPESCLOUD_EVENT_SERVICE_ServiceStateChangeEvent,
+    VULPESCLOUD_EVENT_SERVICE_ServiceLogEvent,
+    VULPESCLOUD_EVENT_PLAYER_PlayerJoinEvent,
+    VULPESCLOUD_EVENT_PLAYER_PlayerLeaveEvent,
+    VULPESCLOUD_EVENT_PLAYER_PlayerSwitchServerEvent,
+    VULPESCLOUD_EVENT_CLUSTER_NodeLogEvent,
+    VULPESCLOUD_ACTION_PLAYER,
+    VULPESCLOUD_ACTION_SERVICE,
+    VULPESCLOUD_CLUSTER_SelectNewHeadNode,
+    VULPESCLOUD_NODE_COMMUNICATION;
+
+}

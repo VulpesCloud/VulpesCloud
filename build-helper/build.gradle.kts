@@ -7,5 +7,5 @@ repositories {
 }
 
 dependencies {
-    implementation("org.json:json:20250107")
+    implementation("org.json:json:20250517")
 }

@@ -1,12 +1,11 @@
 package de.vulpescloud.api.event
 
-import kotlin.reflect.KClass
-
 interface EventManager {
 
-    fun <T : Event> listen(type: KClass<T>, listener: (T) -> Unit)
+    fun registerListener(listener: Any): EventManager
 
-    fun call(event: Event)
+    fun callLocal(event: Event)
 
-    fun registerListener(listener: Any)
+    fun unregisterListener(listener: Any): EventManager
+
 }

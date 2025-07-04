@@ -23,7 +23,7 @@
  */
 
 plugins {
-    kotlin("jvm") version "2.1.20"
+    kotlin("jvm") version "2.2.0"
     id("org.jetbrains.dokka") version "2.0.0"
 }
 
@@ -31,11 +31,16 @@ repositories {
     mavenCentral()
 }
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 dependencies {
     compileOnly(project(":VulpesCloud-api"))
-    compileOnly(project(":VulpesCloud-wrapper"))
     compileOnly(rootProject.libs.annotations)
     compileOnly(libs.jedis)
+    compileOnly(libs.jedisWrapper)
 }
 
 tasks.jar {

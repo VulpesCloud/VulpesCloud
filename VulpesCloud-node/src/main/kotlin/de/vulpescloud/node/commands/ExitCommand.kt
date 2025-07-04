@@ -1,13 +1,13 @@
 package de.vulpescloud.node.commands
 
 import de.vulpescloud.node.NodeShutdown
+import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.annotations.Alias
 import de.vulpescloud.node.command.annotations.Description
-import de.vulpescloud.node.command.source.CommandSource
 import org.incendo.cloud.annotations.Command
 
 @Suppress("UNUSED")
-@Description("Shut down the Node(translate)")
+@Description("COMMANDS.DESCRIPTION.exit")
 @Alias(["stop", "shutdown"])
 class ExitCommand {
 
@@ -16,7 +16,7 @@ class ExitCommand {
         source: CommandSource
     ) {
         source.sendMessage("Shutting down the Node!")
-        NodeShutdown.normalShutdown()
+        NodeShutdown.commandShutdown()
     }
 
 }

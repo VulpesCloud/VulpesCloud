@@ -1,41 +1,44 @@
 [versions]
 # kotlin
-
-stdlib = "2.1.20"
+stdlib = "2.2.0"
+kotlinx-serialization = "1.9.0"
 
 # google deps
-guava = "33.4.6-jre"
+guava = "33.4.8-jre"
 
 # utils
 lombok = "1.18.36"
 annotations = "26.0.2"
 
 # network
-jedis = "5.2.0"
+jedis = "6.0.0"
 hikariCP = "6.3.0"
-mariadb = "3.5.3"
-exposed = "0.60.0"
+mariadb = "3.5.4"
+exposed = "1.0.0-beta-3"
+jedisWrapper = "1.1.4"
 
 #logging
-slf4j = "2.0.17"
+slf4j = "2.1.0-alpha1"
 logback = "1.5.18"
 
 # configuration
-gson = "2.12.1"
-json = "20250107"
+gson = "2.13.1"
+json = "20250517"
 
 # console
-jline = "3.29.0"
+jline = "3.30.4"
 cloud = "2.0.0"
 
 # platforms
-kSpigot = "1.21.0"
 paper = "1.21.1-R0.1-SNAPSHOT"
 velocity = "3.4.0-SNAPSHOT"
 
+# dependency injection
+koin = "4.1.0"
+
 # config
 
-night-config = "3.8.1"
+night-config = "3.8.2"
 
 # shadowJar
 shadow = "8.1.1"
@@ -45,8 +48,8 @@ shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
 
 [libraries]
 # kotlin
-
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "stdlib" }
+kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization"}
 
 # google libs
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
@@ -61,6 +64,7 @@ hikariCP = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikariCP" }
 mariadb-java-client = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.ref = "mariadb" }
 exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
 exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
+jedisWrapper = { group = "de.vulpescloud", name = "JedisWrapper", version.ref = "jedisWrapper"}
 
 # logging
 slf4jApi = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
@@ -82,9 +86,11 @@ cloud-velocity = { group = "org.incendo", name = "cloud-velocity", version = "2.
 cloud-processors-confirmation = { group = "org.incendo", name = "cloud-processors-confirmation", version = "1.0.0-rc.1"}
 
 # platforms
-kSpigot = { group = "net.axay", name = "kspigot", version.ref = "kSpigot" }
 paper = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
 velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
+
+# depdendency injection
+koin = { group = "io.insert-koin", name = "koin-core", version.ref = "koin"}
 
 # config
 

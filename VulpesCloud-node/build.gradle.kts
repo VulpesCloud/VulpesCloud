@@ -23,7 +23,7 @@
  */
 
 plugins {
-    kotlin("jvm") version "2.1.20"
+    kotlin("jvm") version "2.2.0"
     id("com.github.johnrengelman.shadow") version "8.1.1"
 }
 
@@ -33,6 +33,7 @@ dependencies {
     compileOnly(libs.jline)
     compileOnly(libs.json)
     implementation(libs.jedis)
+    implementation(libs.jedisWrapper)
     compileOnly(libs.slf4jApi)
     implementation(libs.logbackCore)
     implementation(libs.logbackClassic)
@@ -48,9 +49,9 @@ dependencies {
     compileOnly(libs.nightConfig.json)
     compileOnly(libs.nightConfig.toml)
     compileOnly(libs.nightConfig.yaml)
-    compileOnly(libs.exposed.core)
-    compileOnly(libs.exposed.jdbc)
-    implementation("com.github.ben-manes.caffeine:caffeine:3.2.0")
+    implementation(libs.exposed.core)
+    implementation(libs.exposed.jdbc)
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.1")
 }
 
 sourceSets {
@@ -61,22 +62,22 @@ sourceSets {
     }
 }
 
-
-
-tasks.jar {
-    manifest {
-        attributes["Main-Class"] = "de.vulpescloud.node.NodeLauncher"
-    }
-    archiveFileName.set("vulpescloud-node.jar")
-    destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
+java {
+    withSourcesJar()
+    withJavadocJar()
 }
 
 tasks.shadowJar {
+    val buildNumber = System.getenv("BUILD_NUMBER")
+    val versionString = if (buildNumber != null) {
+        "${version}_${getGitBranch()}@${getGitCommit()}_$buildNumber"
+    } else {
+        "${version}_${getGitBranch()}@${getGitCommit()}"
+    }
+
     manifest {
         attributes["Main-Class"] = "de.vulpescloud.node.NodeLauncher"
+        attributes["Implementation-Version"] = versionString
     }
     archiveFileName.set("vulpescloud-node.jar")
-    if (System.getenv("dev") == "true") {
-        destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
-    }
 }

@@ -23,13 +23,13 @@
 -->
 
 <configuration>
-    <import class="de.vulpescloud.node.terminal.ConsoleAppender"/>
+    <import class="de.vulpescloud.node.terminal.impl.ConsoleAppender"/>
     <import class="ch.qos.logback.classic.encoder.PatternLayoutEncoder"/>
     <import class="ch.qos.logback.core.rolling.RollingFileAppender"/>
     <import class="ch.qos.logback.classic.filter.ThresholdFilter"/>
     <import class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy"/>
 
-    <conversionRule conversionWord="levelColor" class="de.vulpescloud.node.terminal.LoggingLevelConversion"/>
+    <conversionRule conversionWord="levelColor" class="de.vulpescloud.node.terminal.impl.LoggingLevelConversion"/>
 
     <variable name="cloud.log.level" value="DEBUG"/>
 
@@ -60,10 +60,12 @@
         <appender-ref ref="ConsoleAppender"/>
         <appender-ref ref="Rolling"/>
     </root>
+    <!--
+        <logger name="com.zaxxer.hikari.pool.PoolBase" level="INFO"/>
+        <logger name="com.zaxxer.hikari.pool.HikariPool" level="INFO"/>
+        <logger name="com.zaxxer.hikari.HikariDataSource" level="INFO"/>
+        <logger name="com.zaxxer.hikari" level="INFO"/>
+        <logger name="org.mariadb.jdbc" level="INFO" />
+    -->
 
-    <logger name="com.zaxxer.hikari.pool.PoolBase" level="INFO"/>
-    <logger name="com.zaxxer.hikari.pool.HikariPool" level="INFO"/>
-    <logger name="com.zaxxer.hikari.HikariDataSource" level="INFO"/>
-    <logger name="com.zaxxer.hikari" level="INFO"/>
-    <logger name="org.mariadb.jdbc" level="INFO" />
 </configuration>
