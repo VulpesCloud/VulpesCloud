@@ -117,6 +117,8 @@ class ClusterProviderImpl(
                 "Sending Authentication Request to HeadNode. Using secret ${authenticationProvider.getAuthenticationToken()}"
             )
 
+            logger.info("Waiting for Response on Channel '&8VULPESCLOUD_NODEAUTHENTICATION_${config.name()}'")
+
             TemporaryAuthenticationListener(config, eventManager, Node.instance)
 
             getRC()

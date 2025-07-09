@@ -203,6 +203,9 @@ class FirstSetup(
 
             config.config.update("name", this.name)
             config.config.update("ranFirstSetup", true)
+            config.config.update("ranFirstSetup", true)
+
+            config.config.update("migrated_to_v2", true)
 
             config.config.update("uuid", UUID.randomUUID().toString())
 

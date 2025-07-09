@@ -25,6 +25,7 @@ class TemporaryAuthenticationListener(
     private val eventManager = eventManager as EventManagerImpl
 
     override fun onMessage(message: String) {
+        logger.info("Received Authentication Response from Head Node!")
         val msg = JSONObject(JSONObject(message).getString("message"))
         if (msg.getString("status") == "AUTHENTICATED") {
             logger.info("<green>Successfully <gray>authenticated with the Head Node!")

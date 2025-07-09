@@ -60,4 +60,6 @@ class NodeConfig {
     fun ranFirstSetup() = getEntry("ranFirstSetup", false)
 
     fun serviceStopTimeout() = getEntry("service_stop_timeout", 15)
+
+    fun hasBeenMigratedToV2() = getEntry("migrated_to_v2", false)
 }
