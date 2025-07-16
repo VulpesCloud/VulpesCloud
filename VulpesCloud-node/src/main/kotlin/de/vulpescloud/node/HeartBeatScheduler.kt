@@ -86,9 +86,11 @@ class HeartBeatScheduler(private val clusterProvider: ClusterProvider) : Schedul
                     getRC()?.setHashField("VULPESCLOUD:NODES", name, JSONObject(node).toString())
                     getRC()?.deleteHashField("VULPESCLOUD:NODE:HEARTBEAT", name)
                 } else if (heartBeatFailureMap[name]!! < heartbeatIntervalsUntilNodeLost) {
-                    logger.warn(
-                        "Node $name didn't send heartbeat for ${heartBeatFailureMap[name]} beats!"
-                    )
+                    if (heartBeatFailureMap[name] != 1) {
+                        logger.warn(
+                            "Node $name didn't send heartbeat for ${heartBeatFailureMap[name]} beats!"
+                        )
+                    }
                 }
             }
         }
@@ -130,9 +132,11 @@ class HeartBeatScheduler(private val clusterProvider: ClusterProvider) : Schedul
                         )
                 }
             } else {
-                logger.warn(
-                    "Head node $headNodeName didn't send heartbeat for ${heartBeatFailureMap[headNodeName]} beats!"
-                )
+                if (heartBeatFailureMap[headNodeName] != 1) {
+                    logger.warn(
+                        "Head node $headNodeName didn't send heartbeat for ${heartBeatFailureMap[headNodeName]} beats!"
+                    )
+                }
             }
         }
 
