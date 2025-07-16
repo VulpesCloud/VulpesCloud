@@ -51,7 +51,7 @@ dependencies {
     compileOnly(libs.nightConfig.yaml)
     implementation(libs.exposed.core)
     implementation(libs.exposed.jdbc)
-    implementation("com.github.ben-manes.caffeine:caffeine:3.2.1")
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.2")
 }
 
 sourceSets {
