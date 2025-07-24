@@ -45,7 +45,7 @@ dependencies {
     compileOnly(project(":VulpesCloud-wrapper"))
 
     implementation("dev.jorel:commandapi-velocity-shade:10.1.2")
-    implementation("dev.jorel:commandapi-bukkit-kotlin:10.1.1")
+    implementation("dev.jorel:commandapi-bukkit-kotlin:10.1.2")
 
 
     compileOnly(libs.jedis)
