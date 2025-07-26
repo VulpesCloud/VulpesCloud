@@ -39,26 +39,25 @@ class TaskProviderImpl : TaskProvider {
         }
     }
 
-    override fun updateTask(task: Task) {
-        logger.debug("Starting transaction to update task")
+    override fun updateTask(task: Task, updateInMySQL: Boolean) {
         val taskJson = JSONObject(task)
-        transaction {
-            logger.debug("Checking if task is already in database")
-            val existing = TaskTable.select(TaskTable.name eq task.name).singleOrNull()
+        if (updateInMySQL) {
+            transaction {
+                val existing = TaskTable.select(TaskTable.name eq task.name).singleOrNull()
 
-            if (existing != null) {
-                logger.debug("Task already exists in database, updating")
-                TaskTable.update({ TaskTable.name eq task.name }) { it[json] = taskJson.toString() }
-            } else {
-                logger.debug("Task does not exist in database, inserting")
-                TaskTable.insert {
-                    it[name] = name
-                    it[json] = taskJson.toString()
+                if (existing != null) {
+                    TaskTable.update({ TaskTable.name eq task.name }) {
+                        it[json] = taskJson.toString()
+                    }
+                } else {
+                    TaskTable.insert {
+                        it[name] = name
+                        it[json] = taskJson.toString()
+                    }
                 }
             }
         }
 
-        logger.debug("Syncing to Redis")
         getRC()?.setHashField("VULPESCLOUD:TASKS", task.name, taskJson.toString())
     }
 }

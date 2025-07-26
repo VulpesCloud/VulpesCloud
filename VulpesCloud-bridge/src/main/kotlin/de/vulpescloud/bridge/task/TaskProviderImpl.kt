@@ -28,5 +28,5 @@ class TaskProviderImpl : TaskProvider {
         }
     }
 
-    override fun updateTask(task: Task) {}
+    override fun updateTask(task: Task, updateInMySQL: Boolean) {}
 }

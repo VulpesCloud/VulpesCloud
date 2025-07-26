@@ -6,6 +6,6 @@ interface TaskProvider {
 
     fun tasks(): List<Task>
 
-    fun updateTask(task: Task)
+    fun updateTask(task: Task, updateInMySQL: Boolean = true)
 
 }

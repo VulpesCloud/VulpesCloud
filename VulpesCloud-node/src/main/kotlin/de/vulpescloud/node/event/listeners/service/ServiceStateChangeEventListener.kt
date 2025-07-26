@@ -34,7 +34,7 @@ class ServiceStateChangeEventListener(
             return
         }
         task.copy(serviceCount = servicesOnTask.size, services = servicesOnTask).let {
-            taskProvider.updateTask(it)
+            taskProvider.updateTask(it, false)
         }
 
         clusterProvider.localNode().copy(runningServices = servicesOnNode.size).let {
