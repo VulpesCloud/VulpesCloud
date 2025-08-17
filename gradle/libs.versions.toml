@@ -14,7 +14,7 @@ annotations = "26.0.2"
 jedis = "6.0.0"
 hikariCP = "7.0.0"
 mariadb = "3.5.5"
-exposed = "1.0.0-beta-3"
+exposed = "1.0.0-beta-5"
 jedisWrapper = "1.1.4"
 
 #logging
