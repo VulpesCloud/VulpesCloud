@@ -38,7 +38,7 @@ koin = "4.1.0"
 
 # config
 
-night-config = "3.8.2"
+night-config = "3.8.3"
 
 # shadowJar
 shadow = "8.1.1"
