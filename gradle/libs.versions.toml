@@ -1,6 +1,6 @@
 [versions]
 # kotlin
-stdlib = "2.2.0"
+stdlib = "2.2.10"
 kotlinx-serialization = "1.9.0"
 
 # google deps
