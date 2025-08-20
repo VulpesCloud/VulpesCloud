@@ -23,7 +23,7 @@
  */
 
 pluginManagement {
-    includeBuild("build-helper")
+    //includeBuild("build-helper")
     repositories {
         gradlePluginPortal()
     }

@@ -24,7 +24,8 @@
 
 plugins {
     kotlin("jvm") version "2.2.10"
-    id("com.github.johnrengelman.shadow") version "8.1.1"
+    //id("com.github.johnrengelman.shadow") version "8.1.1"
+    alias(libs.plugins.shadow)
 }
 
 dependencies {
@@ -69,11 +70,12 @@ java {
 
 tasks.shadowJar {
     val buildNumber = System.getenv("BUILD_NUMBER")
-    val versionString = if (buildNumber != null) {
-        "${version}_${getGitBranch()}@${getGitCommit()}_$buildNumber"
-    } else {
-        "${version}_${getGitBranch()}@${getGitCommit()}"
-    }
+//    val versionString = if (buildNumber != null) {
+//        "${version}_${getGitBranch()}@${getGitCommit()}_$buildNumber"
+//    } else {
+//        "${version}_${getGitBranch()}@${getGitCommit()}"
+//    }
+    val versionString = "0.0.0-UNKNOWN"
 
     manifest {
         attributes["Main-Class"] = "de.vulpescloud.node.NodeLauncher"

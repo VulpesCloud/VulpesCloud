@@ -26,7 +26,7 @@ plugins {
     id("java")
     kotlin("jvm") version "2.2.10"
     //id("io.papermc.paperweight.userdev") version "1.7.4"
-    id("com.gradleup.shadow") version "9.0.2"
+    alias(libs.plugins.shadow)
 }
 
 repositories {
@@ -40,12 +40,12 @@ repositories {
 
 dependencies {
     //paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
-    implementation(project(":VulpesCloud-api"))
-    implementation(project(":VulpesCloud-bridge"))
+    compileOnly(project(":VulpesCloud-api"))
+    compileOnly(project(":VulpesCloud-bridge"))
     compileOnly(project(":VulpesCloud-wrapper"))
 
-    implementation("dev.jorel:commandapi-velocity-shade:10.1.2")
-    implementation("dev.jorel:commandapi-bukkit-kotlin:10.1.2")
+    //implementation("dev.jorel:commandapi-velocity-shade:10.1.2")
+    //implementation("dev.jorel:commandapi-bukkit-kotlin:10.1.2")
 
 
     compileOnly(libs.jedis)
@@ -61,21 +61,20 @@ dependencies {
 
 java {
     withSourcesJar()
-    withJavadocJar()
 }
 
-sourceSets {
-    getByName("main") {
-        kotlin {
-            srcDir("src/main/kotlin")
-        }
-    }
-}
+//sourceSets {
+//    getByName("main") {
+//        kotlin {
+//            srcDir("src/main/kotlin")
+//        }
+//    }
+//}
 
 //paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 tasks.shadowJar {
     archiveFileName.set("vulpescloud-connector.jar")
-    dependsOn(":VulpesCloud-api:jar")
-    dependsOn(":VulpesCloud-bridge:jar")
+    //dependsOn(":VulpesCloud-api:jar")
+    //dependsOn(":VulpesCloud-bridge:jar")
     //relocate("dev.jorel.commandapi", "de.vulpescloud.connector.commandapi")
 }
