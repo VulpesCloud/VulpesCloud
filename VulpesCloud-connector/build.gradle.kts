@@ -77,4 +77,5 @@ tasks.shadowJar {
     //dependsOn(":VulpesCloud-api:jar")
     //dependsOn(":VulpesCloud-bridge:jar")
     //relocate("dev.jorel.commandapi", "de.vulpescloud.connector.commandapi")
+    destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs").get().asFile)
 }

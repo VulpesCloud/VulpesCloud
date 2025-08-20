@@ -45,7 +45,5 @@ java {
 
 tasks.jar {
     archiveFileName.set("vulpescloud-api.jar")
-    if (System.getenv("dev") == "true") {
-        destinationDirectory = File("D:\\Christian\\Development\\VulpesCloud\\VulpesCloud-launcher\\build\\libs\\launcher\\dependencies")
-    }
+    destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs").get().asFile)
 }

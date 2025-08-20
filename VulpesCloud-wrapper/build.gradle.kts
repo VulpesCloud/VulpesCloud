@@ -43,4 +43,5 @@ tasks.shadowJar {
         attributes["Premain-Class"] = "de.vulpescloud.wrapper.Premain"
     }
     archiveFileName.set("vulpescloud-wrapper.jar")
+    destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs").get().asFile)
 }

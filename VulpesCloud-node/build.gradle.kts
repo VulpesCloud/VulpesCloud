@@ -82,4 +82,5 @@ tasks.shadowJar {
         attributes["Implementation-Version"] = versionString
     }
     archiveFileName.set("vulpescloud-node.jar")
+    destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs").get().asFile)
 }

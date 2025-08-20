@@ -61,4 +61,5 @@ tasks.shadowJar {
         attributes["Main-Class"] = "de.vulpescloud.launcher.VulpesLauncher"
     }
     archiveFileName.set("vulpescloud-launcher.jar")
+    destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs").get().asFile)
 }
