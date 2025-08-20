@@ -49,12 +49,12 @@ allprojects {
     }
 
     dependencies {
-        "implementation"(rootProject.libs.annotations)
-        "implementation"(rootProject.libs.gson)
-        "implementation"(rootProject.libs.guava)
-        "implementation"(kotlin("reflect"))
-        "implementation"(rootProject.libs.koin)
-        "implementation"(rootProject.libs.kotlin.stdlib)
+        compileOnly(rootProject.libs.annotations)
+        compileOnly(rootProject.libs.gson)
+        compileOnly(rootProject.libs.guava)
+        compileOnly(kotlin("reflect"))
+        compileOnly(rootProject.libs.koin)
+        compileOnly(rootProject.libs.kotlin.stdlib)
     }
 
     publishing {
@@ -94,48 +94,32 @@ allprojects {
     }
 }
 
-tasks.register("copyFilesForMetaRepo") {
-    dependsOn(project(":VulpesCloud-api").tasks.jar)
-    dependsOn(project(":VulpesCloud-bridge").tasks.jar)
-    dependsOn(project(":VulpesCloud-node").tasks.shadowJar)
-    dependsOn(project(":VulpesCloud-wrapper").tasks.shadowJar)
-    dependsOn(project(":VulpesCloud-connector").tasks.shadowJar)
-    dependsOn(project(":VulpesCloud-launcher").tasks.shadowJar)
-
-    doLast {
-        copy {
-            from(project(":VulpesCloud-api").buildDir.resolve("libs/vulpescloud-api.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-api.jar" }
+tasks.register("cleanBuildDirs") {
+    group = "build"
+    description = "Deletes the root build/libs directory to avoid leftover jars with different commit hashes"
+    doFirst {
+        val rootLibs = rootProject.layout.buildDirectory.dir("libs").get().asFile
+        if (rootLibs.exists()) {
+            rootLibs.deleteRecursively()
+            println("✅ Deleted root build/libs directory")
         }
-        copy {
-            from(project(":VulpesCloud-bridge").buildDir.resolve("libs/vulpescloud-bridge.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-bridge.jar" }
-        }
-        copy {
-            from(project(":VulpesCloud-node").buildDir.resolve("libs/vulpescloud-node.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-node.jar" }
-        }
-        copy {
-            from(project(":VulpesCloud-wrapper").buildDir.resolve("libs/vulpescloud-wrapper.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-wrapper.jar" }
-        }
-        copy {
-            from(project(":VulpesCloud-connector").buildDir.resolve("libs/vulpescloud-connector.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-connector.jar" }
-        }
-        copy {
-            from(project(":VulpesCloud-launcher").buildDir.resolve("libs/vulpescloud-launcher.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-launcher.jar" }
-        }
-
-        generateCheckSums("$buildDir/meta-repo")
     }
 }
 
+tasks.register("buildAll") {
+    group = "build"
+    description = "Builds all valid subprojects using shadowJar"
+
+    dependsOn("cleanBuildDirs")
+
+    dependsOn(
+        subprojects.filter { sub ->
+            val hasBuildFile = file("${sub.projectDir}/build.gradle.kts").exists()
+            val hasPlugin = sub.plugins.hasPlugin("java") || sub.plugins.hasPlugin("org.jetbrains.kotlin.jvm")
+            hasBuildFile && hasPlugin
+        }.mapNotNull { sub ->
+            sub.tasks.findByName("shadowJar")
+        }
+    )
+}
 
