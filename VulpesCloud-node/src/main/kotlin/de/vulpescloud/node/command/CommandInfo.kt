@@ -6,6 +6,7 @@ data class CommandInfo(
     val name: String,
     val aliases: Set<String>,
     val description: String,
+    val usage: List<String>,
 )  {
 
     override fun equals(other: Any?): Boolean {

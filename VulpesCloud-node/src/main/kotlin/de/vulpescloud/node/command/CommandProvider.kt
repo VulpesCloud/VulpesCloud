@@ -92,7 +92,7 @@ class CommandProvider {
                 .handler(confirmationManager.createExecutionHandler())
         )
 
-        registeredCommands!!.add(CommandInfo("confirm", setOf(), ""))
+        registeredCommands!!.add(CommandInfo("confirm", setOf(), "",  listOf()))
     }
 
     fun execute(
@@ -128,7 +128,7 @@ class CommandProvider {
 
             val name = cloudCommand.nonFlagArguments().first().name().lowercase()
 
-            registeredCommands!!.add(CommandInfo(name, aliases.toSet(), description))
+            registeredCommands!!.add(CommandInfo(name, aliases.toSet(), description, this.commandUsageOfRoot(name)))
         }
     }
 
@@ -144,5 +144,21 @@ class CommandProvider {
 
     fun commands(): MutableCollection<CommandInfo>? {
         return this.registeredCommands?.let { Collections.unmodifiableCollection(it) }
+    }
+
+    fun commandUsageOfRoot(root: String): List<String> {
+        val commandUsage: MutableList<String> = ArrayList()
+        for (command in commandManager.commands()) {
+            // the first argument is the root, check if it matches
+            val arguments = command.components()
+            if (arguments.isEmpty() || !arguments.first().name().equals(root, ignoreCase = true)) {
+                continue
+            }
+
+            commandUsage.add(commandManager.commandSyntaxFormatter().apply(null, arguments, null))
+        }
+
+        commandUsage.sort()
+        return commandUsage
     }
 }
