@@ -73,6 +73,7 @@ val generateDependenciesJson by tasks.registering {
 
 tasks.named<ShadowJar>("shadowJar") {
     dependsOn(generateDependenciesJson)
+    val buildDirectory = project.layout.buildDirectory
     from(layout.buildDirectory.file("dependencies.json")) {
         rename { "dependencies.json" }
     }

@@ -15,6 +15,12 @@ fun Project.exportDependenciesJson(
 ): String {
     val depsArray = JSONArray()
 
+    val outputFolder = layout.buildDirectory.dir("libs").get().asFile
+
+    if (!outputFolder.exists()) {
+        outputFolder.mkdirs()
+    }
+
     configurations.getByName("runtimeClasspath")
         .resolvedConfiguration
         .resolvedArtifacts
