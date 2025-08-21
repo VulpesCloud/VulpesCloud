@@ -2,13 +2,11 @@ package de.vulpescloud.launcher.config
 
 import com.electronwill.nightconfig.core.file.CommentedFileConfig
 import de.vulpescloud.launcher.util.FileSystemUtil
-import java.nio.file.Files
 import java.nio.file.Path
 
 class Config {
 
     private val config = CommentedFileConfig.builder("launcher/launcher-config.toml")
-        // .defaultResource("launcher-config.toml")
         .sync()
         .build()
 

@@ -34,7 +34,6 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
 import java.time.Duration
-import kotlin.reflect.jvm.internal.impl.util.Check
 
 
 object FileUpdaterUtil {
