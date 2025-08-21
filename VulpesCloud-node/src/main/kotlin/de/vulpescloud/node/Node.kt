@@ -2,6 +2,7 @@ package de.vulpescloud.node
 
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.commands.ClearCommand
+import de.vulpescloud.node.commands.ExitCommand
 import de.vulpescloud.node.terminal.Terminal
 
 class Node {
@@ -15,7 +16,10 @@ class Node {
         terminal.init()
 
         commandProvider.initialize()
-        commandProvider.register(ClearCommand(terminal))
+        commandProvider.apply {
+            register(ClearCommand(terminal))
+            register(ExitCommand())
+        }
 
         terminal.allowInput()
     }
