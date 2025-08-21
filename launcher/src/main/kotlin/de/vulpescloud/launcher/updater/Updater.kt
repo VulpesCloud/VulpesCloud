@@ -15,7 +15,13 @@ object Updater {
      */
     fun updateDependency(jarName: String) {
         val checksum = ChecksumUtil.returnChecksumJson().getString(jarName)
-        val target = File("launcher/dependencies/$jarName")
+
+        val depsFolder = File("launcher/dependencies")
+        if (!depsFolder.exists()) {
+            depsFolder.mkdirs()
+        }
+
+        val target = File("launcher/dependencies/$jarName.jar")
         val branchName = config.autoUpdatesBranch()
 
         val downloadUri = URI("${GITHUBURL}refs/heads/$branchName/$jarName.jar")

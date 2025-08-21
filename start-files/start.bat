@@ -1,1 +1,1 @@
-java -jar vulpescloud-launcher.jar
+java --enable-native-access=ALL-UNNAMED -jar vulpescloud-launcher.jar

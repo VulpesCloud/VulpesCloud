@@ -80,7 +80,7 @@ class VulpesLauncher {
                 )
 
                 modulesToUpdate.forEach { module ->
-                    Updater.updateDependency("$module.jar")
+                    Updater.updateDependency(module)
                 }
             }
 

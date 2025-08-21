@@ -3,6 +3,7 @@ package de.vulpescloud.node
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.commands.ClearCommand
 import de.vulpescloud.node.commands.ExitCommand
+import de.vulpescloud.node.commands.HelpCommand
 import de.vulpescloud.node.terminal.Terminal
 
 class Node {
@@ -18,6 +19,7 @@ class Node {
         commandProvider.initialize()
         commandProvider.apply {
             register(ClearCommand(terminal))
+            register(HelpCommand(commandProvider))
             register(ExitCommand())
         }
 
