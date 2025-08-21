@@ -73,7 +73,6 @@ val generateDependenciesJson by tasks.registering {
 
 tasks.named<ShadowJar>("shadowJar") {
     dependsOn(generateDependenciesJson)
-    val buildDirectory = project.layout.buildDirectory
     from(layout.buildDirectory.file("dependencies.json")) {
         rename { "dependencies.json" }
     }
@@ -86,8 +85,6 @@ tasks.shadowJar {
         } else {
             "${version}_${getGitBranch()}@${getGitCommit()}"
         }
-
-    exportDependenciesJson()
 
     manifest {
         attributes["Main-Class"] = "de.vulpescloud.node.Node"

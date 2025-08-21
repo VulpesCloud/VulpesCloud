@@ -38,7 +38,7 @@ import java.util.jar.JarFile
 class DependencyDownloader {
     private val DOWNLOAD_DIR = Path.of("launcher/dependencies")
 
-    fun downloadDependency() {
+    fun downloadDependencies() {
         val jarFile = JarFile(File("launcher/dependencies/vulpescloud-node.jar"))
         val dependenciesJson = jarFile.getJarEntry("dependencies.json")
 
@@ -50,7 +50,7 @@ class DependencyDownloader {
         val reader = InputStreamReader(jarFile.getInputStream(dependenciesJson))
         val json = JSONObject(reader.readText())
 
-        val jsonArray = JSONObject(json).getJSONArray("dependencies")
+        val jsonArray = json.getJSONArray("dependencies")
 
         for (i in 0 until jsonArray.length()) {
             jsonArray.getJSONObject(i).let { json ->
@@ -62,6 +62,7 @@ class DependencyDownloader {
                 val file = this.DOWNLOAD_DIR.resolve("$artifact-$version.jar").toFile()
 
                 if (!file.exists()) {
+                    println("Downloading dependency: $artifact-$version.jar")
                     this.download(url, file)
                 }
                 VulpesLauncher.CLASS_LOADER.addURL(file.toURI().toURL())

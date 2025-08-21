@@ -21,7 +21,7 @@ fun Project.exportDependenciesJson(
         outputFolder.mkdirs()
     }
 
-    configurations.getByName("runtimeClasspath")
+    configurations.getByName("compileClasspath")
         .resolvedConfiguration
         .resolvedArtifacts
         .forEach { artifact ->
@@ -53,6 +53,7 @@ fun Project.exportDependenciesJson(
         }
 
     val root = JSONObject().put("dependencies", depsArray)
+    println("Dependencies JSON: $root")
     val target = layout.buildDirectory.file(fileName).get().asFile
     target.writeText(root.toString(2))
     return target.absolutePath
@@ -85,7 +86,7 @@ fun generateCheckSums(destPath: Path, jars: List<String>) {
     val checksumJson = JSONObject()
 
     jars.forEach { jar ->
-        checksumJson.put(jar.removePrefix("vulpescloud-").removeSuffix(".jar"), getFileChecksum(destPath.resolve(jar).toFile()))
+        checksumJson.put(jar.removeSuffix(".jar"), getFileChecksum(destPath.resolve(jar).toFile()))
     }
 
     Files.writeString(destPath.resolve("checksums.json"), checksumJson.toString(4))

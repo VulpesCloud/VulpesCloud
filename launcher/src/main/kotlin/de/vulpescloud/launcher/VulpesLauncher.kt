@@ -45,8 +45,6 @@ class VulpesLauncher {
         fun main(args: Array<String>) {
             println("Checking for dependencies to download")
 
-            ChecksumUtil.downloadChecksumJson()
-
             if (!config.autoUpdatesEnabled()) {
                 System.err.println("╭────────────────────────────────────────────────────────╮")
                 System.err.println("│                                                        │")
@@ -69,6 +67,10 @@ class VulpesLauncher {
                 }
 
             } else {
+                ChecksumUtil.downloadChecksumJson()
+
+                println("Checking for updates...")
+
                 val modulesToUpdate = listOf(
                     "vulpescloud-api",
                     "vulpescloud-bridge",
@@ -83,7 +85,7 @@ class VulpesLauncher {
             }
 
             // Download dependencies
-            DependencyDownloader().downloadDependency()
+            DependencyDownloader().downloadDependencies()
 
             this.CLASS_LOADER.addURL(Path.of("launcher/dependencies/vulpescloud-api.jar").toUri().toURL())
             this.CLASS_LOADER.addURL(bootFile().toURI().toURL())

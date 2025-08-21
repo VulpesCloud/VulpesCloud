@@ -87,7 +87,7 @@ class Terminal {
 
     private fun printHeader() {
         print("")
-        print("   <color:#ff700a>VulpesCloud</color> <dark_gray>-</dark_gray> <gray><color:#ff700a>v${CloudVersion.getVersion()}</color>#${CloudVersion.getGitCommit()}</gray>")
+        print("   <color:#ff700a>VulpesCloud</color> <dark_gray>-</dark_gray> <gray><color:#ff700a>v${CloudVersion.getVersion()}</color>@${CloudVersion.getGitCommit()}</gray>")
         print("             <dark_gray>[<color:#008ff5>Swift</color>]</dark_gray>")
         print("")
     }
