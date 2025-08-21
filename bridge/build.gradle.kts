@@ -25,6 +25,7 @@
 plugins {
     kotlin("jvm") version "2.2.10"
     id("org.jetbrains.dokka") version "2.0.0"
+    alias(libs.plugins.shadow)
 }
 
 repositories {
@@ -33,17 +34,9 @@ repositories {
 
 java {
     withSourcesJar()
-    withJavadocJar()
 }
 
 dependencies {
     compileOnly(project(":api"))
     compileOnly(rootProject.libs.annotations)
-    compileOnly(libs.jedis)
-    compileOnly(libs.jedisWrapper)
-}
-
-tasks.jar {
-    archiveFileName.set("vulpescloud-bridge.jar")
-    destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs").get().asFile)
 }

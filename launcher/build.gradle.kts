@@ -39,27 +39,8 @@ java {
     withJavadocJar()
 }
 
-tasks.jar {
-    dependsOn(project(":api").tasks.jar)
-    dependsOn(project(":bridge").tasks.jar)
-    dependsOn(project(":node").tasks.shadowJar)
-    dependsOn(project(":wrapper").tasks.shadowJar)
-    dependsOn(project(":connector").tasks.shadowJar)
-    manifest {
-        attributes["Main-Class"] = "de.vulpescloud.launcher.VulpesLauncher"
-    }
-    archiveFileName.set("vulpescloud-launcher.jar")
-}
-
 tasks.shadowJar {
-    dependsOn(project(":api").tasks.jar)
-    dependsOn(project(":bridge").tasks.jar)
-    dependsOn(project(":node").tasks.shadowJar)
-    dependsOn(project(":wrapper").tasks.shadowJar)
-    dependsOn(project(":connector").tasks.shadowJar)
     manifest {
         attributes["Main-Class"] = "de.vulpescloud.launcher.VulpesLauncher"
     }
-    archiveFileName.set("vulpescloud-launcher.jar")
-    destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs").get().asFile)
 }

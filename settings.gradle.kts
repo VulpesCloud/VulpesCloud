@@ -23,13 +23,11 @@
  */
 
 pluginManagement {
-    //includeBuild("build-helper")
+    includeBuild("build-helper")
     repositories {
         gradlePluginPortal()
     }
 }
-
-enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
 
 rootProject.name = "VulpesCloud"
 include("api")

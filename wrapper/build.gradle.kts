@@ -11,16 +11,9 @@ repositories {
 dependencies {
     compileOnly(project(":api"))
     compileOnly(project(":bridge"))
-    implementation(libs.jedisWrapper)
-    implementation(libs.kotlin.stdlib)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")
-    implementation(libs.jedis)
+    implementation(libs.bundles.kotlin)
     implementation(libs.logbackCore)
     implementation(libs.logbackClassic)
-    implementation(libs.hikariCP)
-    implementation(libs.mariadb.java.client)
-    implementation(libs.exposed.core)
-    implementation(libs.exposed.jdbc)
     implementation(libs.nightConfig.json)
 }
 

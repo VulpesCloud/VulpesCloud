@@ -24,6 +24,7 @@
 
 plugins {
     kotlin("jvm") version "2.2.10"
+    alias(libs.plugins.shadow)
 }
 
 dependencies {
@@ -32,18 +33,10 @@ dependencies {
     compileOnly(libs.nightConfig.toml)
     compileOnly(libs.nightConfig.yaml)
     compileOnly(libs.json)
-    compileOnly(libs.exposed.core)
-    compileOnly(libs.exposed.jdbc)
     compileOnly(libs.kotlinx.serialization)
-    compileOnly(libs.jedisWrapper)
 }
 
 java {
     withSourcesJar()
     withJavadocJar()
-}
-
-tasks.jar {
-    archiveFileName.set("vulpescloud-api.jar")
-    destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs").get().asFile)
 }

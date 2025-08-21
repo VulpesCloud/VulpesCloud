@@ -1,6 +1,5 @@
-package de.vulpescloud
+package de.vulpescloud.node
 
-import de.vulpescloud.node.Node
 import org.slf4j.LoggerFactory
 
 object NodeShutdown {

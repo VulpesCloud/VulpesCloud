@@ -17,6 +17,7 @@ out/
 !**/src/main/**/out/
 !**/src/test/**/out/
 .idea/workspace.xml
+.idea/gradle.xml
 
 ### Eclipse ###
 .apt_generated

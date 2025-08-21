@@ -1,7 +1,7 @@
 package de.vulpescloud.launcher.util
 
 import de.vulpescloud.launcher.VulpesLauncher.Companion.config
-import de.vulpescloud.launcher.VulpesLauncher.Companion.githubURL
+import de.vulpescloud.launcher.VulpesLauncher.Companion.GITHUBURL
 import org.json.JSONObject
 import java.io.File
 import java.net.URI
@@ -31,11 +31,7 @@ object ChecksumUtil {
         Files.writeString(
             Path("launcher/checksums.json"),
             String(
-                if (config.autoUpdatesBranch() == "jenkins") {
-                    URI("https://jenkins.vulpescloud.de/job/VulpesCloud/lastSuccessfulBuild/artifact/build/meta-repo/checksums.json")
-                } else {
-                    URI(githubURL + config.autoUpdatesBranch() + "/checksums.json")
-                }
+                URI(GITHUBURL + config.autoUpdatesBranch() + "/checksums.json")
                 .toURL()
                 .openStream()
                 .readAllBytes()

@@ -30,54 +30,43 @@ import java.io.BufferedOutputStream
 import java.io.File
 import java.io.FileOutputStream
 import java.io.IOException
+import java.io.InputStreamReader
 import java.net.URI
 import java.nio.file.Path
+import java.util.jar.JarFile
 
 class DependencyDownloader {
     private val DOWNLOAD_DIR = Path.of("launcher/dependencies")
 
-    fun downloadDependency(uri: URI) {
-        val jsonArray = JSONObject(String(uri.toURL().openStream().readAllBytes())).getJSONArray("dependencys")
+    fun downloadDependency() {
+        val jarFile = JarFile(File("launcher/dependencies/vulpescloud-node.jar"))
+        val dependenciesJson = jarFile.getJarEntry("dependencies.json")
+
+        if (dependenciesJson == null) {
+            System.err.println("No dependencies.json found in the vulpescloud-node.jar")
+            return
+        }
+
+        val reader = InputStreamReader(jarFile.getInputStream(dependenciesJson))
+        val json = JSONObject(reader.readText())
+
+        val jsonArray = JSONObject(json).getJSONArray("dependencies")
 
         for (i in 0 until jsonArray.length()) {
             jsonArray.getJSONObject(i).let { json ->
-                println(json.toString())
-                if (json.getString("location") == "CUSTOM") {
-                    download(
-                        Dependency(
-                            json.getString("group"),
-                            json.getString("artifact"),
-                            json.getString("version"),
-                            json.getString("location"),
-                            json.getString("url")
-                        )
-                    )
-                } else {
-                    download(
-                        Dependency(
-                            json.getString("group"),
-                            json.getString("artifact"),
-                            json.getString("version"),
-                            json.getString("location")
-                        )
-                    )
+                val url = json.getString("url")
+                val artifact = json.getString("artifact")
+                val version = json.getString("version")
+
+                this.DOWNLOAD_DIR.toFile().mkdirs()
+                val file = this.DOWNLOAD_DIR.resolve("$artifact-$version.jar").toFile()
+
+                if (!file.exists()) {
+                    this.download(url, file)
                 }
+                VulpesLauncher.CLASS_LOADER.addURL(file.toURI().toURL())
             }
         }
-    }
-
-    private fun download(dependency: Dependency) {
-        this.DOWNLOAD_DIR.toFile().mkdirs()
-        val file = this.DOWNLOAD_DIR.resolve("$dependency.jar").toFile()
-
-        if (!file.exists()) {
-            this.download(dependency.downloadUrl(), file)
-        }
-        VulpesLauncher.CLASS_LOADER.addURL(file.toURI().toURL())
-    }
-
-    fun download(vararg dependencies: Dependency) {
-        downloadDependenciesWithProgress(listOf(*dependencies))
     }
 
     private fun download(url: String, file: File) {
@@ -95,37 +84,4 @@ class DependencyDownloader {
             e.printStackTrace()
         }
     }
-
-    private fun downloadDependenciesWithProgress(dependencies: List<Dependency>) {
-        val totalDependencies = dependencies.size
-        for (i in 0 until totalDependencies) {
-            val dependency = dependencies[i]
-            logProgress(totalDependencies, i + 1, dependency)
-            this.download(dependency)
-        }
-
-        clearTerminal()
-    }
-
-    private fun logProgress(total: Int, current: Int, dependency: Dependency) {
-        if (findDependency(dependency).exists()) {
-            return
-        }
-        System.out.printf("Downloading Dependency - %s %d %d \n", dependency.artifactId, current, total)
-    }
-
-    private fun clearTerminal() {
-        defaultSys("\r", " ".repeat(80), "\r")
-    }
-
-    private fun defaultSys(vararg messages: String) {
-        for (message in messages) {
-            print(message)
-        }
-    }
-
-    private fun findDependency(dependency: Dependency): File {
-        return this.DOWNLOAD_DIR.resolve("$dependency.jar").toFile()
-    }
-
 }

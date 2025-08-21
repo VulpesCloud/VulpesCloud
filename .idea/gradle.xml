@@ -4,6 +4,17 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="$PROJECT_DIR$/build-helper" name="build-helper">
+                <projects>
+                  <project path="$PROJECT_DIR$/build-helper" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="gradleJvm" value="jbrsdk_jcef-21" />
         <option name="modules">
@@ -11,6 +22,7 @@
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/api" />
             <option value="$PROJECT_DIR$/bridge" />
+            <option value="$PROJECT_DIR$/build-helper" />
             <option value="$PROJECT_DIR$/connector" />
             <option value="$PROJECT_DIR$/dokka" />
             <option value="$PROJECT_DIR$/launcher" />

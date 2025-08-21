@@ -1,3 +1,6 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.kotlin.dsl.named
+
 /*
  * MIT License
  *
@@ -31,26 +34,26 @@ plugins {
 dependencies {
     compileOnly(project(":launcher"))
     compileOnly(project(":api"))
-    implementation(libs.jline)
+    compileOnly(libs.jline)
     compileOnly(libs.json)
     compileOnly(libs.slf4jApi)
-    implementation(libs.logbackCore)
-    implementation(libs.logbackClassic)
-    implementation(libs.cloud)
-    implementation(libs.cloud.kotlin.coroutines)
-    implementation(libs.cloud.kotlin.coroutines.annotations)
-    implementation(libs.cloud.extension)
-    implementation(libs.cloud.annotations)
-    implementation(libs.cloud.processors.confirmation)
+    compileOnly(libs.logbackCore)
+    compileOnly(libs.logbackClassic)
+    compileOnly(libs.cloud)
+    compileOnly(libs.cloud.kotlin.coroutines)
+    compileOnly(libs.cloud.kotlin.coroutines.annotations)
+    compileOnly(libs.cloud.extension)
+    compileOnly(libs.cloud.annotations)
+    compileOnly(libs.cloud.processors.confirmation)
     compileOnly(libs.kotlin.stdlib)
     compileOnly(libs.nightConfig.json)
     compileOnly(libs.nightConfig.toml)
     compileOnly(libs.nightConfig.yaml)
-    implementation("com.github.ben-manes.caffeine:caffeine:3.2.2")
-    implementation(libs.adventure.text.serializer.ansi)
-    implementation(libs.adventure.text.serializer.legacy)
-    implementation(libs.adventure.text.minimessage)
-    implementation(rootProject.libs.guava)
+    compileOnly("com.github.ben-manes.caffeine:caffeine:3.2.2")
+    compileOnly(libs.adventure.text.serializer.ansi)
+    compileOnly(libs.adventure.text.serializer.legacy)
+    compileOnly(libs.adventure.text.minimessage)
+    compileOnly(libs.guava)
 }
 
 sourceSets { getByName("main") { kotlin { srcDir("src/main/kotlin") } } }
@@ -60,19 +63,33 @@ java {
     withJavadocJar()
 }
 
+val generateDependenciesJson by tasks.registering {
+    val outFile = layout.buildDirectory.file("dependencies.json")
+    outputs.file(outFile)
+    doLast {
+        exportDependenciesJson("dependencies.json")
+    }
+}
+
+tasks.named<ShadowJar>("shadowJar") {
+    dependsOn(generateDependenciesJson)
+    from(layout.buildDirectory.file("dependencies.json")) {
+        rename { "dependencies.json" }
+    }
+}
+
 tasks.shadowJar {
     val buildNumber = System.getenv("BUILD_NUMBER")
-    //    val versionString = if (buildNumber != null) {
-    //        "${version}_${getGitBranch()}@${getGitCommit()}_$buildNumber"
-    //    } else {
-    //        "${version}_${getGitBranch()}@${getGitCommit()}"
-    //    }
-    val versionString = "0.0.0-UNKNOWN"
+        val versionString = if (buildNumber != null) {
+            "${version}_${getGitBranch()}@${getGitCommit()}_$buildNumber"
+        } else {
+            "${version}_${getGitBranch()}@${getGitCommit()}"
+        }
+
+    exportDependenciesJson()
 
     manifest {
         attributes["Main-Class"] = "de.vulpescloud.node.Node"
         attributes["Implementation-Version"] = versionString
     }
-    archiveFileName.set("vulpescloud-node.jar")
-    destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs").get().asFile)
 }

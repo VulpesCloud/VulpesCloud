@@ -1,5 +1,6 @@
 package de.vulpescloud.node.terminal
 
+import de.vulpescloud.node.CloudVersion
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
@@ -86,9 +87,8 @@ class Terminal {
 
     private fun printHeader() {
         print("")
-        //print("   &oVulpesCloud &8- &7${CloudVersion.getVersion()}#${CloudVersion.getGitCommit()}")
-        print("   <color:#ff700a>VulpesCloud</color> <dark_gray>-</dark_gray> <gray>v0.0.0#000000</gray>")
-        print("        <dark_gray>[<color:#008ff5>Swift</color>]</dark_gray>")
+        print("   <color:#ff700a>VulpesCloud</color> <dark_gray>-</dark_gray> <gray><color:#ff700a>v${CloudVersion.getVersion()}</color>#${CloudVersion.getGitCommit()}</gray>")
+        print("             <dark_gray>[<color:#008ff5>Swift</color>]</dark_gray>")
         print("")
     }
 

@@ -26,29 +26,24 @@ package de.vulpescloud.launcher
 
 import de.vulpescloud.launcher.config.Config
 import de.vulpescloud.launcher.dependency.DependencyDownloader
-import de.vulpescloud.launcher.updater.*
+import de.vulpescloud.launcher.updater.Updater
 import de.vulpescloud.launcher.util.ChecksumUtil
 import java.io.File
-import java.net.URI
 import java.nio.file.Path
 import java.util.concurrent.TimeUnit
 import java.util.jar.Attributes
 import java.util.jar.JarFile
-import kotlin.system.exitProcess
 
 class VulpesLauncher {
     companion object {
         val CLASS_LOADER = VulpesClassLoader()
         private val DEPENDENCY_DIR: Path = Path.of("launcher/dependencies")
-        const val githubURL = "https://github.com/VulpesCloud/VulpesCloud-meta/raw/"
         val config = Config()
+        const val GITHUBURL = "https://github.com/VulpesCloud/VulpesCloud-meta/raw/"
 
         @JvmStatic
         fun main(args: Array<String>) {
-            println("Checking for Dependency's to download")
-
-            // Download Dependency's
-            DependencyDownloader().downloadDependency(URI("https://raw.githubusercontent.com/VulpesCloud/VulpesCloud-meta/refs/heads/main/dependency.json"))
+            println("Checking for dependencies to download")
 
             ChecksumUtil.downloadChecksumJson()
 
@@ -60,9 +55,9 @@ class VulpesLauncher {
                 System.err.println("│  VulpesCloud is currently running in Development Mode! │")
                 System.err.println("│                                                        │")
                 System.err.println("│  Please make sure that you have all VulpesCloud jars   │")
-                System.err.println("│ in the right place, otherwise the Cloud will shut down │")
+                System.err.println("│ in the right place, otherwise the cloud will shut down │")
                 System.err.println("│                                                        │")
-                System.err.println("│   For more Information, please ask on our Discord!     │")
+                System.err.println("│   For more information, please ask on our Discord!     │")
                 System.err.println("│         VulpesCloud will start in 5 seconds!           │")
                 System.err.println("│                                                        │")
                 System.err.println("╰────────────────────────────────────────────────────────╯")
@@ -74,12 +69,21 @@ class VulpesLauncher {
                 }
 
             } else {
-                APIUpdater().updateAPI()
-                BridgeUpdater().updateBridge()
-                ConnectorUpdater().updateConnector()
-                NodeUpdater().updateNode()
-                WrapperUpdater().updateWrapper()
+                val modulesToUpdate = listOf(
+                    "vulpescloud-api",
+                    "vulpescloud-bridge",
+                    "vulpescloud-connector",
+                    "vulpescloud-node",
+                    "vulpescloud-wrapper"
+                )
+
+                modulesToUpdate.forEach { module ->
+                    Updater.updateDependency("$module.jar")
+                }
             }
+
+            // Download dependencies
+            DependencyDownloader().downloadDependency()
 
             this.CLASS_LOADER.addURL(Path.of("launcher/dependencies/vulpescloud-api.jar").toUri().toURL())
             this.CLASS_LOADER.addURL(bootFile().toURI().toURL())
