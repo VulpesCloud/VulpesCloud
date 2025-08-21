@@ -51,10 +51,7 @@ allprojects {
     dependencies {
         compileOnly(rootProject.libs.annotations)
         compileOnly(rootProject.libs.gson)
-        compileOnly(rootProject.libs.guava)
         compileOnly(kotlin("reflect"))
-        compileOnly(rootProject.libs.koin)
-        compileOnly(rootProject.libs.kotlin.stdlib)
     }
 
     publishing {

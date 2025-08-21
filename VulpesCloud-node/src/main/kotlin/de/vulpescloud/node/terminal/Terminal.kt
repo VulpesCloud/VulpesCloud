@@ -87,8 +87,8 @@ class Terminal {
     private fun printHeader() {
         print("")
         //print("   &oVulpesCloud &8- &7${CloudVersion.getVersion()}#${CloudVersion.getGitCommit()}")
-        print("   &oVulpesCloud &8- &70.0.0#000000")
-        print("        &8[<>Swift&8]")
+        print("   <color:#ff700a>VulpesCloud</color> <dark_gray>-</dark_gray> <gray>v0.0.0#000000</gray>")
+        print("        <dark_gray>[<color:#008ff5>Swift</color>]</dark_gray>")
         print("")
     }
 

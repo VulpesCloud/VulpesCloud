@@ -24,17 +24,15 @@
 
 plugins {
     kotlin("jvm") version "2.2.10"
-    //id("com.github.johnrengelman.shadow") version "8.1.1"
+    // id("com.github.johnrengelman.shadow") version "8.1.1"
     alias(libs.plugins.shadow)
 }
 
 dependencies {
     compileOnly(project(":VulpesCloud-launcher"))
     compileOnly(project(":VulpesCloud-api"))
-    compileOnly(libs.jline)
+    implementation(libs.jline)
     compileOnly(libs.json)
-    implementation(libs.jedis)
-    implementation(libs.jedisWrapper)
     compileOnly(libs.slf4jApi)
     implementation(libs.logbackCore)
     implementation(libs.logbackClassic)
@@ -45,23 +43,17 @@ dependencies {
     implementation(libs.cloud.annotations)
     implementation(libs.cloud.processors.confirmation)
     compileOnly(libs.kotlin.stdlib)
-    compileOnly(libs.hikariCP)
-    compileOnly(libs.mariadb.java.client)
     compileOnly(libs.nightConfig.json)
     compileOnly(libs.nightConfig.toml)
     compileOnly(libs.nightConfig.yaml)
-    implementation(libs.exposed.core)
-    implementation(libs.exposed.jdbc)
     implementation("com.github.ben-manes.caffeine:caffeine:3.2.2")
+    implementation(libs.adventure.text.serializer.ansi)
+    implementation(libs.adventure.text.serializer.legacy)
+    implementation(libs.adventure.text.minimessage)
+    implementation(rootProject.libs.guava)
 }
 
-sourceSets {
-    getByName("main") {
-        kotlin {
-            srcDir("src/main/kotlin")
-        }
-    }
-}
+sourceSets { getByName("main") { kotlin { srcDir("src/main/kotlin") } } }
 
 java {
     withSourcesJar()
@@ -70,15 +62,15 @@ java {
 
 tasks.shadowJar {
     val buildNumber = System.getenv("BUILD_NUMBER")
-//    val versionString = if (buildNumber != null) {
-//        "${version}_${getGitBranch()}@${getGitCommit()}_$buildNumber"
-//    } else {
-//        "${version}_${getGitBranch()}@${getGitCommit()}"
-//    }
+    //    val versionString = if (buildNumber != null) {
+    //        "${version}_${getGitBranch()}@${getGitCommit()}_$buildNumber"
+    //    } else {
+    //        "${version}_${getGitBranch()}@${getGitCommit()}"
+    //    }
     val versionString = "0.0.0-UNKNOWN"
 
     manifest {
-        attributes["Main-Class"] = "de.vulpescloud.node.NodeLauncher"
+        attributes["Main-Class"] = "de.vulpescloud.node.Node"
         attributes["Implementation-Version"] = versionString
     }
     archiveFileName.set("vulpescloud-node.jar")
