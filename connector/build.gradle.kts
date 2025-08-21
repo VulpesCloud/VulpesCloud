@@ -23,27 +23,59 @@
  */
 
 plugins {
+    id("java")
     kotlin("jvm") version "2.2.10"
-    id("org.jetbrains.dokka") version "2.0.0"
+    //id("io.papermc.paperweight.userdev") version "1.7.4"
+    alias(libs.plugins.shadow)
 }
 
 repositories {
     mavenCentral()
+    maven("https://repo.papermc.io/repository/maven-public/")
+    maven {
+        url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
+    }
+    maven("https://jitpack.io")
+}
+
+dependencies {
+    //paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
+    compileOnly(project(":api"))
+    compileOnly(project(":bridge"))
+    compileOnly(project(":wrapper"))
+
+    //implementation("dev.jorel:commandapi-velocity-shade:10.1.2")
+    //implementation("dev.jorel:commandapi-bukkit-kotlin:10.1.2")
+
+
+    compileOnly(libs.jedis)
+    compileOnly(libs.jedisWrapper)
+
+    compileOnly(libs.exposed.jdbc)
+    compileOnly(libs.exposed.core)
+
+    compileOnly(libs.paper)
+    compileOnly(libs.velocity)
+    annotationProcessor(libs.velocity)
 }
 
 java {
     withSourcesJar()
-    withJavadocJar()
 }
 
-dependencies {
-    compileOnly(project(":VulpesCloud-api"))
-    compileOnly(rootProject.libs.annotations)
-    compileOnly(libs.jedis)
-    compileOnly(libs.jedisWrapper)
-}
+//sourceSets {
+//    getByName("main") {
+//        kotlin {
+//            srcDir("src/main/kotlin")
+//        }
+//    }
+//}
 
-tasks.jar {
-    archiveFileName.set("vulpescloud-bridge.jar")
+//paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
+tasks.shadowJar {
+    archiveFileName.set("vulpescloud-connector.jar")
+    //dependsOn(":api:jar")
+    //dependsOn(":bridge:jar")
+    //relocate("dev.jorel.commandapi", "de.vulpescloud.connector.commandapi")
     destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs").get().asFile)
 }

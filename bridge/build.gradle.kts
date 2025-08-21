@@ -24,14 +24,11 @@
 
 plugins {
     kotlin("jvm") version "2.2.10"
-    // id("com.github.johnrengelman.shadow") version "8.1.1"
-    alias(libs.plugins.shadow)
+    id("org.jetbrains.dokka") version "2.0.0"
 }
 
-dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.10")
-    implementation(libs.nightConfig.toml)
-    implementation(libs.json)
+repositories {
+    mavenCentral()
 }
 
 java {
@@ -39,27 +36,14 @@ java {
     withJavadocJar()
 }
 
-tasks.jar {
-    dependsOn(project(":VulpesCloud-api").tasks.jar)
-    dependsOn(project(":VulpesCloud-bridge").tasks.jar)
-    dependsOn(project(":VulpesCloud-node").tasks.shadowJar)
-    dependsOn(project(":VulpesCloud-wrapper").tasks.shadowJar)
-    dependsOn(project(":VulpesCloud-connector").tasks.shadowJar)
-    manifest {
-        attributes["Main-Class"] = "de.vulpescloud.launcher.VulpesLauncher"
-    }
-    archiveFileName.set("vulpescloud-launcher.jar")
+dependencies {
+    compileOnly(project(":api"))
+    compileOnly(rootProject.libs.annotations)
+    compileOnly(libs.jedis)
+    compileOnly(libs.jedisWrapper)
 }
 
-tasks.shadowJar {
-    dependsOn(project(":VulpesCloud-api").tasks.jar)
-    dependsOn(project(":VulpesCloud-bridge").tasks.jar)
-    dependsOn(project(":VulpesCloud-node").tasks.shadowJar)
-    dependsOn(project(":VulpesCloud-wrapper").tasks.shadowJar)
-    dependsOn(project(":VulpesCloud-connector").tasks.shadowJar)
-    manifest {
-        attributes["Main-Class"] = "de.vulpescloud.launcher.VulpesLauncher"
-    }
-    archiveFileName.set("vulpescloud-launcher.jar")
+tasks.jar {
+    archiveFileName.set("vulpescloud-bridge.jar")
     destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs").get().asFile)
 }

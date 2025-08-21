@@ -23,59 +23,43 @@
  */
 
 plugins {
-    id("java")
     kotlin("jvm") version "2.2.10"
-    //id("io.papermc.paperweight.userdev") version "1.7.4"
+    // id("com.github.johnrengelman.shadow") version "8.1.1"
     alias(libs.plugins.shadow)
 }
 
-repositories {
-    mavenCentral()
-    maven("https://repo.papermc.io/repository/maven-public/")
-    maven {
-        url = uri("https://s01.oss.sonatype.org/content/repositories/snapshots")
-    }
-    maven("https://jitpack.io")
-}
-
 dependencies {
-    //paperweight.paperDevBundle("1.21.1-R0.1-SNAPSHOT")
-    compileOnly(project(":VulpesCloud-api"))
-    compileOnly(project(":VulpesCloud-bridge"))
-    compileOnly(project(":VulpesCloud-wrapper"))
-
-    //implementation("dev.jorel:commandapi-velocity-shade:10.1.2")
-    //implementation("dev.jorel:commandapi-bukkit-kotlin:10.1.2")
-
-
-    compileOnly(libs.jedis)
-    compileOnly(libs.jedisWrapper)
-
-    compileOnly(libs.exposed.jdbc)
-    compileOnly(libs.exposed.core)
-
-    compileOnly(libs.paper)
-    compileOnly(libs.velocity)
-    annotationProcessor(libs.velocity)
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.2.10")
+    implementation(libs.nightConfig.toml)
+    implementation(libs.json)
 }
 
 java {
     withSourcesJar()
+    withJavadocJar()
 }
 
-//sourceSets {
-//    getByName("main") {
-//        kotlin {
-//            srcDir("src/main/kotlin")
-//        }
-//    }
-//}
+tasks.jar {
+    dependsOn(project(":api").tasks.jar)
+    dependsOn(project(":bridge").tasks.jar)
+    dependsOn(project(":node").tasks.shadowJar)
+    dependsOn(project(":wrapper").tasks.shadowJar)
+    dependsOn(project(":connector").tasks.shadowJar)
+    manifest {
+        attributes["Main-Class"] = "de.vulpescloud.launcher.VulpesLauncher"
+    }
+    archiveFileName.set("vulpescloud-launcher.jar")
+}
 
-//paperweight.reobfArtifactConfiguration = io.papermc.paperweight.userdev.ReobfArtifactConfiguration.MOJANG_PRODUCTION
 tasks.shadowJar {
-    archiveFileName.set("vulpescloud-connector.jar")
-    //dependsOn(":VulpesCloud-api:jar")
-    //dependsOn(":VulpesCloud-bridge:jar")
-    //relocate("dev.jorel.commandapi", "de.vulpescloud.connector.commandapi")
+    dependsOn(project(":api").tasks.jar)
+    dependsOn(project(":bridge").tasks.jar)
+    dependsOn(project(":node").tasks.shadowJar)
+    dependsOn(project(":wrapper").tasks.shadowJar)
+    dependsOn(project(":connector").tasks.shadowJar)
+    manifest {
+        attributes["Main-Class"] = "de.vulpescloud.launcher.VulpesLauncher"
+    }
+    archiveFileName.set("vulpescloud-launcher.jar")
     destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs").get().asFile)
 }

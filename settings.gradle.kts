@@ -29,12 +29,14 @@ pluginManagement {
     }
 }
 
+enableFeaturePreview("STABLE_CONFIGURATION_CACHE")
+
 rootProject.name = "VulpesCloud"
-include("VulpesCloud-api")
-include("VulpesCloud-node")
-include("VulpesCloud-launcher")
-include("VulpesCloud-wrapper")
-include("VulpesCloud-connector")
-include("VulpesCloud-bridge")
+include("api")
+include("node")
+include("launcher")
+include("wrapper")
+include("connector")
+include("bridge")
 
 include("dokka")

@@ -9,8 +9,8 @@ repositories {
 }
 
 dependencies {
-    compileOnly(project(":VulpesCloud-api"))
-    compileOnly(project(":VulpesCloud-bridge"))
+    compileOnly(project(":api"))
+    compileOnly(project(":bridge"))
     implementation(libs.jedisWrapper)
     implementation(libs.kotlin.stdlib)
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.10.2")

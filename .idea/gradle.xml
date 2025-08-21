@@ -5,17 +5,17 @@
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleJvm" value="temurin-21" />
+        <option name="gradleJvm" value="jbrsdk_jcef-21" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/VulpesCloud-api" />
-            <option value="$PROJECT_DIR$/VulpesCloud-bridge" />
-            <option value="$PROJECT_DIR$/VulpesCloud-connector" />
-            <option value="$PROJECT_DIR$/VulpesCloud-launcher" />
-            <option value="$PROJECT_DIR$/VulpesCloud-node" />
-            <option value="$PROJECT_DIR$/VulpesCloud-wrapper" />
+            <option value="$PROJECT_DIR$/api" />
+            <option value="$PROJECT_DIR$/bridge" />
+            <option value="$PROJECT_DIR$/connector" />
             <option value="$PROJECT_DIR$/dokka" />
+            <option value="$PROJECT_DIR$/launcher" />
+            <option value="$PROJECT_DIR$/node" />
+            <option value="$PROJECT_DIR$/wrapper" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="true" />

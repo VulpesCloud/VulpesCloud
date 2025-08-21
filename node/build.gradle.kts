@@ -29,8 +29,8 @@ plugins {
 }
 
 dependencies {
-    compileOnly(project(":VulpesCloud-launcher"))
-    compileOnly(project(":VulpesCloud-api"))
+    compileOnly(project(":launcher"))
+    compileOnly(project(":api"))
     implementation(libs.jline)
     compileOnly(libs.json)
     compileOnly(libs.slf4jApi)

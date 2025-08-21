@@ -91,23 +91,9 @@ allprojects {
     }
 }
 
-tasks.register("cleanBuildDirs") {
-    group = "build"
-    description = "Deletes the root build/libs directory to avoid leftover jars with different commit hashes"
-    doFirst {
-        val rootLibs = rootProject.layout.buildDirectory.dir("libs").get().asFile
-        if (rootLibs.exists()) {
-            rootLibs.deleteRecursively()
-            println("✅ Deleted root build/libs directory")
-        }
-    }
-}
-
 tasks.register("buildAll") {
     group = "build"
     description = "Builds all valid subprojects using shadowJar"
-
-    dependsOn("cleanBuildDirs")
 
     dependsOn(
         subprojects.filter { sub ->
