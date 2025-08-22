@@ -1,6 +1,7 @@
 package de.vulpescloud.node.terminal
 
 import de.vulpescloud.node.CloudVersion
+import de.vulpescloud.node.Node
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
@@ -33,8 +34,7 @@ class Terminal {
         lineReader =
             LineReaderBuilder.builder()
                 .terminal(terminal)
-                // .completer(JLineTabCompleter(setupProvider, commandProvider))
-
+                .completer(JLineTabCompleter(Node.instance.commandProvider))
                 .option(LineReader.Option.AUTO_MENU_LIST, true)
                 .option(LineReader.Option.AUTO_GROUP, false)
                 .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
@@ -69,9 +69,7 @@ class Terminal {
         terminal.puts(InfoCmp.Capability.carriage_return)
         terminal
             .writer()
-            .println(
-                replaceColors(line) + Ansi.ansi().a(Ansi.Attribute.RESET).toString()
-            )
+            .println(replaceColors(line) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
         terminal.flush()
         update()
     }
@@ -87,13 +85,17 @@ class Terminal {
 
     private fun printHeader() {
         print("")
-        print("   <color:#ff700a>VulpesCloud</color> <dark_gray>-</dark_gray> <gray><color:#ff700a>v${CloudVersion.getVersion()}</color>@${CloudVersion.getGitCommit()}</gray>")
+        print(
+            "   <color:#ff700a>VulpesCloud</color> <dark_gray>-</dark_gray> <gray><color:#ff700a>v${CloudVersion.getVersion()}</color>@${CloudVersion.getGitCommit()}</gray>"
+        )
         print("             <dark_gray>[<color:#008ff5>Swift</color>]</dark_gray>")
         print("")
     }
 
     fun replaceColors(line: String): String {
-        return ansiComponentSerializer.serialize(miniMessage.deserialize(convertToMinimessage(line)))
+        return ansiComponentSerializer.serialize(
+            miniMessage.deserialize(convertToMinimessage(line))
+        )
     }
 
     private fun convertToMinimessage(input: String): String {
