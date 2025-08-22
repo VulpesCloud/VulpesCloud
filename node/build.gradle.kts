@@ -64,6 +64,7 @@ dependencies {
     compileOnly(libs.bundles.proto)
     compileOnly(libs.bundles.mongo)
     compileOnly(libs.bundles.kotlin)
+    compileOnly(libs.perfmark)
 }
 
 sourceSets { getByName("main") { kotlin { srcDir("src/main/kotlin") } } }

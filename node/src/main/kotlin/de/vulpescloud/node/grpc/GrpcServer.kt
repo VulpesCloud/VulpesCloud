@@ -5,6 +5,7 @@ import io.grpc.Server
 import io.grpc.ServerBuilder
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
+import java.io.IOException
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
@@ -13,18 +14,32 @@ class GrpcServer(
     private val services: List<BindableService> = emptyList(),
     private val shutdownTimeoutSec: Long = 5
 ) {
-
     private val logger = LoggerFactory.getLogger("gRPC Server")
-    @Volatile private var server: Server? = null
+    @Volatile
+    private var server: Server? = null
 
     suspend fun start() = withContext(Dispatchers.IO) {
-        if (server != null) return@withContext
-        server = ServerBuilder.forPort(port).apply {
-            services.forEach { addService(it) }
-        }.build().start()
-        logger.info("gRPC Server started on port $port")
+        if (server?.isTerminated == false) {
+            logger.warn("Server already running")
+            return@withContext
+        }
+
+        try {
+            server = ServerBuilder.forPort(port).apply {
+                services.forEach { addService(it) }
+            }.build().start()
+            logger.info("gRPC Server started on port $port")
+        } catch (ex: IOException) {
+            logger.error("Failed to start gRPC Server", ex)
+            throw ex
+        }
+
         Runtime.getRuntime().addShutdownHook(Thread {
-            runBlocking { stop() }
+            try {
+                runBlocking(Dispatchers.IO) { stop() }
+            } catch (ex: Exception) {
+                logger.error("Error during shutdown hook", ex)
+            }
         })
     }
 
@@ -50,8 +65,8 @@ class GrpcServer(
         scope: CoroutineScope,
         context: CoroutineContext = Dispatchers.IO
     ): Job = scope.launch(context) {
-        start()
         try {
+            start()
             awaitTermination()
         } finally {
             withContext(NonCancellable) { stop() }

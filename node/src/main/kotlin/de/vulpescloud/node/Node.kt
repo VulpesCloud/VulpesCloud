@@ -16,9 +16,8 @@ class Node {
     val configProvider = ConfigProvider()
 
     suspend fun init() = withContext(Dispatchers.Default) {
-        System.setProperty("io.netty.noUnsafe", "true")
-
         instance = this@Node
+
         terminal.init()
 
         configProvider.loadConfig()
@@ -30,7 +29,11 @@ class Node {
             register(ExitCommand())
         }
 
-        GrpcServer().serve(NodeCoroutineScope)
+        GrpcServer(
+            services = listOf(
+
+            )
+        ).serve(NodeCoroutineScope)
     }
 
     fun startInput(scope: CoroutineScope): Job =
