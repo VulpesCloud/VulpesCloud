@@ -66,7 +66,6 @@ allprojects {
     dependencies {
         compileOnly(rootProject.libs.annotations)
         compileOnly(rootProject.libs.gson)
-        compileOnly(kotlin("reflect"))
     }
 
     publishing {

@@ -43,6 +43,7 @@ dependencies {
     compileOnly(project(":launcher"))
     compileOnly(project(":api"))
     compileOnly(libs.jline)
+    compileOnly(libs.jline.console.ui)
     compileOnly(libs.json)
     compileOnly(libs.slf4jApi)
     compileOnly(libs.logbackCore)
@@ -65,6 +66,7 @@ dependencies {
     compileOnly(libs.bundles.mongo)
     compileOnly(libs.bundles.kotlin)
     compileOnly(libs.perfmark)
+    implementation(kotlin("reflect"))
 }
 
 sourceSets { getByName("main") { kotlin { srcDir("src/main/kotlin") } } }

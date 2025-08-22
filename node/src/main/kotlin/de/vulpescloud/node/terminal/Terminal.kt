@@ -15,7 +15,7 @@ import java.nio.charset.StandardCharsets
 
 class Terminal {
 
-    private lateinit var terminal: Terminal
+    lateinit var terminal: Terminal
     lateinit var lineReader: LineReaderImpl
     private val miniMessage = MiniMessage.miniMessage()
     private val ansiComponentSerializer = ANSIComponentSerializer.ansi()

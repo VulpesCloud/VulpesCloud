@@ -105,6 +105,7 @@ commandapi-velocity-shade = { group = "dev.jorel", name = "commandapi-velocity-s
 
 # console
 jline = { group = "org.jline", name = "jline", version.ref = "jline" }
+jline-console-ui = { group = "org.jline", name = "jline-console-ui", version.ref = "jline" }
 cloud = { group = "org.incendo", name = "cloud-core", version.ref = "cloud" }
 cloud-extension = { group = "org.incendo", name = "cloud-kotlin-extensions", version.ref = "cloud" }
 cloud-annotations = { group = "org.incendo", name = "cloud-annotations", version.ref = "cloud" }
