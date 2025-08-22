@@ -28,7 +28,7 @@ import org.gradle.kotlin.dsl.named
 plugins {
     kotlin("jvm") version "2.2.10"
     alias(libs.plugins.shadow)
-    kotlin("plugin.serialization") version "2.2.0"
+    kotlin("plugin.serialization") version "2.2.10"
 }
 
 repositories {
