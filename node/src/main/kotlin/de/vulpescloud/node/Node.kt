@@ -10,10 +10,12 @@ import de.vulpescloud.node.commands.HelpCommand
 import de.vulpescloud.node.commands.InfoCommand
 import de.vulpescloud.node.config.ConfigProvider
 import de.vulpescloud.node.grpc.GrpcServer
+import de.vulpescloud.node.secret.SecretFactory
 import de.vulpescloud.node.terminal.Terminal
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.util.concurrent.TimeUnit
+import kotlin.io.path.Path
 
 class Node {
     private val logger = LoggerFactory.getLogger("Node")
@@ -22,6 +24,7 @@ class Node {
     val commandProvider = CommandProvider()
     val configProvider = ConfigProvider()
     lateinit var mongoClient: MongoClient
+    lateinit var secret: String
 
     suspend fun init() = withContext(Dispatchers.Default) {
         instance = this@Node
@@ -29,6 +32,8 @@ class Node {
         terminal.init()
 
         configProvider.loadConfig()
+
+        secret = SecretFactory().loadOrCreateSecret(Path("launcher/.auth.secret"))
 
         commandProvider.initialize()
         commandProvider.apply {
