@@ -66,7 +66,7 @@ dependencies {
     compileOnly(libs.bundles.mongo)
     compileOnly(libs.bundles.kotlin)
     compileOnly(libs.perfmark)
-    implementation(kotlin("reflect"))
+    compileOnly(kotlin("reflect"))
 }
 
 sourceSets { getByName("main") { kotlin { srcDir("src/main/kotlin") } } }

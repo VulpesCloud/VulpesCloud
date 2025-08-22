@@ -11,6 +11,7 @@ import de.vulpescloud.node.commands.InfoCommand
 import de.vulpescloud.node.config.ConfigProvider
 import de.vulpescloud.node.grpc.GrpcServer
 import de.vulpescloud.node.secret.SecretFactory
+import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.terminal.Terminal
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
@@ -25,11 +26,14 @@ class Node {
     val configProvider = ConfigProvider()
     lateinit var mongoClient: MongoClient
     lateinit var secret: String
+    val setupProvider = SetupProvider()
 
     suspend fun init() = withContext(Dispatchers.Default) {
         instance = this@Node
 
         terminal.init()
+
+        setupProvider.init()
 
         configProvider.loadConfig()
 
