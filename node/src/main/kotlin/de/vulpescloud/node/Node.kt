@@ -4,6 +4,7 @@ import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.commands.ClearCommand
 import de.vulpescloud.node.commands.ExitCommand
 import de.vulpescloud.node.commands.HelpCommand
+import de.vulpescloud.node.config.ConfigProvider
 import de.vulpescloud.node.grpc.GrpcServer
 import de.vulpescloud.node.terminal.Terminal
 import kotlinx.coroutines.*
@@ -12,12 +13,16 @@ class Node {
 
     val terminal = Terminal()
     val commandProvider = CommandProvider()
+    val configProvider = ConfigProvider()
 
     suspend fun init() = withContext(Dispatchers.Default) {
         System.setProperty("io.netty.noUnsafe", "true")
 
         instance = this@Node
         terminal.init()
+
+        configProvider.loadConfig()
+
         commandProvider.initialize()
         commandProvider.apply {
             register(ClearCommand(terminal))
