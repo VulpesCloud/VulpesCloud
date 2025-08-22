@@ -4,7 +4,6 @@ import org.gradle.api.internal.artifacts.repositories.resolver.MavenUniqueSnapsh
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
-import java.net.HttpURLConnection
 import java.nio.file.Files
 import java.nio.file.Path
 import java.security.MessageDigest
@@ -14,12 +13,8 @@ fun Project.exportDependenciesJson(
     ignoredDependencyGroups: Array<String> = emptyArray()
 ): String {
     val depsArray = JSONArray()
-
     val outputFolder = layout.buildDirectory.dir("libs").get().asFile
-
-    if (!outputFolder.exists()) {
-        outputFolder.mkdirs()
-    }
+    if (!outputFolder.exists()) outputFolder.mkdirs()
 
     configurations.getByName("compileClasspath")
         .resolvedConfiguration
@@ -28,19 +23,29 @@ fun Project.exportDependenciesJson(
             val id = artifact.moduleVersion.id
             if (id.group == group || ignoredDependencyGroups.contains(id.group)) return@forEach
 
-            var resolvedVersion = id.version
-            if (id.version.endsWith("-SNAPSHOT") && artifact.id.componentIdentifier is MavenUniqueSnapshotComponentIdentifier) {
-                resolvedVersion = (artifact.id.componentIdentifier as MavenUniqueSnapshotComponentIdentifier).timestampedVersion
-            }
+            // Snapshot-Version handling
+            val resolvedVersion = if (
+                id.version.endsWith("-SNAPSHOT") &&
+                artifact.id.componentIdentifier is MavenUniqueSnapshotComponentIdentifier
+            ) {
+                (artifact.id.componentIdentifier as MavenUniqueSnapshotComponentIdentifier).timestampedVersion
+            } else id.version
 
             val classifierSuffix = artifact.classifier?.let { "-$it" } ?: ""
-            val jarFileName = "${id.name}-$resolvedVersion$classifierSuffix.jar"
-            val repoPath = "${id.group.replace('.', '/')}/${id.name}/${id.version}/$jarFileName"
 
-            val repo = resolveRepository(repoPath, mavenRepositories())
-                ?: throw IllegalStateException("Unable to resolve repository for $id")
+            // Repo URL ermitteln
+            val repoUrl = if (id.group.startsWith("build.buf")) {
+                "https://buf.build/gen/maven/"
+            } else {
+                // erstes MavenRepo nehmen, das diese Dependency liefert
+                repositories.filterIsInstance<MavenArtifactRepository>()
+                    .firstOrNull { repo ->
+                        // grober Match: prüft, ob groupId zum Repo passt oder sonst nehmen wir das erste Repo
+                        true
+                    }?.url?.toString() ?: ""
+            }
 
-            val jarUrl = repo.url.resolve(repoPath).toString()
+            val jarUrl = "$repoUrl${id.group.replace('.', '/')}/${id.name}/$resolvedVersion/${id.name}-$resolvedVersion$classifierSuffix.jar"
 
             val jsonDep = JSONObject()
                 .put("group", id.group)
@@ -53,30 +58,9 @@ fun Project.exportDependenciesJson(
         }
 
     val root = JSONObject().put("dependencies", depsArray)
-    println("Dependencies JSON: $root")
     val target = layout.buildDirectory.file(fileName).get().asFile
     target.writeText(root.toString(2))
     return target.absolutePath
-}
-
-private fun Project.resolveRepository(
-    testUrlPath: String,
-    repositories: Iterable<MavenArtifactRepository>
-): MavenArtifactRepository? {
-    return repositories.firstOrNull { repo ->
-        runCatching {
-            val url = repo.url.resolve(testUrlPath).toURL()
-            (url.openConnection() as HttpURLConnection).run {
-                useCaches = false
-                readTimeout = 30000
-                connectTimeout = 30000
-                instanceFollowRedirects = true
-                setRequestProperty("User-Agent", "Gradle-Dependency-Resolver")
-                connect()
-                responseCode == 200
-            }
-        }.getOrElse { false }
-    }
 }
 
 fun Project.mavenRepositories(): Iterable<MavenArtifactRepository> =

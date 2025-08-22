@@ -31,6 +31,14 @@ plugins {
     alias(libs.plugins.shadow)
 }
 
+repositories {
+    mavenCentral()
+    maven {
+        name = "buf"
+        url = uri("https://buf.build/gen/maven")
+    }
+}
+
 dependencies {
     compileOnly(project(":launcher"))
     compileOnly(project(":api"))
@@ -45,15 +53,17 @@ dependencies {
     compileOnly(libs.cloud.extension)
     compileOnly(libs.cloud.annotations)
     compileOnly(libs.cloud.processors.confirmation)
-    compileOnly(libs.kotlin.stdlib)
     compileOnly(libs.nightConfig.json)
     compileOnly(libs.nightConfig.toml)
     compileOnly(libs.nightConfig.yaml)
-    compileOnly("com.github.ben-manes.caffeine:caffeine:3.2.2")
+    compileOnly(libs.caffeine)
     compileOnly(libs.adventure.text.serializer.ansi)
     compileOnly(libs.adventure.text.serializer.legacy)
     compileOnly(libs.adventure.text.minimessage)
     compileOnly(libs.guava)
+    compileOnly(libs.bundles.proto)
+    compileOnly(libs.bundles.mongo)
+    compileOnly(libs.bundles.kotlin)
 }
 
 sourceSets { getByName("main") { kotlin { srcDir("src/main/kotlin") } } }

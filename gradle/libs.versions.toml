@@ -46,8 +46,15 @@ commandapi-velocity-shade = "10.1.2"
 # shadowJar
 shadow = "9.0.2"
 
+# protoBuf
+protobuf-gradle-plugin = "0.9.5"
+
+# caffeine
+caffeine = "3.2.2"
+
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
+protobuf = { id = "com.google.protobuf", version.ref = "protobuf-gradle-plugin" }
 
 [libraries]
 # kotlin
@@ -66,7 +73,7 @@ grpc-stub = { module = "io.grpc:grpc-stub", version.ref = "grpc" }
 grpc-kotlin-stub = { module = "io.grpc:grpc-kotlin-stub", version.ref = "grpc-kotlin" }
 grpc-protobuf = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
 grpc-netty-shaded = { module = "io.grpc:grpc-netty-shaded", version.ref = "grpc" }
-protospecs-grpc = { group = "de.vulpescloud", name = "protospecs-grpc", version.ref = "protospecs-grpc" }
+protospecs-grpc = { group = "build.buf.gen", name = "vulpescloud_protospecs_grpc_kotlin", version.ref = "protospecs-grpc" }
 
 # mongo
 mongodb-driver-coroutine = { group = "org.mongodb", name = "mongodb-driver-kotlin-coroutine", version.ref = "mongodb" }
@@ -107,6 +114,9 @@ velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref =
 nightConfig-toml = { group = "com.electronwill.night-config", name = "toml", version.ref = "night-config" }
 nightConfig-json = { group = "com.electronwill.night-config", name = "json", version.ref = "night-config" }
 nightConfig-yaml = { group = "com.electronwill.night-config", name = "yaml", version.ref = "night-config" }
+
+# caffeine
+caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
 
 [bundles]
 proto = [
