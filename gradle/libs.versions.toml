@@ -104,7 +104,7 @@ cloud-extension = { group = "org.incendo", name = "cloud-kotlin-extensions", ver
 cloud-annotations = { group = "org.incendo", name = "cloud-annotations", version.ref = "cloud" }
 cloud-kotlin-coroutines = { group = "org.incendo", name = "cloud-kotlin-coroutines", version.ref = "cloud" }
 cloud-kotlin-coroutines-annotations = { group = "org.incendo", name = "cloud-kotlin-coroutines-annotations", version.ref = "cloud" }
-cloud-processors-confirmation = { group = "org.incendo", name = "cloud-processors-confirmation", version = "1.0.0-rc.1" }
+cloud-processors-confirmation = { group = "org.incendo", name = "cloud-processors-confirmation", version = "1.0.0-SNAPSHOT" }
 
 # platforms
 paper = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
