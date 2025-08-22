@@ -5,5 +5,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class MongoConfig(
     val connectionString: String,
-    val connectionPrefix: String
+    val database: String,
+    val collectionPrefix: String
 )

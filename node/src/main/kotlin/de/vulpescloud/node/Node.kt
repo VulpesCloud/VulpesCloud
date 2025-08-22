@@ -1,5 +1,8 @@
 package de.vulpescloud.node
 
+import com.mongodb.ConnectionString
+import com.mongodb.MongoClientSettings
+import com.mongodb.kotlin.client.coroutine.MongoClient
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.commands.ClearCommand
 import de.vulpescloud.node.commands.ExitCommand
@@ -9,12 +12,16 @@ import de.vulpescloud.node.config.ConfigProvider
 import de.vulpescloud.node.grpc.GrpcServer
 import de.vulpescloud.node.terminal.Terminal
 import kotlinx.coroutines.*
+import org.slf4j.LoggerFactory
+import java.util.concurrent.TimeUnit
 
 class Node {
+    private val logger = LoggerFactory.getLogger("Node")
 
     val terminal = Terminal()
     val commandProvider = CommandProvider()
     val configProvider = ConfigProvider()
+    lateinit var mongoClient: MongoClient
 
     suspend fun init() = withContext(Dispatchers.Default) {
         instance = this@Node
@@ -36,6 +43,29 @@ class Node {
 
             )
         ).serve(NodeCoroutineScope)
+
+        val connectionString = configProvider.config.mongodb.connectionString
+
+        try {
+            val settings = MongoClientSettings.builder()
+                .applyConnectionString(ConnectionString(connectionString))
+                .applyToConnectionPoolSettings {
+                    it.maxSize(50)
+                    it.maxWaitTime(2, TimeUnit.SECONDS)
+                }
+                .applyToSocketSettings {
+                    it.connectTimeout(2, TimeUnit.SECONDS)
+                    it.readTimeout(2, TimeUnit.SECONDS)
+                }
+                .retryWrites(true)
+                .build()
+
+            mongoClient = MongoClient.create(settings)
+            logger.info("Successfully connected to MongoDB!")
+        } catch (e: Exception) {
+            logger.error("Failed to connect to MongoDB: ${e.message}")
+            return@withContext
+        }
     }
 
     fun startInput(scope: CoroutineScope): Job =

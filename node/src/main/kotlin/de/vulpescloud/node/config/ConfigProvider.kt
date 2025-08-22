@@ -27,7 +27,7 @@ class ConfigProvider {
                     "0.0.0.0",
                     "0.0.0.0",
                     "en_US",
-                    MongoConfig("", ""),
+                    MongoConfig("mongodb://localhost:27017/", "vulpescloud", "vc_"),
                 )
 
             Files.writeString(Path("config.json"), json.encodeToString(defaultConfig))
