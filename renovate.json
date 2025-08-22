@@ -30,5 +30,8 @@
   "stopUpdatingLabel": "s: stop updates",
   "commitMessagePrefix": "chore: ",
   "commitMessageAction": "update",
-  "baseBranches": ["v3"]
+  "baseBranches": ["v3"],
+  "ignoreDeps": [
+    "org.incendo:cloud-processors-confirmation",
+  ],
 }
