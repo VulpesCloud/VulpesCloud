@@ -4,6 +4,7 @@ import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.commands.ClearCommand
 import de.vulpescloud.node.commands.ExitCommand
 import de.vulpescloud.node.commands.HelpCommand
+import de.vulpescloud.node.commands.InfoCommand
 import de.vulpescloud.node.config.ConfigProvider
 import de.vulpescloud.node.grpc.GrpcServer
 import de.vulpescloud.node.terminal.Terminal
@@ -27,6 +28,7 @@ class Node {
             register(ClearCommand(terminal))
             register(HelpCommand(commandProvider))
             register(ExitCommand())
+            register(InfoCommand())
         }
 
         GrpcServer(
