@@ -1,8 +1,5 @@
 package de.vulpescloud.node
 
-import build.buf.gen.vulpescloud.node.v1.CreateServiceRequest
-import build.buf.gen.vulpescloud.node.v1.NodeServiceGrpcKt
-import build.buf.gen.vulpescloud.node.v1.TaskDefinition
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.kotlin.client.coroutine.MongoClient
@@ -14,16 +11,11 @@ import de.vulpescloud.node.commands.InfoCommand
 import de.vulpescloud.node.config.ConfigProvider
 import de.vulpescloud.node.grpc.GrpcServer
 import de.vulpescloud.node.grpc.LoggingServerInterceptor
-import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import de.vulpescloud.node.grpc.security.AuthInterceptor
 import de.vulpescloud.node.grpc.security.CertGen
-import de.vulpescloud.node.grpc.services.NodeServiceImpl
 import de.vulpescloud.node.secret.SecretFactory
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.terminal.Terminal
-import io.grpc.Grpc
-import io.grpc.StatusException
-import io.grpc.TlsChannelCredentials
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -59,7 +51,7 @@ class Node {
         val grpcServer = GrpcServer(
             port = configProvider.config.grpcPort,
             services = listOf(
-                NodeServiceImpl()
+
             ),
             interceptors = listOf(
                 LoggingServerInterceptor(),
@@ -99,35 +91,6 @@ class Node {
         } catch (e: Exception) {
             logger.error("Failed to connect to MongoDB: ${e.message}")
             return@withContext
-        }
-
-        val serverCertBytes = File("certs/server.crt")
-
-        val creds = TlsChannelCredentials.newBuilder()
-            .trustManager(serverCertBytes)
-            .build()
-
-        val channel = Grpc.newChannelBuilderForAddress(
-            "127.0.0.1",
-            configProvider.config.grpcPort,
-            creds
-        ).build()
-
-        val stub = NodeServiceGrpcKt.NodeServiceCoroutineStub(channel)
-            .withInterceptors(AuthClientInterceptor(secret))
-
-        delay(1500)
-        try {
-            val response = stub.createService(
-                CreateServiceRequest.newBuilder()
-                    .setTask(TaskDefinition.newBuilder().setName("test").build())
-                    .build()
-            )
-            logger.info("createService OK: $response")
-        } catch (e: StatusException) {
-            logger.error("RPC createService failed: status=${e.status} cause=${e.cause}", e)
-        } catch (t: Throwable) {
-            logger.error("Unexpected error calling createService", t)
         }
     }
 
