@@ -81,7 +81,7 @@ class CommandProvider {
                         it!!.sendMessage("There are no Commands that need confirmation")
                     }
                     .confirmationRequiredNotifier { source, _ ->
-                        source!!.sendMessage("Type 'confirm' to confirm this command")
+                        source!!.sendMessage("Type 'confirm' in the next 30 seconds to confirm this command")
                     }
                     .build()
             )
