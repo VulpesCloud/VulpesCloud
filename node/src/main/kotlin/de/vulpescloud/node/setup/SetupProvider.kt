@@ -1,146 +1,225 @@
 package de.vulpescloud.node.setup
 
-import de.vulpescloud.node.Node
 import de.vulpescloud.node.setup.annotations.SetupCancel
 import de.vulpescloud.node.setup.annotations.SetupFinish
 import de.vulpescloud.node.setup.annotations.SetupQuestion
-import org.jline.consoleui.prompt.ConsolePrompt
-import org.jline.terminal.Terminal
+import de.vulpescloud.node.terminal.Terminal
+import kotlinx.coroutines.delay
+import org.jline.utils.InfoCmp
 import org.slf4j.LoggerFactory
-import kotlin.reflect.KFunction
-import kotlin.reflect.KParameter
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.functions
-import kotlin.reflect.full.hasAnnotation
+import java.util.*
 
-class SetupProvider {
+class SetupProvider(private val terminal: Terminal) {
 
-    private val logger = LoggerFactory.getLogger("SetupProvider")
-    lateinit var prompt: ConsolePrompt
-    var currentSetup: Setup? = null
-    var currentIndex = 0
-    var answers = mutableMapOf<Int, Any?>()
+    private val logger = LoggerFactory.getLogger(SetupProvider::class.java)
+    var currentSetup: SetupInfo? = null
+    private var currentQuestion: SetupQuestionInfo? = null
+    private var currentQuestionIndex = 0
+    private var oldTerminalInput = terminal.terminalContent
+    private var inputLocked = false
+    private var lockedInputCount = 0
 
-    fun init() {
-        val uiConfig = ConsolePrompt.UiConfig()
-        val terminal = Node.instance.terminal.terminal
-        val lineReader = Node.instance.terminal.lineReader
-
-        prompt = ConsolePrompt(lineReader, terminal, uiConfig)
-    }
-
-    fun parseSetup(setup: Setup) {
-        val functions = setup::class.functions
-        val setupQuestions = functions.filter { it.hasAnnotation<SetupQuestion>() }
-            .sortedBy { it.findAnnotation<SetupQuestion>()!!.index }
-        val finishFunction = functions.firstOrNull { it.hasAnnotation<SetupFinish>() }
-        val cancelFunction = functions.firstOrNull { it.hasAnnotation<SetupCancel>() }
-
-        if (setupQuestions.isEmpty()) {
-            logger.error("Tried to start a setup without questions!")
-            return
-        }
-        if (finishFunction == null) {
-            logger.error("Tried to start a setup without a finish function!")
-            return
-        }
-        if (cancelFunction == null) {
-            logger.error("Tried to start a setup without a cancel function!")
-            return
-        }
-
-        currentSetup = setup
-
-        while (currentIndex < setupQuestions.size) {
-            val func = setupQuestions[currentIndex]
-            val annotation = func.findAnnotation<SetupQuestion>()!!
-            val builder = prompt.promptBuilder
-
-            builder.createInputPrompt()
-                .name("answer")
-                .message("[${annotation.index}] ${annotation.question} (Tippe /skip <index>, /goto <index> oder /cancel)")
-                .addPrompt()
-
-            val result = prompt.prompt(builder.build())
-            val input = result["answer"]!!.result as String
-
-            when {
-                input.startsWith("goto") -> {
-                    val idx = input.removePrefix("goto").trim().toIntOrNull()
-                    if (idx != null && setupQuestions.any { it.findAnnotation<SetupQuestion>()!!.index == idx }) {
-                        currentIndex = setupQuestions.indexOfFirst { it.findAnnotation<SetupQuestion>()!!.index == idx }
-                        continue
-                    }
-                }
-                input == "cancel" -> {
-                    cancelFunction.call(setup)
-                    println("Setup abgebrochen.")
-                    return
-                }
-                else -> {
-                    val param: KParameter = func.parameters[1]
-                    val value: Any = when (param.type.classifier) {
-                        Int::class -> input.toIntOrNull() ?: 0
-                        Boolean::class -> input.equals("true", ignoreCase = true) || input == "1"
-                        else -> input
-                    }
-                    answers[annotation.index] = value
-                    val result = func.call(setup, value) as? Boolean
-                }
-            }
-            currentIndex++
-        }
-        finishFunction.call(setup)
-        println("Setup abgeschlossen!")
-    }
-
-    fun test() {
-        demonstrateInputPrompt(Node.instance.terminal.terminal)
-    }
-
-    fun demonstrateInputPrompt(terminal: Terminal) {
-        val prompt = ConsolePrompt(terminal)
-        val builder = prompt.promptBuilder
-
-        builder
-            .createInputPrompt()
-            .name("username")
-            .message("Enter your username")
-            .defaultValue("admin")
-            .addPrompt()
-
-        builder
-            .createInputPrompt()
-            .name("password")
-            .message("Enter your password")
-            .mask('*')
-            .addPrompt()
-
-        builder.createListPrompt()
-            .name("color")
-            .message("Choose your favorite color")
-            .newItem()
-            .text("Red")
-            .add()
-            .newItem("green")
-            .text("Green")
-            .add()
-            .newItem("blue")
-            .text("Blue")
-            .add()
-            .newItem("yellow")
-            .text("Yellow")
-            .add()
-            .pageSize(3)
-            .addPrompt();
-
+    fun startSetup(setup: Setup) {
         try {
-            val result = prompt.prompt(builder.build())
-            val username = result["username"]!!.result
-            val password = result["password"]!!.result
-            println("Logged in as: $username with password: $password")
+            val questions = mutableListOf<SetupQuestionInfo>()
+            val methods = setup::class.java.methods
+            methods.filter { it.isAnnotationPresent(SetupQuestion::class.java) }.forEach {
+                check(it.parameters.size == 1) {
+                    "Function has @SetupQuestion annotation must have 1 parameter!"
+                }
+                questions.add(
+                    SetupQuestionInfo(it.getAnnotation(SetupQuestion::class.java), it, it.parameters[0])
+                )
+            }
+
+            val finishMethods = methods.filter { it.isAnnotationPresent(SetupFinish::class.java) }
+            val cancelMethods = methods.filter { it.isAnnotationPresent(SetupCancel::class.java) }
+            check(finishMethods.size <= 1) {
+                "There can only be one Function with the @SetupFinish annotation!"
+            }
+            check(cancelMethods.size <= 1) {
+                "There can only be one Function with the @SetupCancel annotation!"
+            }
+            val finishMethod = finishMethods.firstOrNull()
+            val cancelMethod = cancelMethods.firstOrNull()
+
+            val setupInfo =
+                SetupInfo(
+                    setup,
+                    finishMethod,
+                    cancelMethod,
+                    questions.sortedBy { it.setupQuestion.index },
+                )
+
+            if (currentSetup == null) {
+                currentSetup = setupInfo
+                this.currentQuestion = setupInfo.questions[currentQuestionIndex]
+            } else {
+                return
+            }
+
+            terminal.clear()
+            terminal.changePrompt("&f> ")
+            terminal.printSetup(setup.header)
+            terminal.printSetup("")
+            printCurrentQuestion()
         } catch (e: Exception) {
-            e.printStackTrace()
+            logger.error("Failed to start setup", e)
+        }
+    }
+
+    private fun printCurrentQuestion() {
+        val currentQuestion =
+            this.currentQuestion ?: throw IllegalStateException("There is no setup at the moment")
+        val questionSetupAnswer = currentQuestion.setupQuestion.answer.java.getDeclaredConstructor().newInstance()
+        val answers = questionSetupAnswer.suggest()
+        val suffix =
+            if (answers.isNotEmpty()) "&ePossible answers: " + answers.joinToString() else ""
+        if (suffix.isEmpty()) {
+            terminal.printSetup(currentQuestion.setupQuestion.translationKey)
+        } else {
+            terminal.printSetup(currentQuestion.setupQuestion.translationKey)
+            terminal.printSetup(suffix)
+        }
+    }
+
+    private fun nextQuestionExists(setup: SetupInfo) =
+        this.currentQuestionIndex + 1 in setup.questions.indices
+
+    private fun finishSetup() {
+        terminal.clear()
+        this.currentQuestion = null
+        this.currentQuestionIndex = 0
+        this.currentSetup!!.callFinish()
+        this.currentSetup = null
+
+        oldTerminalInput.forEach { line ->
+            terminal.printNoCheck(line)
+        }
+
+        terminal.changePrompt("")
+
+        logger.info("Setup &2Finished")
+    }
+
+    fun cancelSetup() {
+        terminal.clear()
+        this.currentSetup?.callCancel()
+        this.currentSetup = null
+        this.currentQuestion = null
+        this.currentQuestionIndex = 0
+
+        oldTerminalInput.forEach { line ->
+            terminal.printNoCheck(line)
+        }
+
+        terminal.changePrompt("")
+
+        logger.info("Setup &cCancelled")
+    }
+
+    suspend fun input(input: String) {
+        if (inputLocked) {
+            lockedInputCount++
+            terminal.terminal.writer().print('\r')
+            terminal.terminal.puts(InfoCmp.Capability.clr_eol)
+            terminal.terminal.puts(InfoCmp.Capability.cursor_up)
+            terminal.terminal.flush()
+            return
+        }
+
+        val q = this.currentQuestion ?: return
+
+        val answers = q.setupQuestion.answer.java
+            .getDeclaredConstructor()
+            .newInstance()
+            .suggest()
+
+        fun resetCurrentInput() {
+            terminal.terminal.puts(InfoCmp.Capability.clr_bol)
+            terminal.terminal.puts(InfoCmp.Capability.clr_eol)
+            terminal.terminal.puts(InfoCmp.Capability.cursor_up)
+            terminal.terminal.puts(InfoCmp.Capability.clr_bol)
+            terminal.terminal.puts(InfoCmp.Capability.clr_eol)
+            terminal.terminal.puts(InfoCmp.Capability.cursor_up)
+            terminal.terminal.puts(InfoCmp.Capability.carriage_return)
+            terminal.terminal.puts(InfoCmp.Capability.clr_eol)
+            terminal.terminal.puts(InfoCmp.Capability.cursor_normal)
+            terminal.changePrompt("&f> ")
+            terminal.terminal.writer().print(terminal.replaceColors("&f> "))
+            terminal.terminal.flush()
+        }
+
+        fun failAndLock() {
+            inputLocked = true
+            lockedInputCount = 0
+        }
+
+        suspend fun unlockAfterDelay() {
+            delay(2500)
+            resetCurrentInput()
+            inputLocked = false
+        }
+
+        if (answers.isNotEmpty() && !answers.contains(input) && q.setupQuestion.forceAnswer) {
+            terminal.printSetup("&cInvalid input, please try again!")
+            failAndLock()
+            unlockAfterDelay()
+            return
+        }
+
+        val invoke = try {
+            q.method.invoke(this.currentSetup!!.setup, input)
+        } catch (_: Exception) {
+            terminal.printSetup("&cInvalid input, please try again!")
+            failAndLock()
+            unlockAfterDelay()
+            return
+        }
+
+        if (invoke is Boolean && !invoke) {
+            terminal.printSetup("&cInvalid input, please try again!")
+            failAndLock()
+            unlockAfterDelay()
+            return
+        }
+
+        terminal.terminal.puts(InfoCmp.Capability.cursor_up)
+        terminal.terminal.puts(InfoCmp.Capability.clr_bol)
+        terminal.terminal.puts(InfoCmp.Capability.clr_eol)
+        terminal.terminal.puts(InfoCmp.Capability.cursor_up)
+        terminal.terminal.puts(InfoCmp.Capability.clr_bol)
+        terminal.terminal.puts(InfoCmp.Capability.clr_eol)
+        terminal.printSetup("${q.setupQuestion.translationKey} &7> &f$input")
+        terminal.terminal.flush()
+
+        val setup = this.currentSetup ?: return
+        if (!nextQuestionExists(setup)) {
+            finishSetup()
+            return
+        }
+
+        this.currentQuestionIndex++
+        this.currentQuestion = setup.questions[currentQuestionIndex]
+        printCurrentQuestion()
+    }
+
+    fun getSetupAnswers(input: String): List<String> {
+        if (currentSetup == null) {
+            throw IllegalStateException("There is no Setup running!")
+        }
+        val answers = currentQuestion!!.setupQuestion.answer.java.getDeclaredConstructor().newInstance().suggest()
+        if (currentQuestion!!.setupQuestion.default.isNotEmpty()) {
+            val mList = answers.toMutableList()
+            mList.addAll(currentQuestion!!.setupQuestion.default)
+
+            return mList.filter {
+                it.lowercase(Locale.getDefault()).startsWith(input.lowercase(Locale.getDefault()))
+            }
+        }
+
+        return answers.filter {
+            it.lowercase(Locale.getDefault()).startsWith(input.lowercase(Locale.getDefault()))
         }
     }
 }

@@ -21,6 +21,26 @@ class Terminal {
     private val miniMessage = MiniMessage.miniMessage()
     private val ansiComponentSerializer = ANSIComponentSerializer.ansi()
     private val commandReadingThread = CommandReadingThread(this)
+    val terminalContent: MutableList<String> = mutableListOf()
+    var prompt = ""
+
+    private fun getDefaultPrompt(): String {
+        val nodeName = Node.instance.configProvider.config.nodeName
+        val versionPart = if (CloudVersion.getGitBranch() == "stable") {
+            "v3"
+        } else {
+            "dev-${CloudVersion.getGitCommit()}"
+        }
+        return "&f$nodeName&8@<color:#ff700a>$versionPart</color> &8» &7"
+    }
+
+    fun changePrompt(prompt: String) {
+        if (prompt == "" || prompt == "default")  {
+            this.prompt = getDefaultPrompt()
+        } else {
+            this.prompt = prompt
+        }
+    }
 
     fun init() {
         terminal =
@@ -41,6 +61,10 @@ class Terminal {
                 .option(LineReader.Option.AUTO_PARAM_SLASH, false)
                 .variable(LineReader.COMPLETION_STYLE_LIST_SELECTION, "fg:cyan")
                 .variable(LineReader.COMPLETION_STYLE_LIST_BACKGROUND, "bg:default")
+                .option(LineReader.Option.AUTO_FRESH_LINE, true)
+                .option(LineReader.Option.EMPTY_WORD_OPTIONS, false)
+                .option(LineReader.Option.HISTORY_TIMESTAMPED, false)
+                .option(LineReader.Option.DISABLE_EVENT_EXPANSION, true)
                 .variable(LineReader.BELL_STYLE, "none")
                 .build() as LineReaderImpl
 
@@ -66,6 +90,32 @@ class Terminal {
     }
 
     fun print(line: String) {
+        if (Node.instance.setupProvider.currentSetup == null) {
+            terminal.puts(InfoCmp.Capability.carriage_return)
+            terminal
+                .writer()
+                .println(replaceColors(line) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
+            terminal.flush()
+            if (terminalContent.size > 250) {
+                terminalContent.removeFirst()
+            }
+            terminalContent.add(line)
+            update()
+        }
+    }
+
+    fun printSetup(line: String) {
+        if (Node.instance.setupProvider.currentSetup != null) {
+            terminal.puts(InfoCmp.Capability.carriage_return)
+            terminal
+                .writer()
+                .println(replaceColors(line) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
+            terminal.flush()
+            update()
+        }
+    }
+
+    fun printNoCheck(line: String) {
         terminal.puts(InfoCmp.Capability.carriage_return)
         terminal
             .writer()
@@ -77,10 +127,6 @@ class Terminal {
     fun close() {
         commandReadingThread.interrupt()
         terminal.close()
-    }
-
-    fun updatePrompt(prompt: String) {
-        lineReader.setPrompt(replaceColors(prompt))
     }
 
     private fun printHeader() {

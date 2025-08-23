@@ -15,6 +15,7 @@ import de.vulpescloud.node.grpc.security.AuthInterceptor
 import de.vulpescloud.node.grpc.security.CertGen
 import de.vulpescloud.node.secret.SecretFactory
 import de.vulpescloud.node.setup.SetupProvider
+import de.vulpescloud.node.setup.setups.TestSetup
 import de.vulpescloud.node.terminal.Terminal
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
@@ -30,14 +31,14 @@ class Node {
     val configProvider = ConfigProvider()
     lateinit var mongoClient: MongoClient
     lateinit var secret: String
-    val setupProvider = SetupProvider()
+    lateinit var setupProvider: SetupProvider
 
     suspend fun init() = withContext(Dispatchers.IO) {
         instance = this@Node
 
-        terminal.init()
+        setupProvider = SetupProvider(terminal)
 
-        setupProvider.init()
+        terminal.init()
 
         CertGen.loadOrCreate(
             keyFile = File("certs/server.key"),
@@ -46,6 +47,7 @@ class Node {
 
         val secretFactory = SecretFactory()
         configProvider.loadConfig()
+        terminal.changePrompt("")
         secret = secretFactory.loadOrCreateSecret(Path("launcher/secret/.auth.secret"))
 
         val grpcServer = GrpcServer(
@@ -92,6 +94,9 @@ class Node {
             logger.error("Failed to connect to MongoDB: ${e.message}")
             return@withContext
         }
+
+        delay(1000)
+        setupProvider.startSetup(TestSetup())
     }
 
     fun startInput(scope: CoroutineScope): Job =

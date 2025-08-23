@@ -1,3 +1,5 @@
 package de.vulpescloud.node.setup.annotations
 
-annotation class SetupFinish()
+@Target(AnnotationTarget.FUNCTION)
+@Retention(AnnotationRetention.RUNTIME)
+annotation class SetupFinish

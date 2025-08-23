@@ -1,7 +1,10 @@
 package de.vulpescloud.node.terminal
 
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import org.jline.reader.EndOfFileException
 import org.jline.reader.UserInterruptException
 import kotlin.system.exitProcess
@@ -20,19 +23,22 @@ class CommandReadingThread(private val terminal: Terminal) : Thread() {
                             continue
                         }
 
-                        //                        if (setupProvider.currentSetup != null) {
-                        //                            if (rawLine.equals("exit", true)) {
-                        //                                setupProvider.cancelSetup()
-                        //                                continue
-                        //                            }
-                        //                            setupProvider.input(rawLine)
-                        //                        } else {
-                        //
-                         Node.instance.commandProvider.execute(CommandSource.CONSOLE, rawLine)
-                        //                        }
+                        val setupProvider = Node.instance.setupProvider
 
-                    } catch (ignore: EndOfFileException) {}
-                } catch (exception: UserInterruptException) {
+                        if (setupProvider.currentSetup != null) {
+                            if (rawLine.equals("exit", true) || rawLine.equals("cancel", true) || rawLine.equals("stop", true)) {
+                                setupProvider.cancelSetup()
+                                continue
+                            }
+                            NodeCoroutineScope.launch(Dispatchers.IO) {
+                                setupProvider.input(rawLine)
+                            }
+                        } else {
+                            Node.instance.commandProvider.execute(CommandSource.CONSOLE, rawLine)
+                        }
+
+                    } catch (_: EndOfFileException) {}
+                } catch (_: UserInterruptException) {
                     exitProcess(0)
                     // ctrlCCloud()
                 }
@@ -43,8 +49,7 @@ class CommandReadingThread(private val terminal: Terminal) : Thread() {
     }
 
     private fun prompt(): String {
-        // return ("&9" + config.name()) + "&8@&7cloud &8» &7"
-        return ("&9" + "DEVELOPMENT") + "&8@&7cloud &8» &7"
+        return terminal.prompt
     }
 
     fun startThread() {

@@ -1,7 +1,6 @@
 package de.vulpescloud.node.config
 
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.setup.setups.FirstSetup
 import kotlinx.serialization.json.Json
 import java.nio.file.Files
 import java.util.*
@@ -35,7 +34,7 @@ class ConfigProvider {
             Files.writeString(Path("config.json"), json.encodeToString(defaultConfig))
             config = defaultConfig
 
-            Node.instance.setupProvider.parseSetup(FirstSetup())
+            // Node.instance.setupProvider.parseSetup(FirstSetup())
         }
     }
 

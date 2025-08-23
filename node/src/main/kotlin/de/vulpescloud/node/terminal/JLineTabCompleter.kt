@@ -1,5 +1,6 @@
 package de.vulpescloud.node.terminal
 
+import de.vulpescloud.node.Node
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.command.ConsoleCommandSource
 import org.incendo.cloud.suggestion.Suggestion
@@ -15,7 +16,9 @@ class JLineTabCompleter(private val commandProvider: CommandProvider) : Complete
         p2: MutableList<Candidate>,
     ) {
         val line = parsedLine.line()
-        val suggestions: List<String> =
+        val suggestions: List<String> = if (Node.instance.setupProvider.currentSetup != null) {
+            Node.instance.setupProvider.getSetupAnswers(line)
+        } else {
             commandProvider.commandManager
                 .suggestionFactory()
                 .suggest(ConsoleCommandSource(), line)
@@ -24,6 +27,7 @@ class JLineTabCompleter(private val commandProvider: CommandProvider) : Complete
                 .stream()
                 .map(Suggestion::suggestion)
                 .toList()
+        }
 
         if (suggestions.isEmpty()) {
             return

@@ -1,3 +1,5 @@
 package de.vulpescloud.node.setup
 
-interface Setup {}
+interface Setup {
+    val header: String
+}
