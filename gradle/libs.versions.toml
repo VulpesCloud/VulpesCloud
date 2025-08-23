@@ -47,7 +47,7 @@ commandapi-velocity-shade = "10.1.2"
 shadow = "9.0.2"
 
 # bouncy castle
-bouncy-castle = "1.68"
+bouncy-castle = "1.70"
 
 # caffeine
 caffeine = "3.2.2"
