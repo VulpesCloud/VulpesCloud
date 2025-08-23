@@ -36,10 +36,10 @@ import java.nio.file.Path
 import java.util.jar.JarFile
 
 class DependencyDownloader {
-    private val DOWNLOAD_DIR = Path.of("launcher/dependencies")
+    private val DOWNLOAD_DIR = Path.of("launcher/dependencies/maven")
 
     fun downloadDependencies() {
-        val jarFile = JarFile(File("launcher/dependencies/vulpescloud-node.jar"))
+        val jarFile = JarFile(File("launcher/dependencies/vulpescloud/vulpescloud-node.jar"))
         val dependenciesJson = jarFile.getJarEntry("dependencies.json")
 
         if (dependenciesJson == null) {

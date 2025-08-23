@@ -37,7 +37,6 @@ import java.util.jar.JarFile
 class VulpesLauncher {
     companion object {
         val CLASS_LOADER = VulpesClassLoader()
-        private val DEPENDENCY_DIR: Path = Path.of("launcher/dependencies")
         val config = Config()
         const val GITHUBURL = "https://github.com/VulpesCloud/VulpesCloud-meta/raw/"
 
@@ -87,7 +86,7 @@ class VulpesLauncher {
             // Download dependencies
             DependencyDownloader().downloadDependencies()
 
-            this.CLASS_LOADER.addURL(Path.of("launcher/dependencies/vulpescloud-api.jar").toUri().toURL())
+            this.CLASS_LOADER.addURL(Path.of("launcher/dependencies/vulpescloud/vulpescloud-api.jar").toUri().toURL())
             this.CLASS_LOADER.addURL(bootFile().toURI().toURL())
 
             println("Launching the Node!")
@@ -98,7 +97,7 @@ class VulpesLauncher {
         }
 
         private fun bootFile(): File {
-            return DEPENDENCY_DIR.resolve("vulpescloud-node.jar").toFile()
+            return File("launcher/dependencies/vulpescloud/vulpescloud-node.jar")
         }
 
         private fun mainClass(): String {

@@ -16,7 +16,6 @@ protobuf = "4.32.0"
 grpc = "1.75.0"
 grpc-kotlin = "1.4.3"
 protospecs-grpc = "1.4.3.1.20250822121228.c5010f05d362"
-perfmark = "0.27.0"
 
 # mongo
 mongodb = "5.5.1"
@@ -47,15 +46,14 @@ commandapi-velocity-shade = "10.1.2"
 # shadowJar
 shadow = "9.0.2"
 
-# protoBuf
-protobuf-gradle-plugin = "0.9.5"
+# bouncy castle
+bouncy-castle = "1.68"
 
 # caffeine
 caffeine = "3.2.2"
 
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
-protobuf = { id = "com.google.protobuf", version.ref = "protobuf-gradle-plugin" }
 
 [libraries]
 # kotlin
@@ -68,18 +66,16 @@ kotlinx-coroutines-reactive = { group = "org.jetbrains.kotlinx", name = "kotlinx
 # google libs
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 
+# bouncy castle
+bouncy-castle = { group = "org.bouncycastle", name = "bcpkix-jdk15on", version.ref = "bouncy-castle" }
+
 # proto
 protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref = "protobuf" }
 grpc-stub = { module = "io.grpc:grpc-stub", version.ref = "grpc" }
 grpc-kotlin-stub = { module = "io.grpc:grpc-kotlin-stub", version.ref = "grpc-kotlin" }
 grpc-protobuf = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
-protobuf-lite = { module = "com.google.protobuf:protobuf-javalite", version.ref = "protobuf" }
-protobuf-java = { module = "com.google.protobuf:protobuf-java", version.ref = "protobuf" }
-protobuf-java-util = { module = "com.google.protobuf:protobuf-java-util", version.ref = "protobuf" }
-grpc-protobuf-lite = { module = "io.grpc:grpc-protobuf-lite", version.ref = "grpc" }
 grpc-netty = { module = "io.grpc:grpc-netty-shaded", version.ref = "grpc" }
 protospecs-grpc = { group = "build.buf.gen", name = "vulpescloud_protospecs_grpc_kotlin", version.ref = "protospecs-grpc" }
-perfmark = { group = "io.perfmark", name = "perfmark-api", version.ref = "perfmark" }
 
 # mongo
 mongodb-driver-coroutine = { group = "org.mongodb", name = "mongodb-driver-kotlin-coroutine", version.ref = "mongodb" }
@@ -133,10 +129,6 @@ proto = [
     "grpc-protobuf",
     "grpc-netty",
     "protospecs-grpc",
-    "protobuf-lite",
-    "protobuf-java",
-    "protobuf-java-util",
-    "grpc-protobuf-lite",
 ]
 
 kotlin = [

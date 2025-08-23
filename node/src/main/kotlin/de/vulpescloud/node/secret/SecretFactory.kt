@@ -1,25 +1,47 @@
 package de.vulpescloud.node.secret
 
+import java.nio.charset.StandardCharsets
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
+import java.security.SecureRandom
+import java.util.Base64
+import kotlin.io.path.createDirectories
+import kotlin.io.path.exists
+import kotlin.io.path.isRegularFile
+import kotlin.io.path.readText
+import kotlin.io.path.writeText
 
-class SecretFactory {
-    fun loadOrCreateSecret(path: Path) : String {
-        if (!Files.exists(path)) {
-            return create(path)
+class SecretFactory(
+    private val random: SecureRandom = SecureRandom()
+) {
+    fun loadOrCreateSecret(path: Path, bytes: Int = 32): String {
+        if (path.exists() && path.isRegularFile()) {
+            return path.readText(StandardCharsets.UTF_8).trim()
         }
-
-        return Files.readString(path)
+        val secret = generateBase64(bytes)
+        writeAtomic(path, secret + "\n")
+        return secret
     }
 
-    private fun create(path: Path): String {
-        val secret = SecretGenerator.generate()
+    fun loadOrCreateEncryptionSecret(path: Path, bytes: Int = 32): String =
+        loadOrCreateSecret(path, bytes)
 
-        if (!Files.exists(path)) {
-            path.parent?.let { Files.createDirectories(it) }
-            Files.writeString(path, secret)
-        }
+    private fun generateBase64(len: Int): String {
+        val buf = ByteArray(len)
+        random.nextBytes(buf)
+        return Base64.getUrlEncoder().withoutPadding().encodeToString(buf)
+    }
 
-        return secret
+    private fun writeAtomic(target: Path, content: String) {
+        target.parent?.createDirectories()
+        val tmp = target.resolveSibling(target.fileName.toString() + ".tmp")
+        tmp.writeText(content, StandardCharsets.UTF_8)
+        Files.move(
+            tmp,
+            target,
+            StandardCopyOption.REPLACE_EXISTING,
+            StandardCopyOption.ATOMIC_MOVE
+        )
     }
 }

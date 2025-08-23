@@ -10,11 +10,13 @@ import de.vulpescloud.node.commands.HelpCommand
 import de.vulpescloud.node.commands.InfoCommand
 import de.vulpescloud.node.config.ConfigProvider
 import de.vulpescloud.node.grpc.GrpcServer
+import de.vulpescloud.node.grpc.security.CertGen
 import de.vulpescloud.node.secret.SecretFactory
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.terminal.Terminal
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
 
@@ -28,16 +30,23 @@ class Node {
     lateinit var secret: String
     val setupProvider = SetupProvider()
 
-    suspend fun init() = withContext(Dispatchers.Default) {
+    suspend fun init() = withContext(Dispatchers.IO) {
         instance = this@Node
 
         terminal.init()
 
         setupProvider.init()
 
-        configProvider.loadConfig()
+        CertGen.loadOrCreate(
+            keyFile = File("certs/server.key"),
+            certFile = File("certs/server.crt")
+        )
 
-        secret = SecretFactory().loadOrCreateSecret(Path("launcher/.auth.secret"))
+        val secretFactory = SecretFactory()
+        configProvider.loadConfig()
+        secret = secretFactory.loadOrCreateSecret(Path("launcher/secret/.auth.secret"))
+
+        GrpcServer(port = configProvider.config.grpcPort).serve(NodeCoroutineScope)
 
         commandProvider.initialize()
         commandProvider.apply {
@@ -46,12 +55,6 @@ class Node {
             register(ExitCommand())
             register(InfoCommand())
         }
-
-        GrpcServer(
-            services = listOf(
-
-            )
-        ).serve(NodeCoroutineScope)
 
         val connectionString = configProvider.config.mongodb.connectionString
 
@@ -75,6 +78,7 @@ class Node {
             logger.error("Failed to connect to MongoDB: ${e.message}")
             return@withContext
         }
+
     }
 
     fun startInput(scope: CoroutineScope): Job =

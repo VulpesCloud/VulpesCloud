@@ -2,14 +2,17 @@ package de.vulpescloud.node.grpc
 
 import io.grpc.BindableService
 import io.grpc.Server
-import io.grpc.ServerBuilder
+import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
+import java.io.File
 import java.io.IOException
+import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.CoroutineContext
 
 class GrpcServer(
+    private val host: String = "127.0.0.1",
     private val port: Int = 6565,
     private val services: List<BindableService> = emptyList(),
     private val shutdownTimeoutSec: Long = 5
@@ -25,10 +28,19 @@ class GrpcServer(
         }
 
         try {
-            server = ServerBuilder.forPort(port).apply {
+            val certFile = File("certs/server.crt")
+            val keyFile = File("certs/server.key")
+
+            if (!certFile.exists() || !keyFile.exists()) {
+                throw IllegalStateException("TLS Certs are missing: ${certFile.path}, ${keyFile.path}")
+            }
+
+            val address = InetSocketAddress(host, port)
+            server = NettyServerBuilder.forAddress(address).apply {
                 services.forEach { addService(it) }
+                useTransportSecurity(certFile, keyFile)
             }.build().start()
-            logger.info("gRPC Server started on port $port")
+            logger.info("gRPC Server started on $address")
         } catch (ex: IOException) {
             logger.error("Failed to start gRPC Server", ex)
             throw ex

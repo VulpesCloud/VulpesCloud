@@ -16,12 +16,12 @@ object Updater {
     fun updateDependency(jarName: String) {
         val checksum = ChecksumUtil.returnChecksumJson().getString(jarName)
 
-        val depsFolder = File("launcher/dependencies")
+        val depsFolder = File("launcher/dependencies/vulpescloud")
         if (!depsFolder.exists()) {
             depsFolder.mkdirs()
         }
 
-        val target = File("launcher/dependencies/$jarName.jar")
+        val target = File("launcher/dependencies/vulpescloud/$jarName.jar")
         val branchName = config.autoUpdatesBranch()
 
         val downloadUri = URI("${GITHUBURL}refs/heads/$branchName/$jarName.jar")
