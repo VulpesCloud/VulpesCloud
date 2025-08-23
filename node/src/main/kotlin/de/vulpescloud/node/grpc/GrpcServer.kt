@@ -1,7 +1,11 @@
 package de.vulpescloud.node.grpc
 
+import de.vulpescloud.node.Node
+import de.vulpescloud.node.grpc.security.AuthInterceptor
 import io.grpc.BindableService
 import io.grpc.Server
+import io.grpc.ServerBuilder
+import io.grpc.ServerInterceptors
 import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
@@ -15,6 +19,7 @@ class GrpcServer(
     private val host: String = "127.0.0.1",
     private val port: Int = 6565,
     private val services: List<BindableService> = emptyList(),
+    private val interceptors: List<io.grpc.ServerInterceptor> = emptyList(),
     private val shutdownTimeoutSec: Long = 5
 ) {
     private val logger = LoggerFactory.getLogger("gRPC Server")
@@ -37,7 +42,11 @@ class GrpcServer(
 
             val address = InetSocketAddress(host, port)
             server = NettyServerBuilder.forAddress(address).apply {
-                services.forEach { addService(it) }
+                services.forEach { svc ->
+                    var def = svc.bindService()
+                    interceptors.forEach { def = ServerInterceptors.intercept(def, it) }
+                    addService(def)
+                }
                 useTransportSecurity(certFile, keyFile)
             }.build().start()
             logger.info("gRPC Server started on $address")

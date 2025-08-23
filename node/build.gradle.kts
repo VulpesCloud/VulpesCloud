@@ -66,6 +66,7 @@ dependencies {
     compileOnly(libs.bundles.mongo)
     compileOnly(libs.bundles.kotlin)
     compileOnly(libs.bouncy.castle)
+    compileOnly(libs.perfmark)
     compileOnly(kotlin("reflect"))
 }
 

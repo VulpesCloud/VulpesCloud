@@ -16,6 +16,10 @@ fun Project.exportDependenciesJson(
     val outputFolder = layout.buildDirectory.dir("libs").get().asFile
     if (!outputFolder.exists()) outputFolder.mkdirs()
 
+    if (File(outputFolder, fileName).exists()) {
+        Files.delete(Path.of(outputFolder.toString(), fileName))
+    }
+
     configurations.getByName("compileClasspath")
         .resolvedConfiguration
         .resolvedArtifacts

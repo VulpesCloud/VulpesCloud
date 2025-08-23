@@ -15,7 +15,8 @@ annotations = "26.0.2"
 protobuf = "4.32.0"
 grpc = "1.75.0"
 grpc-kotlin = "1.4.3"
-protospecs-grpc = "1.4.3.1.20250822121228.c5010f05d362"
+protospecs-grpc = "1.4.3.1.20250823181250.8eb0edbe8921"
+perfmark = "0.27.0"
 
 # mongo
 mongodb = "5.5.1"
@@ -74,8 +75,10 @@ protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref 
 grpc-stub = { module = "io.grpc:grpc-stub", version.ref = "grpc" }
 grpc-kotlin-stub = { module = "io.grpc:grpc-kotlin-stub", version.ref = "grpc-kotlin" }
 grpc-protobuf = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
+grpc-protobuf-lite = { module = "io.grpc:grpc-protobuf-lite", version.ref = "grpc" }
 grpc-netty = { module = "io.grpc:grpc-netty-shaded", version.ref = "grpc" }
 protospecs-grpc = { group = "build.buf.gen", name = "vulpescloud_protospecs_grpc_kotlin", version.ref = "protospecs-grpc" }
+perfmark = { group = "io.perfmark", name = "perfmark-api", version.ref = "perfmark" }
 
 # mongo
 mongodb-driver-coroutine = { group = "org.mongodb", name = "mongodb-driver-kotlin-coroutine", version.ref = "mongodb" }
@@ -129,7 +132,9 @@ proto = [
     "grpc-protobuf",
     "grpc-netty",
     "protospecs-grpc",
+    "grpc-protobuf-lite",
 ]
+
 
 kotlin = [
     "kotlin-stdlib",
