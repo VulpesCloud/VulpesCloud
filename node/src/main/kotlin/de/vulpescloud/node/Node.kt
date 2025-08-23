@@ -15,7 +15,6 @@ import de.vulpescloud.node.grpc.security.AuthInterceptor
 import de.vulpescloud.node.grpc.security.CertGen
 import de.vulpescloud.node.secret.SecretFactory
 import de.vulpescloud.node.setup.SetupProvider
-import de.vulpescloud.node.setup.setups.TestSetup
 import de.vulpescloud.node.terminal.Terminal
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
@@ -94,9 +93,6 @@ class Node {
             logger.error("Failed to connect to MongoDB: ${e.message}")
             return@withContext
         }
-
-        delay(1000)
-        setupProvider.startSetup(TestSetup())
     }
 
     fun startInput(scope: CoroutineScope): Job =
