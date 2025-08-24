@@ -1,6 +1,5 @@
 package de.vulpescloud.node.config
 
-import de.vulpescloud.node.Node
 import kotlinx.serialization.json.Json
 import java.nio.file.Files
 import java.util.*
@@ -16,25 +15,25 @@ class ConfigProvider {
         encodeDefaults = true
     }
 
-    fun loadConfig() {
+    fun loadConfig(): Boolean {
         if (Files.exists(Path("config.json"))) {
             config = json.decodeFromString(Files.readString(Path("config.json")))
+            return true
         } else {
             val defaultConfig =
                 NodeConfig(
-                    "unset",
+                    "Node-1",
                     UUID.randomUUID(),
                     6565,
                     "0.0.0.0",
                     "0.0.0.0",
-                    "en_US",
                     MongoConfig("mongodb://localhost:27017/", "vulpescloud", "vc_"),
                 )
 
             Files.writeString(Path("config.json"), json.encodeToString(defaultConfig))
             config = defaultConfig
 
-            // Node.instance.setupProvider.parseSetup(FirstSetup())
+            return false
         }
     }
 

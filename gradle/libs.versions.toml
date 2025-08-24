@@ -76,7 +76,7 @@ grpc-stub = { module = "io.grpc:grpc-stub", version.ref = "grpc" }
 grpc-kotlin-stub = { module = "io.grpc:grpc-kotlin-stub", version.ref = "grpc-kotlin" }
 grpc-protobuf = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
 grpc-protobuf-lite = { module = "io.grpc:grpc-protobuf-lite", version.ref = "grpc" }
-grpc-netty = { module = "io.grpc:grpc-netty-shaded", version.ref = "grpc" }
+grpc-netty = { module = "io.grpc:grpc-netty", version.ref = "grpc" }
 protospecs-grpc = { group = "build.buf.gen", name = "vulpescloud_protospecs_grpc_kotlin", version.ref = "protospecs-grpc" }
 perfmark = { group = "io.perfmark", name = "perfmark-api", version.ref = "perfmark" }
 

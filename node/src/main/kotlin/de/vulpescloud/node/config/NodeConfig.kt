@@ -11,6 +11,5 @@ data class NodeConfig(
     val grpcPort: Int,
     val grpcHost: String,
     val hostname: String,
-    val language: String,
     val mongodb: MongoConfig,
 )

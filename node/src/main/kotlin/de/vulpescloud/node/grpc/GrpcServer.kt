@@ -1,12 +1,9 @@
 package de.vulpescloud.node.grpc
 
-import de.vulpescloud.node.Node
-import de.vulpescloud.node.grpc.security.AuthInterceptor
 import io.grpc.BindableService
 import io.grpc.Server
-import io.grpc.ServerBuilder
 import io.grpc.ServerInterceptors
-import io.grpc.netty.shaded.io.grpc.netty.NettyServerBuilder
+import io.grpc.netty.NettyServerBuilder
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.io.File

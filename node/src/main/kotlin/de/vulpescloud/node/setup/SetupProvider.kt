@@ -190,6 +190,9 @@ class SetupProvider(private val terminal: Terminal) {
         terminal.terminal.puts(InfoCmp.Capability.cursor_up)
         terminal.terminal.puts(InfoCmp.Capability.clr_bol)
         terminal.terminal.puts(InfoCmp.Capability.clr_eol)
+        terminal.terminal.puts(InfoCmp.Capability.cursor_up)
+        terminal.terminal.puts(InfoCmp.Capability.clr_bol)
+        terminal.terminal.puts(InfoCmp.Capability.clr_eol)
         terminal.printSetup("${q.setupQuestion.translationKey} &7> &f$input")
         terminal.terminal.flush()
 

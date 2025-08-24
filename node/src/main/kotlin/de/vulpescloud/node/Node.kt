@@ -15,7 +15,10 @@ import de.vulpescloud.node.grpc.security.AuthInterceptor
 import de.vulpescloud.node.grpc.security.CertGen
 import de.vulpescloud.node.secret.SecretFactory
 import de.vulpescloud.node.setup.SetupProvider
+import de.vulpescloud.node.setup.setups.FirstSetup
 import de.vulpescloud.node.terminal.Terminal
+import io.grpc.ChannelCredentials
+import io.grpc.TlsChannelCredentials
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.io.File
@@ -31,6 +34,7 @@ class Node {
     lateinit var mongoClient: MongoClient
     lateinit var secret: String
     lateinit var setupProvider: SetupProvider
+    lateinit var creds: ChannelCredentials
 
     suspend fun init() = withContext(Dispatchers.IO) {
         instance = this@Node
@@ -44,12 +48,28 @@ class Node {
             certFile = File("certs/server.crt")
         )
 
+        val serverCertBytes = File("certs/server.crt")
+
+        creds = TlsChannelCredentials.newBuilder()
+            .trustManager(serverCertBytes)
+            .build()
+
         val secretFactory = SecretFactory()
-        configProvider.loadConfig()
+
+        val configExists = configProvider.loadConfig()
+
         terminal.changePrompt("")
+
         secret = secretFactory.loadOrCreateSecret(Path("launcher/secret/.auth.secret"))
 
+        if (!configExists) {
+            setupProvider.startSetup(FirstSetup())
+        }
+
+
+
         val grpcServer = GrpcServer(
+            host = configProvider.config.grpcHost,
             port = configProvider.config.grpcPort,
             services = listOf(
 
