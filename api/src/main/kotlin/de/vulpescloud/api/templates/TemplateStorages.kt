@@ -3,7 +3,7 @@ package de.vulpescloud.api.templates
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class TemplateStorage {
+enum class TemplateStorages {
     LOCAL,
     S3;
 }

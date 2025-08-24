@@ -10,7 +10,7 @@ import org.bson.BsonString
 @Serializable
 data class Template(
     val name: String,
-    val storage: de.vulpescloud.api.templates.TemplateStorage,
+    val storage: de.vulpescloud.api.templates.TemplateStorages,
     val weight: Int,
 ) {
 
@@ -25,9 +25,9 @@ data class Template(
         val builder = TemplateDefinition.newBuilder().setName(name).setWeight(weight)
 
         when (storage) {
-            de.vulpescloud.api.templates.TemplateStorage.LOCAL ->
+            de.vulpescloud.api.templates.TemplateStorages.LOCAL ->
                 (builder.setStorage(TemplateStorage.TEMPLATE_STORAGE_LOCAL_UNSPECIFIED))
-            de.vulpescloud.api.templates.TemplateStorage.S3 ->
+            de.vulpescloud.api.templates.TemplateStorages.S3 ->
                 (builder.setStorage(TemplateStorage.TEMPLATE_STORAGE_S3))
         }
 
@@ -40,10 +40,10 @@ data class Template(
                 templateDefinition.name,
                 when (templateDefinition.storage) {
                     TemplateStorage.TEMPLATE_STORAGE_LOCAL_UNSPECIFIED ->
-                        de.vulpescloud.api.templates.TemplateStorage.LOCAL
+                        de.vulpescloud.api.templates.TemplateStorages.LOCAL
                     TemplateStorage.TEMPLATE_STORAGE_S3 ->
-                        de.vulpescloud.api.templates.TemplateStorage.S3
-                    else -> de.vulpescloud.api.templates.TemplateStorage.LOCAL
+                        de.vulpescloud.api.templates.TemplateStorages.S3
+                    else -> de.vulpescloud.api.templates.TemplateStorages.LOCAL
                 },
                 templateDefinition.weight,
             )
@@ -52,7 +52,7 @@ data class Template(
         fun fromDocument(document: BsonDocument): Template =
             Template(
                 document.getString("name").value,
-                de.vulpescloud.api.templates.TemplateStorage.entries[
+                de.vulpescloud.api.templates.TemplateStorages.entries[
                         document.getInt32("storage").value],
                 document.getInt32("weight").value,
             )

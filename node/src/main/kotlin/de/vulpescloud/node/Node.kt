@@ -17,6 +17,7 @@ import de.vulpescloud.node.secret.SecretFactory
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.setups.FirstSetup
 import de.vulpescloud.node.tasks.TasksAPIService
+import de.vulpescloud.node.templates.TemplateStorageProvider
 import de.vulpescloud.node.terminal.Terminal
 import io.grpc.ChannelCredentials
 import io.grpc.TlsChannelCredentials
@@ -38,6 +39,7 @@ class Node {
     lateinit var creds: ChannelCredentials
     var inputJob: Job? = null
         private set
+    val templateStorageProvider = TemplateStorageProvider()
 
     suspend fun init(scope: CoroutineScope) =
         withContext(Dispatchers.IO) {
