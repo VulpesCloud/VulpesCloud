@@ -3,6 +3,7 @@ package de.vulpescloud.node.setup
 import de.vulpescloud.node.setup.annotations.SetupCancel
 import de.vulpescloud.node.setup.annotations.SetupFinish
 import de.vulpescloud.node.setup.annotations.SetupQuestion
+import de.vulpescloud.node.setup.answers.NullSetupAnswer
 import de.vulpescloud.node.terminal.Terminal
 import kotlinx.coroutines.delay
 import org.jline.utils.InfoCmp
@@ -190,9 +191,12 @@ class SetupProvider(private val terminal: Terminal) {
         terminal.terminal.puts(InfoCmp.Capability.cursor_up)
         terminal.terminal.puts(InfoCmp.Capability.clr_bol)
         terminal.terminal.puts(InfoCmp.Capability.clr_eol)
-        terminal.terminal.puts(InfoCmp.Capability.cursor_up)
-        terminal.terminal.puts(InfoCmp.Capability.clr_bol)
-        terminal.terminal.puts(InfoCmp.Capability.clr_eol)
+        if (currentQuestion!!.setupQuestion.answer != NullSetupAnswer::class) {
+            terminal.terminal.puts(InfoCmp.Capability.cursor_up)
+            terminal.terminal.puts(InfoCmp.Capability.clr_bol)
+            terminal.terminal.puts(InfoCmp.Capability.clr_eol)
+        }
+
         terminal.printSetup("${q.setupQuestion.translationKey} &7> &f$input")
         terminal.terminal.flush()
 

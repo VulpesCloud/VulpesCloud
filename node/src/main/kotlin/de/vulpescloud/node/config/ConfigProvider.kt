@@ -22,12 +22,13 @@ class ConfigProvider {
         } else {
             val defaultConfig =
                 NodeConfig(
-                    "Node-1",
+                    "cloud",
                     UUID.randomUUID(),
                     6565,
                     "0.0.0.0",
-                    "0.0.0.0",
                     MongoConfig("mongodb://localhost:27017/", "vulpescloud", "vc_"),
+                    4096,
+                    "LOCAL"
                 )
 
             Files.writeString(Path("config.json"), json.encodeToString(defaultConfig))
@@ -38,6 +39,7 @@ class ConfigProvider {
     }
 
     fun updateConfig(config: NodeConfig) {
+        Files.deleteIfExists(Path("config.json"))
         Files.writeString(Path("config.json"), json.encodeToString(config))
         this.config = config
     }

@@ -35,12 +35,15 @@ class Node {
     lateinit var secret: String
     lateinit var setupProvider: SetupProvider
     lateinit var creds: ChannelCredentials
+    var inputJob: Job? = null
+        private set
 
-    suspend fun init() = withContext(Dispatchers.IO) {
+    suspend fun init(scope: CoroutineScope) = withContext(Dispatchers.IO) {
         instance = this@Node
 
-        setupProvider = SetupProvider(terminal)
+        val configExists = configProvider.loadConfig()
 
+        setupProvider = SetupProvider(terminal)
         terminal.init()
 
         CertGen.loadOrCreate(
@@ -49,37 +52,34 @@ class Node {
         )
 
         val serverCertBytes = File("certs/server.crt")
-
         creds = TlsChannelCredentials.newBuilder()
             .trustManager(serverCertBytes)
             .build()
 
         val secretFactory = SecretFactory()
-
-        val configExists = configProvider.loadConfig()
-
-        terminal.changePrompt("")
-
         secret = secretFactory.loadOrCreateSecret(Path("launcher/secret/.auth.secret"))
+
+        inputJob = scope.launch(Dispatchers.IO) { terminal.allowInput() }
 
         if (!configExists) {
             setupProvider.startSetup(FirstSetup())
         }
 
+        while (setupProvider.currentSetup?.setup is FirstSetup) {
+            delay(500)
+        }
 
+        terminal.changePrompt("")
 
         val grpcServer = GrpcServer(
             host = configProvider.config.grpcHost,
             port = configProvider.config.grpcPort,
-            services = listOf(
-
-            ),
+            services = listOf(),
             interceptors = listOf(
                 LoggingServerInterceptor(),
                 AuthInterceptor(secret)
             )
         )
-
         grpcServer.start()
         NodeCoroutineScope.launch { grpcServer.awaitTermination() }
 
@@ -92,7 +92,6 @@ class Node {
         }
 
         val connectionString = configProvider.config.mongodb.connectionString
-
         try {
             val settings = MongoClientSettings.builder()
                 .applyConnectionString(ConnectionString(connectionString))
@@ -115,23 +114,19 @@ class Node {
         }
     }
 
-    fun startInput(scope: CoroutineScope): Job =
-        scope.launch(Dispatchers.IO) { terminal.allowInput() }
-
     companion object {
         lateinit var instance: Node
 
-        suspend fun create(scope: CoroutineScope): Pair<Node, Job> {
+        suspend fun create(scope: CoroutineScope): Node {
             val node = Node()
-            node.init()
-            val inputJob = node.startInput(scope)
-            return node to inputJob
+            node.init(scope)
+            return node
         }
 
         @JvmStatic
         fun main(args: Array<String>) = runBlocking {
-            val (_, inputJob) = create(this)
-            inputJob.join()
+            val node = create(this)
+            node.inputJob?.join()
         }
     }
 }

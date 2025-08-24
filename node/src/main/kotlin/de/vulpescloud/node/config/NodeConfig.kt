@@ -10,6 +10,7 @@ data class NodeConfig(
     @Serializable(with = UUIDSerializer::class) val uuid: UUID,
     val grpcPort: Int,
     val grpcHost: String,
-    val hostname: String,
     val mongodb: MongoConfig,
+    val maxMemory: Int = 1024, // MB
+    val serviceType: String = "LOCAL" // can be "LOCAL" or "DOCKER"
 )
