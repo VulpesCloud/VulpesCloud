@@ -16,6 +16,7 @@ import de.vulpescloud.node.grpc.security.CertGen
 import de.vulpescloud.node.secret.SecretFactory
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.setups.FirstSetup
+import de.vulpescloud.node.tasks.TasksAPIService
 import de.vulpescloud.node.terminal.Terminal
 import io.grpc.ChannelCredentials
 import io.grpc.TlsChannelCredentials
@@ -38,81 +39,79 @@ class Node {
     var inputJob: Job? = null
         private set
 
-    suspend fun init(scope: CoroutineScope) = withContext(Dispatchers.IO) {
-        instance = this@Node
+    suspend fun init(scope: CoroutineScope) =
+        withContext(Dispatchers.IO) {
+            instance = this@Node
 
-        val configExists = configProvider.loadConfig()
+            val configExists = configProvider.loadConfig()
 
-        setupProvider = SetupProvider(terminal)
-        terminal.init()
+            setupProvider = SetupProvider(terminal)
+            terminal.init()
 
-        CertGen.loadOrCreate(
-            keyFile = File("certs/server.key"),
-            certFile = File("certs/server.crt")
-        )
-
-        val serverCertBytes = File("certs/server.crt")
-        creds = TlsChannelCredentials.newBuilder()
-            .trustManager(serverCertBytes)
-            .build()
-
-        val secretFactory = SecretFactory()
-        secret = secretFactory.loadOrCreateSecret(Path("launcher/secret/.auth.secret"))
-
-        inputJob = scope.launch(Dispatchers.IO) { terminal.allowInput() }
-
-        if (!configExists) {
-            setupProvider.startSetup(FirstSetup())
-        }
-
-        while (setupProvider.currentSetup?.setup is FirstSetup) {
-            delay(500)
-        }
-
-        terminal.changePrompt("")
-
-        val grpcServer = GrpcServer(
-            host = configProvider.config.grpcHost,
-            port = configProvider.config.grpcPort,
-            services = listOf(),
-            interceptors = listOf(
-                LoggingServerInterceptor(),
-                AuthInterceptor(secret)
+            CertGen.loadOrCreate(
+                keyFile = File("certs/server.key"),
+                certFile = File("certs/server.crt"),
             )
-        )
-        grpcServer.start()
-        NodeCoroutineScope.launch { grpcServer.awaitTermination() }
 
-        commandProvider.initialize()
-        commandProvider.apply {
-            register(ClearCommand(terminal))
-            register(HelpCommand(commandProvider))
-            register(ExitCommand())
-            register(InfoCommand())
+            val serverCertBytes = File("certs/server.crt")
+            creds = TlsChannelCredentials.newBuilder().trustManager(serverCertBytes).build()
+
+            val secretFactory = SecretFactory()
+            secret = secretFactory.loadOrCreateSecret(Path("launcher/secret/.auth.secret"))
+
+            inputJob = scope.launch(Dispatchers.IO) { terminal.allowInput() }
+
+            if (!configExists) {
+                setupProvider.startSetup(FirstSetup())
+            }
+
+            while (setupProvider.currentSetup?.setup is FirstSetup) {
+                delay(500)
+            }
+
+            terminal.changePrompt("")
+
+            val grpcServer =
+                GrpcServer(
+                    host = configProvider.config.grpcHost,
+                    port = configProvider.config.grpcPort,
+                    services = listOf(TasksAPIService()),
+                    interceptors = listOf(LoggingServerInterceptor(), AuthInterceptor(secret)),
+                )
+            grpcServer.start()
+            NodeCoroutineScope.launch { grpcServer.awaitTermination() }
+
+            commandProvider.initialize()
+            commandProvider.apply {
+                register(ClearCommand(terminal))
+                register(HelpCommand(commandProvider))
+                register(ExitCommand())
+                register(InfoCommand())
+            }
+
+            val connectionString = configProvider.config.mongodb.connectionString
+            try {
+                val settings =
+                    MongoClientSettings.builder()
+                        .applyConnectionString(ConnectionString(connectionString))
+                        .applyToConnectionPoolSettings {
+                            it.maxSize(50)
+                            it.maxWaitTime(2, TimeUnit.SECONDS)
+                        }
+                        .applyToSocketSettings {
+                            it.connectTimeout(2, TimeUnit.SECONDS)
+                            it.readTimeout(2, TimeUnit.SECONDS)
+                        }
+                        .retryWrites(true)
+                        .build()
+
+                mongoClient = MongoClient.create(settings)
+                logger.info("Successfully connected to MongoDB!")
+            } catch (e: Exception) {
+                logger.error("Failed to connect to MongoDB: ${e.message}")
+                return@withContext
+            }
         }
-
-        val connectionString = configProvider.config.mongodb.connectionString
-        try {
-            val settings = MongoClientSettings.builder()
-                .applyConnectionString(ConnectionString(connectionString))
-                .applyToConnectionPoolSettings {
-                    it.maxSize(50)
-                    it.maxWaitTime(2, TimeUnit.SECONDS)
-                }
-                .applyToSocketSettings {
-                    it.connectTimeout(2, TimeUnit.SECONDS)
-                    it.readTimeout(2, TimeUnit.SECONDS)
-                }
-                .retryWrites(true)
-                .build()
-
-            mongoClient = MongoClient.create(settings)
-            logger.info("Successfully connected to MongoDB!")
-        } catch (e: Exception) {
-            logger.error("Failed to connect to MongoDB: ${e.message}")
-            return@withContext
-        }
-    }
 
     companion object {
         lateinit var instance: Node

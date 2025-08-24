@@ -34,6 +34,8 @@ dependencies {
     compileOnly(libs.nightConfig.yaml)
     compileOnly(libs.json)
     compileOnly(libs.kotlinx.serialization)
+    compileOnly(libs.bundles.proto)
+    compileOnly(libs.mongodb.bson.kotlinx)
 }
 
 java {

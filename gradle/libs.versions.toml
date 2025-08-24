@@ -20,6 +20,7 @@ perfmark = "0.27.0"
 
 # mongo
 mongodb = "5.5.1"
+reactor = "3.8.0-M3"
 
 #logging
 slf4j = "2.1.0-alpha1"
@@ -83,6 +84,7 @@ perfmark = { group = "io.perfmark", name = "perfmark-api", version.ref = "perfma
 # mongo
 mongodb-driver-coroutine = { group = "org.mongodb", name = "mongodb-driver-kotlin-coroutine", version.ref = "mongodb" }
 mongodb-bson-kotlinx = { group = "org.mongodb", name = "bson-kotlinx", version.ref = "mongodb" }
+reactor-core = { group = "io.projectreactor", name = "reactor-core", version.ref = "reactor" }
 
 # utils
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
@@ -146,5 +148,6 @@ kotlin = [
 
 mongo = [
     "mongodb-driver-coroutine",
-    "mongodb-bson-kotlinx"
+    "mongodb-bson-kotlinx",
+    "reactor-core"
 ]
