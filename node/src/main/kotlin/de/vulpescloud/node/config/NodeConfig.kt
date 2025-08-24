@@ -1,6 +1,6 @@
 package de.vulpescloud.node.config
 
-import de.vulpescloud.node.serializer.UUIDSerializer
+import de.vulpescloud.api.serializer.UUIDSerializer
 import kotlinx.serialization.Serializable
 import java.util.*
 

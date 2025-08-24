@@ -1,4 +1,4 @@
-package de.vulpescloud.node.serializer
+package de.vulpescloud.api.serializer
 
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.descriptors.PrimitiveKind

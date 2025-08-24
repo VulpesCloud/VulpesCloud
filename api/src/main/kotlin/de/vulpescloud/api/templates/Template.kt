@@ -25,9 +25,9 @@ data class Template(
         val builder = TemplateDefinition.newBuilder().setName(name).setWeight(weight)
 
         when (storage) {
-            de.vulpescloud.api.templates.TemplateStorages.LOCAL ->
+            TemplateStorages.LOCAL ->
                 (builder.setStorage(TemplateStorage.TEMPLATE_STORAGE_LOCAL_UNSPECIFIED))
-            de.vulpescloud.api.templates.TemplateStorages.S3 ->
+            TemplateStorages.S3 ->
                 (builder.setStorage(TemplateStorage.TEMPLATE_STORAGE_S3))
         }
 
