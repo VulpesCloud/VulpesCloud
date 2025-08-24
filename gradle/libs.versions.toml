@@ -20,7 +20,7 @@ perfmark = "0.27.0"
 
 # mongo
 mongodb = "5.5.1"
-reactor = "3.8.0-M3"
+reactor = "3.8.0-M6"
 
 #logging
 slf4j = "2.1.0-alpha1"
