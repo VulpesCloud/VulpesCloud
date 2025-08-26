@@ -10,6 +10,7 @@ import de.vulpescloud.node.commands.HelpCommand
 import de.vulpescloud.node.commands.InfoCommand
 import de.vulpescloud.node.config.ConfigProvider
 import de.vulpescloud.node.grpc.GrpcServer
+import de.vulpescloud.node.grpc.LocalGrpcClient
 import de.vulpescloud.node.grpc.LoggingServerInterceptor
 import de.vulpescloud.node.grpc.security.AuthInterceptor
 import de.vulpescloud.node.grpc.security.CertGen
@@ -39,7 +40,9 @@ class Node {
     lateinit var creds: ChannelCredentials
     var inputJob: Job? = null
         private set
+
     val templateStorageProvider = TemplateStorageProvider()
+    val localGrpcClient = LocalGrpcClient()
 
     suspend fun init(scope: CoroutineScope) =
         withContext(Dispatchers.IO) {
@@ -82,6 +85,13 @@ class Node {
                 )
             grpcServer.start()
             NodeCoroutineScope.launch { grpcServer.awaitTermination() }
+
+            localGrpcClient.connect(
+                host = configProvider.config.grpcHost,
+                port = configProvider.config.grpcPort,
+                creds = creds,
+                secret = secret,
+            )
 
             commandProvider.initialize()
             commandProvider.apply {
