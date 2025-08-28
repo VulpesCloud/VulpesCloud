@@ -37,6 +37,10 @@ repositories {
         name = "buf"
         url = uri("https://buf.build/gen/maven")
     }
+    maven {
+        name = "jitpack"
+        url = uri("https://jitpack.io")
+    }
 }
 
 dependencies {
@@ -66,6 +70,8 @@ dependencies {
     compileOnly(libs.bundles.mongo)
     compileOnly(libs.bundles.kotlin)
     compileOnly(libs.bouncy.castle)
+    compileOnly(libs.okio)
+    compileOnly(libs.okhttp)
     compileOnly(libs.perfmark)
     compileOnly(kotlin("reflect"))
 }

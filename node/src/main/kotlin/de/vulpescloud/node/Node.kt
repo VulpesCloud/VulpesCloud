@@ -16,6 +16,10 @@ import de.vulpescloud.node.grpc.security.AuthInterceptor
 import de.vulpescloud.node.grpc.security.CertGen
 import de.vulpescloud.node.secret.SecretFactory
 import de.vulpescloud.node.services.ServicesAPIService
+import de.vulpescloud.node.serversoftware.impl.CanvasDownloader
+import de.vulpescloud.node.serversoftware.impl.FoliaDownloader
+import de.vulpescloud.node.serversoftware.impl.PaperDownloader
+import de.vulpescloud.node.serversoftware.impl.PurpurDownloader
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.setups.FirstSetup
 import de.vulpescloud.node.tasks.TasksAPIService
@@ -81,7 +85,7 @@ class Node {
                 GrpcServer(
                     host = configProvider.config.grpcHost,
                     port = configProvider.config.grpcPort,
-                    services = listOf(TasksAPIService(), ServicesAPIService()),
+                    services = listOf(TasksAPIService()),
                     interceptors = listOf(LoggingServerInterceptor(), AuthInterceptor(secret)),
                 )
             grpcServer.start()
