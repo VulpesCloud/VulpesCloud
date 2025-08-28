@@ -5,7 +5,7 @@ import org.incendo.cloud.execution.ExecutionCoordinator
 import org.incendo.cloud.internal.CommandRegistrationHandler
 
 class CloudCommandManager : CommandManager<CommandSource>(
-    ExecutionCoordinator.simpleCoordinator(),
+    ExecutionCoordinator.asyncCoordinator(),
     CommandRegistrationHandler.nullCommandRegistrationHandler()
 ) {
     override fun hasPermission(sender: CommandSource, permission: String): Boolean = true

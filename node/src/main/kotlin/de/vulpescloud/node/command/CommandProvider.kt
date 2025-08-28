@@ -81,7 +81,9 @@ class CommandProvider {
                         it!!.sendMessage("There are no Commands that need confirmation")
                     }
                     .confirmationRequiredNotifier { source, _ ->
-                        source!!.sendMessage("Type 'confirm' in the next 30 seconds to confirm this command")
+                        source!!.sendMessage(
+                            "Type 'confirm' in the next 30 seconds to confirm this command"
+                        )
                     }
                     .build()
             )
@@ -92,20 +94,18 @@ class CommandProvider {
                 .handler(confirmationManager.createExecutionHandler())
         )
 
-        registeredCommands!!.add(CommandInfo("confirm", setOf(), "",  listOf()))
+        registeredCommands!!.add(CommandInfo("confirm", setOf(), "", listOf()))
     }
 
     fun execute(
         source: CommandSource,
         input: String,
     ): CompletableFuture<CommandResult<CommandSource>> {
-        return commandManager.commandExecutor().executeCommand(source, input)
-        //            .exceptionally { exception: Throwable? ->
-        //            logger.error("Exception while executing command", exception)
-        //            throw if (exception is CompletionException) exception else
-        // CompletionException(exception)
-        //        }
-        // TODO: Handle these exceptions
+
+        return commandManager.commandExecutor().executeCommand(source, input).exceptionally {
+            exception ->
+            throw exception
+        }
     }
 
     fun register(command: Any) {
@@ -128,7 +128,9 @@ class CommandProvider {
 
             val name = cloudCommand.nonFlagArguments().first().name().lowercase()
 
-            registeredCommands!!.add(CommandInfo(name, aliases.toSet(), description, this.commandUsageOfRoot(name)))
+            registeredCommands!!.add(
+                CommandInfo(name, aliases.toSet(), description, this.commandUsageOfRoot(name))
+            )
         }
     }
 
