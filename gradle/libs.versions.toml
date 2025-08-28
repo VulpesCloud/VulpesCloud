@@ -18,11 +18,15 @@ grpc-kotlin = "1.4.3"
 protospecs-grpc = "1.4.3.1.20250823232418.d658d661d322"
 perfmark = "0.27.0"
 
+# ok
+okhttp = "5.1.0"
+okio = "3.16.0"
+
 # mongo
 mongodb = "5.5.1"
 reactor = "3.8.0-M6"
 
-#logging
+# logging
 slf4j = "2.1.0-alpha1"
 logback = "1.5.18"
 adventure = "4.24.0"
@@ -64,6 +68,10 @@ kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-seria
 kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
 kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
 kotlinx-coroutines-reactive = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactive", version.ref = "kotlinx-coroutines" }
+
+# ok
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
 # google libs
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
