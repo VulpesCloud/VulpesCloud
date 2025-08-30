@@ -1,6 +1,7 @@
 package de.vulpescloud.api.tasks
 
 import build.buf.gen.vulpescloud.tasks.v1.TaskDefinition
+import com.google.protobuf.Struct
 import de.vulpescloud.api.serversoftware.ServerSoftware
 import de.vulpescloud.api.templates.Template
 import kotlinx.serialization.Serializable
@@ -22,6 +23,9 @@ data class Task(
     val preferredNode: String,
     val maxPlayers: Int,
     val software: ServerSoftware,
+    val attributes: Struct,
+    val jvmArgs: List<String> = emptyList(),
+    val envVars: List<String> = emptyList(),
 ) {
 
     fun toDocument(): BsonDocument =
@@ -80,6 +84,9 @@ data class Task(
                 taskDefinition.preferredNode,
                 taskDefinition.maxPlayers,
                 ServerSoftware.fromDefinition(taskDefinition.serverSoftware),
+                taskDefinition.attributes,
+                taskDefinition.jvmArgsList,
+                taskDefinition.envVarsList,
             )
         }
 
@@ -99,6 +106,9 @@ data class Task(
                 document.getString("preferredNode").value,
                 document.getInt32("maxPlayers").value,
                 ServerSoftware.fromDocument(document.getDocument("software")),
+                document.getString("attributes").let { Struct.parseFrom(it.asBinary().data) },
+                document.getArray("jvmArgs").map { it.asString().value },
+                document.getArray("envVars").map { it.asString().value },
             )
     }
 }
