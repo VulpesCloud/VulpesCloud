@@ -1,5 +1,6 @@
 package de.vulpescloud.node
 
+import build.buf.gen.vulpescloud.tasks.v1.TaskDefinition
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.kotlin.client.coroutine.MongoClient
