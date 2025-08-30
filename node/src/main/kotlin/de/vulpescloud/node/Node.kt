@@ -13,6 +13,7 @@ import de.vulpescloud.node.commands.ClearCommand
 import de.vulpescloud.node.commands.ExitCommand
 import de.vulpescloud.node.commands.HelpCommand
 import de.vulpescloud.node.commands.InfoCommand
+import de.vulpescloud.node.commands.ServiceCommand
 import de.vulpescloud.node.config.ConfigProvider
 import de.vulpescloud.node.grpc.GrpcServer
 import de.vulpescloud.node.grpc.LocalGrpcClient
@@ -108,6 +109,7 @@ class Node {
                 register(HelpCommand(commandProvider))
                 register(ExitCommand())
                 register(InfoCommand())
+                register(ServiceCommand())
             }
 
             val connectionString = configProvider.config.mongodb.connectionString
