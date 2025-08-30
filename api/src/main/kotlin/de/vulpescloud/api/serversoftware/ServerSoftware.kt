@@ -5,11 +5,13 @@ import kotlinx.serialization.Serializable
 import org.bson.BsonDocument
 import org.bson.BsonInt32
 import org.bson.BsonString
+import build.buf.gen.vulpescloud.node.v1.SoftwareType as SoftwareTypeProto
 
 @Serializable
 data class ServerSoftware(
     val name: String,
     val version: String,
+    val build: Int,
     val url: String,
     val pluginDir: String,
     val type: SoftwareType,
@@ -33,9 +35,9 @@ data class ServerSoftware(
             .setType(
                 when (type) {
                     SoftwareType.SERVER ->
-                        (build.buf.gen.vulpescloud.node.v1.SoftwareType.SOFTWARE_TYPE_SERVER)
+                        (SoftwareTypeProto.SOFTWARE_TYPE_SERVER)
                     SoftwareType.PROXY ->
-                        (build.buf.gen.vulpescloud.node.v1.SoftwareType.SOFTWARE_TYPE_PROXY)
+                        (SoftwareTypeProto.SOFTWARE_TYPE_PROXY)
                 }
             )
             .build()
@@ -48,12 +50,13 @@ data class ServerSoftware(
             return ServerSoftware(
                 definition.name,
                 definition.version,
+                definition.build,
                 definition.url,
                 definition.pluginDir,
                 when (definition.type) {
-                    build.buf.gen.vulpescloud.node.v1.SoftwareType.SOFTWARE_TYPE_SERVER ->
+                    SoftwareTypeProto.SOFTWARE_TYPE_SERVER ->
                         SoftwareType.SERVER
-                    build.buf.gen.vulpescloud.node.v1.SoftwareType.SOFTWARE_TYPE_PROXY ->
+                    SoftwareTypeProto.SOFTWARE_TYPE_PROXY ->
                         SoftwareType.PROXY
                     else -> SoftwareType.SERVER
                 },
@@ -64,6 +67,7 @@ data class ServerSoftware(
             ServerSoftware(
                 document.getString("name").value,
                 document.getString("version").value,
+                document.getInt32("build").value,
                 document.getString("url").value,
                 document.getString("pluginDir").value,
                 SoftwareType.entries[document.getInt32("type").value],

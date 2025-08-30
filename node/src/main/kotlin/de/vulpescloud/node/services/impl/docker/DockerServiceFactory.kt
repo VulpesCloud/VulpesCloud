@@ -6,6 +6,6 @@ import de.vulpescloud.node.services.AbstractServiceFactory
 
 class DockerServiceFactory : AbstractServiceFactory() {
     override suspend fun prepareService(service: Service): AbstractService {
-        TODO("Not yet implemented")
+        TODO()
     }
 }

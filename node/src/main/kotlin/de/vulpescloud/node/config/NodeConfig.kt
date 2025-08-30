@@ -10,8 +10,9 @@ data class NodeConfig(
     @Serializable(with = UUIDSerializer::class) val uuid: UUID,
     val grpcPort: Int,
     val grpcHost: String,
+    val serviceBindAdress: String,
     val mongodb: MongoConfig,
     val maxMemory: Int = 1024, // MB
     val serviceType: String = "LOCAL", // can be "LOCAL" or "DOCKER"
-    val dockerSocket: String = "unix:///var/run/docker.sock" // only used if serviceType is "DOCKER"
+    val docker: DockerConfig
 )

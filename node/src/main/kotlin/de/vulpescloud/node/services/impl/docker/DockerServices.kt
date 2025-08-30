@@ -1,19 +1,10 @@
 package de.vulpescloud.node.services.impl.docker
 
-import com.google.protobuf.Timestamp
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.node.services.AbstractService
+import java.nio.file.Path
 
-class DockerServices(service: Service) : AbstractService {
-    override val task = service.task
-    override val uuid = service.uuid
-    override val orderedId = service.orderedId
-    override val port = service.port
-    override val node = service.node
-    override val playerCount = service.playerCount
-    override val startTime: Timestamp = service.startTime
-    override val state = service.state
-
+class DockerServices(override val service: Service) : AbstractService {
     override fun start() {
         TODO("Not yet implemented")
     }
@@ -32,5 +23,13 @@ class DockerServices(service: Service) : AbstractService {
 
     override fun restart() {
         TODO("Not yet implemented")
+    }
+
+    fun path(): Path {
+        return if (service.task.staticServices) {
+            Path.of("local/services/${service.task.name}-${service.orderedId}")
+        } else {
+            Path.of("temp/services/docker/${service.task.name}-${service.orderedId}")
+        }
     }
 }

@@ -14,7 +14,7 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 
 object VelocityDownloader : ServerSoftwareDownloader {
-    private const val BASE_API_URL = "https://fill.papermc.io/v3"
+    private const val BASE_API_URL = "https://fill.velocitymc.io/v3"
     private val logger = LoggerFactory.getLogger("VelocityDownloader")
 
     override suspend fun downloadSoftware(version: String) {
@@ -53,6 +53,11 @@ object VelocityDownloader : ServerSoftwareDownloader {
                 "Finished downloading $downloadFileName (${file.length() / 1000000}mb) in ${if (durationMs >= 1000) "${durationMs / 1000}s" else "${durationMs}ms}"}"
             )
         }
+    }
+
+    override suspend fun getLatestVersionPath(version: String): Path {
+        val latestVersion = getLatestVersion(version)
+        return Path("local/versions/velocity-${latestVersion.version}-${latestVersion.build}.jar")
     }
 
     override suspend fun getDownloadUrl(version: String): URI {
@@ -109,6 +114,7 @@ object VelocityDownloader : ServerSoftwareDownloader {
                 val software = ServerSoftware(
                     name = "Velocity",
                     version = version.getString("id"),
+                    build = version.getJSONArray("builds").maxOfOrNull { it as Int } ?: 1,
                     url = downloadUrl.toString(),
                     pluginDir = "plugins",
                     type = SoftwareType.PROXY
@@ -121,14 +127,9 @@ object VelocityDownloader : ServerSoftwareDownloader {
         }
     }
 
-    override suspend fun getLatestVersionPath(): Path {
-        val latest = getLatestVersion()
-        val fileName = "velocity-${latest.version}-${latest.url.split("/")[4].replace(" ", "")}.jar"
-        return Path("local/versions/$fileName")
-    }
-
-    override suspend fun getLatestVersion(): ServerSoftware {
+    override suspend fun getLatestVersion(version: String?): ServerSoftware {
         val apiUrl = "$BASE_API_URL/projects/velocity/versions"
+        val allVersions = getAvailableVersions()
 
         val client = OkHttpClient()
 
@@ -137,28 +138,62 @@ object VelocityDownloader : ServerSoftwareDownloader {
             .header("User-Agent", "VulpesCloud-Node/1.0")
             .build()
 
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw Exception("Unexpected code $response")
+        if (version == null) {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) throw Exception("Unexpected code $response")
 
-            val responseBody = response.body.string()
+                val responseBody = response.body.string()
 
-            val jResponse = JSONObject(responseBody)
+                val jResponse = JSONObject(responseBody)
 
-            val versions = jResponse.getJSONArray("versions")
+                val versions = jResponse.getJSONArray("versions")
 
-            if (versions.length() == 0) throw Exception("No versions found")
+                if (versions.length() == 0) throw Exception("No versions found")
 
-            val latestVersion = versions.getJSONObject(0).getJSONObject("version")
+                val latestVersion = versions.getJSONObject(0).getJSONObject("version")
 
-            val downloadUrl = getDownloadUrl(latestVersion.getString("id"))
+                val downloadUrl = getDownloadUrl(latestVersion.getString("id"))
 
-            return ServerSoftware(
-                name = "Velocity",
-                version = latestVersion.getString("id"),
-                url = downloadUrl.toString(),
-                pluginDir = "plugins",
-                type = SoftwareType.PROXY
-            )
+                return ServerSoftware(
+                    name = "Velocity",
+                    version = latestVersion.getString("id"),
+                    build = latestVersion.getJSONArray("builds").maxOfOrNull { it as Int } ?: 1,
+                    url = downloadUrl.toString(),
+                    pluginDir = "plugins",
+                    type = SoftwareType.PROXY
+                )
+            }
+        } else {
+            val matchingVersion = allVersions.find { it.version == version }
+            if (matchingVersion != null) throw Exception("No version found for Velocity with version $version")
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) throw Exception("Unexpected code $response")
+
+                val responseBody = response.body.string()
+
+                val jResponse = JSONObject(responseBody)
+
+                val versions = jResponse.getJSONArray("versions")
+
+                if (versions.length() == 0) throw Exception("No versions found")
+
+                val latestVersion = versions
+                    .find { (it as JSONObject).getJSONObject("version").getString("id") == version }
+                    ?.let { (it as JSONObject).getJSONObject("version") }
+                    ?: throw Exception("No version found for Velocity with version $version")
+
+                val downloadUrl = getDownloadUrl(version)
+
+                return ServerSoftware(
+                    name = "Velocity",
+                    version = version,
+                    build = latestVersion.getJSONArray("builds").maxOfOrNull { it as Int } ?: 1,
+                    url = downloadUrl.toString(),
+                    pluginDir = "plugins",
+                    type = SoftwareType.PROXY
+                )
+            }
         }
     }
 }

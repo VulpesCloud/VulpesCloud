@@ -104,6 +104,7 @@ object PurpurDownloader : ServerSoftwareDownloader {
                 ServerSoftware(
                     name = "Purpur",
                     version = version,
+                    build = downloadUrl.path.split("/")[4].toInt(),
                     url = downloadUrl.toString(),
                     pluginDir = "plugins",
                     type = SoftwareType.SERVER
@@ -112,14 +113,15 @@ object PurpurDownloader : ServerSoftwareDownloader {
         }
     }
 
-    override suspend fun getLatestVersionPath(): Path {
-        val latest = getLatestVersion()
-        val fileName = "purpur-${latest.version}-${latest.url.split("/")[4].replace(" ", "")}.jar"
+    override suspend fun getLatestVersionPath(version: String): Path {
+        val latest = getLatestVersion(version)
+        val fileName = "purpur-${latest.version}-${latest.build}.jar"
         return Path("local/versions/$fileName")
     }
 
-    override suspend fun getLatestVersion(): ServerSoftware {
+    override suspend fun getLatestVersion(version: String?): ServerSoftware {
         val getCurrentVersionApiUrl = "$BASE_API_URL/purpur"
+        val allVersions = getAvailableVersions()
 
         val client = OkHttpClient()
 
@@ -128,32 +130,66 @@ object PurpurDownloader : ServerSoftwareDownloader {
             .header("User-Agent", "VulpesCloud-Node/1.0")
             .build()
 
-        client.newCall(versionRequest).execute().use { response ->
-            if (!response.isSuccessful) throw Exception("Unexpected code $response")
+        if (version == null) {
+            client.newCall(versionRequest).execute().use { response ->
+                if (!response.isSuccessful) throw Exception("Unexpected code $response")
 
-            val responseBody = response.body.string()
+                val responseBody = response.body.string()
 
-            val jVersionResponse = JSONObject(responseBody)
+                val jVersionResponse = JSONObject(responseBody)
 
-            val latestVersion = jVersionResponse.getJSONObject("metadata").getString("current")
+                val latestVersion = jVersionResponse.getJSONObject("metadata").getString("current")
 
-            val latestBuildUrl = "$BASE_API_URL/purpur/$latestVersion"
+                val latestBuildUrl = "$BASE_API_URL/purpur/$latestVersion"
 
-            val buildRequest = Request.Builder()
-                .url(latestBuildUrl)
-                .header("User-Agent", "VulpesCloud-Node/1.0")
-                .build()
+                val buildRequest = Request.Builder()
+                    .url(latestBuildUrl)
+                    .header("User-Agent", "VulpesCloud-Node/1.0")
+                    .build()
 
-            client.newCall(buildRequest).execute().use { buildResponse ->
-                if (!buildResponse.isSuccessful) throw Exception("Unexpected code $buildResponse")
+                client.newCall(buildRequest).execute().use { buildResponse ->
+                    if (!buildResponse.isSuccessful) throw Exception("Unexpected code $buildResponse")
 
-                return ServerSoftware(
-                    name = "Purpur",
-                    version = latestVersion,
-                    url = getDownloadUrl(latestVersion).toString(),
-                    pluginDir = "plugins",
-                    type = SoftwareType.SERVER
-                )
+                    return ServerSoftware(
+                        name = "Purpur",
+                        version = latestVersion,
+                        build = jVersionResponse.getJSONObject("builds").getInt("latest"),
+                        url = getDownloadUrl(latestVersion).toString(),
+                        pluginDir = "plugins",
+                        type = SoftwareType.SERVER
+                    )
+                }
+            }
+        } else {
+            val matchingVersion = allVersions.find { it.version == version }
+            if (matchingVersion != null) throw Exception("No version found for Purpur with version $version")
+
+            client.newCall(versionRequest).execute().use { response ->
+                if (!response.isSuccessful) throw Exception("Unexpected code $response")
+
+                val responseBody = response.body.string()
+
+                val jVersionResponse = JSONObject(responseBody)
+
+                val latestBuildUrl = "$BASE_API_URL/purpur/$version"
+
+                val buildRequest = Request.Builder()
+                    .url(latestBuildUrl)
+                    .header("User-Agent", "VulpesCloud-Node/1.0")
+                    .build()
+
+                client.newCall(buildRequest).execute().use { buildResponse ->
+                    if (!buildResponse.isSuccessful) throw Exception("Unexpected code $buildResponse")
+
+                    return ServerSoftware(
+                        name = "Purpur",
+                        version = version,
+                        build = jVersionResponse.getJSONObject("builds").getInt("latest"),
+                        url = getDownloadUrl(version).toString(),
+                        pluginDir = "plugins",
+                        type = SoftwareType.SERVER
+                    )
+                }
             }
         }
     }

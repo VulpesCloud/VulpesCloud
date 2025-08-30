@@ -11,7 +11,7 @@ interface ServerSoftwareDownloader {
 
     suspend fun getAvailableVersions(): List<ServerSoftware>
 
-    suspend fun getLatestVersion(): ServerSoftware
+    suspend fun getLatestVersion(version: String? = null): ServerSoftware
 
-    suspend fun getLatestVersionPath(): Path
+    suspend fun getLatestVersionPath(version: String): Path
 }

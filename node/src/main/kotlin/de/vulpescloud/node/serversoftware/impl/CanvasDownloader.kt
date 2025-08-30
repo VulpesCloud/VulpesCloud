@@ -60,9 +60,9 @@ object CanvasDownloader : ServerSoftwareDownloader {
         }
     }
 
-    override suspend fun getLatestVersionPath(): Path {
-        val latest = getLatestVersion()
-        val fileName = "canvas-${latest.version}-${latest.url.split("/")[3].replace(" ", "")}.jar"
+    override suspend fun getLatestVersionPath(version: String): Path {
+        val latest = getLatestVersion(version)
+        val fileName = "canvas-${latest.version}-${latest.build}.jar"
         return Path("local/versions/$fileName")
     }
 
@@ -116,6 +116,7 @@ object CanvasDownloader : ServerSoftwareDownloader {
             ServerSoftware(
                 name = "Canvas",
                 version = version,
+                build = downloadUrl.path.split("/")[3].toIntOrNull() ?: 0,
                 url = downloadUrl.toString(),
                 pluginDir = "plugins",
                 type = SoftwareType.SERVER
@@ -123,8 +124,10 @@ object CanvasDownloader : ServerSoftwareDownloader {
         }
     }
 
-    override suspend fun getLatestVersion(): ServerSoftware {
+    override suspend fun getLatestVersion(version: String?): ServerSoftware {
         val getCurrentVersionApiUrl = "$BASE_API_URL/builds/latest?experimental=true"
+        val allVersions = getAvailableVersions()
+        if (allVersions.isEmpty()) throw Exception("No versions found for Canvas")
 
         val client = OkHttpClient()
 
@@ -133,16 +136,36 @@ object CanvasDownloader : ServerSoftwareDownloader {
             .header("User-Agent", "VulpesCloud-Node/1.0")
             .build()
 
-        client.newCall(request).execute().use { response ->
-            if (!response.isSuccessful) throw Exception("Unexpected code $response")
-            val responseBody = response.body.string()
+        if (version == null) {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) throw Exception("Unexpected code $response")
+                val responseBody = response.body.string()
 
-            val jResponse = JSONObject(responseBody)
+                val jResponse = JSONObject(responseBody)
+
+                return ServerSoftware(
+                    name = "Canvas",
+                    version = jResponse.getString("minecraftVersion"),
+                    build = jResponse.getInt("buildNumber"),
+                    url = jResponse.getString("downloadUrl"),
+                    pluginDir = "plugins",
+                    type = SoftwareType.SERVER
+                )
+            }
+        } else {
+            val matchingVersion = allVersions.find { it.version == version }
+            if (matchingVersion != null) throw Exception("No version found for Canvas with version $version")
+
+            val allBuilds = getAllBuilds()
+            val latestForVersion = allBuilds.filter { it.getString("minecraftVersion") == version }
+                .maxByOrNull { it.getInt("buildNumber") }
+                ?: throw Exception("No build found for version $version")
 
             return ServerSoftware(
                 name = "Canvas",
-                version = jResponse.getString("minecraftVersion"),
-                url = jResponse.getString("downloadUrl"),
+                version = latestForVersion.getString("minecraftVersion"),
+                build = latestForVersion.getInt("buildNumber"),
+                url = latestForVersion.getString("downloadUrl"),
                 pluginDir = "plugins",
                 type = SoftwareType.SERVER
             )
