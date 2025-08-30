@@ -26,9 +26,11 @@ class ConfigProvider {
                     UUID.randomUUID(),
                     6565,
                     "0.0.0.0",
+                    "0.0.0.0",
                     MongoConfig("mongodb://localhost:27017/", "vulpescloud", "vc_"),
                     4096,
-                    "LOCAL"
+                    "LOCAL",
+                    DockerConfig()
                 )
 
             Files.writeString(Path("config.json"), json.encodeToString(defaultConfig))

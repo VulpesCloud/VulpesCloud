@@ -1,6 +1,10 @@
 package de.vulpescloud.node
 
-import build.buf.gen.vulpescloud.tasks.v1.TaskDefinition
+import com.github.dockerjava.core.DefaultDockerClientConfig
+import com.github.dockerjava.core.DockerClientConfig
+import com.github.dockerjava.core.DockerClientImpl
+import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
+import com.github.dockerjava.transport.DockerHttpClient
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.kotlin.client.coroutine.MongoClient
@@ -27,6 +31,7 @@ import io.grpc.TlsChannelCredentials
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.io.File
+import java.time.Duration
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
 
@@ -42,6 +47,8 @@ class Node {
     lateinit var creds: ChannelCredentials
     var inputJob: Job? = null
         private set
+    lateinit var dockerClientConfig: DockerClientConfig
+    lateinit var dockerHttpClient: DockerHttpClient
 
     val templateStorageProvider = TemplateStorageProvider()
     val localGrpcClient = LocalGrpcClient()
@@ -124,6 +131,36 @@ class Node {
             } catch (e: Exception) {
                 logger.error("Failed to connect to MongoDB: ${e.message}")
                 return@withContext
+            }
+
+            if (configProvider.config.serviceType.uppercase() == "DOCKER") {
+                try {
+                    dockerClientConfig = DefaultDockerClientConfig.createDefaultConfigBuilder()
+                        .withDockerHost(configProvider.config.docker.host)
+                        .withDockerCertPath(configProvider.config.docker.dockerCertPath)
+                        .withDockerTlsVerify(configProvider.config.docker.dockerCertPath != null)
+                        .withRegistryUsername(configProvider.config.docker.registryUsername)
+                        .withRegistryPassword(configProvider.config.docker.registryPassword)
+                        .withRegistryEmail(configProvider.config.docker.registryEmail)
+                        .withRegistryUrl("https://index.docker.io/v1/")
+                        .build()
+
+                    dockerHttpClient = ApacheDockerHttpClient.Builder()
+                        .dockerHost(dockerClientConfig.dockerHost)
+                        .sslConfig(dockerClientConfig.sslConfig)
+                        .maxConnections(100)
+                        .connectionTimeout(Duration.ofSeconds(30))
+                        .responseTimeout(Duration.ofSeconds(45))
+                        .build()
+
+                    logger.info("Trying to connect to Docker...")
+                    val dockerClient = DockerClientImpl.getInstance(dockerClientConfig, dockerHttpClient)
+                    val version = dockerClient.versionCmd().exec()
+                    logger.info("Successfully connected to Docker! Version: ${version.version}, API Version: ${version.apiVersion}")
+                } catch (e: Exception) {
+                    logger.error("Failed to connect to Docker: ${e.message}")
+                    return@withContext
+                }
             }
         }
 

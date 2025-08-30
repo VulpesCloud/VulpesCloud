@@ -6,7 +6,7 @@ import kotlinx.serialization.Serializable
 data class DockerConfig(
     val host: String = "unix:///var/run/docker.sock",
     val network: String = "vulpescloud",
-    val dockerCertPath: String = "/certs",
+    val dockerCertPath: String? = null,
     val registryUsername: String = "",
     val registryPassword: String = "",
     val registryEmail: String = ""
