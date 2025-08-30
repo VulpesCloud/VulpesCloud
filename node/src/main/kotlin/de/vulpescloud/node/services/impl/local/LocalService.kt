@@ -2,8 +2,22 @@ package de.vulpescloud.node.services.impl.local
 
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.node.services.AbstractService
+import java.nio.file.Path
 
-class LocalServices(override val service: Service) : AbstractService {
+class LocalService(override val service: Service) : AbstractService {
+
+    fun path(): Path {
+        return if (service.task.staticServices) {
+            Path.of("local/services/${service.task.name}-${service.orderedId}")
+        } else {
+            Path.of("temp/services/local/${service.task.name}-${service.orderedId}")
+        }
+    }
+
+    var processBuilder: ProcessBuilder? = null
+
+    private var process: Process? = null
+    private var processTracking: Thread? = null
 
     override fun start() {
         TODO("Not yet implemented")
