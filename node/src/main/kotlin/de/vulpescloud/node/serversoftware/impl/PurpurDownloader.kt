@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URI
+import java.nio.file.Path
+import kotlin.io.path.Path
 
 object PurpurDownloader : ServerSoftwareDownloader {
     private const val BASE_API_URL = "https://api.purpurmc.org/v2"
@@ -108,6 +110,12 @@ object PurpurDownloader : ServerSoftwareDownloader {
                 )
             }
         }
+    }
+
+    override suspend fun getLatestVersionPath(): Path {
+        val latest = getLatestVersion()
+        val fileName = "purpur-${latest.version}-${latest.url.split("/")[4].replace(" ", "")}.jar"
+        return Path("local/versions/$fileName")
     }
 
     override suspend fun getLatestVersion(): ServerSoftware {

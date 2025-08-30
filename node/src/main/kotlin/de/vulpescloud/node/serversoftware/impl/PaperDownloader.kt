@@ -10,6 +10,8 @@ import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.FileOutputStream
 import java.net.URI
+import java.nio.file.Path
+import kotlin.io.path.Path
 
 object PaperDownloader : ServerSoftwareDownloader {
     private const val BASE_API_URL = "https://fill.papermc.io/v3"
@@ -51,6 +53,13 @@ object PaperDownloader : ServerSoftwareDownloader {
                 "Finished downloading $downloadFileName (${file.length() / 1000000}mb) in ${if (durationMs >= 1000) "${durationMs / 1000}s" else "${durationMs}ms}"}"
             )
         }
+    }
+
+    override suspend fun getLatestVersionPath(): Path {
+        val latestVersion = getLatestVersion()
+        val downloadUrl = URI(latestVersion.url)
+        val fileName = downloadUrl.path.substringAfterLast('/')
+        return Path("local/versions/$fileName")
     }
 
     override suspend fun getDownloadUrl(version: String): URI {
