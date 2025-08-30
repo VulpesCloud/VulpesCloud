@@ -50,7 +50,7 @@ night-config = "3.8.3"
 commandapi-velocity-shade = "10.1.2"
 
 # shadowJar
-shadow = "9.0.2"
+shadow = "9.1.0"
 
 # bouncy castle
 bouncy-castle = "1.70"
