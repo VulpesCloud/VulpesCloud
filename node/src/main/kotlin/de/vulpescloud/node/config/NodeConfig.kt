@@ -12,5 +12,6 @@ data class NodeConfig(
     val grpcHost: String,
     val mongodb: MongoConfig,
     val maxMemory: Int = 1024, // MB
-    val serviceType: String = "LOCAL" // can be "LOCAL" or "DOCKER"
+    val serviceType: String = "LOCAL", // can be "LOCAL" or "DOCKER"
+    val dockerSocket: String = "unix:///var/run/docker.sock" // only used if serviceType is "DOCKER"
 )

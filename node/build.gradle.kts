@@ -73,6 +73,7 @@ dependencies {
     compileOnly(libs.okio)
     compileOnly(libs.okhttp)
     compileOnly(libs.perfmark)
+    compileOnly(libs.bundles.docker)
     compileOnly(kotlin("reflect"))
 }
 

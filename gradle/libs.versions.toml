@@ -22,6 +22,9 @@ perfmark = "0.27.0"
 okhttp = "5.1.0"
 okio = "3.16.0"
 
+# docker
+docker-java = "3.6.0"
+
 # mongo
 mongodb = "5.5.1"
 reactor = "3.8.0-M6"
@@ -94,6 +97,10 @@ mongodb-driver-coroutine = { group = "org.mongodb", name = "mongodb-driver-kotli
 mongodb-bson-kotlinx = { group = "org.mongodb", name = "bson-kotlinx", version.ref = "mongodb" }
 reactor-core = { group = "io.projectreactor", name = "reactor-core", version.ref = "reactor" }
 
+# docker
+docker-java = { group = "com.github.docker-java", name = "docker-java-core", version.ref = "docker-java" }
+docker-java-transport-zerodep = { group = "com.github.docker-java", name = "docker-java-transport-zerodep", version.ref = "docker-java" }
+
 # utils
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
 
@@ -145,6 +152,10 @@ proto = [
     "grpc-protobuf-lite",
 ]
 
+docker = [
+    "docker-java",
+    "docker-java-transport-zerodep"
+]
 
 kotlin = [
     "kotlin-stdlib",
