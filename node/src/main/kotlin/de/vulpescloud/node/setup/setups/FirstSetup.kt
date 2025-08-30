@@ -1,6 +1,7 @@
 package de.vulpescloud.node.setup.setups
 
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.config.DockerConfig
 import de.vulpescloud.node.config.MongoConfig
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.setup.Setup
@@ -15,6 +16,7 @@ class FirstSetup : Setup {
 
     private var eulaAccepted = false
     private var grpcAddress = "0.0.0.0:6565"
+    private var bindAddress = "0.0.0.0"
     private var nodeName = "Node-1"
 
     private val systemMemoryInMb: Long = Runtime.getRuntime().maxMemory() / 1024 / 1024
@@ -90,11 +92,29 @@ class FirstSetup : Setup {
 
     @SetupQuestion(
         index = 3,
+        translationKey = "On which address should services bind to? (Usually it is recommended to use your public IP or 0.0.0.0, if you have IPv6 only you have to use 0.0.0.0)",
+        forceAnswer = false,
+        default = ["0.0.0.0"]
+    )
+    fun q4(answer: String): Boolean {
+        if (answer.isBlank()) return false
+
+        val effective = answer.ifBlank { "0.0.0.0" }
+
+        // simple IPv4 regex check
+        val ipv4Regex = Regex("^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$")
+        bindAddress = effective
+        return ipv4Regex.matches(effective)
+    }
+
+
+    @SetupQuestion(
+        index = 4,
         translationKey = "What name should this node have?",
         forceAnswer = false,
         default = ["Node-1"]
     )
-    fun q4(answer: String): Boolean {
+    fun q5(answer: String): Boolean {
         val effective = answer.ifBlank { "Node-1" }.trim()
         if (effective.length !in 3..32) return false
         nodeName = effective
@@ -102,24 +122,24 @@ class FirstSetup : Setup {
     }
 
     @SetupQuestion(
-        index = 4,
+        index = 5,
         translationKey = "Which service type should be used? (LOCAL or DOCKER)",
         forceAnswer = true,
         default = ["LOCAL"],
         answer = ServiceTypeAnswer::class
     )
-    fun q5(answer: String): Boolean {
+    fun q6(answer: String): Boolean {
         val effective = answer.ifBlank { "LOCAL" }.trim().uppercase()
         return !(effective != "LOCAL" && effective != "DOCKER")
     }
 
     @SetupQuestion(
-        index = 5,
+        index = 6,
         translationKey = "Please enter the MongoDB connection string",
         forceAnswer = false,
         default = ["mongodb://localhost:27017/"]
     )
-    fun q6(answer: String): Boolean {
+    fun q7(answer: String): Boolean {
         val effective = answer.ifBlank { mongoConnectionString }.trim()
         if (!(!effective.startsWith("mongodb://") && !effective.startsWith("mongodb+srv://"))) {
             mongoConnectionString = effective
@@ -130,12 +150,12 @@ class FirstSetup : Setup {
     }
 
     @SetupQuestion(
-        index = 6,
+        index = 7,
         translationKey = "Please enter the MongoDB database name",
         forceAnswer = false,
         default = ["vulpescloud"]
     )
-    fun q7(answer: String): Boolean {
+    fun q8(answer: String): Boolean {
         val effective = answer.ifBlank { mongoDatabase }.trim()
         if (effective.isNotEmpty()) {
             mongoDatabase = effective
@@ -146,12 +166,12 @@ class FirstSetup : Setup {
     }
 
     @SetupQuestion(
-        index = 7,
+        index = 8,
         translationKey = "Please enter the MongoDB collection prefix (keep default if you don't know what this is)",
         forceAnswer = false,
         default = ["vc_"]
     )
-    fun q8(answer: String): Boolean {
+    fun q9(answer: String): Boolean {
         val effective = answer.ifBlank { mongoCollectionPrefix }.trim()
         if (effective.isNotEmpty()) {
             mongoCollectionPrefix = effective
@@ -169,13 +189,15 @@ class FirstSetup : Setup {
                 UUID.randomUUID(),
                 grpcAddress.split(":")[1].toInt(),
                 grpcAddress.split(":")[0],
+                bindAddress,
                 MongoConfig(
                     mongoConnectionString,
                     mongoDatabase,
                     mongoCollectionPrefix
                 ),
                 totalAllowedMemoryMb.toInt(),
-                serviceType
+                serviceType,
+                docker = DockerConfig()
             )
         )
 
