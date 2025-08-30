@@ -1,6 +1,6 @@
 package de.vulpescloud.node.command
 
-import java.util.Objects
+import java.util.*
 
 data class CommandInfo(
     val name: String,

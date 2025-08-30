@@ -4,7 +4,6 @@ import de.vulpescloud.node.command.CommandInfo
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.annotation.Alias
-import de.vulpescloud.node.command.annotation.Description
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.parser.Parser

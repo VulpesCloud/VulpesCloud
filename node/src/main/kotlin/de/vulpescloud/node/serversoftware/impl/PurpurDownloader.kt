@@ -162,34 +162,28 @@ object PurpurDownloader : ServerSoftwareDownloader {
             }
         } else {
             val matchingVersion = allVersions.find { it.version == version }
-            if (matchingVersion != null) throw Exception("No version found for Purpur with version $version")
+            if (matchingVersion == null) throw Exception("No version found for Purpur with version $version")
 
-            client.newCall(versionRequest).execute().use { response ->
-                if (!response.isSuccessful) throw Exception("Unexpected code $response")
+            val latestBuildUrl = "$BASE_API_URL/purpur/$version"
 
-                val responseBody = response.body.string()
+            val buildRequest = Request.Builder()
+                .url(latestBuildUrl)
+                .header("User-Agent", "VulpesCloud-Node/1.0")
+                .build()
 
-                val jVersionResponse = JSONObject(responseBody)
+            client.newCall(buildRequest).execute().use { buildResponse ->
+                if (!buildResponse.isSuccessful) throw Exception("Unexpected code $buildResponse")
 
-                val latestBuildUrl = "$BASE_API_URL/purpur/$version"
+                val jBuildResponse = JSONObject(buildResponse.body.string())
 
-                val buildRequest = Request.Builder()
-                    .url(latestBuildUrl)
-                    .header("User-Agent", "VulpesCloud-Node/1.0")
-                    .build()
-
-                client.newCall(buildRequest).execute().use { buildResponse ->
-                    if (!buildResponse.isSuccessful) throw Exception("Unexpected code $buildResponse")
-
-                    return ServerSoftware(
-                        name = "Purpur",
-                        version = version,
-                        build = jVersionResponse.getJSONObject("builds").getInt("latest"),
-                        url = getDownloadUrl(version).toString(),
-                        pluginDir = "plugins",
-                        type = SoftwareType.SERVER
-                    )
-                }
+                return ServerSoftware(
+                    name = "Purpur",
+                    version = version,
+                    build = jBuildResponse.getJSONObject("builds").getInt("latest"),
+                    url = getDownloadUrl(version).toString(),
+                    pluginDir = "plugins",
+                    type = SoftwareType.SERVER
+                )
             }
         }
     }

@@ -154,7 +154,7 @@ object CanvasDownloader : ServerSoftwareDownloader {
             }
         } else {
             val matchingVersion = allVersions.find { it.version == version }
-            if (matchingVersion != null) throw Exception("No version found for Canvas with version $version")
+            if (matchingVersion == null) throw Exception("No version found for Canvas with version $version")
 
             val allBuilds = getAllBuilds()
             val latestForVersion = allBuilds.filter { it.getString("minecraftVersion") == version }

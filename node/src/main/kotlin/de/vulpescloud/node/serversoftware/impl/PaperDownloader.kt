@@ -165,7 +165,7 @@ object PaperDownloader : ServerSoftwareDownloader {
             }
         } else {
             val matchingVersion = allVersions.find { it.version == version }
-            if (matchingVersion != null) throw Exception("No version found for Paper with version $version")
+            if (matchingVersion == null) throw Exception("No version found for Paper with version $version")
 
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) throw Exception("Unexpected code $response")

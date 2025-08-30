@@ -5,12 +5,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardCopyOption
 import java.security.SecureRandom
-import java.util.Base64
-import kotlin.io.path.createDirectories
-import kotlin.io.path.exists
-import kotlin.io.path.isRegularFile
-import kotlin.io.path.readText
-import kotlin.io.path.writeText
+import java.util.*
+import kotlin.io.path.*
 
 class SecretFactory(
     private val random: SecureRandom = SecureRandom()

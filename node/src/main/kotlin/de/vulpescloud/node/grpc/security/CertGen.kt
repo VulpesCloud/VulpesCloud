@@ -1,5 +1,6 @@
 package de.vulpescloud.node.grpc.security
 
+import de.vulpescloud.node.utils.SysUtils
 import org.bouncycastle.asn1.x500.X500Name
 import org.bouncycastle.asn1.x509.*
 import org.bouncycastle.cert.X509CertificateHolder
@@ -81,7 +82,11 @@ object CertGen {
             arrayOf(
                 GeneralName(GeneralName.dNSName, "localhost"),
                 GeneralName(GeneralName.iPAddress, "127.0.0.1"),
-                GeneralName(GeneralName.iPAddress, "::1")
+                GeneralName(GeneralName.iPAddress, "0.0.0.0"),
+                GeneralName(GeneralName.iPAddress, "::1"),
+                GeneralName(GeneralName.dNSName, commonName),
+                *SysUtils.getPublicIps().map { GeneralName(GeneralName.iPAddress, it) }
+                    .toTypedArray()
             )
         )
         builder.addExtension(Extension.subjectAlternativeName, false, sanNames)

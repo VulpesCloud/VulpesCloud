@@ -23,7 +23,7 @@ data class Task(
     val preferredNode: String,
     val maxPlayers: Int,
     val software: ServerSoftware,
-    val attributes: Struct,
+    val attributes: Struct? = null,
     val jvmArgs: List<String> = emptyList(),
     val envVars: List<String> = emptyList(),
 ) {

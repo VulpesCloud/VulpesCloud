@@ -9,7 +9,7 @@ import de.vulpescloud.node.setup.annotations.SetupFinish
 import de.vulpescloud.node.setup.annotations.SetupQuestion
 import de.vulpescloud.node.setup.answers.MemorySetupAnswer
 import de.vulpescloud.node.setup.answers.SetupAnswer
-import java.util.UUID
+import java.util.*
 
 class FirstSetup : Setup {
     override val header = "test setup"

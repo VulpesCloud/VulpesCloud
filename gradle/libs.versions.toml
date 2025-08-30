@@ -15,7 +15,7 @@ annotations = "26.0.2"
 protobuf = "4.32.0"
 grpc = "1.75.0"
 grpc-kotlin = "1.4.3"
-protospecs-grpc = "1.4.3.1.20250830162538.a683ddeaf9b5"
+protospecs-grpc = "1.4.3.1.20250830203839.f04afb385f50"
 perfmark = "0.27.0"
 
 # ok
