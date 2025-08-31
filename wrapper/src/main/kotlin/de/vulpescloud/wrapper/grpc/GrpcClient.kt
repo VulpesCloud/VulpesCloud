@@ -1,13 +1,18 @@
-package de.vulpescloud.node.grpc
+package de.vulpescloud.wrapper.grpc
 
 import build.buf.gen.vulpescloud.services.v1.ServiceAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpcKt
-import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import io.grpc.ChannelCredentials
 import io.grpc.Grpc
 import io.grpc.ManagedChannel
+import io.grpc.ManagedChannelBuilder
+import io.grpc.internal.ManagedChannelImplBuilder
+import io.grpc.netty.NettyChannelBuilder
+import io.grpc.netty.NettyChannelProvider
+import java.io.File
+import java.net.URI
 
-class LocalGrpcClient {
+class GrpcClient {
 
     private lateinit var channel: ManagedChannel
     lateinit var serviceAPI: ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub
@@ -19,9 +24,16 @@ class LocalGrpcClient {
         creds: ChannelCredentials,
         secret: String,
     ) {
-        channel = Grpc.newChannelBuilderForAddress(host, port, creds).build()
+        println("Connecting to $host:$port")
 
-        println("AUTHORITY: ${channel.authority()}")
+        println(URI(null, null, host, port, null, null, null).getAuthority())
+
+        channel = NettyChannelBuilder
+            .forAddress(host, port)
+            .useTransportSecurity()
+            .build()
+
+        println("Channel authority: ${channel.authority()}")
 
         serviceAPI =
             ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(channel)

@@ -15,11 +15,11 @@ dependencies {
     implementation(libs.logbackCore)
     implementation(libs.logbackClassic)
     implementation(libs.nightConfig.json)
+    implementation(libs.bundles.proto)
 }
 
 java {
     withSourcesJar()
-    withJavadocJar()
 }
 
 tasks.jar {
@@ -27,7 +27,6 @@ tasks.jar {
         attributes["Main-Class"] = "de.vulpescloud.wrapper.Wrapper"
         attributes["Premain-Class"] = "de.vulpescloud.wrapper.Premain"
     }
-    archiveFileName.set("vulpescloud-wrapper.jar")
 }
 
 tasks.shadowJar {
@@ -35,6 +34,4 @@ tasks.shadowJar {
         attributes["Main-Class"] = "de.vulpescloud.wrapper.Wrapper"
         attributes["Premain-Class"] = "de.vulpescloud.wrapper.Premain"
     }
-    archiveFileName.set("vulpescloud-wrapper.jar")
-    destinationDirectory.set(rootProject.layout.buildDirectory.dir("libs").get().asFile)
 }
