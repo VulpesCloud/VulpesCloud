@@ -13,6 +13,9 @@ import kotlin.io.path.Path
 import kotlin.io.path.copyTo
 
 class DockerServiceFactory : AbstractServiceFactory() {
+
+    override val factoryName: String = "docker"
+
     override suspend fun prepareService(service: Service): DockerService {
         val dockerService = DockerService(service)
 

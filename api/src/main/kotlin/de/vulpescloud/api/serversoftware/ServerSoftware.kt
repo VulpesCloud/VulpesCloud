@@ -34,10 +34,8 @@ data class ServerSoftware(
             .setPluginDir(pluginDir)
             .setType(
                 when (type) {
-                    SoftwareType.SERVER ->
-                        (SoftwareTypeProto.SOFTWARE_TYPE_SERVER)
-                    SoftwareType.PROXY ->
-                        (SoftwareTypeProto.SOFTWARE_TYPE_PROXY)
+                    SoftwareType.SERVER -> SoftwareTypeProto.SOFTWARE_TYPE_SERVER
+                    SoftwareType.PROXY -> SoftwareTypeProto.SOFTWARE_TYPE_PROXY
                 }
             )
             .build()
@@ -54,10 +52,8 @@ data class ServerSoftware(
                 definition.url,
                 definition.pluginDir,
                 when (definition.type) {
-                    SoftwareTypeProto.SOFTWARE_TYPE_SERVER ->
-                        SoftwareType.SERVER
-                    SoftwareTypeProto.SOFTWARE_TYPE_PROXY ->
-                        SoftwareType.PROXY
+                    SoftwareTypeProto.SOFTWARE_TYPE_SERVER -> SoftwareType.SERVER
+                    SoftwareTypeProto.SOFTWARE_TYPE_PROXY -> SoftwareType.PROXY
                     else -> SoftwareType.SERVER
                 },
             )

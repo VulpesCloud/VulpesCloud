@@ -12,6 +12,8 @@ import java.util.*
 
 abstract class AbstractServiceFactory {
 
+    abstract val factoryName: String
+
     suspend fun prepareService(task: Task): AbstractService {
         return prepareService(
             Service(

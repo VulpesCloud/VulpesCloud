@@ -19,12 +19,13 @@ class LocalGrpcClient {
         creds: ChannelCredentials,
         secret: String,
     ) {
-        channel =
-            Grpc.newChannelBuilderForAddress(host, port, creds)
-                .intercept(AuthClientInterceptor(secret))
-                .build()
+        channel = Grpc.newChannelBuilderForAddress(host, port, creds).build()
 
-        serviceAPI = ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(channel)
-        tasksAPI = TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub(channel)
+        serviceAPI =
+            ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(channel)
+                .withInterceptors(AuthClientInterceptor(secret))
+        tasksAPI =
+            TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub(channel)
+                .withInterceptors(AuthClientInterceptor(secret))
     }
 }

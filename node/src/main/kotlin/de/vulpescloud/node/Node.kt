@@ -9,11 +9,7 @@ import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.kotlin.client.coroutine.MongoClient
 import de.vulpescloud.node.command.CommandProvider
-import de.vulpescloud.node.commands.ClearCommand
-import de.vulpescloud.node.commands.ExitCommand
-import de.vulpescloud.node.commands.HelpCommand
-import de.vulpescloud.node.commands.InfoCommand
-import de.vulpescloud.node.commands.ServiceCommand
+import de.vulpescloud.node.commands.*
 import de.vulpescloud.node.config.ConfigProvider
 import de.vulpescloud.node.grpc.GrpcServer
 import de.vulpescloud.node.grpc.LocalGrpcClient
@@ -21,7 +17,11 @@ import de.vulpescloud.node.grpc.LoggingServerInterceptor
 import de.vulpescloud.node.grpc.security.AuthInterceptor
 import de.vulpescloud.node.grpc.security.CertGen
 import de.vulpescloud.node.secret.SecretFactory
+import de.vulpescloud.node.services.AbstractService
+import de.vulpescloud.node.services.ServiceFactoryProvider
 import de.vulpescloud.node.services.ServicesAPIService
+import de.vulpescloud.node.services.impl.docker.DockerServiceFactory
+import de.vulpescloud.node.services.impl.local.LocalServiceFactory
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.setups.FirstSetup
 import de.vulpescloud.node.tasks.TasksAPIService
@@ -48,11 +48,14 @@ class Node {
     lateinit var creds: ChannelCredentials
     var inputJob: Job? = null
         private set
+
     lateinit var dockerClientConfig: DockerClientConfig
     lateinit var dockerHttpClient: DockerHttpClient
-
     val templateStorageProvider = TemplateStorageProvider()
     val localGrpcClient = LocalGrpcClient()
+    val serviceFactoryProvider = ServiceFactoryProvider()
+
+    val nodeServices = mutableListOf<AbstractService>()
 
     suspend fun init(scope: CoroutineScope) =
         withContext(Dispatchers.IO) {
@@ -110,6 +113,7 @@ class Node {
                 register(ExitCommand())
                 register(InfoCommand())
                 register(ServiceCommand())
+                register(DebugCommand())
             }
 
             val connectionString = configProvider.config.mongodb.connectionString
@@ -135,30 +139,42 @@ class Node {
                 return@withContext
             }
 
+            serviceFactoryProvider.apply {
+                registerServiceFactory(DockerServiceFactory())
+                registerServiceFactory(LocalServiceFactory())
+            }
+
             if (configProvider.config.serviceType.uppercase() == "DOCKER") {
                 try {
-                    dockerClientConfig = DefaultDockerClientConfig.createDefaultConfigBuilder()
-                        .withDockerHost(configProvider.config.docker.host)
-                        .withDockerCertPath(configProvider.config.docker.dockerCertPath)
-                        .withDockerTlsVerify(configProvider.config.docker.dockerCertPath != null)
-                        .withRegistryUsername(configProvider.config.docker.registryUsername)
-                        .withRegistryPassword(configProvider.config.docker.registryPassword)
-                        .withRegistryEmail(configProvider.config.docker.registryEmail)
-                        .withRegistryUrl("https://index.docker.io/v1/")
-                        .build()
+                    dockerClientConfig =
+                        DefaultDockerClientConfig.createDefaultConfigBuilder()
+                            .withDockerHost(configProvider.config.docker.host)
+                            .withDockerCertPath(configProvider.config.docker.dockerCertPath)
+                            .withDockerTlsVerify(
+                                configProvider.config.docker.dockerCertPath != null
+                            )
+                            .withRegistryUsername(configProvider.config.docker.registryUsername)
+                            .withRegistryPassword(configProvider.config.docker.registryPassword)
+                            .withRegistryEmail(configProvider.config.docker.registryEmail)
+                            .withRegistryUrl("https://index.docker.io/v1/")
+                            .build()
 
-                    dockerHttpClient = ApacheDockerHttpClient.Builder()
-                        .dockerHost(dockerClientConfig.dockerHost)
-                        .sslConfig(dockerClientConfig.sslConfig)
-                        .maxConnections(100)
-                        .connectionTimeout(Duration.ofSeconds(30))
-                        .responseTimeout(Duration.ofSeconds(45))
-                        .build()
+                    dockerHttpClient =
+                        ApacheDockerHttpClient.Builder()
+                            .dockerHost(dockerClientConfig.dockerHost)
+                            .sslConfig(dockerClientConfig.sslConfig)
+                            .maxConnections(100)
+                            .connectionTimeout(Duration.ofSeconds(30))
+                            .responseTimeout(Duration.ofSeconds(45))
+                            .build()
 
                     logger.info("Trying to connect to Docker...")
-                    val dockerClient = DockerClientImpl.getInstance(dockerClientConfig, dockerHttpClient)
+                    val dockerClient =
+                        DockerClientImpl.getInstance(dockerClientConfig, dockerHttpClient)
                     val version = dockerClient.versionCmd().exec()
-                    logger.info("Successfully connected to Docker! Version: ${version.version}, API Version: ${version.apiVersion}")
+                    logger.info(
+                        "Successfully connected to Docker! Version: ${version.version}, API Version: ${version.apiVersion}"
+                    )
                 } catch (e: Exception) {
                     logger.error("Failed to connect to Docker: ${e.message}")
                     return@withContext

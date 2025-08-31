@@ -1,21 +1,17 @@
 package de.vulpescloud.node.services
 
 import build.buf.gen.vulpescloud.services.v1.*
-import com.google.protobuf.Timestamp
 import de.vulpescloud.api.services.Service
-import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.services.impl.docker.DockerService
-import de.vulpescloud.node.services.impl.docker.DockerServiceFactory
-import de.vulpescloud.node.services.impl.local.LocalService
-import de.vulpescloud.node.services.impl.local.LocalServiceFactory
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.BsonDocument
 import org.bson.BsonString
-import java.util.UUID
+import org.slf4j.LoggerFactory
 
 class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImplBase() {
+
+    private val logger = LoggerFactory.getLogger("ServicesAPIService")
 
     override suspend fun getAllServices(request: GetAllServicesRequest): GetAllServicesResponse {
         val collection =
@@ -69,77 +65,83 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
     override suspend fun createService(request: CreateServiceRequest): CreateServiceResponse {
         val task = Task.fromDefinition(request.task)
 
-        val factory = if (task.serviceFactoryName.contains("docker", true)) {
-            DockerServiceFactory()
-        } else {
-            LocalServiceFactory()
+        val serviceFactory =
+            Node.instance.serviceFactoryProvider.findServiceFactory(task.serviceFactoryName)
+        if (serviceFactory == null) {
+            throw IllegalArgumentException(
+                "Unable to find ServiceFactory ${task.serviceFactoryName}"
+            )
         }
+        val service = serviceFactory.prepareService(task)
 
-        val service = Service(
-            task,
-            UUID.randomUUID(),
-            factory.generateOrderedId(task),
-            factory.detectServicePort(task),
-            task.preferredNode,
-            0,
-            Timestamp.newBuilder().build(),
-            ServiceStates.PREPARED,
-        )
-
-        return CreateServiceResponse.newBuilder().setService(service.toDefinition()).build()
+        return CreateServiceResponse.newBuilder().setService(service.service.toDefinition()).build()
     }
 
     override suspend fun startService(request: StartServiceRequest): StartServiceResponse {
         val service = Service.fromDefinition(request.service)
 
-        val abstractService = if (service.task.serviceFactoryName.contains("docker", true)) {
-            DockerService(service)
-        } else {
-            LocalService(service)
+        val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
+        if (abstractService == null) {
+            logger.error(
+                "Unable to start Service ${service.task.name}-${service.orderedId} as it is not registered!"
+            )
+            return StartServiceResponse.newBuilder().build()
         }
         abstractService.start()
 
-        return StartServiceResponse.newBuilder().setService(abstractService.service.toDefinition()).build()
+        return StartServiceResponse.newBuilder()
+            .setService(abstractService.service.toDefinition())
+            .build()
     }
 
     override suspend fun stopService(request: StopServiceRequest): StopServiceResponse {
         val service = Service.fromDefinition(request.service)
 
-        val abstractService = if (service.task.serviceFactoryName.contains("docker", true)) {
-            DockerService(service)
-        } else {
-            LocalService(service)
+        val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
+        if (abstractService == null) {
+            logger.error(
+                "Unable to stop Service ${service.task.name}-${service.orderedId} as it is not registered!"
+            )
+            return StopServiceResponse.newBuilder().build()
         }
         abstractService.stop()
 
-        return StopServiceResponse.newBuilder().setService(abstractService.service.toDefinition()).build()
+        return StopServiceResponse.newBuilder()
+            .setService(abstractService.service.toDefinition())
+            .build()
     }
 
     override suspend fun restartService(request: RestartServiceRequest): RestartServiceResponse {
         val service = Service.fromDefinition(request.service)
 
-        val abstractService = if (service.task.serviceFactoryName.contains("docker", true)) {
-            DockerService(service)
-        } else {
-            LocalService(service)
+        val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
+        if (abstractService == null) {
+            logger.error(
+                "Unable to restart Service ${service.task.name}-${service.orderedId} as it is not registered!"
+            )
+            return RestartServiceResponse.newBuilder().build()
         }
-
         abstractService.restart()
 
-        return RestartServiceResponse.newBuilder().setService(abstractService.service.toDefinition()).build()
+        return RestartServiceResponse.newBuilder()
+            .setService(abstractService.service.toDefinition())
+            .build()
     }
 
     override suspend fun deleteService(request: DeleteServiceRequest): DeleteServiceResponse {
         val service = Service.fromDefinition(request.service)
 
-        val abstractService = if (service.task.serviceFactoryName.contains("docker", true)) {
-            DockerService(service)
-        } else {
-            LocalService(service)
+        val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
+        if (abstractService == null) {
+            logger.error(
+                "Unable to delete Service ${service.task.name}-${service.orderedId} as it is not registered!"
+            )
+            return DeleteServiceResponse.newBuilder().build()
         }
-
         abstractService.delete()
 
-        return DeleteServiceResponse.newBuilder().setService(abstractService.service.toDefinition()).build()
+        return DeleteServiceResponse.newBuilder()
+            .setService(abstractService.service.toDefinition())
+            .build()
     }
 }

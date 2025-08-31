@@ -1,6 +1,7 @@
 package de.vulpescloud.node.services.impl.local
 
 import de.vulpescloud.api.services.Service
+import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.serversoftware.impl.*
 import de.vulpescloud.node.services.AbstractServiceFactory
@@ -11,8 +12,11 @@ import kotlin.io.path.Path
 import kotlin.io.path.copyTo
 
 class LocalServiceFactory : AbstractServiceFactory() {
+
+    override val factoryName: String = "local"
+
     override suspend fun prepareService(service: Service): LocalService {
-        val localService = LocalService(service)
+        val localService = LocalService(service.copy(state = ServiceStates.PREPARED))
 
         localService.path().resolve(localService.service.task.software.pluginDir).toFile().mkdirs()
 
@@ -30,35 +34,35 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 CanvasDownloader.apply {
                     downloadSoftware(service.task.software.version)
                     getLatestVersionPath(service.task.software.version)
-                        .copyTo(localService.path().resolve("server.jar"))
+                        .copyTo(localService.path().resolve("server.jar"), true)
                 }
             }
             "Folia" -> {
                 FoliaDownloader.apply {
                     downloadSoftware(service.task.software.version)
                     getLatestVersionPath(service.task.software.version)
-                        .copyTo(localService.path().resolve("server.jar"))
+                        .copyTo(localService.path().resolve("server.jar"), true)
                 }
             }
             "Paper" -> {
                 PaperDownloader.apply {
                     downloadSoftware(service.task.software.version)
                     getLatestVersionPath(service.task.software.version)
-                        .copyTo(localService.path().resolve("server.jar"))
+                        .copyTo(localService.path().resolve("server.jar"), true)
                 }
             }
             "Purpur" -> {
                 PurpurDownloader.apply {
                     downloadSoftware(service.task.software.version)
                     getLatestVersionPath(service.task.software.version)
-                        .copyTo(localService.path().resolve("server.jar"))
+                        .copyTo(localService.path().resolve("server.jar"), true)
                 }
             }
             "Velocity" -> {
                 VelocityDownloader.apply {
                     downloadSoftware(service.task.software.version)
                     getLatestVersionPath(service.task.software.version)
-                        .copyTo(localService.path().resolve("server.jar"))
+                        .copyTo(localService.path().resolve("server.jar"), true)
                 }
             }
         }
@@ -107,24 +111,34 @@ class LocalServiceFactory : AbstractServiceFactory() {
         arguments.add("de.vulpescloud.wrapper.Wrapper")
 
         val processBuilder =
-            ProcessBuilder(*arguments.toTypedArray()).directory(localService.path().toFile()).redirectErrorStream(true)
+            ProcessBuilder(*arguments.toTypedArray())
+                .directory(localService.path().toFile())
+                .redirectErrorStream(true)
 
         processBuilder.environment()["bootstrapFile"] = "server.jar"
         processBuilder.environment()["grpc_hostname"] = Node.instance.configProvider.config.grpcHost
-        processBuilder.environment()["grpc_port"] = Node.instance.configProvider.config.grpcPort.toString()
+        processBuilder.environment()["grpc_port"] =
+            Node.instance.configProvider.config.grpcPort.toString()
         processBuilder.environment()["serviceUUID"] = service.uuid.toString()
         processBuilder.environment()["serviceName"] = service.task.name + "-" + service.orderedId
-        processBuilder.environment()["hostname"] = Node.instance.configProvider.config.serviceBindAdress
+        processBuilder.environment()["hostname"] =
+            Node.instance.configProvider.config.serviceBindAdress
         processBuilder.environment()["port"] = service.port.toString()
         processBuilder.environment()["secret"] = Node.instance.secret
 
         Files.copy(
             Path("launcher/dependencies/vulpescloud/vulpescloud-connector.jar"),
-            localService.path().resolve(service.task.software.pluginDir).resolve("vulpescloud-connector.jar"),
+            localService
+                .path()
+                .resolve(service.task.software.pluginDir)
+                .resolve("vulpescloud-connector.jar"),
             StandardCopyOption.REPLACE_EXISTING,
         )
 
         localService.processBuilder = processBuilder
+        Node.instance.nodeServices.add(localService)
+
+        print("Prepared Service!")
 
         return localService
     }
