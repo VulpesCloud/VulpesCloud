@@ -2,15 +2,12 @@ package de.vulpescloud.wrapper.grpc
 
 import build.buf.gen.vulpescloud.services.v1.ServiceAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpcKt
-import io.grpc.ChannelCredentials
-import io.grpc.Grpc
 import io.grpc.ManagedChannel
-import io.grpc.ManagedChannelBuilder
-import io.grpc.internal.ManagedChannelImplBuilder
+import io.grpc.netty.GrpcSslContexts
 import io.grpc.netty.NettyChannelBuilder
-import io.grpc.netty.NettyChannelProvider
+import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.channel.socket.nio.NioSocketChannel
 import java.io.File
-import java.net.URI
 
 class GrpcClient {
 
@@ -18,22 +15,19 @@ class GrpcClient {
     lateinit var serviceAPI: ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub
     lateinit var tasksAPI: TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub
 
-    fun connect(
-        host: String = "127.0.0.1",
-        port: Int = 6565,
-        creds: ChannelCredentials,
-        secret: String,
-    ) {
+    fun connect(host: String = "127.0.0.1", port: Int = 6565, secret: String) {
         println("Connecting to $host:$port")
 
-        println(URI(null, null, host, port, null, null, null).getAuthority())
+        val serverCertFile = File("vulpescloud/certs/server.crt")
 
-        channel = NettyChannelBuilder
-            .forAddress(host, port)
-            .useTransportSecurity()
-            .build()
+        val sslContext = GrpcSslContexts.forClient().trustManager(serverCertFile).build()
 
-        println("Channel authority: ${channel.authority()}")
+        channel =
+            NettyChannelBuilder.forAddress(host, port)
+                .eventLoopGroup(NioEventLoopGroup()) // force NIO transport
+                .channelType(NioSocketChannel::class.java) // force TCP
+                .sslContext(sslContext)
+                .build()
 
         serviceAPI =
             ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(channel)

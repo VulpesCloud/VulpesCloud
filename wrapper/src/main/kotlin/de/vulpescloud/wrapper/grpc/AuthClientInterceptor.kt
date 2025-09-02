@@ -6,7 +6,7 @@ class AuthClientInterceptor(private val token: String) : ClientInterceptor {
     override fun <ReqT : Any?, RespT : Any?> interceptCall(
         method: MethodDescriptor<ReqT, RespT>,
         callOptions: CallOptions,
-        next: Channel
+        next: Channel,
     ): ClientCall<ReqT, RespT> {
         val call = next.newCall(method, callOptions)
         return object : ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(call) {
