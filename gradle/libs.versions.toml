@@ -9,7 +9,7 @@ kotlinx-coroutines = "1.10.2"
 guava = "33.4.8-jre"
 
 # utils
-annotations = "26.0.2"
+annotations = "26.0.2-1"
 
 # network
 protobuf = "4.32.0"
