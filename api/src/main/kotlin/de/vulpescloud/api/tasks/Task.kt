@@ -44,6 +44,9 @@ data class Task(
             append("preferredNode", BsonString(preferredNode))
             append("maxPlayers", BsonInt32(maxPlayers))
             append("software", software.toDocument())
+            attributes?.let { append("attributes", BsonBinary(it.toByteArray())) }
+            append("jvmArgs", BsonArray(jvmArgs.map { BsonString(it) }))
+            append("envVars", BsonArray(envVars.map { BsonString(it) }))
         }
 
     fun toDefinition(): TaskDefinition {
@@ -106,7 +109,7 @@ data class Task(
                 document.getString("preferredNode").value,
                 document.getInt32("maxPlayers").value,
                 ServerSoftware.fromDocument(document.getDocument("software")),
-                document.getString("attributes").let { Struct.parseFrom(it.asBinary().data) },
+                document.get("attributes")?.let { Struct.parseFrom(it.asBinary().data) },
                 document.getArray("jvmArgs").map { it.asString().value },
                 document.getArray("envVars").map { it.asString().value },
             )

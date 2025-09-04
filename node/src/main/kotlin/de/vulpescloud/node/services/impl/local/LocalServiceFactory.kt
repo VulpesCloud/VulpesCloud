@@ -5,6 +5,7 @@ import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.serversoftware.impl.*
 import de.vulpescloud.node.services.AbstractServiceFactory
+import de.vulpescloud.node.utils.MongoUtils
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.*
@@ -16,7 +17,13 @@ class LocalServiceFactory : AbstractServiceFactory() {
     override val factoryName: String = "local"
 
     override suspend fun prepareService(service: Service): LocalService {
-        val localService = LocalService(service.copy(state = ServiceStates.PREPARED))
+        val localService =
+            LocalService(
+                service.copy(
+                    state = ServiceStates.PREPARED,
+                    node = Node.instance.configProvider.config.nodeName,
+                )
+            )
 
         localService.path().resolve(localService.service.task.software.pluginDir).toFile().mkdirs()
 
@@ -116,7 +123,8 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 .redirectErrorStream(true)
 
         processBuilder.environment()["bootstrapFile"] = "server.jar"
-        processBuilder.environment()["grpc_hostname"] = "127.0.0.1"//Node.instance.configProvider.config.grpcHost
+        processBuilder.environment()["grpc_hostname"] =
+            "127.0.0.1" // Node.instance.configProvider.config.grpcHost
         processBuilder.environment()["grpc_port"] =
             Node.instance.configProvider.config.grpcPort.toString()
         processBuilder.environment()["serviceUUID"] = service.uuid.toString()
@@ -138,7 +146,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
         localService.processBuilder = processBuilder
         Node.instance.nodeServices.add(localService)
 
-        print("Prepared Service!")
+        MongoUtils.updateService(localService.service)
 
         return localService
     }
