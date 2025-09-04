@@ -52,6 +52,44 @@ class DebugCommand {
         }
     }
 
+    @Command("debug create task defaultproxy")
+    fun createDefaultTaskProxy(source: CommandSource) {
+        NodeCoroutineScope.launch {
+            source.sendMessage("Creating default task proxy")
+            Node.instance.localGrpcClient.tasksAPI.createTask(
+                CreateTaskRequest.newBuilder()
+                    .setTask(
+                        Task(
+                            "Proxy",
+                            512,
+                            512,
+                            25565,
+                            listOf(),
+                            true,
+                            1,
+                            1,
+                            false,
+                            false,
+                            "docker",
+                            "",
+                            1,
+                            ServerSoftware(
+                                "Velocity",
+                                "3.4.0-SNAPSHOT",
+                                533,
+                                "https://fill-data.papermc.io/v1/objects/cb33a12f4b6057fe2f862212ab4c033202b86172527168a41e30a30c1d05d27e/velocity-3.4.0-SNAPSHOT-533.jar",
+                                "plugins",
+                                SoftwareType.PROXY,
+                            ),
+                        )
+                            .toDefinition()
+                    )
+                    .build()
+            )
+            source.sendMessage("Successfully created default proxy task")
+        }
+    }
+
     @Command("debug start service default")
     fun startServiceOnDefaultTask(source: CommandSource) {
         NodeCoroutineScope.launch {
@@ -93,6 +131,50 @@ class DebugCommand {
                     )
                 }
             source.sendMessage("Successfully started service on default task")
+        }
+    }
+
+    @Command("debug start service defaultproxy")
+    fun startServiceOnDefaultTaskProxy(source: CommandSource) {
+        NodeCoroutineScope.launch {
+            source.sendMessage("Starting service on default proxy task")
+            Node.instance.localGrpcClient.serviceAPI
+                .createService(
+                    CreateServiceRequest.newBuilder()
+                        .setTask(
+                            Task(
+                                "Proxy",
+                                512,
+                                512,
+                                25565,
+                                listOf(),
+                                true,
+                                1,
+                                1,
+                                false,
+                                false,
+                                "docker",
+                                "",
+                                1,
+                                ServerSoftware(
+                                    "Velocity",
+                                    "3.4.0-SNAPSHOT",
+                                    533,
+                                    "https://fill-data.papermc.io/v1/objects/cb33a12f4b6057fe2f862212ab4c033202b86172527168a41e30a30c1d05d27e/velocity-3.4.0-SNAPSHOT-533.jar",
+                                    "plugins",
+                                    SoftwareType.PROXY,
+                                ),
+                            )
+                                .toDefinition()
+                        )
+                        .build()
+                )
+                .let {
+                    Node.instance.localGrpcClient.serviceAPI.startService(
+                        StartServiceRequest.newBuilder().setService(it.service).build()
+                    )
+                }
+            source.sendMessage("Successfully started service on default proxy task")
         }
     }
 }

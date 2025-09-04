@@ -14,7 +14,7 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 
 object VelocityDownloader : ServerSoftwareDownloader {
-    private const val BASE_API_URL = "https://fill.velocitymc.io/v3"
+    private const val BASE_API_URL = "https://fill.papermc.io/v3"
     private val logger = LoggerFactory.getLogger("VelocityDownloader")
 
     override suspend fun downloadSoftware(version: String) {

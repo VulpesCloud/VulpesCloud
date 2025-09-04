@@ -100,17 +100,16 @@ class DockerServiceFactory : AbstractServiceFactory() {
             )
         )
 
-        // TODO: re-add wrapper, current it throws an error when trying to load the java agent, because the jar is empty or does not exist
-//        if (service.task.staticServices) {
-//            jvmArgs.add(
-//                "-javaagent:../../../launcher/dependencies/vulpescloud/vulpescloud-wrapper.jar"
-//            )
-//        } else {
-//            jvmArgs.add(
-//                "-javaagent:../../../../launcher/dependencies/vulpescloud/vulpescloud-wrapper.jar"
-//            )
-//        }
-//        jvmArgs.add("de.vulpescloud.wrapper.Wrapper")
+        if (service.task.staticServices) {
+            jvmArgs.add(
+                "-javaagent:../../../launcher/dependencies/vulpescloud/vulpescloud-wrapper.jar"
+            )
+        } else {
+            jvmArgs.add(
+                "-javaagent:../../../../launcher/dependencies/vulpescloud/vulpescloud-wrapper.jar"
+            )
+        }
+        jvmArgs.add("de.vulpescloud.wrapper.Wrapper")
         jvmArgs.add("-Xmx" + service.task.maxMemory + "M")
         jvmArgs.add("-Xms" + service.task.minMemory + "M")
         jvmArgs.addAll(service.task.jvmArgs)
