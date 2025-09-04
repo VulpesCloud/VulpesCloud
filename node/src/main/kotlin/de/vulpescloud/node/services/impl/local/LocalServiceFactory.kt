@@ -43,6 +43,8 @@ class LocalServiceFactory : AbstractServiceFactory() {
                     getLatestVersionPath(service.task.software.version)
                         .copyTo(localService.path().resolve("server.jar"), true)
                 }
+                acceptEULA(localService)
+                setServerProperties(localService)
             }
             "Folia" -> {
                 FoliaDownloader.apply {
@@ -50,6 +52,8 @@ class LocalServiceFactory : AbstractServiceFactory() {
                     getLatestVersionPath(service.task.software.version)
                         .copyTo(localService.path().resolve("server.jar"), true)
                 }
+                acceptEULA(localService)
+                setServerProperties(localService)
             }
             "Paper" -> {
                 PaperDownloader.apply {
@@ -57,6 +61,8 @@ class LocalServiceFactory : AbstractServiceFactory() {
                     getLatestVersionPath(service.task.software.version)
                         .copyTo(localService.path().resolve("server.jar"), true)
                 }
+                acceptEULA(localService)
+                setServerProperties(localService)
             }
             "Purpur" -> {
                 PurpurDownloader.apply {
@@ -64,6 +70,8 @@ class LocalServiceFactory : AbstractServiceFactory() {
                     getLatestVersionPath(service.task.software.version)
                         .copyTo(localService.path().resolve("server.jar"), true)
                 }
+                acceptEULA(localService)
+                setServerProperties(localService)
             }
             "Velocity" -> {
                 VelocityDownloader.apply {
@@ -149,5 +157,35 @@ class LocalServiceFactory : AbstractServiceFactory() {
         MongoUtils.updateService(localService.service)
 
         return localService
+    }
+
+    private fun acceptEULA(service: LocalService) {
+        val properties = Properties()
+        properties.clear()
+
+        properties.setProperty("eula", "true")
+
+        val outEula = Files.newOutputStream(service.path().resolve("eula.txt"))
+        properties.store(
+            outEula,
+            "Auto Eula by VulpesCloud (https://account.mojang.com/documents/minecraft_eula)",
+        )
+    }
+
+    private fun setServerProperties(service: LocalService) {
+        val properties = Properties()
+        val out = Files.newOutputStream(service.path().resolve("server.properties"))
+        if (!service.path().resolve("server.properties").toFile().exists())
+            properties.store(out, null)
+
+        properties.load(service.path().resolve("server.properties").toFile().inputStream())
+
+        properties.setProperty("server-ip", Node.instance.configProvider.config.serviceBindAdress)
+        properties.setProperty("server-port", service.service.port.toString())
+        properties.setProperty("motd", "A VulpesCloud Service!")
+        properties.setProperty("online-mode", false.toString())
+        properties.setProperty("max-players", service.service.task.maxPlayers.toString())
+
+        properties.store(out, "Minecraft server properties - edited by VulpesCloud")
     }
 }
