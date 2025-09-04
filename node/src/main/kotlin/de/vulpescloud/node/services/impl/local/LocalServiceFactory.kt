@@ -5,6 +5,7 @@ import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.serversoftware.impl.*
 import de.vulpescloud.node.services.AbstractServiceFactory
+import de.vulpescloud.node.utils.MongoUtils
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.*
@@ -16,7 +17,13 @@ class LocalServiceFactory : AbstractServiceFactory() {
     override val factoryName: String = "local"
 
     override suspend fun prepareService(service: Service): LocalService {
-        val localService = LocalService(service.copy(state = ServiceStates.PREPARED))
+        val localService =
+            LocalService(
+                service.copy(
+                    state = ServiceStates.PREPARED,
+                    node = Node.instance.configProvider.config.nodeName,
+                )
+            )
 
         localService.path().resolve(localService.service.task.software.pluginDir).toFile().mkdirs()
 
@@ -36,6 +43,8 @@ class LocalServiceFactory : AbstractServiceFactory() {
                     getLatestVersionPath(service.task.software.version)
                         .copyTo(localService.path().resolve("server.jar"), true)
                 }
+                acceptEULA(localService)
+                setServerProperties(localService)
             }
             "Folia" -> {
                 FoliaDownloader.apply {
@@ -43,6 +52,8 @@ class LocalServiceFactory : AbstractServiceFactory() {
                     getLatestVersionPath(service.task.software.version)
                         .copyTo(localService.path().resolve("server.jar"), true)
                 }
+                acceptEULA(localService)
+                setServerProperties(localService)
             }
             "Paper" -> {
                 PaperDownloader.apply {
@@ -50,6 +61,8 @@ class LocalServiceFactory : AbstractServiceFactory() {
                     getLatestVersionPath(service.task.software.version)
                         .copyTo(localService.path().resolve("server.jar"), true)
                 }
+                acceptEULA(localService)
+                setServerProperties(localService)
             }
             "Purpur" -> {
                 PurpurDownloader.apply {
@@ -57,6 +70,8 @@ class LocalServiceFactory : AbstractServiceFactory() {
                     getLatestVersionPath(service.task.software.version)
                         .copyTo(localService.path().resolve("server.jar"), true)
                 }
+                acceptEULA(localService)
+                setServerProperties(localService)
             }
             "Velocity" -> {
                 VelocityDownloader.apply {
@@ -116,7 +131,8 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 .redirectErrorStream(true)
 
         processBuilder.environment()["bootstrapFile"] = "server.jar"
-        processBuilder.environment()["grpc_hostname"] = "127.0.0.1"//Node.instance.configProvider.config.grpcHost
+        processBuilder.environment()["grpc_hostname"] =
+            "127.0.0.1" // Node.instance.configProvider.config.grpcHost
         processBuilder.environment()["grpc_port"] =
             Node.instance.configProvider.config.grpcPort.toString()
         processBuilder.environment()["serviceUUID"] = service.uuid.toString()
@@ -138,8 +154,38 @@ class LocalServiceFactory : AbstractServiceFactory() {
         localService.processBuilder = processBuilder
         Node.instance.nodeServices.add(localService)
 
-        print("Prepared Service!")
+        MongoUtils.updateService(localService.service)
 
         return localService
+    }
+
+    private fun acceptEULA(service: LocalService) {
+        val properties = Properties()
+        properties.clear()
+
+        properties.setProperty("eula", "true")
+
+        val outEula = Files.newOutputStream(service.path().resolve("eula.txt"))
+        properties.store(
+            outEula,
+            "Auto Eula by VulpesCloud (https://account.mojang.com/documents/minecraft_eula)",
+        )
+    }
+
+    private fun setServerProperties(service: LocalService) {
+        val properties = Properties()
+        val out = Files.newOutputStream(service.path().resolve("server.properties"))
+        if (!service.path().resolve("server.properties").toFile().exists())
+            properties.store(out, null)
+
+        properties.load(service.path().resolve("server.properties").toFile().inputStream())
+
+        properties.setProperty("server-ip", Node.instance.configProvider.config.serviceBindAdress)
+        properties.setProperty("server-port", service.service.port.toString())
+        properties.setProperty("motd", "A VulpesCloud Service!")
+        properties.setProperty("online-mode", false.toString())
+        properties.setProperty("max-players", service.service.task.maxPlayers.toString())
+
+        properties.store(out, "Minecraft server properties - edited by VulpesCloud")
     }
 }

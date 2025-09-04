@@ -24,6 +24,7 @@ data class ServerSoftware(
             append("url", BsonString(url))
             append("pluginDir", BsonString(pluginDir))
             append("type", BsonInt32(type.ordinal))
+            append("build", BsonInt32(build))
         }
 
     fun toDefinition(): ServerSoftware {
@@ -38,6 +39,7 @@ data class ServerSoftware(
                     SoftwareType.PROXY -> SoftwareTypeProto.SOFTWARE_TYPE_PROXY
                 }
             )
+            .setBuild(build)
             .build()
     }
 

@@ -106,14 +106,19 @@ class Node {
                 secret = secret,
             )
 
-            commandProvider.initialize()
-            commandProvider.apply {
-                register(ClearCommand(terminal))
-                register(HelpCommand(commandProvider))
-                register(ExitCommand())
-                register(InfoCommand())
-                register(ServiceCommand())
-                register(DebugCommand())
+            try {
+                commandProvider.initialize()
+                commandProvider.apply {
+                    register(ClearCommand(terminal))
+                    register(HelpCommand(commandProvider))
+                    register(ExitCommand())
+                    register(InfoCommand())
+                    register(ServiceCommand())
+                    register(DebugCommand())
+                }
+            } catch (e: Exception) {
+                logger.error("Failed to initialize commands: ${e.stackTraceToString()}")
+                return@withContext
             }
 
             val connectionString = configProvider.config.mongodb.connectionString

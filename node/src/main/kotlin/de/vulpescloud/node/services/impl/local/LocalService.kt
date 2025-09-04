@@ -2,7 +2,12 @@ package de.vulpescloud.node.services.impl.local
 
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceStates
+import de.vulpescloud.node.Node
+import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.services.AbstractService
+import de.vulpescloud.node.utils.MongoUtils
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.io.BufferedWriter
 import java.io.IOException
@@ -30,11 +35,11 @@ class LocalService(override val service: Service) : AbstractService {
 
     override fun start() {
         logger.info("Starting service ${service.task.name}-${service.orderedId}...")
-//        if (service.state != ServiceStates.PREPARED) {
-//            return
-//        }
+        if (process != null) {
+            logger.warn("Service ${service.task.name}-${service.orderedId} is already running!")
+            return
+        }
 
-        logger.info("Service ProcessBuilder: $processBuilder")
         process = processBuilder?.start()
 
         Thread {
@@ -65,6 +70,11 @@ class LocalService(override val service: Service) : AbstractService {
 
                 this.process = null
 
+                NodeCoroutineScope.launch { MongoUtils.deleteService(service) }
+                Node.instance.nodeServices.removeIf { it.service.uuid == service.uuid }
+
+                logger.info("Service ${service.task.name}-${service.orderedId} stopped!")
+
                 if (this.processTracking != null) {
                     processTracking!!.interrupt()
                     this.processTracking = null
@@ -73,24 +83,45 @@ class LocalService(override val service: Service) : AbstractService {
         }
 
         processTracking!!.start()
+
+        NodeCoroutineScope.launch {
+            MongoUtils.updateService(service.copy(state = ServiceStates.STARTING))
+        }
     }
 
     override fun stop() {
-        command("stop")
+        NodeCoroutineScope.launch {
+            command("stop")
+
+            delay(5000)
+
+            if (process != null) {
+                process!!.destroyForcibly()
+            }
+        }
     }
 
     override fun delete() {
-        if (!service.task.staticServices) {
-            synchronized(this) {
-                try {
-                    Thread.sleep(200)
-                } catch (_: InterruptedException) {}
-                try {
-                    if (path().exists()) {
-                        path().toFile().deleteRecursively()
+        command("stop")
+        NodeCoroutineScope.launch {
+            delay(5000)
+
+            if (process != null) {
+                process!!.destroyForcibly()
+            }
+
+            if (!service.task.staticServices) {
+                synchronized(this) {
+                    try {
+                        Thread.sleep(200)
+                    } catch (_: InterruptedException) {}
+                    try {
+                        if (path().exists()) {
+                            path().toFile().deleteRecursively()
+                        }
+                    } catch (e: Exception) {
+                        logger.error("Failed to delete directory: ${path()}", e)
                     }
-                } catch (e: Exception) {
-                    logger.error("Failed to delete directory: ${path()}", e)
                 }
             }
         }
@@ -109,7 +140,16 @@ class LocalService(override val service: Service) : AbstractService {
     }
 
     override fun restart() {
-        stop()
-        start()
+        NodeCoroutineScope.launch {
+            command("stop")
+
+            delay(5000)
+
+            if (process != null) {
+                process!!.destroyForcibly()
+            }
+
+            start()
+        }
     }
 }
