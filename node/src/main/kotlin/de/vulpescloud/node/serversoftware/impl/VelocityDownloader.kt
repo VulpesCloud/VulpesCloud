@@ -37,7 +37,7 @@ object VelocityDownloader : ServerSoftwareDownloader {
 
             if (file.exists()) {
                 logger.info("$downloadFileName already exists, skipping download.")
-                return
+                return@use
             }
 
             val fileBytes = response.body.bytes()
@@ -111,10 +111,12 @@ object VelocityDownloader : ServerSoftwareDownloader {
 
                 val downloadUrl = getDownloadUrl(version.getString("id"))
 
+                val build = downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
+
                 val software = ServerSoftware(
                     name = "Velocity",
                     version = version.getString("id"),
-                    build = version.getJSONArray("builds").maxOfOrNull { it as Int } ?: 1,
+                    build = build ?: 1,
                     url = downloadUrl.toString(),
                     pluginDir = "plugins",
                     type = SoftwareType.PROXY
@@ -154,10 +156,12 @@ object VelocityDownloader : ServerSoftwareDownloader {
 
                 val downloadUrl = getDownloadUrl(latestVersion.getString("id"))
 
+                val build = downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
+
                 return ServerSoftware(
                     name = "Velocity",
                     version = latestVersion.getString("id"),
-                    build = latestVersion.getJSONArray("builds").maxOfOrNull { it as Int } ?: 1,
+                    build = build ?: 1,
                     url = downloadUrl.toString(),
                     pluginDir = "plugins",
                     type = SoftwareType.PROXY
@@ -185,10 +189,12 @@ object VelocityDownloader : ServerSoftwareDownloader {
 
                 val downloadUrl = getDownloadUrl(version)
 
+                val build = downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
+
                 return ServerSoftware(
                     name = "Velocity",
                     version = version,
-                    build = latestVersion.getJSONArray("builds").maxOfOrNull { it as Int } ?: 1,
+                    build = build ?: 1,
                     url = downloadUrl.toString(),
                     pluginDir = "plugins",
                     type = SoftwareType.PROXY

@@ -42,7 +42,7 @@ object CanvasDownloader : ServerSoftwareDownloader {
 
             if (file.exists()) {
                 logger.info("$downloadFileName already exists, skipping download.")
-                return
+                return@use
             }
 
             val fileBytes = response.body.bytes()

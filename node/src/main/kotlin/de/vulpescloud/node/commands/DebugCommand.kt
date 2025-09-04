@@ -9,6 +9,7 @@ import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
+import de.vulpescloud.node.services.impl.docker.DockerService
 import kotlinx.coroutines.launch
 import org.incendo.cloud.annotations.Command
 
@@ -63,7 +64,7 @@ class DebugCommand {
                             "Proxy",
                             512,
                             512,
-                            25565,
+                            28879,
                             listOf(),
                             true,
                             1,
@@ -146,7 +147,7 @@ class DebugCommand {
                                 "Proxy",
                                 512,
                                 512,
-                                25565,
+                                28879,
                                 listOf(),
                                 true,
                                 1,
@@ -175,6 +176,18 @@ class DebugCommand {
                     )
                 }
             source.sendMessage("Successfully started service on default proxy task")
+        }
+    }
+
+    @Command("debug cmd")
+    fun cmdCmd(source: CommandSource) {
+        NodeCoroutineScope.launch {
+            source.sendMessage("making command exec on proxy 1")
+            DockerService(
+                Node.instance.nodeServices.filterIsInstance<DockerService>().first {
+                    it.service.task.software.type == SoftwareType.PROXY
+                }.service
+            ).command("velocity plugins")
         }
     }
 }

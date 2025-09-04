@@ -1,7 +1,5 @@
 package de.vulpescloud.node.utils
 
-import com.github.dockerjava.api.async.ResultCallback
-import com.github.dockerjava.api.model.Frame
 import com.github.dockerjava.core.DockerClientImpl
 import de.vulpescloud.node.Node
 
@@ -17,19 +15,6 @@ object DockerUtils {
     }
 
     fun execMinecraftCommand(containerId: String, command: String) {
-        val execCreate = dockerClient.execCreateCmd(containerId)
-            .withUser("1000")
-            .withAttachStdout(true)
-            .withAttachStderr(true)
-            .withCmd("mc-send-to-console", *command.split(" ").toTypedArray())
-            .exec()
 
-        dockerClient.execStartCmd(execCreate.id)
-            .exec(object : ResultCallback.Adapter<Frame>() {
-                override fun onNext(frame: Frame) {
-                    println(String(frame.payload))
-                }
-            })
-            .awaitCompletion()
     }
 }

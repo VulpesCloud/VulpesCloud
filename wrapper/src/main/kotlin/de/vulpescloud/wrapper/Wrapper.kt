@@ -49,7 +49,7 @@ class Wrapper(args: Array<String>) {
                 ClassLoader.getSystemClassLoader()
             }
 
-        System.setProperty("fabric.systemLibraries", System.getProperty("java.class.path"))
+        // System.setProperty("fabric.systemLibraries", System.getProperty("java.class.path"))
 
         val thread = Thread {
             val jar = JarFile(file)

@@ -37,7 +37,7 @@ object PaperDownloader : ServerSoftwareDownloader {
 
             if (file.exists()) {
                 logger.info("$downloadFileName already exists, skipping download.")
-                return
+                return@use
             }
 
             val fileBytes = response.body.bytes()
@@ -111,10 +111,12 @@ object PaperDownloader : ServerSoftwareDownloader {
 
                 val downloadUrl = getDownloadUrl(version.getString("id"))
 
+                val build = downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
+
                 val software = ServerSoftware(
                     name = "Paper",
                     version = version.getString("id"),
-                    build = version.getJSONArray("builds").maxOfOrNull { it as Int } ?: 1,
+                    build = build ?: 1,
                     url = downloadUrl.toString(),
                     pluginDir = "plugins",
                     type = SoftwareType.SERVER
@@ -154,10 +156,12 @@ object PaperDownloader : ServerSoftwareDownloader {
 
                 val downloadUrl = getDownloadUrl(latestVersion.getString("id"))
 
+                val build = downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
+
                 return ServerSoftware(
                     name = "Paper",
                     version = latestVersion.getString("id"),
-                    build = latestVersion.getJSONArray("builds").maxOfOrNull { it as Int } ?: 1,
+                    build = build ?: 1,
                     url = downloadUrl.toString(),
                     pluginDir = "plugins",
                     type = SoftwareType.SERVER
@@ -178,17 +182,14 @@ object PaperDownloader : ServerSoftwareDownloader {
 
                 if (versions.length() == 0) throw Exception("No versions found")
 
-                val latestVersion = versions
-                    .find { (it as JSONObject).getJSONObject("version").getString("id") == version }
-                    ?.let { (it as JSONObject).getJSONObject("version") }
-                    ?: throw Exception("No version found for Paper with version $version")
-
                 val downloadUrl = getDownloadUrl(version)
+
+                val build = downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
 
                 return ServerSoftware(
                     name = "Paper",
                     version = version,
-                    build = latestVersion.getJSONArray("builds").maxOfOrNull { it as Int } ?: 1,
+                    build = build ?: 1,
                     url = downloadUrl.toString(),
                     pluginDir = "plugins",
                     type = SoftwareType.SERVER

@@ -30,6 +30,8 @@ tasks.jar {
 }
 
 tasks.shadowJar {
+    relocate("io.netty", "de.vulpescloud.wrapper.relocate.io.netty")
+
     manifest {
         attributes["Main-Class"] = "de.vulpescloud.wrapper.Wrapper"
         attributes["Premain-Class"] = "de.vulpescloud.wrapper.Premain"

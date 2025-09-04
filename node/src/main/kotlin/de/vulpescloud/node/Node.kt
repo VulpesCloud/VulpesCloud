@@ -180,6 +180,9 @@ class Node {
                     logger.info(
                         "Successfully connected to Docker! Version: ${version.version}, API Version: ${version.apiVersion}"
                     )
+
+                    // build docker image
+
                 } catch (e: Exception) {
                     logger.error("Failed to connect to Docker: ${e.message}")
                     return@withContext

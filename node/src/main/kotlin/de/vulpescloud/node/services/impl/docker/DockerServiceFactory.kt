@@ -81,12 +81,7 @@ class DockerServiceFactory : AbstractServiceFactory() {
 
         jvmArgs.add("-cp")
 
-        val path =
-            if (service.task.staticServices) {
-                "../../../launcher/dependencies/vulpescloud"
-            } else {
-                "../../../../launcher/dependencies/vulpescloud"
-            }
+        val path = "/launcher/dependencies/vulpescloud"
 
         val neededDependencies =
             listOf("vulpescloud-api.jar", "vulpescloud-wrapper.jar", "vulpescloud-bridge.jar")
@@ -100,26 +95,18 @@ class DockerServiceFactory : AbstractServiceFactory() {
             )
         )
 
-        if (service.task.staticServices) {
-            jvmArgs.add(
-                "-javaagent:../../../launcher/dependencies/vulpescloud/vulpescloud-wrapper.jar"
-            )
-        } else {
-            jvmArgs.add(
-                "-javaagent:../../../../launcher/dependencies/vulpescloud/vulpescloud-wrapper.jar"
-            )
-        }
+        jvmArgs.add(
+            "-javaagent:/launcher/dependencies/vulpescloud/vulpescloud-wrapper.jar"
+        )
+
         jvmArgs.add("de.vulpescloud.wrapper.Wrapper")
-        jvmArgs.add("-Xmx" + service.task.maxMemory + "M")
-        jvmArgs.add("-Xms" + service.task.minMemory + "M")
+        if (service.task.software.type == SoftwareType.SERVER) {
+            jvmArgs.add("--nogui")
+        }
         jvmArgs.addAll(service.task.jvmArgs)
 
         val dockerClient = DockerClientImpl.getInstance(Node.instance.dockerClientConfig, Node.instance.dockerHttpClient)
-        val imageName = if (service.task.software.type == SoftwareType.SERVER) {
-            "itzg/minecraft-server"
-        } else {
-            "itzg/mc-proxy"
-        }
+        val imageName = "bypixeltv/vulpescloud-wrapper"
 
         dockerClient.pullImageCmd(imageName)
             .withTag("latest")
@@ -135,20 +122,13 @@ class DockerServiceFactory : AbstractServiceFactory() {
         }
 
         env.add("JVM_OPTS=" + jvmArgs.joinToString(" "))
-        env.add("EULA=TRUE")
-        env.add("TYPE=CUSTOM")
-        env.add("CUSTOM_SERVER=server.jar")
-        env.add("MEMORY=${service.task.maxMemory}")
-        env.add("MAX_PLAYERS=${service.task.maxPlayers}")
-        env.add("MOTD=VulpesCloud provided dockerized service")
+        env.add("bootstrapFile=server.jar")
         env.add("grpc_hostname=${Node.instance.configProvider.config.grpcHost}")
         env.add("grpc_port=${Node.instance.configProvider.config.grpcPort}")
         env.add("serviceUUID=${service.uuid}")
         env.add("serviceName=${service.task.name}-${service.orderedId}")
         env.add("hostname=${Node.instance.configProvider.config.serviceBindAdress}")
         env.add("secret=${Node.instance.secret}")
-        env.add("ENABLE_RCON=false")
-        env.add("CREATE_CONSOLE_IN_PIPE=true")
 
         val ports = Ports()
         ports.bind(ExposedPort.tcp(25565), Ports.Binding.bindPort(service.port))
@@ -175,28 +155,37 @@ class DockerServiceFactory : AbstractServiceFactory() {
             } catch (_: Exception) {
             }
 
-            binds.add(Bind.parse("$volumeName:/data"))
+            binds.add(Bind.parse("$volumeName:/app"))
         } else {
-            binds.add(Bind.parse("${dockerService.path().toAbsolutePath()}:/data"))
+            binds.add(Bind.parse("${dockerService.path().toAbsolutePath()}:/app"))
         }
 
-        binds.add(Bind.parse("${Path("launcher/dependencies/vulpescloud/vulpescloud-connector.jar").toAbsolutePath()}:/data/plugins/vulpescloud-connector.jar"))
+        binds.add(Bind.parse("${Path("launcher/dependencies/vulpescloud/vulpescloud-connector.jar").toAbsolutePath()}:/app/plugins/vulpescloud-connector.jar"))
+        binds.add(Bind.parse("${Path("${dockerService.path().toAbsolutePath()}/server.jar").toAbsolutePath()}:/app/server.jar"))
+        binds.add(Bind.parse("${Path("launcher/dependencies/maven").toAbsolutePath()}:/launcher/dependencies/maven"))
+        binds.add(Bind.parse("${Path("launcher/dependencies/vulpescloud").toAbsolutePath()}:/launcher/dependencies/vulpescloud"))
+        binds.add(Bind.parse("${Path("certs").toAbsolutePath()}:/vulpescloud/certs"))
+        binds.add(Bind.parse("${Path("certs").toAbsolutePath()}:/app/vulpescloud/certs"))
 
         val hostConfig = HostConfig.newHostConfig()
             .withBinds(binds)
             .withPortBindings(ports)
 
-
         DockerClientImpl.getInstance(Node.instance.dockerClientConfig, Node.instance.dockerHttpClient).createContainerCmd(imageName)
             .withEnv(env)
             .withVolumes(
                 Volume(dockerService.path().toString()),
-                Volume("launcher/dependencies/vulpescloud/vulpescloud-connector.jar")
+                Volume("launcher/dependencies/maven"),
+                Volume("launcher/dependencies/vulpescloud"),
+                Volume("vulpescloud/certs"),
+                Volume("/app/vulpescloud/certs"),
             )
             .withHostConfig(hostConfig)
             .withName("vulpescloud-service-${service.task.name}-${service.orderedId}-${service.uuid}")
             .withExposedPorts(ExposedPort.tcp(25565))
             .exec()
+
+        Node.instance.nodeServices.add(dockerService)
 
         return dockerService
     }
