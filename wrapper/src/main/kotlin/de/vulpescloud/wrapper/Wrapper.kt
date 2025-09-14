@@ -1,11 +1,8 @@
 package de.vulpescloud.wrapper
 
-import build.buf.gen.vulpescloud.services.v1.GetAllServicesRequest
 import de.vulpescloud.wrapper.Premain.preClassCall
 import de.vulpescloud.wrapper.grpc.GrpcClient
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import java.net.URLClassLoader
 import java.util.*
 import java.util.jar.JarFile
@@ -34,10 +31,6 @@ class Wrapper(args: Array<String>) {
             (System.getenv("grpc_port") ?: "6565").toInt(),
             System.getenv("secret") ?: "1osajdf3",
         )
-
-        GlobalScope.launch {
-            grpcClient.serviceAPI.getAllServices(GetAllServicesRequest.getDefaultInstance())
-        }
 
         val file = Path(System.getenv("bootstrapFile")).toFile()
 
