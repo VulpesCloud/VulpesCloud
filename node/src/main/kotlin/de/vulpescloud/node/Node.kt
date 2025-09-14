@@ -15,7 +15,6 @@ import de.vulpescloud.node.grpc.GrpcServer
 import de.vulpescloud.node.grpc.LocalGrpcClient
 import de.vulpescloud.node.grpc.LoggingServerInterceptor
 import de.vulpescloud.node.grpc.security.AuthInterceptor
-import de.vulpescloud.node.grpc.security.CertGen
 import de.vulpescloud.node.secret.SecretFactory
 import de.vulpescloud.node.services.AbstractService
 import de.vulpescloud.node.services.ServiceFactoryProvider
@@ -28,10 +27,8 @@ import de.vulpescloud.node.tasks.TasksAPIService
 import de.vulpescloud.node.templates.TemplateStorageProvider
 import de.vulpescloud.node.terminal.Terminal
 import io.grpc.ChannelCredentials
-import io.grpc.TlsChannelCredentials
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
-import java.io.File
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
@@ -66,13 +63,14 @@ class Node {
             setupProvider = SetupProvider(terminal)
             terminal.init()
 
-//            CertGen.loadOrCreate(
-//                keyFile = File("certs/server.key"),
-//                certFile = File("certs/server.crt"),
-//            )
+            //            CertGen.loadOrCreate(
+            //                keyFile = File("certs/server.key"),
+            //                certFile = File("certs/server.crt"),
+            //            )
 
-//            val serverCertBytes = File("certs/server.crt")
-//            creds = TlsChannelCredentials.newBuilder().trustManager(serverCertBytes).build()
+            //            val serverCertBytes = File("certs/server.crt")
+            //            creds =
+            // TlsChannelCredentials.newBuilder().trustManager(serverCertBytes).build()
 
             val secretFactory = SecretFactory()
             secret = secretFactory.loadOrCreateSecret(Path("launcher/secret/.auth.secret"))
@@ -148,7 +146,7 @@ class Node {
                 registerServiceFactory(LocalServiceFactory())
             }
 
-            if (configProvider.config.serviceType.uppercase() == "DOCKER") {
+            if (configProvider.config.docker.enabled) {
                 try {
                     dockerClientConfig =
                         DefaultDockerClientConfig.createDefaultConfigBuilder()
@@ -188,6 +186,11 @@ class Node {
                 }
             }
         }
+
+    fun getVelocitySecret(): String {
+        val secretFactory = SecretFactory()
+        return secretFactory.loadOrCreateSecret(Path("launcher/secret/.velocity.secret"))
+    }
 
     companion object {
         lateinit var instance: Node

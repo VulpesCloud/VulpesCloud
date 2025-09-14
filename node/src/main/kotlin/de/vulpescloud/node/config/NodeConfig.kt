@@ -13,6 +13,7 @@ data class NodeConfig(
     val serviceBindAdress: String,
     val mongodb: MongoConfig,
     val maxMemory: Int = 1024, // MB
-    val serviceType: String = "LOCAL", // can be "LOCAL" or "DOCKER"
-    val docker: DockerConfig
+    val defaultServiceType: String = "LOCAL", // can be "LOCAL" or "DOCKER"
+    val docker: DockerConfig,
+    val useModernForwarding: Boolean
 )

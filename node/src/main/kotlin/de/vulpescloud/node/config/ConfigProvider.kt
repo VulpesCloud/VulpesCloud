@@ -1,5 +1,6 @@
 package de.vulpescloud.node.config
 
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import java.nio.file.Files
 import java.util.*
@@ -10,9 +11,12 @@ class ConfigProvider {
     lateinit var config: NodeConfig
         private set
 
+    @OptIn(ExperimentalSerializationApi::class)
     val json = Json {
         prettyPrint = true
         encodeDefaults = true
+        allowComments = true
+        allowTrailingComma = true
     }
 
     fun loadConfig(): Boolean {
@@ -30,7 +34,8 @@ class ConfigProvider {
                     MongoConfig("mongodb://localhost:27017/", "vulpescloud", "vc_"),
                     4096,
                     "LOCAL",
-                    DockerConfig()
+                    DockerConfig(),
+                    true,
                 )
 
             Files.writeString(Path("config.json"), json.encodeToString(defaultConfig))

@@ -7,6 +7,7 @@ import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.setup.Setup
 import de.vulpescloud.node.setup.annotations.SetupFinish
 import de.vulpescloud.node.setup.annotations.SetupQuestion
+import de.vulpescloud.node.setup.answers.BooleanSetupAnswer
 import de.vulpescloud.node.setup.answers.MemorySetupAnswer
 import de.vulpescloud.node.setup.answers.SetupAnswer
 import java.util.*
@@ -27,6 +28,7 @@ class FirstSetup : Setup {
     private var mongoCollectionPrefix: String = "vc_"
 
     private val serviceType: String = "LOCAL" // can be "LOCAL" or "DOCKER"
+    private var modernForwardingEnabled: Boolean = false
 
     class EulaAnswer : SetupAnswer {
         override fun suggest(): Collection<String> {
@@ -46,8 +48,14 @@ class FirstSetup : Setup {
         }
     }
 
-    @SetupQuestion(index = 0, translationKey = "Do you agree to the Mojang EULA (https://aka.ms/MinecraftEULA)?", EulaAnswer::class, true, ["yes"])
-    fun q1(answer: String) : Boolean {
+    @SetupQuestion(
+        index = 0,
+        translationKey = "Do you agree to the Mojang EULA (https://aka.ms/MinecraftEULA)?",
+        EulaAnswer::class,
+        true,
+        ["yes"],
+    )
+    fun q1(answer: String): Boolean {
         if (answer.lowercase() == "yes") {
             eulaAccepted = true
             return true
@@ -57,8 +65,15 @@ class FirstSetup : Setup {
         }
     }
 
-    @SetupQuestion(index = 1, translationKey = "On which host and port should we start the gRPC Server? (Used for communicating between nodes and the services)", forceAnswer = false, default = ["127.0.0.1:6565"], answer = GrpcAddressAnswer::class)
-    fun q2(answer: String) : Boolean {
+    @SetupQuestion(
+        index = 1,
+        translationKey =
+            "On which host and port should we start the gRPC Server? (Used for communicating between nodes and the services)",
+        forceAnswer = false,
+        default = ["127.0.0.1:6565"],
+        answer = GrpcAddressAnswer::class,
+    )
+    fun q2(answer: String): Boolean {
 
         val matchesFormat = Regex("^([0-9]{1,3}\\.){3}[0-9]{1,3}:[0-9]{1,5}\$").matches(answer)
         if (!matchesFormat) {
@@ -77,9 +92,10 @@ class FirstSetup : Setup {
 
     @SetupQuestion(
         index = 2,
-        translationKey = "How much memory should all services be able to use? (Value must be in MB)",
+        translationKey =
+            "How much memory should all services be able to use? (Value must be in MB)",
         forceAnswer = false,
-        answer = MemorySetupAnswer::class
+        answer = MemorySetupAnswer::class,
     )
     fun q3(answer: String): Boolean {
         val effective = (answer.ifBlank { systemMemoryInMb.toString() }).trim()
@@ -92,9 +108,10 @@ class FirstSetup : Setup {
 
     @SetupQuestion(
         index = 3,
-        translationKey = "On which address should services bind to? (Usually it is recommended to use your public IP or 0.0.0.0, if you have IPv6 only you have to use 0.0.0.0)",
+        translationKey =
+            "On which address should services bind to? (Usually it is recommended to use your public IP or 0.0.0.0, if you have IPv6 only you have to use 0.0.0.0)",
         forceAnswer = false,
-        default = ["0.0.0.0"]
+        default = ["0.0.0.0"],
     )
     fun q4(answer: String): Boolean {
         if (answer.isBlank()) return false
@@ -102,17 +119,17 @@ class FirstSetup : Setup {
         val effective = answer.ifBlank { "0.0.0.0" }
 
         // simple IPv4 regex check
-        val ipv4Regex = Regex("^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$")
+        val ipv4Regex =
+            Regex("^((25[0-5]|2[0-4]\\d|[01]?\\d\\d?)\\.){3}(25[0-5]|2[0-4]\\d|[01]?\\d\\d?)$")
         bindAddress = effective
         return ipv4Regex.matches(effective)
     }
-
 
     @SetupQuestion(
         index = 4,
         translationKey = "What name should this node have?",
         forceAnswer = false,
-        default = ["Node-1"]
+        default = ["Node-1"],
     )
     fun q5(answer: String): Boolean {
         val effective = answer.ifBlank { "Node-1" }.trim()
@@ -126,7 +143,7 @@ class FirstSetup : Setup {
         translationKey = "Which service type should be used? (LOCAL or DOCKER)",
         forceAnswer = true,
         default = ["LOCAL"],
-        answer = ServiceTypeAnswer::class
+        answer = ServiceTypeAnswer::class,
     )
     fun q6(answer: String): Boolean {
         val effective = answer.ifBlank { "LOCAL" }.trim().uppercase()
@@ -137,7 +154,7 @@ class FirstSetup : Setup {
         index = 6,
         translationKey = "Please enter the MongoDB connection string",
         forceAnswer = false,
-        default = ["mongodb://localhost:27017/"]
+        default = ["mongodb://localhost:27017/"],
     )
     fun q7(answer: String): Boolean {
         val effective = answer.ifBlank { mongoConnectionString }.trim()
@@ -153,7 +170,7 @@ class FirstSetup : Setup {
         index = 7,
         translationKey = "Please enter the MongoDB database name",
         forceAnswer = false,
-        default = ["vulpescloud"]
+        default = ["vulpescloud"],
     )
     fun q8(answer: String): Boolean {
         val effective = answer.ifBlank { mongoDatabase }.trim()
@@ -167,9 +184,10 @@ class FirstSetup : Setup {
 
     @SetupQuestion(
         index = 8,
-        translationKey = "Please enter the MongoDB collection prefix (keep default if you don't know what this is)",
+        translationKey =
+            "Please enter the MongoDB collection prefix (keep default if you don't know what this is)",
         forceAnswer = false,
-        default = ["vc_"]
+        default = ["vc_"],
     )
     fun q9(answer: String): Boolean {
         val effective = answer.ifBlank { mongoCollectionPrefix }.trim()
@@ -181,6 +199,18 @@ class FirstSetup : Setup {
         }
     }
 
+    @SetupQuestion(
+        index = 9,
+        translationKey =
+            "Should the Services be configured for Velocity Modern Forwarding automatically?",
+        forceAnswer = true,
+        answer = BooleanSetupAnswer::class,
+    )
+    fun q10(answer: String): Boolean {
+        modernForwardingEnabled = answer.toBoolean()
+        return true
+    }
+
     @SetupFinish
     fun finish() {
         Node.instance.configProvider.updateConfig(
@@ -190,14 +220,11 @@ class FirstSetup : Setup {
                 grpcAddress.split(":")[1].toInt(),
                 grpcAddress.split(":")[0],
                 bindAddress,
-                MongoConfig(
-                    mongoConnectionString,
-                    mongoDatabase,
-                    mongoCollectionPrefix
-                ),
+                MongoConfig(mongoConnectionString, mongoDatabase, mongoCollectionPrefix),
                 totalAllowedMemoryMb.toInt(),
                 serviceType,
-                docker = DockerConfig()
+                docker = DockerConfig(),
+                modernForwardingEnabled,
             )
         )
 

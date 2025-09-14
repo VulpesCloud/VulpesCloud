@@ -9,5 +9,6 @@ data class DockerConfig(
     val dockerCertPath: String? = null,
     val registryUsername: String = "",
     val registryPassword: String = "",
-    val registryEmail: String = ""
+    val registryEmail: String = "",
+    val enabled: Boolean = false
 )

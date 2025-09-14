@@ -2,6 +2,7 @@ package de.vulpescloud.node.services.impl.local
 
 import com.electronwill.nightconfig.core.file.FileConfig
 import com.electronwill.nightconfig.toml.TomlFormat
+import com.electronwill.nightconfig.yaml.YamlFormat
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
@@ -47,6 +48,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 }
                 acceptEULA(localService)
                 setServerProperties(localService)
+                updatePaperGlobalConfig(localService)
             }
             "Folia" -> {
                 FoliaDownloader.apply {
@@ -56,6 +58,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 }
                 acceptEULA(localService)
                 setServerProperties(localService)
+                updatePaperGlobalConfig(localService)
             }
             "Paper" -> {
                 PaperDownloader.apply {
@@ -65,6 +68,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 }
                 acceptEULA(localService)
                 setServerProperties(localService)
+                updatePaperGlobalConfig(localService)
             }
             "Purpur" -> {
                 PurpurDownloader.apply {
@@ -74,6 +78,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 }
                 acceptEULA(localService)
                 setServerProperties(localService)
+                updatePaperGlobalConfig(localService)
             }
             "Velocity" -> {
                 VelocityDownloader.apply {
@@ -192,6 +197,24 @@ class LocalServiceFactory : AbstractServiceFactory() {
         properties.store(out, "Minecraft server properties - edited by VulpesCloud")
     }
 
+    fun updatePaperGlobalConfig(service: LocalService) {
+        if (Node.instance.configProvider.config.useModernForwarding) {
+            val globalConf =
+                FileConfig.builder(
+                        service.path().resolve("config/paper-global.yml"),
+                        YamlFormat.defaultInstance(),
+                    )
+                    .sync()
+                    .preserveInsertionOrder()
+                    .build()
+
+            globalConf.load()
+            globalConf.set<String>("proxies.velocity.secret", Node.instance.getVelocitySecret())
+            globalConf.set<Boolean>("proxies.velocity.enabled", true)
+            globalConf.save()
+        }
+    }
+
     fun updateVelocityConfig(service: LocalService) {
         val config =
             FileConfig.builder(
@@ -208,6 +231,14 @@ class LocalServiceFactory : AbstractServiceFactory() {
             "bind",
             Node.instance.configProvider.config.serviceBindAdress + ":" + service.service.port,
         )
+
+        if (Node.instance.configProvider.config.useModernForwarding) {
+            config.set<String>("player-info-forwarding-mode", "modern")
+            Files.writeString(
+                service.path().resolve("forwarding.secret"),
+                Node.instance.getVelocitySecret(),
+            )
+        }
 
         config.save()
         config.close()

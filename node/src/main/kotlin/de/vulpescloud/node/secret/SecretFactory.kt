@@ -8,9 +8,7 @@ import java.security.SecureRandom
 import java.util.*
 import kotlin.io.path.*
 
-class SecretFactory(
-    private val random: SecureRandom = SecureRandom()
-) {
+class SecretFactory(private val random: SecureRandom = SecureRandom()) {
     fun loadOrCreateSecret(path: Path, bytes: Int = 32): String {
         if (path.exists() && path.isRegularFile()) {
             return path.readText(StandardCharsets.UTF_8).trim()
@@ -19,9 +17,6 @@ class SecretFactory(
         writeAtomic(path, secret + "\n")
         return secret
     }
-
-    fun loadOrCreateEncryptionSecret(path: Path, bytes: Int = 32): String =
-        loadOrCreateSecret(path, bytes)
 
     private fun generateBase64(len: Int): String {
         val buf = ByteArray(len)
@@ -33,11 +28,6 @@ class SecretFactory(
         target.parent?.createDirectories()
         val tmp = target.resolveSibling(target.fileName.toString() + ".tmp")
         tmp.writeText(content, StandardCharsets.UTF_8)
-        Files.move(
-            tmp,
-            target,
-            StandardCopyOption.REPLACE_EXISTING,
-            StandardCopyOption.ATOMIC_MOVE
-        )
+        Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE)
     }
 }
