@@ -1,5 +1,7 @@
 package de.vulpescloud.node.services.impl.local
 
+import com.electronwill.nightconfig.core.file.FileConfig
+import com.electronwill.nightconfig.toml.TomlFormat
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
@@ -79,6 +81,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                     getLatestVersionPath(service.task.software.version)
                         .copyTo(localService.path().resolve("server.jar"), true)
                 }
+                updateVelocityConfig(localService)
             }
         }
 
@@ -187,5 +190,26 @@ class LocalServiceFactory : AbstractServiceFactory() {
         properties.setProperty("max-players", service.service.task.maxPlayers.toString())
 
         properties.store(out, "Minecraft server properties - edited by VulpesCloud")
+    }
+
+    fun updateVelocityConfig(service: LocalService) {
+        val config =
+            FileConfig.builder(
+                    service.path().resolve("velocity.toml").toFile(),
+                    TomlFormat.instance(),
+                )
+                .sync()
+                .preserveInsertionOrder()
+                .build()
+
+        config.load()
+
+        config.set<String>(
+            "bind",
+            Node.instance.configProvider.config.serviceBindAdress + ":" + service.service.port,
+        )
+
+        config.save()
+        config.close()
     }
 }
