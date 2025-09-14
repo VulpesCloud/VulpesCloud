@@ -18,15 +18,15 @@ class GrpcClient {
     fun connect(host: String = "127.0.0.1", port: Int = 6565, secret: String) {
         println("Connecting to $host:$port")
 
-        val serverCertFile = File("vulpescloud/certs/server.crt")
-
-        val sslContext = GrpcSslContexts.forClient().trustManager(serverCertFile).build()
+//        val serverCertFile = File("vulpescloud/certs/server.crt")
+//
+//        val sslContext = GrpcSslContexts.forClient().trustManager(serverCertFile).build()
 
         channel =
             NettyChannelBuilder.forAddress(host, port)
                 .eventLoopGroup(NioEventLoopGroup()) // force NIO transport
                 .channelType(NioSocketChannel::class.java) // force TCP
-                .sslContext(sslContext)
+                // .sslContext(sslContext)
                 .build()
 
         serviceAPI =

@@ -6,6 +6,7 @@ import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import io.grpc.ChannelCredentials
 import io.grpc.Grpc
 import io.grpc.ManagedChannel
+import io.grpc.ManagedChannelBuilder
 
 class LocalGrpcClient {
 
@@ -16,12 +17,10 @@ class LocalGrpcClient {
     fun connect(
         host: String = "127.0.0.1",
         port: Int = 6565,
-        creds: ChannelCredentials,
+        //creds: ChannelCredentials,
         secret: String,
     ) {
-        channel = Grpc.newChannelBuilderForAddress(host, port, creds).build()
-
-        println("AUTHORITY: ${channel.authority()}")
+        channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build()
 
         serviceAPI =
             ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(channel)

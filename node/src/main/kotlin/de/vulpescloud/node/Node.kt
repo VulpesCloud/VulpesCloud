@@ -66,13 +66,13 @@ class Node {
             setupProvider = SetupProvider(terminal)
             terminal.init()
 
-            CertGen.loadOrCreate(
-                keyFile = File("certs/server.key"),
-                certFile = File("certs/server.crt"),
-            )
+//            CertGen.loadOrCreate(
+//                keyFile = File("certs/server.key"),
+//                certFile = File("certs/server.crt"),
+//            )
 
-            val serverCertBytes = File("certs/server.crt")
-            creds = TlsChannelCredentials.newBuilder().trustManager(serverCertBytes).build()
+//            val serverCertBytes = File("certs/server.crt")
+//            creds = TlsChannelCredentials.newBuilder().trustManager(serverCertBytes).build()
 
             val secretFactory = SecretFactory()
             secret = secretFactory.loadOrCreateSecret(Path("launcher/secret/.auth.secret"))
@@ -102,7 +102,6 @@ class Node {
             localGrpcClient.connect(
                 host = configProvider.config.grpcHost,
                 port = configProvider.config.grpcPort,
-                creds = creds,
                 secret = secret,
             )
 

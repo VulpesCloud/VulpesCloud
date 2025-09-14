@@ -30,12 +30,12 @@ class GrpcServer(
         }
 
         try {
-            val certFile = File("certs/server.crt")
-            val keyFile = File("certs/server.key")
+//            val certFile = File("certs/server.crt")
+//            val keyFile = File("certs/server.key")
 
-            if (!certFile.exists() || !keyFile.exists()) {
-                throw IllegalStateException("TLS Certs are missing: ${certFile.path}, ${keyFile.path}")
-            }
+//            if (!certFile.exists() || !keyFile.exists()) {
+//                throw IllegalStateException("TLS Certs are missing: ${certFile.path}, ${keyFile.path}")
+//            }
 
             val address = InetSocketAddress(host, port)
             server = NettyServerBuilder.forAddress(address).apply {
@@ -44,7 +44,7 @@ class GrpcServer(
                     interceptors.forEach { def = ServerInterceptors.intercept(def, it) }
                     addService(def)
                 }
-                useTransportSecurity(certFile, keyFile)
+//                useTransportSecurity(certFile, keyFile)
             }.build().start()
             logger.info("gRPC Server started on $address")
         } catch (ex: IOException) {

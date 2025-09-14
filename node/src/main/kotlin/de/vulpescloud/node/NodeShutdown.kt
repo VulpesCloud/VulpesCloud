@@ -1,6 +1,7 @@
 package de.vulpescloud.node
 
 import org.slf4j.LoggerFactory
+import kotlin.system.exitProcess
 
 object NodeShutdown {
 
@@ -12,5 +13,7 @@ object NodeShutdown {
         Node.instance.nodeServices.forEach { it.stop() }
 
         Node.instance.terminal.close()
+
+        exitProcess(0)
     }
 }
