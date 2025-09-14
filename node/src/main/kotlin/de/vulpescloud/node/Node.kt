@@ -1,5 +1,7 @@
 package de.vulpescloud.node
 
+import build.buf.gen.vulpescloud.events.v1.publishRequest
+import build.buf.gen.vulpescloud.events.v1.subscribeRequest
 import com.github.dockerjava.core.DefaultDockerClientConfig
 import com.github.dockerjava.core.DockerClientConfig
 import com.github.dockerjava.core.DockerClientImpl
@@ -11,6 +13,9 @@ import com.mongodb.kotlin.client.coroutine.MongoClient
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.commands.*
 import de.vulpescloud.node.config.ConfigProvider
+import de.vulpescloud.node.event.EventSerializer
+import de.vulpescloud.node.event.EventsService
+import de.vulpescloud.node.event.events.debug.TestEvent
 import de.vulpescloud.node.grpc.GrpcServer
 import de.vulpescloud.node.grpc.LocalGrpcClient
 import de.vulpescloud.node.grpc.LoggingServerInterceptor
@@ -91,7 +96,7 @@ class Node {
                 GrpcServer(
                     host = configProvider.config.grpcHost,
                     port = configProvider.config.grpcPort,
-                    services = listOf(TasksAPIService(), ServicesAPIService()),
+                    services = listOf(TasksAPIService(), ServicesAPIService(), EventsService()),
                     interceptors = listOf(LoggingServerInterceptor(), AuthInterceptor(secret)),
                 )
             grpcServer.start()
