@@ -10,7 +10,6 @@ repositories {
 
 dependencies {
     compileOnly(project(":api"))
-    compileOnly(project(":bridge"))
     implementation(libs.bundles.kotlin)
     implementation(libs.logbackCore)
     implementation(libs.logbackClassic)
