@@ -11,7 +11,7 @@ import java.io.File
 
 class GrpcClient {
 
-    private lateinit var channel: ManagedChannel
+    lateinit var channel: ManagedChannel
     lateinit var serviceAPI: ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub
     lateinit var tasksAPI: TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub
 

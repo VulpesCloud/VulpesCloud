@@ -38,5 +38,7 @@ java {
 
 dependencies {
     compileOnly(project(":api"))
+    compileOnly(project(":wrapper"))
+    compileOnly(libs.bundles.proto)
     compileOnly(rootProject.libs.annotations)
 }
