@@ -4,6 +4,8 @@ import build.buf.gen.vulpescloud.events.v1.EventServiceGrpcKt
 import build.buf.gen.vulpescloud.events.v1.PublishRequest
 import build.buf.gen.vulpescloud.events.v1.PublishResponse
 import build.buf.gen.vulpescloud.events.v1.SubscribeRequest
+import de.vulpescloud.api.events.Event
+import de.vulpescloud.api.events.EventSerializer
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import kotlinx.coroutines.channels.Channel

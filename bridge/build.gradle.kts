@@ -40,5 +40,7 @@ dependencies {
     compileOnly(project(":api"))
     compileOnly(project(":wrapper"))
     compileOnly(libs.bundles.proto)
+    compileOnly(libs.kotlinx.serialization)
     compileOnly(rootProject.libs.annotations)
+    compileOnly(libs.kotlin.stdlib)
 }

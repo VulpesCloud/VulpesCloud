@@ -1,4 +1,4 @@
-package de.vulpescloud.node.event
+package de.vulpescloud.api.events
 
 import java.util.UUID
 

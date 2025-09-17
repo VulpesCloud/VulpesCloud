@@ -1,4 +1,4 @@
-package de.vulpescloud.node.event
+package de.vulpescloud.api.events
 
 import build.buf.gen.vulpescloud.events.v1.Event
 import kotlinx.serialization.json.Json

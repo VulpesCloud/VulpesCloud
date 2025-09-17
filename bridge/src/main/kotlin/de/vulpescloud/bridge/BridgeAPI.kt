@@ -1,5 +1,6 @@
 package de.vulpescloud.bridge
 
+import de.vulpescloud.bridge.impl.event.EventAPI
 import de.vulpescloud.bridge.impl.service.ServiceCoroutineAPI
 import de.vulpescloud.bridge.impl.service.ServiceFutureAPI
 import de.vulpescloud.bridge.impl.tasks.TasksCoroutineAPI
@@ -11,20 +12,26 @@ interface BridgeAPI {
 
         private val tasksAPI = TasksCoroutineAPI()
         private val servicesAPI = ServiceCoroutineAPI()
+        private val eventAPI = EventAPI()
 
         fun getTasksAPI() = tasksAPI
 
         fun getServicesAPI() = servicesAPI
+
+        fun getEventAPI() = eventAPI
     }
 
     class BridgeFutureAPI {
 
         private val tasksAPI = TasksFutureAPI()
         private val servicesAPI = ServiceFutureAPI()
+        private val eventAPI = EventAPI()
 
         fun getTasksAPI() = tasksAPI
 
         fun getServicesAPI() = servicesAPI
+
+        fun getEventAPI() = eventAPI
     }
 
     companion object {
