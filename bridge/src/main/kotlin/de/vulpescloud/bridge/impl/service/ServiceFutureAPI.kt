@@ -1,7 +1,6 @@
 package de.vulpescloud.bridge.impl.service
 
 import build.buf.gen.vulpescloud.services.v1.*
-import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpc
 import build.buf.gen.vulpescloud.tasks.v1.taskOrNull
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.tasks.Task
@@ -13,9 +12,8 @@ import java.util.concurrent.CompletableFuture
 
 class ServiceFutureAPI : ServiceAPI.ServiceFutureAPI {
 
-    private val serviceStub =
-        ServiceAPIServiceGrpc.newFutureStub(Wrapper.instance.grpcClient.channel)
-    private val tasksStub = TasksAPIServiceGrpc.newFutureStub(Wrapper.instance.grpcClient.channel)
+    private val serviceStub = Wrapper.instance.grpcClient.futureServiceAPI
+    private val tasksStub = Wrapper.instance.grpcClient.futureTasksAPI
 
     override fun getAllServices(): CompletableFuture<List<Service>> {
         return serviceStub

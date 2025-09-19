@@ -9,7 +9,7 @@ import java.util.concurrent.CompletableFuture
 
 class TasksFutureAPI : TasksAPI.TasksFutureAPI {
 
-    private val tasksStub = TasksAPIServiceGrpc.newFutureStub(Wrapper.instance.grpcClient.channel)
+    private val tasksStub = Wrapper.instance.grpcClient.futureTasksAPI
 
     override fun getTaskByName(name: String): CompletableFuture<Task?> {
         return tasksStub

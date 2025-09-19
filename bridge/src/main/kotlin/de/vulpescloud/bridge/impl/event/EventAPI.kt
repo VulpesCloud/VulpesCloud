@@ -1,6 +1,5 @@
 package de.vulpescloud.bridge.impl.event
 
-import build.buf.gen.vulpescloud.events.v1.EventServiceGrpcKt
 import build.buf.gen.vulpescloud.events.v1.PublishRequest
 import build.buf.gen.vulpescloud.events.v1.SubscribeRequest
 import de.vulpescloud.api.events.Event
@@ -14,8 +13,7 @@ import build.buf.gen.vulpescloud.events.v1.Event as GrpcEvent
 
 class EventAPI {
 
-    val eventServiceStub =
-        EventServiceGrpcKt.EventServiceCoroutineStub(Wrapper.instance.grpcClient.channel)
+    val eventServiceStub = Wrapper.instance.grpcClient.eventsAPI
 
     @OptIn(DelicateCoroutinesApi::class)
     fun publish(event: GrpcEvent) {
