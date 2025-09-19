@@ -42,6 +42,8 @@ dependencies {
     compileOnly(libs.paper)
     compileOnly(libs.velocity)
     annotationProcessor(libs.velocity)
+
+    compileOnly(libs.bundles.proto)
 }
 
 java {
