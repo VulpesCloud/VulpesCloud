@@ -4,14 +4,19 @@ import de.vulpescloud.api.events.services.ServiceStateChangeEvent
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.bridge.BridgeAPI
 import de.vulpescloud.wrapper.Wrapper
-import java.util.concurrent.TimeUnit
+import org.bstats.bukkit.Metrics
 import org.bukkit.plugin.java.JavaPlugin
+import java.util.concurrent.TimeUnit
 
 class BukkitConnector : JavaPlugin() {
 
     private val bridgeAPI = BridgeAPI.getFutureAPI()
+    private val pluginID = 27324
+    private lateinit var metrics: Metrics
 
     override fun onEnable() {
+        metrics = Metrics(this, pluginID)
+
         logger.info("Publishing ServiceStateChangeEvent!")
 
         val localService =
@@ -41,5 +46,9 @@ class BukkitConnector : JavaPlugin() {
             .publish(
                 ServiceStateChangeEvent(localService, localService.state, ServiceStates.RUNNING)
             )
+    }
+
+    override fun onDisable() {
+        metrics.shutdown()
     }
 }
