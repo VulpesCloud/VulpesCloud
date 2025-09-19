@@ -121,4 +121,12 @@ class ServiceCoroutineAPI : ServiceAPI.ServiceCoroutineAPI {
         return false
         // TODO: update Protobuf to return boolean
     }
+
+    override suspend fun getLocalService(): Service? {
+        return Service.fromDefinition(
+            serviceStub
+                .getByUuid(getByUuidRequest { this.uuid = Wrapper.SERVICE_UUID.toString() })
+                .serviceOrNull ?: return null
+        )
+    }
 }

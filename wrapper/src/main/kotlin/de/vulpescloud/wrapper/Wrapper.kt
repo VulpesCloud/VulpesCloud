@@ -2,11 +2,11 @@ package de.vulpescloud.wrapper
 
 import de.vulpescloud.wrapper.Premain.preClassCall
 import de.vulpescloud.wrapper.grpc.GrpcClient
-import kotlinx.coroutines.DelicateCoroutinesApi
 import java.net.URLClassLoader
 import java.util.*
 import java.util.jar.JarFile
 import kotlin.io.path.Path
+import kotlinx.coroutines.DelicateCoroutinesApi
 
 @OptIn(DelicateCoroutinesApi::class)
 class Wrapper(args: Array<String>) {
@@ -19,6 +19,9 @@ class Wrapper(args: Array<String>) {
         }
 
         lateinit var instance: Wrapper
+        val SERVICE_NAME = System.getenv("serviceName") ?: ""
+        val SERVICE_UUID =
+            UUID.fromString(System.getenv("serviceUUID") ?: "00000000-0000-0000-0000-000000000000")
     }
 
     val grpcClient = GrpcClient()

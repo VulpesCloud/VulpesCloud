@@ -32,6 +32,8 @@ interface ServiceAPI {
         suspend fun restartService(service: Service): Service?
 
         suspend fun sendCommand(service: Service, command: String): Boolean
+
+        suspend fun getLocalService(): Service?
     }
 
     interface ServiceFutureAPI {
@@ -59,5 +61,7 @@ interface ServiceAPI {
         fun restartService(service: Service): CompletableFuture<Service?>
 
         fun sendCommand(service: Service, command: String): CompletableFuture<Boolean>
+
+        fun getLocalService(): CompletableFuture<Service?>
     }
 }

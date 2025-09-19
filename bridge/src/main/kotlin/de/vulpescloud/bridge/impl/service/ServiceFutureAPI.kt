@@ -112,4 +112,11 @@ class ServiceFutureAPI : ServiceAPI.ServiceFutureAPI {
         return CompletableFuture.completedFuture(false)
         // TODO: See Coroutine API
     }
+
+    override fun getLocalService(): CompletableFuture<Service?> {
+        return serviceStub
+            .getByUuid(getByUuidRequest { this.uuid = Wrapper.SERVICE_UUID.toString() })
+            .toCompletableFuture()
+            .thenApply { Service.fromDefinition(it.serviceOrNull ?: return@thenApply null) }
+    }
 }
