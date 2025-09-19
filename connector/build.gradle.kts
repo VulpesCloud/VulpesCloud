@@ -44,10 +44,14 @@ dependencies {
     annotationProcessor(libs.velocity)
 
     compileOnly(libs.bundles.proto)
-    compileOnly("org.bstats:bstats-bukkit:3.0.2")
-    compileOnly("org.bstats:bstats-velocity:3.0.2")
+    implementation("org.bstats:bstats-bukkit:3.0.2")
+    implementation("org.bstats:bstats-velocity:3.0.2")
 }
 
 java {
     withSourcesJar()
+}
+
+tasks.shadowJar {
+    relocate("org.bstats", "de.vulpescloud.connector.libs.bstats")
 }

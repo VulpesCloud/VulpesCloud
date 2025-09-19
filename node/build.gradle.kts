@@ -1,5 +1,4 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.gradle.kotlin.dsl.named
 
 /*
  * MIT License
@@ -28,7 +27,6 @@ import org.gradle.kotlin.dsl.named
 plugins {
     kotlin("jvm") version "2.2.10"
     alias(libs.plugins.shadow)
-    kotlin("plugin.serialization") version "2.2.10"
 }
 
 repositories {
@@ -61,6 +59,7 @@ dependencies {
     compileOnly(libs.nightConfig.json)
     compileOnly(libs.nightConfig.toml)
     compileOnly(libs.nightConfig.yaml)
+    compileOnly(libs.snakeyml)
     compileOnly(libs.caffeine)
     compileOnly(libs.adventure.text.serializer.ansi)
     compileOnly(libs.adventure.text.serializer.legacy)
@@ -84,24 +83,22 @@ java {
     withJavadocJar()
 }
 
-val generateDependenciesJson by tasks.registering {
-    val outFile = layout.buildDirectory.file("dependencies.json")
-    outputs.file(outFile)
-    doLast {
-        exportDependenciesJson("dependencies.json")
+val generateDependenciesJson by
+    tasks.registering {
+        val outFile = layout.buildDirectory.file("dependencies.json")
+        outputs.file(outFile)
+        doLast { exportDependenciesJson("dependencies.json") }
     }
-}
 
 tasks.named<ShadowJar>("shadowJar") {
     dependsOn(generateDependenciesJson)
-    from(layout.buildDirectory.file("dependencies.json")) {
-        rename { "dependencies.json" }
-    }
+    from(layout.buildDirectory.file("dependencies.json")) { rename { "dependencies.json" } }
 }
 
 tasks.shadowJar {
     val buildNumber = System.getenv("BUILD_NUMBER")
-        val versionString = if (buildNumber != null) {
+    val versionString =
+        if (buildNumber != null) {
             "${version}_${getGitBranch()}@${getGitCommit()}_$buildNumber"
         } else {
             "${version}_${getGitBranch()}@${getGitCommit()}"

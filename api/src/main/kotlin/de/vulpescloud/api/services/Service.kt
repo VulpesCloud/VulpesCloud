@@ -3,21 +3,25 @@ package de.vulpescloud.api.services
 import build.buf.gen.vulpescloud.services.v1.ServiceDefinition
 import build.buf.gen.vulpescloud.services.v1.ServiceState
 import com.google.protobuf.Timestamp
+import de.vulpescloud.api.serializer.TimestampSerializer
+import de.vulpescloud.api.serializer.UUIDSerializer
 import de.vulpescloud.api.tasks.Task
+import kotlinx.serialization.Serializable
 import org.bson.BsonDocument
 import org.bson.BsonInt32
 import org.bson.BsonInt64
 import org.bson.BsonString
 import java.util.*
 
+@Serializable
 data class Service(
     val task: Task,
-    val uuid: UUID,
+    @Serializable(UUIDSerializer::class) val uuid: UUID,
     val orderedId: Int,
     val port: Int,
     val node: String,
     val playerCount: Int,
-    val startTime: Timestamp,
+    @Serializable(TimestampSerializer::class) val startTime: Timestamp,
     val state: ServiceStates,
 ) {
     fun toDocument(): BsonDocument =

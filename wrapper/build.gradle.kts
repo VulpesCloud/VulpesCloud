@@ -16,6 +16,7 @@ dependencies {
     implementation(libs.nightConfig.json)
     implementation(libs.bundles.proto)
     implementation(libs.kotlinx.serialization)
+    implementation(libs.grpc.core)
 }
 
 java {

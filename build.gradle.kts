@@ -32,6 +32,7 @@ plugins {
     id("signing")
     id("maven-publish")
     alias(libs.plugins.shadow)
+    kotlin("plugin.serialization") version "2.2.10"
 }
 
 group = "de.vulpescloud"
@@ -50,6 +51,7 @@ allprojects {
     apply(plugin = "maven-publish")
     apply(plugin = "org.jetbrains.dokka")
     apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
     version = "3.0.0"
     group = "de.vulpescloud"

@@ -2,6 +2,7 @@ package de.vulpescloud.api.tasks
 
 import build.buf.gen.vulpescloud.tasks.v1.TaskDefinition
 import com.google.protobuf.Struct
+import de.vulpescloud.api.serializer.StructSerializer
 import de.vulpescloud.api.serversoftware.ServerSoftware
 import de.vulpescloud.api.templates.Template
 import kotlinx.serialization.Serializable
@@ -23,7 +24,7 @@ data class Task(
     val preferredNode: String,
     val maxPlayers: Int,
     val software: ServerSoftware,
-    val attributes: Struct? = null,
+    @Serializable(StructSerializer::class) val attributes: Struct? = null,
     val jvmArgs: List<String> = emptyList(),
     val envVars: List<String> = emptyList(),
 ) {
