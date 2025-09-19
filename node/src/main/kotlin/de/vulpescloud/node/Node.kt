@@ -186,6 +186,8 @@ class Node {
                     return@withContext
                 }
             }
+
+            // Runtime.getRuntime().addShutdownHook(Thread { NodeShutdown.shutdown() })
         }
 
     fun getVelocitySecret(): String {

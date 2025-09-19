@@ -2,11 +2,13 @@ package de.vulpescloud.wrapper
 
 import de.vulpescloud.wrapper.Premain.preClassCall
 import de.vulpescloud.wrapper.grpc.GrpcClient
+import io.grpc.LoadBalancerRegistry
+import io.grpc.internal.PickFirstLoadBalancerProvider
+import kotlinx.coroutines.DelicateCoroutinesApi
 import java.net.URLClassLoader
 import java.util.*
 import java.util.jar.JarFile
 import kotlin.io.path.Path
-import kotlinx.coroutines.DelicateCoroutinesApi
 
 @OptIn(DelicateCoroutinesApi::class)
 class Wrapper(args: Array<String>) {
@@ -29,6 +31,8 @@ class Wrapper(args: Array<String>) {
     init {
         instance = this
 
+        LoadBalancerRegistry.getDefaultRegistry().register(PickFirstLoadBalancerProvider())
+
         grpcClient.connect(
             System.getenv("grpc_hostname") ?: "127.0.0.1",
             (System.getenv("grpc_port") ?: "6565").toInt(),
@@ -45,7 +49,7 @@ class Wrapper(args: Array<String>) {
                 ClassLoader.getSystemClassLoader()
             }
 
-        // System.setProperty("fabric.systemLibraries", System.getProperty("java.class.path"))
+        System.setProperty("fabric.systemLibraries", System.getProperty("java.class.path"))
 
         val thread = Thread {
             val jar = JarFile(file)

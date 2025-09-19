@@ -39,57 +39,6 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 }
             }
 
-        when (service.task.software.name) {
-            "Canvas" -> {
-                CanvasDownloader.apply {
-                    downloadSoftware(service.task.software.version)
-                    getLatestVersionPath(service.task.software.version)
-                        .copyTo(localService.path().resolve("server.jar"), true)
-                }
-                acceptEULA(localService)
-                setServerProperties(localService)
-                updatePaperGlobalConfig(localService)
-            }
-            "Folia" -> {
-                FoliaDownloader.apply {
-                    downloadSoftware(service.task.software.version)
-                    getLatestVersionPath(service.task.software.version)
-                        .copyTo(localService.path().resolve("server.jar"), true)
-                }
-                acceptEULA(localService)
-                setServerProperties(localService)
-                updatePaperGlobalConfig(localService)
-            }
-            "Paper" -> {
-                PaperDownloader.apply {
-                    downloadSoftware(service.task.software.version)
-                    getLatestVersionPath(service.task.software.version)
-                        .copyTo(localService.path().resolve("server.jar"), true)
-                }
-                acceptEULA(localService)
-                setServerProperties(localService)
-                updatePaperGlobalConfig(localService)
-            }
-            "Purpur" -> {
-                PurpurDownloader.apply {
-                    downloadSoftware(service.task.software.version)
-                    getLatestVersionPath(service.task.software.version)
-                        .copyTo(localService.path().resolve("server.jar"), true)
-                }
-                acceptEULA(localService)
-                setServerProperties(localService)
-                updatePaperGlobalConfig(localService)
-            }
-            "Velocity" -> {
-                VelocityDownloader.apply {
-                    downloadSoftware(service.task.software.version)
-                    getLatestVersionPath(service.task.software.version)
-                        .copyTo(localService.path().resolve("server.jar"), true)
-                }
-                updateVelocityConfig(localService)
-            }
-        }
-
         val arguments = mutableListOf<String>()
         arguments.add("java")
         arguments.addAll(
@@ -105,9 +54,9 @@ class LocalServiceFactory : AbstractServiceFactory() {
 
         val path =
             if (service.task.staticServices) {
-                "../../../launcher/dependencies/vulpescloud"
+                "../../../launcher/dependencies/vulpescloud/"
             } else {
-                "../../../../launcher/dependencies/vulpescloud"
+                "../../../../launcher/dependencies/vulpescloud/"
             }
 
         val neededDependencies =
@@ -132,6 +81,63 @@ class LocalServiceFactory : AbstractServiceFactory() {
             )
         }
         arguments.add("de.vulpescloud.wrapper.Wrapper")
+
+        when (service.task.software.name) {
+            "Canvas" -> {
+                CanvasDownloader.apply {
+                    downloadSoftware(service.task.software.version)
+                    getLatestVersionPath(service.task.software.version)
+                        .copyTo(localService.path().resolve("server.jar"), true)
+                }
+                acceptEULA(localService)
+                setServerProperties(localService)
+                updatePaperGlobalConfig(localService)
+            }
+            "Folia" -> {
+                FoliaDownloader.apply {
+                    downloadSoftware(service.task.software.version)
+                    getLatestVersionPath(service.task.software.version)
+                        .copyTo(localService.path().resolve("server.jar"), true)
+                }
+                acceptEULA(localService)
+                setServerProperties(localService)
+                updatePaperGlobalConfig(localService)
+
+                arguments.add("--separateClassLoader")
+            }
+            "Paper" -> {
+                PaperDownloader.apply {
+                    downloadSoftware(service.task.software.version)
+                    getLatestVersionPath(service.task.software.version)
+                        .copyTo(localService.path().resolve("server.jar"), true)
+                }
+                acceptEULA(localService)
+                setServerProperties(localService)
+                updatePaperGlobalConfig(localService)
+
+                arguments.add("--separateClassLoader")
+            }
+            "Purpur" -> {
+                PurpurDownloader.apply {
+                    downloadSoftware(service.task.software.version)
+                    getLatestVersionPath(service.task.software.version)
+                        .copyTo(localService.path().resolve("server.jar"), true)
+                }
+                acceptEULA(localService)
+                setServerProperties(localService)
+                updatePaperGlobalConfig(localService)
+
+                arguments.add("--separateClassLoader")
+            }
+            "Velocity" -> {
+                VelocityDownloader.apply {
+                    downloadSoftware(service.task.software.version)
+                    getLatestVersionPath(service.task.software.version)
+                        .copyTo(localService.path().resolve("server.jar"), true)
+                }
+                updateVelocityConfig(localService)
+            }
+        }
 
         val processBuilder =
             ProcessBuilder(*arguments.toTypedArray())

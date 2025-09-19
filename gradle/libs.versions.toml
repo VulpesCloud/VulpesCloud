@@ -48,6 +48,7 @@ velocity = "3.4.0-SNAPSHOT"
 
 # config
 night-config = "3.8.3"
+snakeyml = "2.4"
 
 # command api
 commandapi-velocity-shade = "10.1.2"
@@ -89,6 +90,7 @@ grpc-kotlin-stub = { module = "io.grpc:grpc-kotlin-stub", version.ref = "grpc-ko
 grpc-protobuf = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
 grpc-protobuf-lite = { module = "io.grpc:grpc-protobuf-lite", version.ref = "grpc" }
 grpc-netty = { module = "io.grpc:grpc-netty", version.ref = "grpc" }
+grpc-core = { module = "io.grpc:grpc-core", version.ref = "grpc" }
 protospecs-grpc = { group = "build.buf.gen", name = "vulpescloud_protospecs_grpc_kotlin", version.ref = "protospecs-grpc" }
 perfmark = { group = "io.perfmark", name = "perfmark-api", version.ref = "perfmark" }
 
@@ -137,6 +139,7 @@ velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref =
 nightConfig-toml = { group = "com.electronwill.night-config", name = "toml", version.ref = "night-config" }
 nightConfig-json = { group = "com.electronwill.night-config", name = "json", version.ref = "night-config" }
 nightConfig-yaml = { group = "com.electronwill.night-config", name = "yaml", version.ref = "night-config" }
+snakeyml = { group = "org.yaml", name = "snakeyaml", version.ref = "snakeyml" }
 
 # caffeine
 caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }

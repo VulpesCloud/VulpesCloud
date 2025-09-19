@@ -22,7 +22,6 @@ class GrpcClient {
 
     fun connect(host: String = "127.0.0.1", port: Int = 6565, secret: String) {
         println("Connecting to $host:$port")
-        println("Using secret: $secret")
 
         //        val serverCertFile = File("vulpescloud/certs/server.crt")
         //

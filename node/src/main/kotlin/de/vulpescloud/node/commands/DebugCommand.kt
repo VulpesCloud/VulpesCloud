@@ -154,7 +154,7 @@ class DebugCommand {
                                 1,
                                 false,
                                 false,
-                                "docker",
+                                "local",
                                 "",
                                 1,
                                 ServerSoftware(

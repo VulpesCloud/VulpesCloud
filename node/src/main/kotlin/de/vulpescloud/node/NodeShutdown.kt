@@ -10,7 +10,10 @@ object NodeShutdown {
     fun shutdown() {
         logger.info("Shutting down the Node...")
 
-        Node.instance.nodeServices.forEach { it.stop() }
+        Node.instance.nodeServices.forEach {
+            logger.info("Stopping ${it.service.task.name}-${it.service.orderedId}")
+            it.stop()
+        }
 
         Node.instance.terminal.close()
 
