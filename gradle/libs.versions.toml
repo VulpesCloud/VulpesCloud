@@ -1,6 +1,6 @@
 [versions]
 # kotlin
-stdlib = "2.2.10"
+stdlib = "2.2.20"
 kotlinx-serialization = "1.9.0"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-coroutines = "1.10.2"
@@ -12,7 +12,7 @@ guava = "33.5.0-jre"
 annotations = "26.0.2-1"
 
 # network
-protobuf = "4.32.0"
+protobuf = "4.32.1"
 grpc = "1.75.0"
 grpc-kotlin = "1.4.3"
 protospecs-grpc = "1.4.3.1.20250914124946.a6c30258a37a"
@@ -27,7 +27,7 @@ docker-java = "3.6.0"
 
 # mongo
 mongodb = "5.6.0"
-reactor = "3.8.0-M6"
+reactor = "3.8.0-M7"
 
 # logging
 slf4j = "2.1.0-alpha1"
@@ -35,11 +35,11 @@ logback = "1.5.18"
 adventure = "4.24.0"
 
 # configuration
-gson = "2.13.1"
+gson = "2.13.2"
 json = "20250517"
 
 # console
-jline = "3.30.5"
+jline = "3.30.6"
 cloud = "2.0.0"
 
 # platforms
