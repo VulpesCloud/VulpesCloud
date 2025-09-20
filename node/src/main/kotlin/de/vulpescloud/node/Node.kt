@@ -113,6 +113,7 @@ class Node {
                     register(InfoCommand())
                     register(ServiceCommand())
                     register(DebugCommand())
+                    register(TaskCommand())
                 }
             } catch (e: Exception) {
                 logger.error("Failed to initialize commands: ${e.stackTraceToString()}")
