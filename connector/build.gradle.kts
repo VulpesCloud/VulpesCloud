@@ -45,7 +45,7 @@ dependencies {
 
     compileOnly(libs.bundles.proto)
     implementation("org.bstats:bstats-bukkit:3.1.0")
-    implementation("org.bstats:bstats-velocity:3.0.2")
+    implementation("org.bstats:bstats-velocity:3.1.0")
 }
 
 java {
