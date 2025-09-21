@@ -5,15 +5,14 @@ import build.buf.gen.vulpescloud.events.v1.SubscribeRequest
 import de.vulpescloud.api.events.Event
 import de.vulpescloud.api.events.EventSerializer
 import de.vulpescloud.wrapper.Wrapper
-import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import java.util.*
 import build.buf.gen.vulpescloud.events.v1.Event as GrpcEvent
 
 class EventAPI {
 
     val eventServiceStub = Wrapper.instance.grpcClient.eventsAPI
+    val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     @OptIn(DelicateCoroutinesApi::class)
     fun publish(event: GrpcEvent) {
@@ -50,8 +49,8 @@ class EventAPI {
     }
 
     @OptIn(DelicateCoroutinesApi::class)
-    inline fun <reified T> subscribe(noinline handler: suspend (Event<T>) -> Unit) {
-        GlobalScope.launch {
+    inline fun <reified T> subscribe(noinline handler: suspend (Event<T>) -> Unit): Job {
+        return scope.launch {
             eventServiceStub.subscribe(SubscribeRequest.newBuilder().build()).collect { grpcEvent ->
                 if (grpcEvent.type == T::class.qualifiedName) {
                     val decoded = EventSerializer.decode<T>(grpcEvent)

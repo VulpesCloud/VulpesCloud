@@ -25,6 +25,7 @@ abstract class AbstractServiceFactory {
                 0,
                 Timestamp.newBuilder().build(),
                 ServiceStates.UNKNOWN,
+                Node.instance.configProvider.config.serviceBindAdress
             )
         )
     }

@@ -23,6 +23,7 @@ data class Service(
     val playerCount: Int,
     @Serializable(TimestampSerializer::class) val startTime: Timestamp,
     val state: ServiceStates,
+    val hostname: String,
 ) {
     fun toDocument(): BsonDocument =
         BsonDocument().apply {
@@ -34,6 +35,7 @@ data class Service(
             append("playerCount", BsonInt32(playerCount))
             append("startTime", BsonInt64(startTime.seconds))
             append("state", BsonInt32(state.ordinal))
+            append("hostname", BsonString(hostname))
         }
 
     fun toDefinition(): ServiceDefinition =
@@ -54,6 +56,7 @@ data class Service(
                     ServiceStates.STOPPED -> ServiceState.SERVICE_STATE_STOPPED
                 }
             )
+            .setHostname(hostname)
             .build()
 
     companion object {
@@ -74,6 +77,7 @@ data class Service(
                     ServiceState.SERVICE_STATE_STOPPED -> ServiceStates.STOPPED
                     ServiceState.UNRECOGNIZED -> ServiceStates.UNKNOWN
                 },
+                definition.hostname,
             )
         }
 
@@ -89,6 +93,7 @@ data class Service(
                     Timestamp.newBuilder().setSeconds(it).build()
                 },
                 ServiceStates.entries[document.getInt32("state").value],
+                document.getString("hostname").value,
             )
         }
     }

@@ -43,26 +43,14 @@ class ServiceCoroutineAPI : ServiceAPI.ServiceCoroutineAPI {
         }
 
         val serviceDefinition =
-            serviceStub
-                .getByTask(
-                    build.buf.gen.vulpescloud.services.v1.getByTaskRequest {
-                        this.task = taskDefinition
-                    }
-                )
-                .servicesList
+            serviceStub.getByTask(getByTaskRequest { this.task = taskDefinition }).servicesList
 
         return serviceDefinition.map { Service.fromDefinition(it) }
     }
 
     override suspend fun getServicesByTask(task: Task): List<Service> {
         val serviceDefinition =
-            serviceStub
-                .getByTask(
-                    build.buf.gen.vulpescloud.services.v1.getByTaskRequest {
-                        this.task = task.toDefinition()
-                    }
-                )
-                .servicesList
+            serviceStub.getByTask(getByTaskRequest { this.task = task.toDefinition() }).servicesList
 
         return serviceDefinition.map { Service.fromDefinition(it) }
     }
@@ -70,17 +58,19 @@ class ServiceCoroutineAPI : ServiceAPI.ServiceCoroutineAPI {
     override suspend fun prepareService(service: Service): Service? {
         return Service.fromDefinition(
             serviceStub
-                .createService(createServiceRequest { this.task = service.task.toDefinition() })
+                .prepareServiceByService(
+                    prepareServiceByServiceRequest { this.service = service.toDefinition() }
+                )
                 .serviceOrNull ?: return null
         )
-
-        // TODO: Add Protobuf to prepare service from service definition
     }
 
     override suspend fun prepareService(task: Task): Service? {
         return Service.fromDefinition(
             serviceStub
-                .createService(createServiceRequest { this.task = task.toDefinition() })
+                .prepareServiceByTask(
+                    prepareServiceByTaskRequest { this.task = task.toDefinition() }
+                )
                 .serviceOrNull ?: return null
         )
     }
@@ -118,8 +108,14 @@ class ServiceCoroutineAPI : ServiceAPI.ServiceCoroutineAPI {
     }
 
     override suspend fun sendCommand(service: Service, command: String): Boolean {
-        return false
-        // TODO: update Protobuf to return boolean
+        return serviceStub
+            .sendCommand(
+                sendCommandRequest {
+                    this.service = service.toDefinition()
+                    this.command = command
+                }
+            )
+            .success
     }
 
     override suspend fun getLocalService(): Service? {

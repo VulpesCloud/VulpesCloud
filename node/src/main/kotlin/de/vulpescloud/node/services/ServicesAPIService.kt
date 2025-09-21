@@ -62,7 +62,9 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         return GetByUuidResponse.newBuilder().setService(service.toDefinition()).build()
     }
 
-    override suspend fun createService(request: CreateServiceRequest): CreateServiceResponse {
+    override suspend fun prepareServiceByTask(
+        request: PrepareServiceByTaskRequest
+    ): PrepareServiceByTaskResponse {
         val task = Task.fromDefinition(request.task)
 
         val serviceFactory =
@@ -74,7 +76,28 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         }
         val service = serviceFactory.prepareService(task)
 
-        return CreateServiceResponse.newBuilder().setService(service.service.toDefinition()).build()
+        return PrepareServiceByTaskResponse.newBuilder()
+            .setService(service.service.toDefinition())
+            .build()
+    }
+
+    override suspend fun prepareServiceByService(
+        request: PrepareServiceByServiceRequest
+    ): PrepareServiceByServiceResponse {
+        val service = Service.fromDefinition(request.service)
+
+        val serviceFactory =
+            Node.instance.serviceFactoryProvider.findServiceFactory(service.task.serviceFactoryName)
+        if (serviceFactory == null) {
+            throw IllegalArgumentException(
+                "Unable to find ServiceFactory ${service.task.serviceFactoryName}"
+            )
+        }
+        val abstractService = serviceFactory.prepareService(service)
+
+        return PrepareServiceByServiceResponse.newBuilder()
+            .setService(abstractService.service.toDefinition())
+            .build()
     }
 
     override suspend fun startService(request: StartServiceRequest): StartServiceResponse {

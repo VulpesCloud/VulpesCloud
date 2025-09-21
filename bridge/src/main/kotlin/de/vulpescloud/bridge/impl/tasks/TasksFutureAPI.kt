@@ -60,7 +60,9 @@ class TasksFutureAPI : TasksAPI.TasksFutureAPI {
     }
 
     override fun updateTask(task: Task): CompletableFuture<Void> {
-        // TODO: See Coroutine API
-        return CompletableFuture.completedFuture(null)
+        return tasksStub
+            .updateTask(updateTaskRequest { this.task = task.toDefinition() })
+            .toCompletableFuture()
+            .thenApply { null }
     }
 }

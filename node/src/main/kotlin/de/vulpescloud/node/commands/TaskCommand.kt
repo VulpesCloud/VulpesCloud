@@ -1,6 +1,6 @@
 package de.vulpescloud.node.commands
 
-import build.buf.gen.vulpescloud.services.v1.createServiceRequest
+import build.buf.gen.vulpescloud.services.v1.prepareServiceByTaskRequest
 import build.buf.gen.vulpescloud.services.v1.startServiceRequest
 import build.buf.gen.vulpescloud.tasks.v1.deleteTaskRequest
 import build.buf.gen.vulpescloud.tasks.v1.getAllTasksRequest
@@ -91,8 +91,8 @@ class TaskCommand {
         NodeCoroutineScope.launch {
             tasks.forEach { task ->
                 val resp =
-                    Node.instance.localGrpcClient.serviceAPI.createService(
-                        createServiceRequest { this.task = task.toDefinition() }
+                    Node.instance.localGrpcClient.serviceAPI.prepareServiceByTask(
+                        prepareServiceByTaskRequest { this.task = task.toDefinition() }
                     )
                 source.sendMessage("Prepared service for task &m${task.name}&8.")
                 if (startService) {
@@ -134,7 +134,7 @@ class TaskCommand {
                 val newTask = task.copy(maxMemory = memory.toLong())
                 Node.instance.localGrpcClient.tasksAPI
                 source.sendMessage("ERR: Not yet implemented")
-                // TODO: Implement Task update protobuf
+                // TODO: Complete the commands
             }
         }
     }

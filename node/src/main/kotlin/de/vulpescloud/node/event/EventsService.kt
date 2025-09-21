@@ -11,6 +11,7 @@ import de.vulpescloud.node.NodeCoroutineScope
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.consumeAsFlow
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
@@ -24,7 +25,10 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
         val channel = Channel<GrpcEvent>(capacity = Channel.UNLIMITED)
         subscribers.add(channel)
 
-        return channel.consumeAsFlow()
+        return channel.consumeAsFlow().onCompletion {
+            subscribers.remove(channel)
+            channel.close()
+        }
     }
 
     override suspend fun publish(request: PublishRequest): PublishResponse {

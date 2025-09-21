@@ -66,14 +66,16 @@ class ServiceFutureAPI : ServiceAPI.ServiceFutureAPI {
 
     override fun prepareService(service: Service): CompletableFuture<Service?> {
         return serviceStub
-            .createService(createServiceRequest { this.task = service.task.toDefinition() })
+            .prepareServiceByService(
+                prepareServiceByServiceRequest { this.service = service.toDefinition() }
+            )
             .toCompletableFuture()
             .thenApply { Service.fromDefinition(it.serviceOrNull ?: return@thenApply null) }
     }
 
     override fun prepareService(task: Task): CompletableFuture<Service?> {
         return serviceStub
-            .createService(createServiceRequest { this.task = task.toDefinition() })
+            .prepareServiceByTask(prepareServiceByTaskRequest { this.task = task.toDefinition() })
             .toCompletableFuture()
             .thenApply { Service.fromDefinition(it.serviceOrNull ?: return@thenApply null) }
     }
@@ -107,8 +109,15 @@ class ServiceFutureAPI : ServiceAPI.ServiceFutureAPI {
     }
 
     override fun sendCommand(service: Service, command: String): CompletableFuture<Boolean> {
-        return CompletableFuture.completedFuture(false)
-        // TODO: See Coroutine API
+        return serviceStub
+            .sendCommand(
+                sendCommandRequest {
+                    this.service = service.toDefinition()
+                    this.command = command
+                }
+            )
+            .toCompletableFuture()
+            .thenApply { it.success }
     }
 
     override fun getLocalService(): CompletableFuture<Service?> {

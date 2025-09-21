@@ -22,7 +22,6 @@ object MongoUtils {
         val existingTask = existingTaskDoc?.let { Task.fromDocument(it) }
 
         if (existingTask != null) {
-            // Verwende $set Operator für Updates
             val updateDoc = BsonDocument($$"$set", task.toDocument())
             collection.updateOne(filter, updateDoc)
         } else {

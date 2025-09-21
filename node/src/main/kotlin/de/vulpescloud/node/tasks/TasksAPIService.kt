@@ -3,6 +3,7 @@ package de.vulpescloud.node.tasks
 import build.buf.gen.vulpescloud.tasks.v1.*
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.utils.MongoUtils
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.BsonDocument
 import org.bson.BsonString
@@ -89,5 +90,10 @@ class TasksAPIService : TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineImplBase()
             return GetByNameResponse.newBuilder().build()
         }
         return GetByNameResponse.newBuilder().setTask(task.toDefinition()).build()
+    }
+
+    override suspend fun updateTask(request: UpdateTaskRequest): UpdateTaskResponse {
+        MongoUtils.updateTask(Task.fromDefinition(request.task))
+        return UpdateTaskResponse.newBuilder().setTask(request.task).build()
     }
 }

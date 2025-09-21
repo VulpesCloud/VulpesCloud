@@ -35,6 +35,6 @@ class TasksCoroutineAPI : TasksAPI.TasksCoroutineAPI {
     }
 
     override suspend fun updateTask(task: Task) {
-        // TODO: Add update Task to protobuf
+        tasksStub.updateTask(updateTaskRequest { this.task = task.toDefinition() })
     }
 }

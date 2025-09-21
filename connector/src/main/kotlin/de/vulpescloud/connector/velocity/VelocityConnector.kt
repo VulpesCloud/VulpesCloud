@@ -9,6 +9,7 @@ import com.velocitypowered.api.proxy.ProxyServer
 import de.vulpescloud.api.events.services.ServiceStateChangeEvent
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.bridge.BridgeAPI
+import de.vulpescloud.connector.velocity.events.PlayerChooseInitialServerEventListener
 import de.vulpescloud.wrapper.Wrapper
 import jakarta.inject.Inject
 import org.bstats.velocity.Metrics
@@ -28,12 +29,16 @@ constructor(
     private lateinit var metrics: Metrics
     private val pluginID = 27325
     private val bridgeAPI = BridgeAPI.getFutureAPI()
+    private lateinit var velocityServerRegistrationHandler: VelocityServerRegistrationHandler
 
     @Subscribe
     fun onProxyInitializeEvent(event: ProxyInitializeEvent) {
         metrics = metricsFactory.make(this, pluginID)
 
-        VelocityServerRegistrationHandler(proxyServer, bridgeAPI)
+        velocityServerRegistrationHandler =
+            VelocityServerRegistrationHandler(proxyServer, bridgeAPI)
+
+        eventManager.register(this, PlayerChooseInitialServerEventListener(bridgeAPI, proxyServer))
 
         val localService =
             try {
@@ -65,5 +70,6 @@ constructor(
     @Subscribe
     fun onProxyShutdownEvent(event: ProxyShutdownEvent) {
         metrics.shutdown()
+        velocityServerRegistrationHandler.shutdown()
     }
 }

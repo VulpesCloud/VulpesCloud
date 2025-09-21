@@ -1,6 +1,6 @@
 package de.vulpescloud.node.commands
 
-import build.buf.gen.vulpescloud.services.v1.CreateServiceRequest
+import build.buf.gen.vulpescloud.services.v1.PrepareServiceByTaskRequest
 import build.buf.gen.vulpescloud.services.v1.StartServiceRequest
 import build.buf.gen.vulpescloud.tasks.v1.CreateTaskRequest
 import de.vulpescloud.api.serversoftware.ServerSoftware
@@ -61,28 +61,28 @@ class DebugCommand {
                 CreateTaskRequest.newBuilder()
                     .setTask(
                         Task(
-                            "Proxy",
-                            512,
-                            512,
-                            28879,
-                            listOf(),
-                            true,
-                            1,
-                            1,
-                            false,
-                            false,
-                            "docker",
-                            "",
-                            1,
-                            ServerSoftware(
-                                "Velocity",
-                                "3.4.0-SNAPSHOT",
-                                533,
-                                "https://fill-data.papermc.io/v1/objects/cb33a12f4b6057fe2f862212ab4c033202b86172527168a41e30a30c1d05d27e/velocity-3.4.0-SNAPSHOT-533.jar",
-                                "plugins",
-                                SoftwareType.PROXY,
-                            ),
-                        )
+                                "Proxy",
+                                512,
+                                512,
+                                28879,
+                                listOf(),
+                                true,
+                                1,
+                                1,
+                                false,
+                                false,
+                                "docker",
+                                "",
+                                1,
+                                ServerSoftware(
+                                    "Velocity",
+                                    "3.4.0-SNAPSHOT",
+                                    533,
+                                    "https://fill-data.papermc.io/v1/objects/cb33a12f4b6057fe2f862212ab4c033202b86172527168a41e30a30c1d05d27e/velocity-3.4.0-SNAPSHOT-533.jar",
+                                    "plugins",
+                                    SoftwareType.PROXY,
+                                ),
+                            )
                             .toDefinition()
                     )
                     .build()
@@ -96,8 +96,8 @@ class DebugCommand {
         NodeCoroutineScope.launch {
             source.sendMessage("Starting service on default task")
             Node.instance.localGrpcClient.serviceAPI
-                .createService(
-                    CreateServiceRequest.newBuilder()
+                .prepareServiceByTask(
+                    PrepareServiceByTaskRequest.newBuilder()
                         .setTask(
                             Task(
                                     "Lobby",
@@ -140,32 +140,32 @@ class DebugCommand {
         NodeCoroutineScope.launch {
             source.sendMessage("Starting service on default proxy task")
             Node.instance.localGrpcClient.serviceAPI
-                .createService(
-                    CreateServiceRequest.newBuilder()
+                .prepareServiceByTask(
+                    PrepareServiceByTaskRequest.newBuilder()
                         .setTask(
                             Task(
-                                "Proxy",
-                                512,
-                                512,
-                                28879,
-                                listOf(),
-                                true,
-                                1,
-                                1,
-                                false,
-                                false,
-                                "local",
-                                "",
-                                1,
-                                ServerSoftware(
-                                    "Velocity",
-                                    "3.4.0-SNAPSHOT",
-                                    533,
-                                    "https://fill-data.papermc.io/v1/objects/cb33a12f4b6057fe2f862212ab4c033202b86172527168a41e30a30c1d05d27e/velocity-3.4.0-SNAPSHOT-533.jar",
-                                    "plugins",
-                                    SoftwareType.PROXY,
-                                ),
-                            )
+                                    "Proxy",
+                                    512,
+                                    512,
+                                    28879,
+                                    listOf(),
+                                    true,
+                                    1,
+                                    1,
+                                    false,
+                                    false,
+                                    "local",
+                                    "",
+                                    1,
+                                    ServerSoftware(
+                                        "Velocity",
+                                        "3.4.0-SNAPSHOT",
+                                        533,
+                                        "https://fill-data.papermc.io/v1/objects/cb33a12f4b6057fe2f862212ab4c033202b86172527168a41e30a30c1d05d27e/velocity-3.4.0-SNAPSHOT-533.jar",
+                                        "plugins",
+                                        SoftwareType.PROXY,
+                                    ),
+                                )
                                 .toDefinition()
                         )
                         .build()
@@ -184,10 +184,12 @@ class DebugCommand {
         NodeCoroutineScope.launch {
             source.sendMessage("making command exec on proxy 1")
             DockerService(
-                Node.instance.nodeServices.filterIsInstance<DockerService>().first {
-                    it.service.task.software.type == SoftwareType.PROXY
-                }.service
-            ).command("velocity plugins")
+                    Node.instance.nodeServices
+                        .filterIsInstance<DockerService>()
+                        .first { it.service.task.software.type == SoftwareType.PROXY }
+                        .service
+                )
+                .command("velocity plugins")
         }
     }
 }
