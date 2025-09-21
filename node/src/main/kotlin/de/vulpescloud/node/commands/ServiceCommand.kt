@@ -12,6 +12,7 @@ import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.annotation.Alias
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
+import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.parser.Parser
@@ -152,6 +153,34 @@ class ServiceCommand {
                         DeleteServiceRequest.newBuilder().setService(it).build()
                     )
                 }
+        }
+    }
+
+    @Command("services|ser <service> command <command>")
+    fun sendCommand(
+        source: CommandSource,
+        @Argument("service") service: List<Service>,
+        @Greedy @Argument("command") command: String,
+    ) {
+        NodeCoroutineScope.launch {
+            service.forEach {
+                val resp =
+                    Node.instance.localGrpcClient.serviceAPI.sendCommand(
+                        build.buf.gen.vulpescloud.services.v1.sendCommandRequest {
+                            this.service = it.toDefinition()
+                            this.command = command
+                        }
+                    )
+                if (resp.success) {
+                    source.sendMessage(
+                        "Sent command to service &f${it.task.name}-${it.orderedId}&8."
+                    )
+                } else {
+                    source.sendMessage(
+                        "Failed to send command to service &f${it.task.name}-${it.orderedId}&8."
+                    )
+                }
+            }
         }
     }
 }

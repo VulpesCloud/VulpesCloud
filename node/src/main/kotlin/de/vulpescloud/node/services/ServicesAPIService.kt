@@ -167,4 +167,19 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             .setService(abstractService.service.toDefinition())
             .build()
     }
+
+    override suspend fun sendCommand(request: SendCommandRequest): SendCommandResponse {
+        val service = Service.fromDefinition(request.service)
+
+        val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
+        if (abstractService == null) {
+            logger.error(
+                "Unable to send command to Service ${service.task.name}-${service.orderedId} as it is not registered!"
+            )
+            return SendCommandResponse.newBuilder().build()
+        }
+        abstractService.command(request.command)
+
+        return SendCommandResponse.newBuilder().setSuccess(true).build()
+    }
 }

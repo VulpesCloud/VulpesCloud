@@ -10,7 +10,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import java.io.BufferedWriter
-import java.io.IOException
 import java.io.OutputStreamWriter
 import java.nio.file.Path
 import kotlin.io.path.exists
@@ -136,7 +135,13 @@ class LocalService(override val service: Service) : AbstractService {
             writer.write(command)
             writer.newLine()
             writer.flush()
-        } catch (_: IOException) {}
+        } catch (_: Exception) {
+            logger.error(
+                "Failed to send command to service ${service.task.name}-${service.orderedId}!"
+            )
+            // TODO/NOTE: For some stupid reason this doesn't seem to work with Purpur servers, i
+            // don't know if its just a Purpur server not working or all Bukkit Servers
+        }
     }
 
     override fun restart() {
