@@ -19,6 +19,7 @@ import de.vulpescloud.node.grpc.security.AuthInterceptor
 import de.vulpescloud.node.secret.SecretFactory
 import de.vulpescloud.node.services.AbstractService
 import de.vulpescloud.node.services.ServiceFactoryProvider
+import de.vulpescloud.node.services.ServiceLogHandler
 import de.vulpescloud.node.services.ServicesAPIService
 import de.vulpescloud.node.services.impl.docker.DockerServiceFactory
 import de.vulpescloud.node.services.impl.local.LocalServiceFactory
@@ -41,6 +42,7 @@ class Node {
     val commandProvider = CommandProvider()
     val configProvider = ConfigProvider()
     lateinit var mongoClient: MongoClient
+    lateinit var grpcServer: GrpcServer
     lateinit var secret: String
     lateinit var setupProvider: SetupProvider
     lateinit var creds: ChannelCredentials
@@ -88,7 +90,7 @@ class Node {
 
             terminal.changePrompt("")
 
-            val grpcServer =
+            grpcServer =
                 GrpcServer(
                     host = configProvider.config.grpcHost,
                     port = configProvider.config.grpcPort,
@@ -187,6 +189,8 @@ class Node {
                     return@withContext
                 }
             }
+
+            ServiceLogHandler.subscribe()
 
             // Runtime.getRuntime().addShutdownHook(Thread { NodeShutdown.shutdown() })
         }

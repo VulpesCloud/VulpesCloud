@@ -1,5 +1,7 @@
 package de.vulpescloud.node
 
+import de.vulpescloud.node.services.ServiceLogHandler
+import kotlinx.coroutines.cancel
 import org.slf4j.LoggerFactory
 import kotlin.system.exitProcess
 
@@ -7,7 +9,7 @@ object NodeShutdown {
 
     private val logger = LoggerFactory.getLogger("NodeShutdown")
 
-    fun shutdown() {
+    suspend fun shutdown() {
         logger.info("Shutting down the Node...")
 
         Node.instance.nodeServices.forEach {
@@ -15,7 +17,13 @@ object NodeShutdown {
             it.stop()
         }
 
+        ServiceLogHandler.subscribe()
+
+        Node.instance.grpcServer.stop()
+
         Node.instance.terminal.close()
+
+        NodeCoroutineScope.cancel()
 
         exitProcess(0)
     }

@@ -8,6 +8,7 @@ import de.vulpescloud.api.events.Event
 import de.vulpescloud.api.events.EventSerializer
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.consumeAsFlow
@@ -48,8 +49,8 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
             }
         }
 
-        inline fun <reified T> subscribe(noinline handler: suspend (Event<T>) -> Unit) {
-            NodeCoroutineScope.launch {
+        inline fun <reified T> subscribe(noinline handler: suspend (Event<T>) -> Unit): Job {
+            return NodeCoroutineScope.launch {
                 val request = SubscribeRequest.newBuilder().build()
 
                 Node.instance.localGrpcClient.eventsAPI.subscribe(request).collect { grpcEvent ->

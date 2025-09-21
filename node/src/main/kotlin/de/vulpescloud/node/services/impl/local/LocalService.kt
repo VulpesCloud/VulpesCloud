@@ -1,13 +1,17 @@
 package de.vulpescloud.node.services.impl.local
 
+import de.vulpescloud.api.events.EventSerializer
+import de.vulpescloud.api.events.services.ServiceLogEvent
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
+import de.vulpescloud.node.event.EventsService
 import de.vulpescloud.node.services.AbstractService
 import de.vulpescloud.node.utils.MongoUtils
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
@@ -44,15 +48,11 @@ class LocalService(override val service: Service) : AbstractService {
         Thread {
                 process?.inputStream?.bufferedReader()?.use { reader ->
                     reader.forEachLine { line ->
-                        println("${service.task.name}-${service.orderedId} >" + line)
-                        //                    eventManagerImpl.callGlobal(
-                        //                        ServiceLogEvent(
-                        //                            getServiceInfo(),
-                        //                            line.trim(),
-                        //                        ),
-                        //
-                        // RedisChannels.VULPESCLOUD_EVENT_SERVICE_ServiceLogEvent,
-                        //                    )
+                        runBlocking {
+                            EventsService.publish(
+                                EventSerializer.encode(ServiceLogEvent(service, line.trim()))
+                            )
+                        }
                     }
                 }
             }

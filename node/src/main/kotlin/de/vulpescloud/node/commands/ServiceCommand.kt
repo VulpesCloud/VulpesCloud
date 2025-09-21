@@ -10,6 +10,10 @@ import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.annotation.Alias
+import de.vulpescloud.node.services.ServiceLogHandler
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
+import java.util.stream.Stream
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotation.specifier.Greedy
@@ -19,9 +23,6 @@ import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
 import org.incendo.cloud.processors.confirmation.annotation.Confirmation
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.TimeUnit
-import java.util.stream.Stream
 
 @Alias(["ser"])
 class ServiceCommand {
@@ -181,6 +182,13 @@ class ServiceCommand {
                     )
                 }
             }
+        }
+    }
+
+    @Command("services|ser <service> screen")
+    fun toggleScreen(@Argument("service") service: List<Service>) {
+        service.forEach {
+            ServiceLogHandler.toggleServiceLogging("${it.task.name}-${it.orderedId}")
         }
     }
 }
