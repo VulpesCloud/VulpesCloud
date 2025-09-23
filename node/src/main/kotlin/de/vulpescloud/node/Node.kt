@@ -28,6 +28,8 @@ import de.vulpescloud.node.setup.setups.FirstSetup
 import de.vulpescloud.node.tasks.TasksAPIService
 import de.vulpescloud.node.templates.TemplateStorageProvider
 import de.vulpescloud.node.terminal.Terminal
+import de.vulpescloud.node.virtualconfig.VirtualConfigProvider
+import de.vulpescloud.node.virtualconfig.VirtualConfigServiceImpl
 import io.grpc.ChannelCredentials
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
@@ -57,9 +59,13 @@ class Node {
 
     val nodeServices = mutableListOf<AbstractService>()
 
+    val virtualConfigProvider = VirtualConfigProvider()
+
     suspend fun init(scope: CoroutineScope) =
         withContext(Dispatchers.IO) {
             instance = this@Node
+
+            virtualConfigProvider.tempConfigsPath.toFile().mkdirs()
 
             val configExists = configProvider.loadConfig()
 
@@ -94,7 +100,13 @@ class Node {
                 GrpcServer(
                     host = configProvider.config.grpcHost,
                     port = configProvider.config.grpcPort,
-                    services = listOf(TasksAPIService(), ServicesAPIService(), EventsService()),
+                    services =
+                        listOf(
+                            TasksAPIService(),
+                            ServicesAPIService(),
+                            EventsService(),
+                            VirtualConfigServiceImpl(),
+                        ),
                     interceptors = listOf(LoggingServerInterceptor(), AuthInterceptor(secret)),
                 )
             grpcServer.start()
@@ -116,6 +128,7 @@ class Node {
                     register(ServiceCommand())
                     register(DebugCommand())
                     register(TaskCommand())
+                    register(VirtualConfigCommand())
                 }
             } catch (e: Exception) {
                 logger.error("Failed to initialize commands: ${e.stackTraceToString()}")
