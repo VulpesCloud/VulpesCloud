@@ -38,8 +38,12 @@ class VirtualConfigProvider {
                 .getByName(getByNameRequest { this.name = name })
                 .configOrNull
 
+        if (config == null) {
+            return null
+        }
+
         file.parentFile.mkdirs()
-        file.writeText(config?.config ?: return null)
+        file.writeText(JSONObject(VirtualConfig.fromDefinition(config)).toString())
         return json.decodeFromString<T>(config.config ?: return null)
     }
 

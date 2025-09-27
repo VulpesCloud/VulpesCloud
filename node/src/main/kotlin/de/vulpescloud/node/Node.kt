@@ -8,9 +8,13 @@ import com.github.dockerjava.transport.DockerHttpClient
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.kotlin.client.coroutine.MongoClient
+import de.vulpescloud.node.cluster.ClusterAPIServiceImpl
+import de.vulpescloud.node.cluster.ClusterCommand
+import de.vulpescloud.node.cluster.ClusterProvider
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.commands.*
 import de.vulpescloud.node.config.ConfigProvider
+import de.vulpescloud.node.event.EventListenHelper
 import de.vulpescloud.node.event.EventsService
 import de.vulpescloud.node.grpc.GrpcServer
 import de.vulpescloud.node.grpc.LocalGrpcClient
@@ -61,6 +65,8 @@ class Node {
 
     val virtualConfigProvider = VirtualConfigProvider()
 
+    val clusterProvider = ClusterProvider()
+
     suspend fun init(scope: CoroutineScope) =
         withContext(Dispatchers.IO) {
             instance = this@Node
@@ -96,28 +102,6 @@ class Node {
 
             terminal.changePrompt("")
 
-            grpcServer =
-                GrpcServer(
-                    host = configProvider.config.grpcHost,
-                    port = configProvider.config.grpcPort,
-                    services =
-                        listOf(
-                            TasksAPIService(),
-                            ServicesAPIService(),
-                            EventsService(),
-                            VirtualConfigServiceImpl(),
-                        ),
-                    interceptors = listOf(LoggingServerInterceptor(), AuthInterceptor(secret)),
-                )
-            grpcServer.start()
-            NodeCoroutineScope.launch { grpcServer.awaitTermination() }
-
-            localGrpcClient.connect(
-                host = configProvider.config.grpcHost,
-                port = configProvider.config.grpcPort,
-                secret = secret,
-            )
-
             try {
                 commandProvider.initialize()
                 commandProvider.apply {
@@ -129,6 +113,7 @@ class Node {
                     register(DebugCommand())
                     register(TaskCommand())
                     register(VirtualConfigCommand())
+                    register(ClusterCommand())
                 }
             } catch (e: Exception) {
                 logger.error("Failed to initialize commands: ${e.stackTraceToString()}")
@@ -157,6 +142,35 @@ class Node {
                 logger.error("Failed to connect to MongoDB: ${e.message}")
                 return@withContext
             }
+
+            grpcServer =
+                GrpcServer(
+                    host = configProvider.config.grpcHost,
+                    port = configProvider.config.grpcPort,
+                    services =
+                        listOf(
+                            TasksAPIService(),
+                            ServicesAPIService(),
+                            EventsService(),
+                            VirtualConfigServiceImpl(),
+                            ClusterAPIServiceImpl(),
+                        ),
+                    interceptors = listOf(LoggingServerInterceptor(), AuthInterceptor(secret)),
+                )
+            grpcServer.start()
+            NodeCoroutineScope.launch { grpcServer.awaitTermination() }
+
+            localGrpcClient.connect(
+                host = configProvider.config.grpcHost,
+                port = configProvider.config.grpcPort,
+                secret = secret,
+            )
+
+            EventListenHelper.subscribeToEvents()
+
+            clusterProvider.initClusterConfig()
+            clusterProvider.connectToOtherNodes()
+            clusterProvider.init()
 
             serviceFactoryProvider.apply {
                 registerServiceFactory(DockerServiceFactory())
@@ -203,7 +217,10 @@ class Node {
                 }
             }
 
-            ServiceLogHandler.subscribe()
+            clusterProvider.startupDone()
+            val time =
+                (System.getProperty("startup").toLongOrNull() ?: 0) - System.currentTimeMillis()
+            logger.info("Startup Done! Took {}ms", time)
 
             // Runtime.getRuntime().addShutdownHook(Thread { NodeShutdown.shutdown() })
         }

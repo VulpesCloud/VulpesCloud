@@ -114,6 +114,28 @@ object MongoUtils {
         }
     }
 
+    suspend fun nothingOrInsertVirtualConfig(config: VirtualConfig) {
+        val collection =
+            Node.instance.mongoClient
+                .getDatabase(Node.instance.configProvider.config.mongodb.database)
+                .getCollection<BsonDocument>(
+                    Node.instance.configProvider.config.mongodb.collectionPrefix + "virtualconfigs"
+                )
+
+        val filter = BsonDocument("name", BsonString(config.name))
+        val existingDoc = collection.find(filter).firstOrNull()
+        if (existingDoc == null) {
+            collection.insertOne(
+                BsonDocument().apply {
+                    put("name", BsonString(config.name))
+                    put("createdAt", BsonInt64(config.createdAt))
+                    put("lastUpdatedAt", BsonInt64(config.lastUpdatedAt))
+                    put("config", BsonString(config.config))
+                }
+            )
+        }
+    }
+
     suspend fun deleteVirtualConfig(config: VirtualConfig) {
         val collection =
             Node.instance.mongoClient

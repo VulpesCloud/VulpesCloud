@@ -33,11 +33,7 @@ class VirtualConfigServiceImpl :
                 .getCollection<BsonDocument>(
                     Node.instance.configProvider.config.mongodb.collectionPrefix + "virtualconfigs"
                 )
-        val filter =
-            BsonDocument(
-                "name",
-                BsonDocument($$"$eq", BsonDocument("name", BsonString(request.name))),
-            )
+        val filter = BsonDocument("name", BsonString(request.name))
         val configDoc = collection.find(filter).firstOrNull()
         val config = configDoc?.let { fromDocumentToDefinition(it) }
         if (config == null) {
@@ -57,7 +53,7 @@ class VirtualConfigServiceImpl :
             this.lastUpdatedAt = System.currentTimeMillis()
         }
 
-        MongoUtils.updateOrInsertVirtualConfig(config)
+        MongoUtils.nothingOrInsertVirtualConfig(config)
 
         return createVirtualConfigResponse { this.config = config }
     }
