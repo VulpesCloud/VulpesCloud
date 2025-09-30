@@ -1,5 +1,7 @@
 package de.vulpescloud.node
 
+import de.vulpescloud.node.cluster.ClusterHelper
+import de.vulpescloud.node.cluster.NodeSnapshotUpdater
 import de.vulpescloud.node.event.EventListenHelper
 import de.vulpescloud.node.services.ServiceLogHandler
 import kotlinx.coroutines.cancel
@@ -17,6 +19,8 @@ object NodeShutdown {
             logger.info("Stopping ${it.service.task.name}-${it.service.orderedId}")
             it.stop()
         }
+
+        NodeSnapshotUpdater.stop()
 
         ServiceLogHandler.unsubscribe()
         EventListenHelper.unsubscribeFromEvents()

@@ -79,6 +79,8 @@ class ClusterProvider {
 
     suspend fun startupDone() {
         ClusterHelper.updateNodeState(NodeState.ONLINE)
+
+        NodeSnapshotUpdater.start()
     }
 
     suspend fun initClusterConfig() {

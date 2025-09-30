@@ -45,8 +45,7 @@ class TaskCommand {
     fun taskParser(input: CommandInput): List<Task> {
         return CompletableFuture.supplyAsync {
                 runBlocking {
-                    val regexPattern = input.readString()
-                    regexPattern.replace("*", ".*")
+                    val regexPattern = input.readString().replace("*", ".*")
                     val regex = Regex(regexPattern)
 
                     Node.instance.localGrpcClient.tasksAPI

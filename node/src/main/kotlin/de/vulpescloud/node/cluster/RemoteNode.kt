@@ -4,7 +4,6 @@ import build.buf.gen.vulpescloud.node.v1.ClusterAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.node.v1.getNodeSnapshotRequest
 import build.buf.gen.vulpescloud.node.v1.snapshotOrNull
 import de.vulpescloud.api.cluster.NodeEndpointDetails
-import de.vulpescloud.api.cluster.NodeSnapshot
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import io.grpc.ConnectivityState
@@ -31,21 +30,48 @@ class RemoteNode(val endpoint: NodeEndpointDetails) {
             } catch (e: Exception) {
                 logger.error(
                     "Failed to connect to ${endpoint.name} at ${endpoint.host}:${endpoint.port}!",
-                    e,
+                    e.message,
                 )
                 null
             }
 
         val state = channel!!.getState(false)
         logger.info("Connection state from ${endpoint.name}: $state")
-//        logger.info("IsTerminated: ${channel?.isTerminated}")
-//        logger.info("IsShutdown: ${channel?.isShutdown}")
-//        logger.info(
-//            "Received snapshot from ${endpoint.name}: ${snapshot?.let { NodeSnapshot.fromDefinition(it) }}"
-//        )
+        //        logger.info("IsTerminated: ${channel?.isTerminated}")
+        //        logger.info("IsShutdown: ${channel?.isShutdown}")
+        //        logger.info(
+        //            "Received snapshot from ${endpoint.name}: ${snapshot?.let {
+        // NodeSnapshot.fromDefinition(it) }}"
+        //        )
         if (state == ConnectivityState.TRANSIENT_FAILURE) {
             channel?.shutdownNow()
             channel = null
         }
+    }
+
+    suspend fun reConnect() {
+        channel?.shutdownNow()
+        channel = null
+
+        logger.info("Reconnecting to ${endpoint.name} at ${endpoint.host}:${endpoint.port}...")
+        channel =
+            ManagedChannelBuilder.forAddress(endpoint.host, endpoint.port).usePlaintext().build()
+
+        val snapshot =
+            try {
+                ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineStub(channel!!)
+                    .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+                    .getNodeSnapshot(getNodeSnapshotRequest { this.name = endpoint.name })
+                    .snapshotOrNull
+            } catch (e: Exception) {
+                logger.error(
+                    "Failed to connect to ${endpoint.name} at ${endpoint.host}:${endpoint.port}!",
+                    e.message,
+                )
+                null
+            }
+
+        val state = channel!!.getState(true)
+        logger.info("Connection state from ${endpoint.name}: $state")
     }
 }

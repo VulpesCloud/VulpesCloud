@@ -20,10 +20,10 @@ class PlayerChooseInitialServerEventListener(
                 .getAllServices()
                 .get(5, TimeUnit.SECONDS)
                 .filter {
-                    it.task.software.type != de.vulpescloud.api.serversoftware.SoftwareType.PROXY
+                    it.task.software.type != de.vulpescloud.api.serversoftware.SoftwareType.PROXY &&
+                        it.task.fallback
                 }
                 .sortedBy { it.playerCount }
-        // TODO: Add fallback to protobuf
         if (services.isEmpty()) {
             return
         }

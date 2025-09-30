@@ -44,6 +44,10 @@ class DebugCommand {
                                     "plugins",
                                     SoftwareType.SERVER,
                                 ),
+                                null,
+                                emptyList(),
+                                emptyList(),
+                                true,
                             )
                             .toDefinition()
                     )
@@ -82,6 +86,10 @@ class DebugCommand {
                                     "plugins",
                                     SoftwareType.PROXY,
                                 ),
+                                null,
+                                emptyList(),
+                                emptyList(),
+                                false,
                             )
                             .toDefinition()
                     )
@@ -121,6 +129,10 @@ class DebugCommand {
                                         "plugins",
                                         SoftwareType.SERVER,
                                     ),
+                                    null,
+                                    emptyList(),
+                                    emptyList(),
+                                    true,
                                 )
                                 .toDefinition()
                         )
@@ -165,6 +177,10 @@ class DebugCommand {
                                         "plugins",
                                         SoftwareType.PROXY,
                                     ),
+                                    null,
+                                    emptyList(),
+                                    emptyList(),
+                                    false,
                                 )
                                 .toDefinition()
                         )

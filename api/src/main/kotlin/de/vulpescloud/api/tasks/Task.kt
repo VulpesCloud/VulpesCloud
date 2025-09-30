@@ -27,6 +27,7 @@ data class Task(
     @Serializable(StructSerializer::class) val attributes: Struct? = null,
     val jvmArgs: List<String> = emptyList(),
     val envVars: List<String> = emptyList(),
+    val fallback: Boolean,
 ) {
 
     fun toDocument(): BsonDocument =
@@ -48,6 +49,7 @@ data class Task(
             attributes?.let { append("attributes", BsonBinary(it.toByteArray())) }
             append("jvmArgs", BsonArray(jvmArgs.map { BsonString(it) }))
             append("envVars", BsonArray(envVars.map { BsonString(it) }))
+            append("fallback", BsonBoolean(fallback))
         }
 
     fun toDefinition(): TaskDefinition {
@@ -66,6 +68,7 @@ data class Task(
                 .setPreferredNode(preferredNode)
                 .setMaxPlayers(maxPlayers)
                 .setServerSoftware(software.toDefinition())
+                .setFallback(fallback)
 
         templates.forEach { builder.addTemplates(it.toDefinition()) }
         return builder.build()
@@ -91,6 +94,7 @@ data class Task(
                 taskDefinition.attributes,
                 taskDefinition.jvmArgsList,
                 taskDefinition.envVarsList,
+                taskDefinition.fallback,
             )
         }
 
@@ -113,6 +117,7 @@ data class Task(
                 document.get("attributes")?.let { Struct.parseFrom(it.asBinary().data) },
                 document.getArray("jvmArgs").map { it.asString().value },
                 document.getArray("envVars").map { it.asString().value },
+                document.getBoolean("fallback").value,
             )
     }
 }
