@@ -55,16 +55,6 @@ class ServiceCoroutineAPI : ServiceAPI.ServiceCoroutineAPI {
         return serviceDefinition.map { Service.fromDefinition(it) }
     }
 
-    override suspend fun prepareService(service: Service): Service? {
-        return Service.fromDefinition(
-            serviceStub
-                .prepareServiceByService(
-                    prepareServiceByServiceRequest { this.service = service.toDefinition() }
-                )
-                .serviceOrNull ?: return null
-        )
-    }
-
     override suspend fun prepareService(task: Task): Service? {
         return Service.fromDefinition(
             serviceStub

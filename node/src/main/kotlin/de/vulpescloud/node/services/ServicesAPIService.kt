@@ -81,24 +81,24 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             .build()
     }
 
-    override suspend fun prepareServiceByService(
-        request: PrepareServiceByServiceRequest
-    ): PrepareServiceByServiceResponse {
-        val service = Service.fromDefinition(request.service)
-
-        val serviceFactory =
-            Node.instance.serviceFactoryProvider.findServiceFactory(service.task.serviceFactoryName)
-        if (serviceFactory == null) {
-            throw IllegalArgumentException(
-                "Unable to find ServiceFactory ${service.task.serviceFactoryName}"
-            )
-        }
-        val abstractService = serviceFactory.prepareService(service)
-
-        return PrepareServiceByServiceResponse.newBuilder()
-            .setService(abstractService.service.toDefinition())
-            .build()
-    }
+//    override suspend fun prepareServiceByService(
+//        request: PrepareServiceByServiceRequest
+//    ): PrepareServiceByServiceResponse {
+//        val service = Service.fromDefinition(request.service)
+//
+//        val serviceFactory =
+//            Node.instance.serviceFactoryProvider.findServiceFactory(service.task.serviceFactoryName)
+//        if (serviceFactory == null) {
+//            throw IllegalArgumentException(
+//                "Unable to find ServiceFactory ${service.task.serviceFactoryName}"
+//            )
+//        }
+//        val abstractService = serviceFactory.prepareService(service)
+//
+//        return PrepareServiceByServiceResponse.newBuilder()
+//            .setService(abstractService.service.toDefinition())
+//            .build()
+//    }
 
     override suspend fun startService(request: StartServiceRequest): StartServiceResponse {
         val service = Service.fromDefinition(request.service)

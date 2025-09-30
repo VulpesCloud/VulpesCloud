@@ -19,7 +19,7 @@ interface ServiceAPI {
 
         suspend fun getServicesByTask(task: Task): List<Service>
 
-        suspend fun prepareService(service: Service): Service?
+        // suspend fun prepareService(service: Service): Service?
 
         suspend fun prepareService(task: Task): Service?
 
@@ -48,7 +48,7 @@ interface ServiceAPI {
 
         fun getServicesByTask(task: Task): CompletableFuture<List<Service>>
 
-        fun prepareService(service: Service): CompletableFuture<Service?>
+        // fun prepareService(service: Service): CompletableFuture<Service?>
 
         fun prepareService(task: Task): CompletableFuture<Service?>
 

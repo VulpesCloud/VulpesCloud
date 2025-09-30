@@ -64,14 +64,14 @@ class ServiceFutureAPI : ServiceAPI.ServiceFutureAPI {
             }
     }
 
-    override fun prepareService(service: Service): CompletableFuture<Service?> {
-        return serviceStub
-            .prepareServiceByService(
-                prepareServiceByServiceRequest { this.service = service.toDefinition() }
-            )
-            .toCompletableFuture()
-            .thenApply { Service.fromDefinition(it.serviceOrNull ?: return@thenApply null) }
-    }
+//    override fun prepareService(service: Service): CompletableFuture<Service?> {
+//        return serviceStub
+//            .prepareServiceByService(
+//                prepareServiceByServiceRequest { this.service = service.toDefinition() }
+//            )
+//            .toCompletableFuture()
+//            .thenApply { Service.fromDefinition(it.serviceOrNull ?: return@thenApply null) }
+//    }
 
     override fun prepareService(task: Task): CompletableFuture<Service?> {
         return serviceStub
