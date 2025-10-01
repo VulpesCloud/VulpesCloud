@@ -14,26 +14,47 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.coroutines.cancellation.CancellationException
 import build.buf.gen.vulpescloud.events.v1.Event as GrpcEvent
 
 class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
 
     private val subscribers = CopyOnWriteArrayList<Channel<GrpcEvent>>()
+    private val logger = LoggerFactory.getLogger("EventsService")
 
     override fun subscribe(request: SubscribeRequest): Flow<GrpcEvent> {
         val channel = Channel<GrpcEvent>(capacity = Channel.UNLIMITED)
         subscribers.add(channel)
 
-        return channel.consumeAsFlow().onCompletion {
+        return channel.consumeAsFlow().onCompletion { cause ->
             subscribers.remove(channel)
             channel.close()
+            if (cause is CancellationException) {
+                logger.debug("Client cancelled subscription normally")
+            } else if (cause != null) {
+                logger.error("Subscription ended with error", cause)
+            }
         }
     }
 
     override suspend fun publish(request: PublishRequest): PublishResponse {
         val event = request.event
+
+        if (request.forwardToOtherNodes) {
+            Node.instance.clusterProvider.remoteNodes.forEach { node ->
+                val stub =
+                    EventServiceGrpcKt.EventServiceCoroutineStub(node.channel ?: return@forEach)
+                stub.publish(
+                    PublishRequest.newBuilder()
+                        .setEvent(event)
+                        .setForwardToOtherNodes(false)
+                        .build()
+                )
+            }
+        }
 
         subscribers.forEach { channel -> channel.trySend(event).isSuccess }
 

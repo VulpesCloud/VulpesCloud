@@ -43,7 +43,6 @@ object MongoUtils {
         val existingService = existingServiceDoc?.let { Service.fromDocument(it) }
 
         if (existingService != null) {
-            // Verwende $set Operator für Updates
             val updateDoc = BsonDocument($$"$set", service.toDocument())
             collection.updateOne(filter, updateDoc)
         } else {

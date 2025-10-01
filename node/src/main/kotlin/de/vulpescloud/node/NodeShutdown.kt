@@ -1,12 +1,14 @@
 package de.vulpescloud.node
 
-import de.vulpescloud.node.cluster.ClusterHelper
 import de.vulpescloud.node.cluster.NodeSnapshotUpdater
 import de.vulpescloud.node.event.EventListenHelper
 import de.vulpescloud.node.services.ServiceLogHandler
-import kotlinx.coroutines.cancel
+import de.vulpescloud.node.services.ServiceScheduler
+import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
+import java.util.concurrent.TimeoutException
 import kotlin.system.exitProcess
+import kotlin.time.Duration.Companion.seconds
 
 object NodeShutdown {
 
@@ -15,9 +17,27 @@ object NodeShutdown {
     suspend fun shutdown() {
         logger.info("Shutting down the Node...")
 
-        Node.instance.nodeServices.forEach {
-            logger.info("Stopping ${it.service.task.name}-${it.service.orderedId}")
-            it.stop()
+        ServiceScheduler.stop()
+
+        try {
+            withTimeout(30.seconds) {
+                coroutineScope {
+                    Node.instance.nodeServices
+                        .map { service ->
+                            async {
+                                logger.info(
+                                    "Stopping ${service.service.task.name}-${service.service.orderedId}"
+                                )
+                                service.stop()
+                            }
+                        }
+                        .awaitAll()
+                    delay(1.seconds)
+                }
+            }
+        } catch (_: TimeoutException) {
+            logger.warn("Some services did not stop within 30 seconds, forcing shutdown...")
+            Node.instance.nodeServices.forEach { it.delete() }
         }
 
         NodeSnapshotUpdater.stop()

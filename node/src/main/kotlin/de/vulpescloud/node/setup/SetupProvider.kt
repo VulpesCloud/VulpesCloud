@@ -15,7 +15,7 @@ class SetupProvider(private val terminal: Terminal) {
     private val logger = LoggerFactory.getLogger(SetupProvider::class.java)
     var currentSetup: SetupInfo? = null
     private var currentQuestion: SetupQuestionInfo? = null
-    private var currentQuestionIndex = 0
+    var currentQuestionIndex = 0
     private var oldTerminalInput = terminal.terminalContent
     private var inputLocked = false
     private var lockedInputCount = 0
@@ -51,6 +51,8 @@ class SetupProvider(private val terminal: Terminal) {
                     cancelMethod,
                     questions.sortedBy { it.setupQuestion.index },
                 )
+
+            currentQuestionIndex = 0
 
             if (currentSetup == null) {
                 currentSetup = setupInfo

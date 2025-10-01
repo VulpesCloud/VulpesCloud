@@ -1,4 +1,4 @@
-package de.vulpescloud.node.cluster
+package de.vulpescloud.node.commands
 
 import build.buf.gen.vulpescloud.node.v1.getAllNodesRequest
 import build.buf.gen.vulpescloud.node.v1.getNodeSnapshotRequest
@@ -23,30 +23,30 @@ class ClusterCommand {
     @Suggestions("nodes")
     fun suggestNodes(): Stream<String> {
         return CompletableFuture.supplyAsync {
-                runBlocking {
-                    Node.instance.localGrpcClient.clusterAPI
-                        .getAllNodes(getAllNodesRequest {})
-                        .nodesList
-                        .map { it.name }
-                        .stream()
-                }
+            runBlocking {
+                Node.Companion.instance.localGrpcClient.clusterAPI
+                    .getAllNodes(getAllNodesRequest {})
+                    .nodesList
+                    .map { it.name }
+                    .stream()
             }
-            .get(5, java.util.concurrent.TimeUnit.SECONDS)
+            }
+            .get(5, TimeUnit.SECONDS)
     }
 
     @Parser(suggestions = "nodes")
     fun parseNodes(input: CommandInput): List<ClusterNode> {
         return CompletableFuture.supplyAsync {
-                runBlocking {
-                    val regexPattern = input.readString().replace("*", ".*")
-                    val regex = Regex(regexPattern)
+            runBlocking {
+                val regexPattern = input.readString().replace("*", ".*")
+                val regex = Regex(regexPattern)
 
-                    Node.instance.localGrpcClient.clusterAPI
-                        .getAllNodes(getAllNodesRequest {})
-                        .nodesList
-                        .map { ClusterNode.fromDefinition(it) }
-                        .filter { it.name.matches(regex) }
-                }
+                Node.Companion.instance.localGrpcClient.clusterAPI
+                    .getAllNodes(getAllNodesRequest {})
+                    .nodesList
+                    .map { ClusterNode.Companion.fromDefinition(it) }
+                    .filter { it.name.matches(regex) }
+            }
             }
             .thenApply { it }
             .exceptionally { throw it }
@@ -58,12 +58,12 @@ class ClusterCommand {
         NodeCoroutineScope.launch {
             source.sendMessage("Listing all nodes...")
             try {
-                Node.instance.localGrpcClient.clusterAPI
+                Node.Companion.instance.localGrpcClient.clusterAPI
                     .getAllNodes(getAllNodesRequest {})
                     .nodesList
                     .forEach { node ->
                         val state =
-                            Node.instance.clusterProvider.remoteNodes
+                            Node.Companion.instance.clusterProvider.remoteNodes
                                 .find { it.endpoint.name == node.name }
                                 ?.channel
                                 ?.getState(true)
@@ -85,8 +85,8 @@ class ClusterCommand {
         NodeCoroutineScope.launch {
             node.forEach {
                 source.sendMessage("Fetching snapshot for node ${it.name}...")
-                val remoteNode = Node.instance.clusterProvider.remoteNodes.find { n -> n.endpoint.name == it.name }
-                Node.instance.localGrpcClient.clusterAPI
+                val remoteNode = Node.Companion.instance.clusterProvider.remoteNodes.find { n -> n.endpoint.name == it.name }
+                Node.Companion.instance.localGrpcClient.clusterAPI
                     .getNodeSnapshot(getNodeSnapshotRequest { this.name = it.name })
                     .snapshotOrNull
                     ?.let { snapshot ->

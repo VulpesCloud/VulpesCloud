@@ -89,7 +89,7 @@ class LocalService(override val service: Service) : AbstractService {
     }
 
     override fun stop() {
-        NodeCoroutineScope.launch {
+        runBlocking {
             command("stop")
 
             delay(5000)

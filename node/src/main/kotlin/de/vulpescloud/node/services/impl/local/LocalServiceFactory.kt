@@ -28,6 +28,10 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 )
             )
 
+        Node.instance.nodeServices.add(localService)
+
+        MongoUtils.updateService(localService.service)
+
         localService.path().resolve(localService.service.task.software.pluginDir).toFile().mkdirs()
 
         service.task.templates
@@ -166,7 +170,6 @@ class LocalServiceFactory : AbstractServiceFactory() {
         )
 
         localService.processBuilder = processBuilder
-        Node.instance.nodeServices.add(localService)
 
         MongoUtils.updateService(localService.service)
 

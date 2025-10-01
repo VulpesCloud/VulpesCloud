@@ -6,7 +6,6 @@ import build.buf.gen.vulpescloud.node.v1.snapshotOrNull
 import de.vulpescloud.api.cluster.NodeEndpointDetails
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
-import io.grpc.ConnectivityState
 import io.grpc.ManagedChannel
 import io.grpc.ManagedChannelBuilder
 import org.slf4j.LoggerFactory
@@ -37,16 +36,6 @@ class RemoteNode(val endpoint: NodeEndpointDetails) {
 
         val state = channel!!.getState(false)
         logger.info("Connection state from ${endpoint.name}: $state")
-        //        logger.info("IsTerminated: ${channel?.isTerminated}")
-        //        logger.info("IsShutdown: ${channel?.isShutdown}")
-        //        logger.info(
-        //            "Received snapshot from ${endpoint.name}: ${snapshot?.let {
-        // NodeSnapshot.fromDefinition(it) }}"
-        //        )
-        if (state == ConnectivityState.TRANSIENT_FAILURE) {
-            channel?.shutdownNow()
-            channel = null
-        }
     }
 
     suspend fun reConnect() {

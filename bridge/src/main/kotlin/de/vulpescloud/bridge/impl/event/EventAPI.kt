@@ -43,7 +43,7 @@ class EventAPI {
     //        }
     //    }
 
-    inline fun <reified T> publish(event: T, metadata: Map<String, String> = emptyMap()) {
+    inline fun <reified T> publish(event: T, forwardToOtherNodes: Boolean = false, metadata: Map<String, String> = emptyMap()) {
         val grpcEvent = EventSerializer.encode(event, metadata)
         publish(grpcEvent)
     }

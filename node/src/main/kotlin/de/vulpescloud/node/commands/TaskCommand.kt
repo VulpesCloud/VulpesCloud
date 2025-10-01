@@ -4,11 +4,13 @@ import build.buf.gen.vulpescloud.services.v1.prepareServiceByTaskRequest
 import build.buf.gen.vulpescloud.services.v1.startServiceRequest
 import build.buf.gen.vulpescloud.tasks.v1.deleteTaskRequest
 import build.buf.gen.vulpescloud.tasks.v1.getAllTasksRequest
+import build.buf.gen.vulpescloud.tasks.v1.updateTaskRequest
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.annotation.Alias
+import de.vulpescloud.node.setup.setups.TaskSetup
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
@@ -58,6 +60,11 @@ class TaskCommand {
             .thenApply { it }
             .exceptionally { throw it }
             .get(5, TimeUnit.SECONDS)
+    }
+
+    @Command("task|tasks setup")
+    fun setupTask(source: CommandSource) {
+        Node.instance.setupProvider.startSetup(TaskSetup())
     }
 
     @Command("task|tasks list")
@@ -131,9 +138,77 @@ class TaskCommand {
             tasks.forEach { task ->
                 source.sendMessage("Setting max memory for task &m${task.name} to &e$memory MB")
                 val newTask = task.copy(maxMemory = memory.toLong())
-                Node.instance.localGrpcClient.tasksAPI
-                source.sendMessage("ERR: Not yet implemented")
-                // TODO: Complete the commands
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+
+    @Command("task|tasks task <tasks> set maintenance <maintenance>")
+    fun setMaintenance(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("maintenance") maintenance: Boolean,
+    ) {
+        NodeCoroutineScope.launch {
+            tasks.forEach { task ->
+                source.sendMessage("Setting maintenance for task &m${task.name} to &e$maintenance")
+                val newTask = task.copy(maintenance = maintenance)
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+
+    @Command("task|tasks task <tasks> set staticServices <static>")
+    fun setStatic(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("static") static: Boolean,
+    ) {
+        NodeCoroutineScope.launch {
+            tasks.forEach { task ->
+                source.sendMessage("Setting staticServices for task &m${task.name} to &e$static")
+                val newTask = task.copy(staticServices = static)
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+
+    @Command("task|tasks task <tasks> set fallback <fallback>")
+    fun setFallback(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("fallback") fallback: Boolean,
+    ) {
+        NodeCoroutineScope.launch {
+            tasks.forEach { task ->
+                source.sendMessage("Setting fallback for task &m${task.name} to &e$fallback")
+                val newTask = task.copy(fallback = fallback)
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+
+    @Command("task|tasks task <tasks> set preferredNode <node>")
+    fun setPreferredNode(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("node") node: String,
+    ) {
+        NodeCoroutineScope.launch {
+            tasks.forEach { task ->
+                source.sendMessage("Setting preferredNode for task &m${task.name} to &e$node")
+                val newTask = task.copy(preferredNode = node)
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
             }
         }
     }

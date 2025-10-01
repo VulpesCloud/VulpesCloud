@@ -114,7 +114,7 @@ object FoliaDownloader : ServerSoftwareDownloader {
                 val build = downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
 
                 val software = ServerSoftware(
-                    name = "Paper",
+                    name = "Folia",
                     version = version.getString("id"),
                     build = build ?: 1,
                     url = downloadUrl.toString(),
@@ -159,7 +159,7 @@ object FoliaDownloader : ServerSoftwareDownloader {
                 val build = downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
 
                 return ServerSoftware(
-                    name = "Paper",
+                    name = "Folia",
                     version = latestVersion.getString("id"),
                     build = build ?: 1,
                     url = downloadUrl.toString(),
@@ -192,7 +192,7 @@ object FoliaDownloader : ServerSoftwareDownloader {
                 val build = downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
 
                 return ServerSoftware(
-                    name = "Paper",
+                    name = "Folia",
                     version = version,
                     build = build ?: 1,
                     url = downloadUrl.toString(),

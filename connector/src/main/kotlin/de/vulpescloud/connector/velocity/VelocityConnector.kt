@@ -63,7 +63,8 @@ constructor(
         bridgeAPI
             .getEventAPI()
             .publish(
-                ServiceStateChangeEvent(localService, localService.state, ServiceStates.RUNNING)
+                ServiceStateChangeEvent(localService, localService.state, ServiceStates.RUNNING),
+                true,
             )
     }
 

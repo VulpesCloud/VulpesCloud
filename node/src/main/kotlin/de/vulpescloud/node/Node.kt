@@ -9,7 +9,7 @@ import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.kotlin.client.coroutine.MongoClient
 import de.vulpescloud.node.cluster.ClusterAPIServiceImpl
-import de.vulpescloud.node.cluster.ClusterCommand
+import de.vulpescloud.node.commands.ClusterCommand
 import de.vulpescloud.node.cluster.ClusterProvider
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.commands.*
@@ -23,7 +23,7 @@ import de.vulpescloud.node.grpc.security.AuthInterceptor
 import de.vulpescloud.node.secret.SecretFactory
 import de.vulpescloud.node.services.AbstractService
 import de.vulpescloud.node.services.ServiceFactoryProvider
-import de.vulpescloud.node.services.ServiceLogHandler
+import de.vulpescloud.node.services.ServiceScheduler
 import de.vulpescloud.node.services.ServicesAPIService
 import de.vulpescloud.node.services.impl.docker.DockerServiceFactory
 import de.vulpescloud.node.services.impl.local.LocalServiceFactory
@@ -221,6 +221,8 @@ class Node {
             val time =
                 (System.getProperty("startup").toLongOrNull() ?: 0) - System.currentTimeMillis()
             logger.info("Startup Done! Took {}ms", time)
+
+            ServiceScheduler.start()
 
             // Runtime.getRuntime().addShutdownHook(Thread { NodeShutdown.shutdown() })
         }
