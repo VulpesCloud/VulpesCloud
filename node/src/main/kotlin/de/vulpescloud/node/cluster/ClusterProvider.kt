@@ -40,7 +40,8 @@ class ClusterProvider {
             EventsService.publish(
                 EventSerializer.encode(
                     NodeStateChangeEvent(localNode, NodeState.OFFLINE, NodeState.BOOTING)
-                )
+                ),
+                true,
             )
         } else {
             val localNode =
@@ -49,7 +50,8 @@ class ClusterProvider {
             EventsService.publish(
                 EventSerializer.encode(
                     NodeStateChangeEvent(localNode, NodeState.OFFLINE, NodeState.BOOTING)
-                )
+                ),
+                true,
             )
         }
     }
@@ -64,7 +66,8 @@ class ClusterProvider {
                     localNode.state,
                     NodeState.OFFLINE,
                 )
-            )
+            ),
+            true,
         )
         EventsService.publish(
             EventSerializer.encode(
@@ -73,7 +76,8 @@ class ClusterProvider {
                         .filter { it.state == NodeState.ONLINE }
                         .minByOrNull { it.bootTimestamp } ?: return
                 )
-            )
+            ),
+            true,
         )
     }
 

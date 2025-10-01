@@ -28,7 +28,8 @@ object ClusterHelper {
         EventsService.publish(
             EventSerializer.encode(
                 NodeStateChangeEvent(getLocalNode(), NodeState.BOOTING, NodeState.ONLINE)
-            )
+            ),
+            true
         )
     }
 

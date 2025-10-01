@@ -62,7 +62,7 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
     }
 
     companion object {
-        fun publish(event: GrpcEvent) {
+        fun publish(event: GrpcEvent, broadcast: Boolean = false) {
             NodeCoroutineScope.launch {
                 Node.instance.localGrpcClient.eventsAPI.publish(
                     PublishRequest.newBuilder().setEvent(event).build()
