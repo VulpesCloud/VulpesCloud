@@ -51,7 +51,7 @@ night-config = "3.8.3"
 snakeyml = "2.5"
 
 # command api
-commandapi-velocity-shade = "10.1.2"
+commandapi-velocity-shade = "11.0.0"
 
 # shadowJar
 shadow = "9.2.2"
