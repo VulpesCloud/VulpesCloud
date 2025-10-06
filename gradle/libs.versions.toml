@@ -32,7 +32,7 @@ reactor = "3.8.0-M7"
 # logging
 slf4j = "2.1.0-alpha1"
 logback = "1.5.19"
-adventure = "4.24.0"
+adventure = "4.25.0"
 
 # configuration
 gson = "2.13.2"
