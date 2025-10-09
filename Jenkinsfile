@@ -43,6 +43,7 @@ pipeline {
 
         stage('Build') {
             steps {
+                ah './gradlew publishAllPublicationsToVulpesCloudSnapshotsRepository'
                 sh './gradlew buildAll'
             }
         }
