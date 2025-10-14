@@ -13,7 +13,7 @@ object FutureHelper {
         Futures.addCallback(
             this,
             object : FutureCallback<T> {
-                override fun onSuccess(result: T?) {
+                override fun onSuccess(result: T) {
                     cf.complete(result)
                 }
 
