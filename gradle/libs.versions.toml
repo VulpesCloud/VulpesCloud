@@ -20,14 +20,14 @@ perfmark = "0.27.0"
 
 # ok
 okhttp = "5.2.1"
-okio = "3.16.0"
+okio = "3.16.2"
 
 # docker
 docker-java = "3.6.0"
 
 # mongo
-mongodb = "5.6.0"
-reactor = "3.8.0-M7"
+mongodb = "5.6.1"
+reactor = "3.8.0-RC1"
 
 # logging
 slf4j = "2.1.0-alpha1"
