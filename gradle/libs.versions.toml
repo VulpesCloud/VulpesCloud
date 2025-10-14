@@ -19,7 +19,7 @@ protospecs-grpc = "1.5.0.1.20250930184830.3aeb7ae6f9e8"
 perfmark = "0.27.0"
 
 # ok
-okhttp = "5.1.0"
+okhttp = "5.2.1"
 okio = "3.16.0"
 
 # docker
