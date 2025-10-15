@@ -54,6 +54,8 @@ class LocalServiceFactory : AbstractServiceFactory() {
         arguments.add("-Xms" + service.task.minMemory + "M")
         arguments.add("-Xmx" + service.task.maxMemory + "M")
 
+        service.task.jvmArgs.forEach { arguments.add(it) }
+
         arguments.add("-cp")
 
         val path =
