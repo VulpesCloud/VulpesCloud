@@ -9,7 +9,6 @@ import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.kotlin.client.coroutine.MongoClient
 import de.vulpescloud.node.cluster.ClusterAPIServiceImpl
-import de.vulpescloud.node.commands.ClusterCommand
 import de.vulpescloud.node.cluster.ClusterProvider
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.commands.*
@@ -20,6 +19,7 @@ import de.vulpescloud.node.grpc.GrpcServer
 import de.vulpescloud.node.grpc.LocalGrpcClient
 import de.vulpescloud.node.grpc.LoggingServerInterceptor
 import de.vulpescloud.node.grpc.security.AuthInterceptor
+import de.vulpescloud.node.modules.ModuleProvider
 import de.vulpescloud.node.secret.SecretFactory
 import de.vulpescloud.node.services.AbstractService
 import de.vulpescloud.node.services.ServiceFactoryProvider
@@ -60,12 +60,10 @@ class Node {
     val templateStorageProvider = TemplateStorageProvider()
     val localGrpcClient = LocalGrpcClient()
     val serviceFactoryProvider = ServiceFactoryProvider()
-
     val nodeServices = mutableListOf<AbstractService>()
-
     val virtualConfigProvider = VirtualConfigProvider()
-
     val clusterProvider = ClusterProvider()
+    val moduleProvider = ModuleProvider(Path("modules"))
 
     suspend fun init(scope: CoroutineScope) =
         withContext(Dispatchers.IO) {
@@ -101,6 +99,8 @@ class Node {
             }
 
             terminal.changePrompt("")
+
+            moduleProvider.loadAllModules()
 
             try {
                 commandProvider.initialize()
@@ -216,6 +216,8 @@ class Node {
                     return@withContext
                 }
             }
+
+            moduleProvider.startAllModules()
 
             clusterProvider.startupDone()
             val time =
