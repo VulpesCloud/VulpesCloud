@@ -143,6 +143,14 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 }
                 updateVelocityConfig(localService)
             }
+            "Minestom" -> {
+                if (Node.instance.configProvider.config.useModernForwarding) {
+                    Files.writeString(
+                        localService.path().resolve("forwarding.secret"),
+                        Node.instance.getVelocitySecret(),
+                    )
+                }
+            }
         }
 
         val processBuilder =
