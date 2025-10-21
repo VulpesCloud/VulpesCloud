@@ -1,5 +1,6 @@
 package de.vulpescloud.node.event
 
+import build.buf.gen.vulpescloud.events.v1.Event as GrpcEvent
 import build.buf.gen.vulpescloud.events.v1.EventServiceGrpcKt
 import build.buf.gen.vulpescloud.events.v1.PublishRequest
 import build.buf.gen.vulpescloud.events.v1.PublishResponse
@@ -8,6 +9,9 @@ import de.vulpescloud.api.events.Event
 import de.vulpescloud.api.events.EventSerializer
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
+import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -15,10 +19,6 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import java.util.*
-import java.util.concurrent.CopyOnWriteArrayList
-import kotlin.coroutines.cancellation.CancellationException
-import build.buf.gen.vulpescloud.events.v1.Event as GrpcEvent
 
 class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
 
@@ -65,7 +65,10 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
         fun publish(event: GrpcEvent, broadcast: Boolean = false) {
             NodeCoroutineScope.launch {
                 Node.instance.localGrpcClient.eventsAPI.publish(
-                    PublishRequest.newBuilder().setEvent(event).build()
+                    PublishRequest.newBuilder()
+                        .setEvent(event)
+                        .setForwardToOtherNodes(broadcast)
+                        .build()
                 )
             }
         }
