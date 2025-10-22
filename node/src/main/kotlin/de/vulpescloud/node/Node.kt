@@ -127,11 +127,11 @@ class Node {
                         .applyConnectionString(ConnectionString(connectionString))
                         .applyToConnectionPoolSettings {
                             it.maxSize(50)
-                            it.maxWaitTime(2, TimeUnit.SECONDS)
+                            it.maxWaitTime(10, TimeUnit.SECONDS)
                         }
                         .applyToSocketSettings {
-                            it.connectTimeout(2, TimeUnit.SECONDS)
-                            it.readTimeout(2, TimeUnit.SECONDS)
+                            it.connectTimeout(10, TimeUnit.SECONDS)
+                            it.readTimeout(10, TimeUnit.SECONDS)
                         }
                         .retryWrites(true)
                         .build()

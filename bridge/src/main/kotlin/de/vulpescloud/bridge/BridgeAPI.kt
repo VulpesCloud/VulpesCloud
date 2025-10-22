@@ -5,6 +5,7 @@ import de.vulpescloud.bridge.impl.service.ServiceCoroutineAPI
 import de.vulpescloud.bridge.impl.service.ServiceFutureAPI
 import de.vulpescloud.bridge.impl.tasks.TasksCoroutineAPI
 import de.vulpescloud.bridge.impl.tasks.TasksFutureAPI
+import de.vulpescloud.bridge.impl.virtualconfig.VirtualConfigCoroutineAPIImpl
 
 interface BridgeAPI {
 
@@ -13,12 +14,15 @@ interface BridgeAPI {
         private val tasksAPI = TasksCoroutineAPI()
         private val servicesAPI = ServiceCoroutineAPI()
         private val eventAPI = EventAPI()
+        private val virtualConfigAPI = VirtualConfigCoroutineAPIImpl()
 
         fun getTasksAPI() = tasksAPI
 
         fun getServicesAPI() = servicesAPI
 
         fun getEventAPI() = eventAPI
+
+        fun getVirtualConfigAPI() = virtualConfigAPI
     }
 
     class BridgeFutureAPI {

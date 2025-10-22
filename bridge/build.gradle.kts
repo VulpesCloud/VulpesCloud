@@ -43,4 +43,5 @@ dependencies {
     compileOnly(libs.kotlinx.serialization)
     compileOnly(rootProject.libs.annotations)
     compileOnly(libs.kotlin.stdlib)
+    compileOnly(libs.json)
 }
