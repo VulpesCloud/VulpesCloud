@@ -7,7 +7,7 @@ import org.slf4j.LoggerFactory
 import java.nio.file.Path
 import java.util.jar.JarFile
 
-class ModuleProvider(private val moduleFolder: Path) {
+class ModuleProvider(val moduleFolder: Path) {
 
     private val loadedModules = mutableListOf<LoadedModule>()
     private val classLoaders = mutableMapOf<String, ModuleClassLoader>()

@@ -179,6 +179,25 @@ class LocalServiceFactory : AbstractServiceFactory() {
             StandardCopyOption.REPLACE_EXISTING,
         )
 
+        Node.instance.moduleProvider
+            .getAllModules()
+            .filter { module ->
+                module.moduleInfo.copyToServices &&
+                    module.moduleInfo.platforms
+                        .map { it.lowercase() }
+                        .contains(service.task.software.name.lowercase())
+            }
+            .forEach {
+                Files.copy(
+                    Node.instance.moduleProvider.moduleFolder.resolve("${it.moduleInfo.name}.jar"),
+                    localService
+                        .path()
+                        .resolve(service.task.software.pluginDir)
+                        .resolve("${it.moduleInfo.name}.jar"),
+                    StandardCopyOption.REPLACE_EXISTING,
+                )
+            }
+
         localService.processBuilder = processBuilder
 
         MongoUtils.updateService(localService.service)
