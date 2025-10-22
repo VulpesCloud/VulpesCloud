@@ -7,18 +7,20 @@ import build.buf.gen.vulpescloud.virtualconfig.v1.updateVirtualConfigRequest
 import de.vulpescloud.api.virtualconfig.VirtualConfig
 import de.vulpescloud.bridge.VirtualConfigAPI
 import de.vulpescloud.wrapper.Wrapper
+import de.vulpescloud.wrapper.grpc.AuthClientInterceptor
+import java.nio.file.Path
+import kotlin.io.path.Path
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import org.json.JSONObject
-import java.nio.file.Path
-import kotlin.io.path.Path
 
 class VirtualConfigCoroutineAPIImpl : VirtualConfigAPI.VirtualConfigCoroutineAPI {
 
     private val stub =
         VirtualConfigServiceGrpcKt.VirtualConfigServiceCoroutineStub(
-            Wrapper.instance.grpcClient.channel
-        )
+                Wrapper.instance.grpcClient.channel
+            )
+            .withInterceptors(AuthClientInterceptor(System.getenv("secret")))
 
     val tempConfigsPath: Path = Path("temp").resolve("configs")
 
