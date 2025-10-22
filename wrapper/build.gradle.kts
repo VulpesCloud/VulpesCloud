@@ -17,6 +17,7 @@ dependencies {
     implementation(libs.bundles.proto)
     implementation(libs.kotlinx.serialization)
     implementation(libs.grpc.core)
+    implementation(libs.json)
 }
 
 java {
