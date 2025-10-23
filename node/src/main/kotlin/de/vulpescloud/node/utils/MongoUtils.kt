@@ -105,6 +105,7 @@ object MongoUtils {
             collection.updateOne(
                 filter,
                 BsonDocument().apply {
+                    put("name", BsonString(config.name))
                     put("createdAt", BsonInt64(config.createdAt))
                     put("lastUpdatedAt", BsonInt64(config.lastUpdatedAt))
                     put("config", BsonString(config.config))
