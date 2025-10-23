@@ -144,10 +144,7 @@ object MongoUtils {
                     Node.instance.configProvider.config.mongodb.collectionPrefix + "virtualconfigs"
                 )
         val filter = BsonDocument("name", BsonString(config.name))
-        val existingDoc = collection.find(filter).firstOrNull()
-        if (existingDoc == null) {
-            return
-        }
+        val existingDoc = collection.find(filter).firstOrNull() ?: return
         collection.deleteOne(filter)
     }
 }

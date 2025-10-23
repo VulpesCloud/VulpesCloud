@@ -67,7 +67,7 @@ class VirtualConfigCoroutineAPIImpl : VirtualConfigAPI.VirtualConfigCoroutineAPI
         }
 
         file.parentFile.mkdirs()
-        file.writeText(config.config)
+        file.writeText(JSONObject(VirtualConfig.fromDefinition(config)).toString())
         return VirtualConfig(
             config.name,
             config.createdAt,
