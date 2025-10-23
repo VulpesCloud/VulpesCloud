@@ -8,11 +8,11 @@ import de.vulpescloud.api.virtualconfig.VirtualConfig
 import de.vulpescloud.bridge.VirtualConfigAPI
 import de.vulpescloud.wrapper.Wrapper
 import de.vulpescloud.wrapper.grpc.AuthClientInterceptor
-import java.nio.file.Path
-import kotlin.io.path.Path
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import org.json.JSONObject
+import java.nio.file.Path
+import kotlin.io.path.Path
 
 class VirtualConfigCoroutineAPIImpl : VirtualConfigAPI.VirtualConfigCoroutineAPI {
 
@@ -81,28 +81,30 @@ class VirtualConfigCoroutineAPIImpl : VirtualConfigAPI.VirtualConfigCoroutineAPI
         serializer: KSerializer<T>,
         value: T,
     ) {
-        stub.updateVirtualConfig(
-            updateVirtualConfigRequest { this.config = json.encodeToString(serializer, value) }
-        )
+        val response =
+            stub.updateVirtualConfig(
+                updateVirtualConfigRequest { this.config = json.encodeToString(serializer, value) }
+            )
         val file = tempConfigsPath.resolve("$name.json").toFile()
         file.parentFile.mkdirs()
-        file.writeText(json.encodeToString(serializer, value))
+        file.writeText(JSONObject(VirtualConfig.fromDefinition(response.config)).toString())
     }
 
     override suspend fun updateCustomConfig(config: VirtualConfig) {
-        stub.updateVirtualConfig(
-            updateVirtualConfigRequest { this.config = config.config.toString() }
-        )
+        val response =
+            stub.updateVirtualConfig(
+                updateVirtualConfigRequest { this.config = config.config.toString() }
+            )
         val file = tempConfigsPath.resolve("${config.name}.json").toFile()
         file.parentFile.mkdirs()
-        file.writeText(config.config.toString(4))
+        file.writeText(JSONObject(VirtualConfig.fromDefinition(response.config)).toString())
     }
 
     override suspend fun updateLocalConfigFromDatabase(name: String) {
         val newConfig = getCustomConfig(name, true) ?: return
         val file = tempConfigsPath.resolve("${name}.json").toFile()
         file.parentFile.mkdirs()
-        file.writeText(newConfig.config.toString(4))
+        file.writeText(JSONObject(newConfig).toString())
     }
 
     fun getLocalConfigJson(name: String): String? {

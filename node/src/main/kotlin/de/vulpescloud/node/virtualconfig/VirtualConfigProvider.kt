@@ -77,30 +77,33 @@ class VirtualConfigProvider {
     }
 
     suspend inline fun <reified T> updateCustomConfig(config: VirtualConfig, value: T) {
-        Node.instance.localGrpcClient.virtualConfigAPI.updateVirtualConfig(
-            updateVirtualConfigRequest { this.config = json.encodeToString(value) }
-        )
+        val response =
+            Node.instance.localGrpcClient.virtualConfigAPI.updateVirtualConfig(
+                updateVirtualConfigRequest { this.config = json.encodeToString(value) }
+            )
         val file = tempConfigsPath.resolve("${config.name}.json").toFile()
         file.parentFile.mkdirs()
-        file.writeText(config.config.toString(4))
+        file.writeText(JSONObject(VirtualConfig.fromDefinition(response.config)).toString())
     }
 
     suspend inline fun <reified T> updateCustomConfig(name: String, value: T) {
-        Node.instance.localGrpcClient.virtualConfigAPI.updateVirtualConfig(
-            updateVirtualConfigRequest { this.config = json.encodeToString(value) }
-        )
+        val response =
+            Node.instance.localGrpcClient.virtualConfigAPI.updateVirtualConfig(
+                updateVirtualConfigRequest { this.config = json.encodeToString(value) }
+            )
         val file = tempConfigsPath.resolve("$name.json").toFile()
         file.parentFile.mkdirs()
-        file.writeText(json.encodeToString(value))
+        file.writeText(JSONObject(VirtualConfig.fromDefinition(response.config)).toString())
     }
 
     suspend fun updateCustomConfig(config: VirtualConfig) {
-        Node.instance.localGrpcClient.virtualConfigAPI.updateVirtualConfig(
-            updateVirtualConfigRequest { this.config = config.config.toString() }
-        )
+        val response =
+            Node.instance.localGrpcClient.virtualConfigAPI.updateVirtualConfig(
+                updateVirtualConfigRequest { this.config = config.config.toString() }
+            )
         val file = tempConfigsPath.resolve("${config.name}.json").toFile()
         file.parentFile.mkdirs()
-        file.writeText(config.config.toString(4))
+        file.writeText(JSONObject(VirtualConfig.fromDefinition(response.config)).toString())
     }
 
     fun getLocalConfigJson(name: String): String? {
