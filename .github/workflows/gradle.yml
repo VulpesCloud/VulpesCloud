@@ -41,3 +41,6 @@ jobs:
           SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           MESSAGE: 'Update Meta for branch {target-branch} of commit {sha}'
+
+      - name: Publish to maven repo
+        run: ./gradlew publishAllPublicationsToVulpescloudSnapshotsRepository
