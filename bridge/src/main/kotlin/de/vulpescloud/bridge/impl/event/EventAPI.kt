@@ -15,9 +15,14 @@ class EventAPI {
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     @OptIn(DelicateCoroutinesApi::class)
-    fun publish(event: GrpcEvent) {
+    fun publish(event: GrpcEvent, forwardToOtherNodes: Boolean = false) {
         GlobalScope.launch {
-            eventServiceStub.publish(PublishRequest.newBuilder().setEvent(event).build())
+            eventServiceStub.publish(
+                PublishRequest.newBuilder()
+                    .setEvent(event)
+                    .setForwardToOtherNodes(forwardToOtherNodes)
+                    .build()
+            )
         }
     }
 
@@ -43,9 +48,13 @@ class EventAPI {
     //        }
     //    }
 
-    inline fun <reified T> publish(event: T, forwardToOtherNodes: Boolean = false, metadata: Map<String, String> = emptyMap()) {
+    inline fun <reified T> publish(
+        event: T,
+        forwardToOtherNodes: Boolean = false,
+        metadata: Map<String, String> = emptyMap(),
+    ) {
         val grpcEvent = EventSerializer.encode(event, metadata)
-        publish(grpcEvent)
+        publish(grpcEvent, forwardToOtherNodes)
     }
 
     @OptIn(DelicateCoroutinesApi::class)
