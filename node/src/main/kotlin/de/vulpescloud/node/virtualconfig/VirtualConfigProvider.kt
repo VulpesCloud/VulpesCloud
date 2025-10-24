@@ -128,14 +128,14 @@ class VirtualConfigProvider {
         val newConfig = getCustomConfig(name, true) ?: return
         val file = tempConfigsPath.resolve("${name}.json").toFile()
         file.parentFile.mkdirs()
-        file.writeText(newConfig.config.toString(4))
+        file.writeText(JSONObject(newConfig).toString())
     }
 
     suspend fun updateLocalConfigFromDatabase(config: VirtualConfig) {
         val newConfig = getCustomConfig(config.name, true) ?: return
         val file = tempConfigsPath.resolve("${config.name}.json").toFile()
         file.parentFile.mkdirs()
-        file.writeText(newConfig.config.toString(4))
+        file.writeText(JSONObject(newConfig).toString())
     }
 
     suspend fun updateDatabaseFromLocalConfig(name: String) {
