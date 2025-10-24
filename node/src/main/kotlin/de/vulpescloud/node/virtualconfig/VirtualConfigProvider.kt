@@ -79,7 +79,10 @@ class VirtualConfigProvider {
     suspend inline fun <reified T> updateCustomConfig(config: VirtualConfig, value: T) {
         val response =
             Node.instance.localGrpcClient.virtualConfigAPI.updateVirtualConfig(
-                updateVirtualConfigRequest { this.config = json.encodeToString(value) }
+                updateVirtualConfigRequest {
+                    this.config = json.encodeToString(value)
+                    this.name = config.name
+                }
             )
         val file = tempConfigsPath.resolve("${config.name}.json").toFile()
         file.parentFile.mkdirs()
@@ -89,7 +92,10 @@ class VirtualConfigProvider {
     suspend inline fun <reified T> updateCustomConfig(name: String, value: T) {
         val response =
             Node.instance.localGrpcClient.virtualConfigAPI.updateVirtualConfig(
-                updateVirtualConfigRequest { this.config = json.encodeToString(value) }
+                updateVirtualConfigRequest {
+                    this.config = json.encodeToString(value)
+                    this.name = name
+                }
             )
         val file = tempConfigsPath.resolve("$name.json").toFile()
         file.parentFile.mkdirs()
@@ -99,7 +105,10 @@ class VirtualConfigProvider {
     suspend fun updateCustomConfig(config: VirtualConfig) {
         val response =
             Node.instance.localGrpcClient.virtualConfigAPI.updateVirtualConfig(
-                updateVirtualConfigRequest { this.config = config.config.toString() }
+                updateVirtualConfigRequest {
+                    this.config = config.config.toString()
+                    this.name = config.name
+                }
             )
         val file = tempConfigsPath.resolve("${config.name}.json").toFile()
         file.parentFile.mkdirs()

@@ -27,6 +27,9 @@ class VirtualConfigServiceImpl :
     }
 
     override suspend fun getByName(request: GetByNameRequest): GetByNameResponse {
+
+        require(request.name.isNotEmpty()) { "Name must not be empty" }
+
         val collection =
             Node.instance.mongoClient
                 .getDatabase(Node.instance.configProvider.config.mongodb.database)
@@ -46,6 +49,9 @@ class VirtualConfigServiceImpl :
         request: CreateVirtualConfigRequest
     ): CreateVirtualConfigResponse {
 
+        require(request.name.isNotEmpty()) { "Name must not be empty" }
+        require(request.config.isNotEmpty()) { "Config must not be empty" }
+
         val config = virtualConfig {
             this.config = request.config
             this.name = request.name
@@ -61,6 +67,9 @@ class VirtualConfigServiceImpl :
     override suspend fun deleteVirtualConfig(
         request: DeleteVirtualConfigRequest
     ): DeleteVirtualConfigResponse {
+
+        require(request.name.isNotEmpty()) { "Name must not be empty" }
+
         MongoUtils.deleteVirtualConfig(virtualConfig { this.name = request.name })
 
         return deleteVirtualConfigResponse { this.success = true }
@@ -69,6 +78,10 @@ class VirtualConfigServiceImpl :
     override suspend fun updateVirtualConfig(
         request: UpdateVirtualConfigRequest
     ): UpdateVirtualConfigResponse {
+
+        require(request.name.isNotEmpty()) { "Name must not be empty" }
+        require(request.config.isNotEmpty()) { "Config must not be empty" }
+
         val config = virtualConfig {
             this.config = request.config
             this.name = request.name

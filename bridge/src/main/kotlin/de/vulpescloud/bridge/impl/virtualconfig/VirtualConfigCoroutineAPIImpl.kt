@@ -83,7 +83,10 @@ class VirtualConfigCoroutineAPIImpl : VirtualConfigAPI.VirtualConfigCoroutineAPI
     ) {
         val response =
             stub.updateVirtualConfig(
-                updateVirtualConfigRequest { this.config = json.encodeToString(serializer, value) }
+                updateVirtualConfigRequest {
+                    this.config = json.encodeToString(serializer, value)
+                    this.name = name
+                }
             )
         val file = tempConfigsPath.resolve("$name.json").toFile()
         file.parentFile.mkdirs()
@@ -93,7 +96,10 @@ class VirtualConfigCoroutineAPIImpl : VirtualConfigAPI.VirtualConfigCoroutineAPI
     override suspend fun updateCustomConfig(config: VirtualConfig) {
         val response =
             stub.updateVirtualConfig(
-                updateVirtualConfigRequest { this.config = config.config.toString() }
+                updateVirtualConfigRequest {
+                    this.config = config.config.toString()
+                    this.name = config.name
+                }
             )
         val file = tempConfigsPath.resolve("${config.name}.json").toFile()
         file.parentFile.mkdirs()
