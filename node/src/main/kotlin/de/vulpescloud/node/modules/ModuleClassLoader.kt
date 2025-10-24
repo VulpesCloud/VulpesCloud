@@ -20,6 +20,7 @@ class ModuleClassLoader(
             "net.kyori.adventure.",
             "org.slf4j.",
             "ch.qos.logback.",
+            "de.vulpescloud."
         )
 
     override fun loadClass(name: String, resolve: Boolean): Class<*> {

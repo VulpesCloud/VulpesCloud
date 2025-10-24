@@ -10,6 +10,7 @@ import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.services.impl.docker.DockerService
+import de.vulpescloud.node.virtualconfig.VirtualConfigDebugHelper
 import kotlinx.coroutines.launch
 import org.incendo.cloud.annotations.Command
 
@@ -206,6 +207,24 @@ class DebugCommand {
                         .service
                 )
                 .command("velocity plugins")
+        }
+    }
+
+    @Command("debug vconf create")
+    fun createVConf(source: CommandSource) {
+        NodeCoroutineScope.launch {
+            source.sendMessage("Creating config")
+            VirtualConfigDebugHelper.createDebugConfig()
+            source.sendMessage("Successfully created config")
+        }
+    }
+
+    @Command("debug vconf update")
+    fun updateVConf(source: CommandSource) {
+        NodeCoroutineScope.launch {
+            source.sendMessage("Updating config")
+            VirtualConfigDebugHelper.updateDebugConfig()
+            source.sendMessage("Successfully updated config")
         }
     }
 }

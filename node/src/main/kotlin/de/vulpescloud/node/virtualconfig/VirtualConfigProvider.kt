@@ -1,15 +1,17 @@
 package de.vulpescloud.node.virtualconfig
 
+import build.buf.gen.vulpescloud.virtualconfig.v1.UpdateVirtualConfigRequest
 import build.buf.gen.vulpescloud.virtualconfig.v1.configOrNull
 import build.buf.gen.vulpescloud.virtualconfig.v1.getByNameRequest
 import build.buf.gen.vulpescloud.virtualconfig.v1.updateVirtualConfigRequest
 import de.vulpescloud.api.virtualconfig.VirtualConfig
 import de.vulpescloud.node.Node
-import kotlinx.serialization.json.Json
-import org.json.JSONObject
 import java.nio.file.Path
 import kotlin.io.path.Path
+import kotlinx.serialization.json.Json
+import org.json.JSONObject
 
+@Suppress("Unused")
 class VirtualConfigProvider {
 
     val json = Json {
@@ -78,7 +80,7 @@ class VirtualConfigProvider {
 
     suspend inline fun <reified T> updateCustomConfig(config: VirtualConfig, value: T) {
         val response =
-            Node.instance.localGrpcClient.virtualConfigAPI.updateVirtualConfig(
+            Node.instance.virtualConfigServiceImpl.updateVirtualConfig(
                 updateVirtualConfigRequest {
                     this.config = json.encodeToString(value)
                     this.name = config.name
@@ -91,11 +93,11 @@ class VirtualConfigProvider {
 
     suspend inline fun <reified T> updateCustomConfig(name: String, value: T) {
         val response =
-            Node.instance.localGrpcClient.virtualConfigAPI.updateVirtualConfig(
-                updateVirtualConfigRequest {
-                    this.config = json.encodeToString(value)
-                    this.name = name
-                }
+            Node.instance.virtualConfigServiceImpl.updateVirtualConfig(
+                UpdateVirtualConfigRequest.newBuilder()
+                    .setName(name)
+                    .setConfig(json.encodeToString(value))
+                    .build()
             )
         val file = tempConfigsPath.resolve("$name.json").toFile()
         file.parentFile.mkdirs()
@@ -104,7 +106,7 @@ class VirtualConfigProvider {
 
     suspend fun updateCustomConfig(config: VirtualConfig) {
         val response =
-            Node.instance.localGrpcClient.virtualConfigAPI.updateVirtualConfig(
+            Node.instance.virtualConfigServiceImpl.updateVirtualConfig(
                 updateVirtualConfigRequest {
                     this.config = config.config.toString()
                     this.name = config.name
@@ -150,14 +152,20 @@ class VirtualConfigProvider {
     suspend fun updateDatabaseFromLocalConfig(name: String) {
         val json = getLocalConfigJson(name) ?: return
         Node.instance.localGrpcClient.virtualConfigAPI.updateVirtualConfig(
-            updateVirtualConfigRequest { this.config = json }
+            updateVirtualConfigRequest {
+                this.config = json
+                this.name = name
+            }
         )
     }
 
     suspend fun updateDatabaseFromLocalConfig(config: VirtualConfig) {
         val json = getLocalConfigJson(config.name) ?: return
         Node.instance.localGrpcClient.virtualConfigAPI.updateVirtualConfig(
-            updateVirtualConfigRequest { this.config = json }
+            updateVirtualConfigRequest {
+                this.config = json
+                this.name = config.name
+            }
         )
     }
 

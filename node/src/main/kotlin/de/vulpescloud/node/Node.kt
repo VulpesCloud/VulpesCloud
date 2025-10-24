@@ -65,6 +65,8 @@ class Node {
     val clusterProvider = ClusterProvider()
     val moduleProvider = ModuleProvider(Path("modules"))
 
+    val virtualConfigServiceImpl = VirtualConfigServiceImpl()
+
     suspend fun init(scope: CoroutineScope) =
         withContext(Dispatchers.IO) {
             instance = this@Node
@@ -152,7 +154,7 @@ class Node {
                             TasksAPIService(),
                             ServicesAPIService(),
                             EventsService(),
-                            VirtualConfigServiceImpl(),
+                            virtualConfigServiceImpl,
                             ClusterAPIServiceImpl(),
                         ),
                     interceptors = listOf(LoggingServerInterceptor(), AuthInterceptor(secret)),
