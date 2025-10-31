@@ -23,7 +23,7 @@
  */
 
 plugins {
-    kotlin("jvm") version "2.2.20"
+    kotlin("jvm") version "2.2.21"
     id("org.jetbrains.dokka") version "2.1.0"
     alias(libs.plugins.shadow)
 }
