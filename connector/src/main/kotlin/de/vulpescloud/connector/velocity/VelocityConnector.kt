@@ -9,6 +9,7 @@ import com.velocitypowered.api.proxy.ProxyServer
 import de.vulpescloud.api.events.services.ServiceStateChangeEvent
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.bridge.BridgeAPI
+import de.vulpescloud.connector.velocity.commands.CloudCommand
 import de.vulpescloud.connector.velocity.commands.HubCommand
 import de.vulpescloud.connector.velocity.events.PlayerChooseInitialServerEventListener
 import de.vulpescloud.wrapper.Wrapper
@@ -66,6 +67,7 @@ constructor(
         }
 
         HubCommand(proxyServer)
+        CloudCommand()
 
         bridgeAPI
             .getEventAPI()

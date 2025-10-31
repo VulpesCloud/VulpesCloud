@@ -51,7 +51,7 @@ night-config = "3.8.3"
 snakeyml = "2.5"
 
 # command api
-commandapi-velocity-shade = "11.0.0"
+commandapi = "11.0.0"
 
 # shadowJar
 shadow = "9.2.2"
@@ -119,7 +119,8 @@ gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 json = { group = "org.json", name = "json", version.ref = "json" }
 
 # command api
-commandapi-velocity-shade = { group = "dev.jorel", name = "commandapi-velocity-shade", version.ref = "commandapi-velocity-shade" }
+commandapi-velocity-shade = { group = "dev.jorel", name = "commandapi-velocity-shade", version.ref = "commandapi" }
+commandapi-kotlin-velocity = { group = "dev.jorel", name = "commandapi-kotlin-velocity", version.ref = "commandapi" }
 
 # console
 jline = { group = "org.jline", name = "jline", version.ref = "jline" }

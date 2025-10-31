@@ -26,6 +26,7 @@ plugins {
     id("java")
     kotlin("jvm") version "2.2.20"
     alias(libs.plugins.shadow)
+
 }
 
 repositories {
@@ -48,6 +49,8 @@ dependencies {
     implementation("org.bstats:bstats-velocity:3.1.0")
 
     implementation(libs.commandapi.velocity.shade)
+    implementation(libs.commandapi.kotlin.velocity)
+    implementation(libs.kotlinx.serialization)
 }
 
 java {
