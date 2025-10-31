@@ -44,3 +44,6 @@ jobs:
 
       - name: Publish to maven repo
         run: ./gradlew publishAllPublicationsToVulpescloudSnapshotsRepository
+        env:
+          REPO_USERNAME: ${{ secrets.REPO_USERNAME }}
+          REPO_PASSWORD: ${{ secrets.REPO_PASSWORD }}
