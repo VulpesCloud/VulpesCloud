@@ -46,6 +46,8 @@ dependencies {
     compileOnly(libs.bundles.proto)
     implementation("org.bstats:bstats-bukkit:3.1.0")
     implementation("org.bstats:bstats-velocity:3.1.0")
+
+    implementation(libs.commandapi.velocity.shade)
 }
 
 java {

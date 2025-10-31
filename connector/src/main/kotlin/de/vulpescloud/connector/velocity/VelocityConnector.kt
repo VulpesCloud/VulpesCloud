@@ -9,8 +9,11 @@ import com.velocitypowered.api.proxy.ProxyServer
 import de.vulpescloud.api.events.services.ServiceStateChangeEvent
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.bridge.BridgeAPI
+import de.vulpescloud.connector.velocity.commands.HubCommand
 import de.vulpescloud.connector.velocity.events.PlayerChooseInitialServerEventListener
 import de.vulpescloud.wrapper.Wrapper
+import dev.jorel.commandapi.CommandAPI
+import dev.jorel.commandapi.CommandAPIVelocityConfig
 import jakarta.inject.Inject
 import org.bstats.velocity.Metrics
 import org.slf4j.Logger
@@ -34,6 +37,8 @@ constructor(
     @Subscribe
     fun onProxyInitializeEvent(event: ProxyInitializeEvent) {
         metrics = metricsFactory.make(this, pluginID)
+
+        CommandAPI.onLoad(CommandAPIVelocityConfig(proxyServer, this))
 
         velocityServerRegistrationHandler =
             VelocityServerRegistrationHandler(proxyServer, bridgeAPI)
@@ -59,6 +64,8 @@ constructor(
             )
             return
         }
+
+        HubCommand(proxyServer)
 
         bridgeAPI
             .getEventAPI()
