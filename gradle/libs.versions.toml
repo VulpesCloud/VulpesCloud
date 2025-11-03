@@ -10,6 +10,7 @@ guava = "33.5.0-jre"
 
 # utils
 annotations = "26.0.2-1"
+bcrypt = "0.10.2"
 
 # network
 protobuf = "4.33.0"
@@ -109,6 +110,7 @@ docker-java-transport = { group = "com.github.docker-java", name = "docker-java-
 
 # utils
 annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
+bcrypt = { group = "at.favre.lib", name = "bcrypt", version.ref = "bcrypt" }
 
 # logging
 slf4jApi = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }

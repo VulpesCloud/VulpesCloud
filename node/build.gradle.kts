@@ -75,6 +75,7 @@ dependencies {
     compileOnly(libs.bundles.docker)
     compileOnly(kotlin("reflect"))
     compileOnly(libs.javaJWT)
+    compileOnly(libs.bcrypt)
 }
 
 sourceSets { getByName("main") { kotlin { srcDir("src/main/kotlin") } } }

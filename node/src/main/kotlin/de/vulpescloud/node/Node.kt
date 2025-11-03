@@ -19,6 +19,7 @@ import de.vulpescloud.node.grpc.GrpcServer
 import de.vulpescloud.node.grpc.LocalGrpcClient
 import de.vulpescloud.node.grpc.LoggingServerInterceptor
 import de.vulpescloud.node.grpc.security.AuthInterceptor
+import de.vulpescloud.node.grpc.security.PermissionInterceptor
 import de.vulpescloud.node.modules.ModuleProvider
 import de.vulpescloud.node.secret.SecretFactory
 import de.vulpescloud.node.services.AbstractService
@@ -116,6 +117,7 @@ class Node {
                     register(TaskCommand())
                     register(VirtualConfigCommand())
                     register(ClusterCommand())
+                    register(AuthCommand())
                 }
             } catch (e: Exception) {
                 logger.error("Failed to initialize commands: ${e.stackTraceToString()}")
@@ -161,6 +163,7 @@ class Node {
                         listOf(
                             LoggingServerInterceptor(),
                             AuthInterceptor(secret, configProvider.config.jwtSecret),
+                            PermissionInterceptor(),
                         ),
                 )
             grpcServer.start()

@@ -6,12 +6,13 @@ import build.buf.gen.vulpescloud.services.v1.ServiceAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.virtualconfig.v1.VirtualConfigServiceGrpcKt
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
-import io.grpc.ManagedChannel
+import io.grpc.Channel
+import io.grpc.ClientInterceptors
 import io.grpc.ManagedChannelBuilder
 
 class LocalGrpcClient {
 
-    private lateinit var channel: ManagedChannel
+    private lateinit var channel: Channel
     lateinit var serviceAPI: ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub
     lateinit var tasksAPI: TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub
     lateinit var eventsAPI: EventServiceGrpcKt.EventServiceCoroutineStub
@@ -24,7 +25,11 @@ class LocalGrpcClient {
         // creds: ChannelCredentials,
         secret: String,
     ) {
-        channel = ManagedChannelBuilder.forAddress(host, port).usePlaintext().build()
+        channel =
+            ClientInterceptors.intercept(
+                ManagedChannelBuilder.forAddress(host, port).usePlaintext().build(),
+                AuthClientInterceptor(secret),
+            )
 
         serviceAPI =
             ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(channel)
