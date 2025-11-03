@@ -157,7 +157,11 @@ class Node {
                             virtualConfigServiceImpl,
                             ClusterAPIServiceImpl(),
                         ),
-                    interceptors = listOf(LoggingServerInterceptor(), AuthInterceptor(secret)),
+                    interceptors =
+                        listOf(
+                            LoggingServerInterceptor(),
+                            AuthInterceptor(secret, configProvider.config.jwtSecret),
+                        ),
                 )
             grpcServer.start()
             NodeCoroutineScope.launch { grpcServer.awaitTermination() }

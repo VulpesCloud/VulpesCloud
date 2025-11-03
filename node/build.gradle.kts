@@ -74,6 +74,7 @@ dependencies {
     compileOnly(libs.perfmark)
     compileOnly(libs.bundles.docker)
     compileOnly(kotlin("reflect"))
+    compileOnly(libs.javaJWT)
 }
 
 sourceSets { getByName("main") { kotlin { srcDir("src/main/kotlin") } } }

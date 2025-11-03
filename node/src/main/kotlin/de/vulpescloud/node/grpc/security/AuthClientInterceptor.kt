@@ -3,16 +3,22 @@ package de.vulpescloud.node.grpc.security
 import io.grpc.*
 
 class AuthClientInterceptor(private val token: String) : ClientInterceptor {
+
     override fun <ReqT : Any?, RespT : Any?> interceptCall(
         method: MethodDescriptor<ReqT, RespT>,
         callOptions: CallOptions,
-        next: Channel
+        next: Channel,
     ): ClientCall<ReqT, RespT> {
         val call = next.newCall(method, callOptions)
         return object : ForwardingClientCall.SimpleForwardingClientCall<ReqT, RespT>(call) {
             override fun start(responseListener: Listener<RespT>, headers: Metadata) {
                 val authKey = Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER)
+                val communicationTypeKey =
+                    Metadata.Key.of("communication-type", Metadata.ASCII_STRING_MARSHALLER)
+
                 headers.put(authKey, "Bearer $token")
+                headers.put(communicationTypeKey, "internal")
+
                 super.start(responseListener, headers)
             }
         }

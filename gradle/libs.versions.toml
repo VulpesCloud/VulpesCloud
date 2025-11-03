@@ -18,6 +18,8 @@ grpc-kotlin = "1.5.0"
 protospecs-grpc = "1.5.0.1.20250930184830.3aeb7ae6f9e8"
 perfmark = "0.27.0"
 
+javaJWT = "4.5.0"
+
 # ok
 okhttp = "5.2.1"
 okio = "3.16.2"
@@ -93,6 +95,8 @@ grpc-netty = { module = "io.grpc:grpc-netty", version.ref = "grpc" }
 grpc-core = { module = "io.grpc:grpc-core", version.ref = "grpc" }
 protospecs-grpc = { group = "build.buf.gen", name = "vulpescloud_protospecs_grpc_kotlin", version.ref = "protospecs-grpc" }
 perfmark = { group = "io.perfmark", name = "perfmark-api", version.ref = "perfmark" }
+
+javaJWT = { group = "com.auth0", name = "java-jwt", version.ref = "javaJWT" }
 
 # mongo
 mongodb-driver-coroutine = { group = "org.mongodb", name = "mongodb-driver-kotlin-coroutine", version.ref = "mongodb" }

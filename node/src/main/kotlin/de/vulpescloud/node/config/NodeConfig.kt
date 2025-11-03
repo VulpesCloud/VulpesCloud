@@ -15,5 +15,6 @@ data class NodeConfig(
     val maxMemory: Int = 1024, // MB
     val defaultServiceType: String = "LOCAL", // can be "LOCAL" or "DOCKER"
     val docker: DockerConfig,
-    val useModernForwarding: Boolean
+    val useModernForwarding: Boolean,
+    val jwtSecret: String = UUID.randomUUID().toString()
 )
