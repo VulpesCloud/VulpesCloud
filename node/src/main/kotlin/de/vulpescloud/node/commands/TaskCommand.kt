@@ -88,7 +88,7 @@ class TaskCommand {
         }
     }
 
-    @Command("task|tasks task <tasks> [info]")
+    @Command("task|tasks task <tasks> info")
     fun infoTask(source: CommandSource, @Argument("tasks") tasks: List<Task>) {
         tasks.forEach {
             source.sendMessage(
