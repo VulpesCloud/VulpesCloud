@@ -11,6 +11,9 @@ import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.annotation.Alias
 import de.vulpescloud.node.setup.setups.TaskSetup
+import java.util.concurrent.CompletableFuture
+import java.util.concurrent.TimeUnit
+import java.util.stream.Stream
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
@@ -20,9 +23,6 @@ import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
 import org.incendo.cloud.processors.confirmation.annotation.Confirmation
-import java.util.concurrent.CompletableFuture
-import java.util.concurrent.TimeUnit
-import java.util.stream.Stream
 
 @Suppress("UNUSED")
 @Alias(["task"])
@@ -85,6 +85,31 @@ class TaskCommand {
                     " &8- &m$name &7Maintenance: &e${it.maintenance}&8, &7MaxPlayers: &e${it.maxPlayers}&8, &7MaxMemory: &e${it.maxMemory}MB&8, &7Static: &e${it.staticServices}&8, &7Fallback: &eNOT IMPLEMENTED&8, &7StartPort: &e${it.startPort}&8, &7Version: &e${it.software.name}-${it.software.version}"
                 )
             }
+        }
+    }
+
+    @Command("task|tasks task <tasks> [info]")
+    fun infoTask(source: CommandSource, @Argument("tasks") tasks: List<Task>) {
+        tasks.forEach {
+            source.sendMessage(
+                "&7Name: &e${it.name} \n" +
+                    "&7MaxPlayers: &e${it.maxPlayers} \n" +
+                    "&7MaxMemory: &e${it.maxMemory}MB \n" +
+                    "&7Static: &e${it.staticServices} \n" +
+                    "&7Fallback: &e${it.fallback} \n" +
+                    "&7StartPort: &e${it.startPort} \n" +
+                    "&7Version: &e${it.software.name}-${it.software.version}" +
+                    "&7StaticServices: &e${it.staticServices} \n" +
+                    "&7Maintenance: &e${it.maintenance}" +
+                    "&7PreferredNode: &e${it.preferredNode}" +
+                    "&7ServiceFactory: &e${it.serviceFactoryName}" +
+                    "&7CopyTemplatesToStatic: &e${it.copyTemplatesToStatic}" +
+                    "&7MinOnlineServices: &e${it.minOnlineServices} \n" +
+                    "&7MaxOnlineServices: &e${it.maxOnlineServices} \n" +
+                    "&7JvmArgs: &e${it.jvmArgs.joinToString(", ")} \n" +
+                    "&7EnvVars: &e${it.envVars.joinToString(", ")}" +
+                    "&7Attributes: &e${it.attributes?.toString() ?: "None"}"
+            )
         }
     }
 
