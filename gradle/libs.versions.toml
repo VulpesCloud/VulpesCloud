@@ -13,8 +13,8 @@ annotations = "26.0.2-1"
 bcrypt = "0.10.2"
 
 # network
-protobuf = "4.33.0"
-grpc = "1.76.0"
+protobuf = "4.33.1"
+grpc = "1.77.0"
 grpc-kotlin = "1.5.0"
 protospecs-grpc = "1.5.0.1.20250930184830.3aeb7ae6f9e8"
 perfmark = "0.27.0"
@@ -22,11 +22,11 @@ perfmark = "0.27.0"
 javaJWT = "4.5.0"
 
 # ok
-okhttp = "5.3.0"
-okio = "3.16.2"
+okhttp = "5.3.2"
+okio = "3.16.4"
 
 # docker
-docker-java = "3.6.0"
+docker-java = "3.7.0"
 
 # mongo
 mongodb = "5.6.1"
@@ -34,7 +34,7 @@ reactor = "3.8.0"
 
 # logging
 slf4j = "2.1.0-alpha1"
-logback = "1.5.20"
+logback = "1.5.21"
 adventure = "4.25.0"
 
 # configuration
