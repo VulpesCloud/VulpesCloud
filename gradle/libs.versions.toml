@@ -57,7 +57,7 @@ snakeyml = "2.5"
 commandapi = "11.0.0"
 
 # shadowJar
-shadow = "9.2.2"
+shadow = "9.3.0"
 
 # bouncy castle
 bouncy-castle = "1.70"
