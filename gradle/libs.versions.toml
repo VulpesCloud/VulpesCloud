@@ -13,7 +13,7 @@ annotations = "26.0.2-1"
 bcrypt = "0.10.2"
 
 # network
-protobuf = "4.33.1"
+protobuf = "4.33.2"
 grpc = "1.77.0"
 grpc-kotlin = "1.5.0"
 protospecs-grpc = "1.5.0.1.20251207133204.c51434a3e86a"
@@ -29,8 +29,8 @@ okio = "3.16.4"
 docker-java = "3.7.0"
 
 # mongo
-mongodb = "5.6.1"
-reactor = "3.8.0"
+mongodb = "5.6.2"
+reactor = "3.8.1"
 
 # logging
 slf4j = "2.1.0-alpha1"
@@ -57,7 +57,7 @@ snakeyml = "2.5"
 commandapi = "11.0.0"
 
 # shadowJar
-shadow = "9.2.2"
+shadow = "9.3.0"
 
 # bouncy castle
 bouncy-castle = "1.70"
