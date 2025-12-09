@@ -11,11 +11,22 @@ class AuthInterceptor(private val internalToken: String, jwtSecret: String) : Se
     private val jwtVerifier: JWTVerifier =
         JWT.require(Algorithm.HMAC256(jwtSecret)).withIssuer("vulpescloud").build()
 
+    private val publicRpcs = setOf(
+        "AuthService/Authenticate",
+        "AuthService/RefreshToken",
+        "AuthService/IsTokenValid"
+    )
+
     override fun <ReqT : Any?, RespT : Any?> interceptCall(
         call: ServerCall<ReqT, RespT>,
         headers: Metadata,
         next: ServerCallHandler<ReqT, RespT>,
     ): ServerCall.Listener<ReqT> {
+        val methodName = call.methodDescriptor.fullMethodName
+        if (methodName in publicRpcs) {
+            return next.startCall(call, headers)
+        }
+
         val authHeaderKey = Metadata.Key.of("authorization", Metadata.ASCII_STRING_MARSHALLER)
         val communicationTypeKey =
             Metadata.Key.of("communication-type", Metadata.ASCII_STRING_MARSHALLER)

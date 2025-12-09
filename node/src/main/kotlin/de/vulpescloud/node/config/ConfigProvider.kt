@@ -17,6 +17,7 @@ class ConfigProvider {
         encodeDefaults = true
         allowComments = true
         allowTrailingComma = true
+        ignoreUnknownKeys = true
     }
 
     fun loadConfig(): Boolean {

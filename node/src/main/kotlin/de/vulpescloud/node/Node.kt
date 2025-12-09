@@ -8,6 +8,7 @@ import com.github.dockerjava.transport.DockerHttpClient
 import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.kotlin.client.coroutine.MongoClient
+import de.vulpescloud.node.auth.AuthServiceImpl
 import de.vulpescloud.node.cluster.ClusterAPIServiceImpl
 import de.vulpescloud.node.cluster.ClusterProvider
 import de.vulpescloud.node.command.CommandProvider
@@ -158,11 +159,15 @@ class Node {
                             EventsService(),
                             virtualConfigServiceImpl,
                             ClusterAPIServiceImpl(),
+                            AuthServiceImpl(
+                                configProvider.config.auth.jwtSecret,
+                                configProvider.config.auth.jwtRefreshSecret,
+                            ),
                         ),
                     interceptors =
                         listOf(
                             LoggingServerInterceptor(),
-                            AuthInterceptor(secret, configProvider.config.jwtSecret),
+                            AuthInterceptor(secret, configProvider.config.auth.jwtSecret),
                             PermissionInterceptor(),
                         ),
                 )

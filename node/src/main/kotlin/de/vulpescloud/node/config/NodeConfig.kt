@@ -16,5 +16,5 @@ data class NodeConfig(
     val defaultServiceType: String = "LOCAL", // can be "LOCAL" or "DOCKER"
     val docker: DockerConfig,
     val useModernForwarding: Boolean,
-    val jwtSecret: String = UUID.randomUUID().toString()
+    val auth: AuthConfig = AuthConfig("changeme", "changeme2", true),
 )

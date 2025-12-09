@@ -10,12 +10,19 @@ import kotlin.reflect.full.findAnnotation
 
 class PermissionInterceptor : ServerInterceptor {
 
+    private val publicRpcs =
+        setOf("AuthService/Authenticate", "AuthService/RefreshToken", "AuthService/IsTokenValid")
+
     override fun <ReqT : Any?, RespT : Any?> interceptCall(
         call: ServerCall<ReqT, RespT>,
         headers: Metadata,
         next: ServerCallHandler<ReqT, RespT>,
     ): ServerCall.Listener<ReqT> {
         val methodName = call.methodDescriptor.fullMethodName
+        if (methodName in publicRpcs) {
+            return next.startCall(call, headers)
+        }
+
         val (serviceClass, rpcName) = methodName.split("/").let { it[0] to it[1] }
 
         val communicationType =
