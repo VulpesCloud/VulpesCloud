@@ -11,7 +11,7 @@ import kotlin.reflect.full.findAnnotation
 class PermissionInterceptor : ServerInterceptor {
 
     private val publicRpcs =
-        setOf("AuthService/Authenticate", "AuthService/RefreshToken", "AuthService/IsTokenValid")
+        setOf("authenticate", "refreshToken", "isTokenValid")
 
     override fun <ReqT : Any?, RespT : Any?> interceptCall(
         call: ServerCall<ReqT, RespT>,
@@ -19,11 +19,11 @@ class PermissionInterceptor : ServerInterceptor {
         next: ServerCallHandler<ReqT, RespT>,
     ): ServerCall.Listener<ReqT> {
         val methodName = call.methodDescriptor.fullMethodName
-        if (methodName in publicRpcs) {
+        val (serviceClass, rpcName) = methodName.split("/").let { it[0] to it[1] }
+
+        if (rpcName.lowercase() in publicRpcs) {
             return next.startCall(call, headers)
         }
-
-        val (serviceClass, rpcName) = methodName.split("/").let { it[0] to it[1] }
 
         val communicationType =
             headers.get(Metadata.Key.of("communication-type", Metadata.ASCII_STRING_MARSHALLER))
@@ -31,7 +31,10 @@ class PermissionInterceptor : ServerInterceptor {
         if (communicationType != "internal") {
             val serviceInstance = GrpcServiceRegistry.get(serviceClass)
             if (serviceInstance != null) {
-                val kFunction = serviceInstance::class.declaredFunctions.find { it.name == rpcName }
+                val kFunction =
+                    serviceInstance::class.declaredFunctions.find {
+                        it.name.equals(rpcName, ignoreCase = true)
+                    }
                 val annotation = kFunction?.findAnnotation<RequiresPermission>()
 
                 if (annotation != null) {

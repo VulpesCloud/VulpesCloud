@@ -166,9 +166,9 @@ class Node {
                         ),
                     interceptors =
                         listOf(
-                            LoggingServerInterceptor(),
-                            AuthInterceptor(secret, configProvider.config.auth.jwtSecret),
                             PermissionInterceptor(),
+                            AuthInterceptor(secret, configProvider.config.auth.jwtSecret),
+                            LoggingServerInterceptor(),
                         ),
                 )
             grpcServer.start()
