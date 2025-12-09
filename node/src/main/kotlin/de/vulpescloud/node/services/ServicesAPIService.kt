@@ -4,6 +4,7 @@ import build.buf.gen.vulpescloud.services.v1.*
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.BsonDocument
 import org.bson.BsonString
@@ -13,6 +14,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
 
     private val logger = LoggerFactory.getLogger("ServicesAPIService")
 
+    @RequiresPermission("services.list")
     override suspend fun getAllServices(request: GetAllServicesRequest): GetAllServicesResponse {
         val collection =
             Node.instance.mongoClient
@@ -30,6 +32,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         return GetAllServicesResponse.newBuilder().addAllServices(services).build()
     }
 
+    @RequiresPermission("services.get")
     override suspend fun getByName(request: GetByNameRequest): GetByNameResponse {
         val collection =
             Node.instance.mongoClient
@@ -46,6 +49,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         return GetByNameResponse.newBuilder().setService(service.toDefinition()).build()
     }
 
+    @RequiresPermission("services.get")
     override suspend fun getByUuid(request: GetByUuidRequest): GetByUuidResponse {
         val collection =
             Node.instance.mongoClient
@@ -62,6 +66,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         return GetByUuidResponse.newBuilder().setService(service.toDefinition()).build()
     }
 
+    @RequiresPermission("services.prepare")
     override suspend fun prepareServiceByTask(
         request: PrepareServiceByTaskRequest
     ): PrepareServiceByTaskResponse {
@@ -81,25 +86,27 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             .build()
     }
 
-//    override suspend fun prepareServiceByService(
-//        request: PrepareServiceByServiceRequest
-//    ): PrepareServiceByServiceResponse {
-//        val service = Service.fromDefinition(request.service)
-//
-//        val serviceFactory =
-//            Node.instance.serviceFactoryProvider.findServiceFactory(service.task.serviceFactoryName)
-//        if (serviceFactory == null) {
-//            throw IllegalArgumentException(
-//                "Unable to find ServiceFactory ${service.task.serviceFactoryName}"
-//            )
-//        }
-//        val abstractService = serviceFactory.prepareService(service)
-//
-//        return PrepareServiceByServiceResponse.newBuilder()
-//            .setService(abstractService.service.toDefinition())
-//            .build()
-//    }
+    //    override suspend fun prepareServiceByService(
+    //        request: PrepareServiceByServiceRequest
+    //    ): PrepareServiceByServiceResponse {
+    //        val service = Service.fromDefinition(request.service)
+    //
+    //        val serviceFactory =
+    //
+    // Node.instance.serviceFactoryProvider.findServiceFactory(service.task.serviceFactoryName)
+    //        if (serviceFactory == null) {
+    //            throw IllegalArgumentException(
+    //                "Unable to find ServiceFactory ${service.task.serviceFactoryName}"
+    //            )
+    //        }
+    //        val abstractService = serviceFactory.prepareService(service)
+    //
+    //        return PrepareServiceByServiceResponse.newBuilder()
+    //            .setService(abstractService.service.toDefinition())
+    //            .build()
+    //    }
 
+    @RequiresPermission("services.start")
     override suspend fun startService(request: StartServiceRequest): StartServiceResponse {
         val service = Service.fromDefinition(request.service)
 
@@ -117,6 +124,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             .build()
     }
 
+    @RequiresPermission("services.stop")
     override suspend fun stopService(request: StopServiceRequest): StopServiceResponse {
         val service = Service.fromDefinition(request.service)
 
@@ -134,6 +142,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             .build()
     }
 
+    @RequiresPermission("services.restart")
     override suspend fun restartService(request: RestartServiceRequest): RestartServiceResponse {
         val service = Service.fromDefinition(request.service)
 
@@ -151,6 +160,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             .build()
     }
 
+    @RequiresPermission("services.delete")
     override suspend fun deleteService(request: DeleteServiceRequest): DeleteServiceResponse {
         val service = Service.fromDefinition(request.service)
 
@@ -168,6 +178,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             .build()
     }
 
+    @RequiresPermission("services.sendCommand")
     override suspend fun sendCommand(request: SendCommandRequest): SendCommandResponse {
         val service = Service.fromDefinition(request.service)
 
