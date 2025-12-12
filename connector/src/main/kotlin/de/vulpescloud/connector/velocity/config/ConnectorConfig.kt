@@ -39,6 +39,6 @@ fun String.replaceCommonServicePlaceholders(service: Service): String {
 suspend fun getConfig(): ConnectorConfig {
     return BridgeAPI.getCoroutineAPI()
         .getVirtualConfigAPI()
-        .getCustomConfigObject<ConnectorConfig>("vc_connector", ConnectorConfig.serializer())
+        .getCustomConfigObject("vc_connector", ConnectorConfig.serializer(), false)
         ?: throw IllegalStateException("ConnectorConfig not found!")
 }

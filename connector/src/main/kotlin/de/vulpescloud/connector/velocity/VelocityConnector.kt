@@ -1,5 +1,6 @@
 package de.vulpescloud.connector.velocity
 
+import build.buf.gen.vulpescloud.virtualconfig.v1.createVirtualConfigRequest
 import com.velocitypowered.api.event.EventManager
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
@@ -11,11 +12,14 @@ import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.bridge.BridgeAPI
 import de.vulpescloud.connector.velocity.commands.CloudCommand
 import de.vulpescloud.connector.velocity.commands.HubCommand
+import de.vulpescloud.connector.velocity.config.ConnectorConfig
 import de.vulpescloud.connector.velocity.events.PlayerChooseInitialServerEventListener
 import de.vulpescloud.wrapper.Wrapper
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIVelocityConfig
 import jakarta.inject.Inject
+import kotlinx.coroutines.runBlocking
+import kotlinx.serialization.json.Json
 import org.bstats.velocity.Metrics
 import org.slf4j.Logger
 import java.util.concurrent.TimeUnit
@@ -45,6 +49,15 @@ constructor(
             VelocityServerRegistrationHandler(proxyServer, bridgeAPI)
 
         eventManager.register(this, PlayerChooseInitialServerEventListener(bridgeAPI, proxyServer))
+
+        runBlocking {
+            BridgeAPI.getCoroutineAPI().getVirtualConfigAPI().stub.createVirtualConfig(
+                createVirtualConfigRequest {
+                    this.name = "vc_connector"
+                    this.config = Json.encodeToString(ConnectorConfig())
+                }
+            )
+        }
 
         val localService =
             try {

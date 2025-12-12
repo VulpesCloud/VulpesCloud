@@ -16,7 +16,7 @@ import kotlin.io.path.Path
 
 class VirtualConfigCoroutineAPIImpl : VirtualConfigAPI.VirtualConfigCoroutineAPI {
 
-    private val stub =
+    val stub =
         VirtualConfigServiceGrpcKt.VirtualConfigServiceCoroutineStub(
                 Wrapper.instance.grpcClient.channel
             )
