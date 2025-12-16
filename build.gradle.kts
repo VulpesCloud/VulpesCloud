@@ -32,7 +32,7 @@ plugins {
     id("signing")
     id("maven-publish")
     alias(libs.plugins.shadow)
-    kotlin("plugin.serialization") version "2.2.21"
+    kotlin("plugin.serialization") version "2.3.0"
 }
 
 group = "de.vulpescloud"
