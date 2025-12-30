@@ -2,6 +2,7 @@ package de.vulpescloud.node.virtualconfig
 
 import build.buf.gen.vulpescloud.virtualconfig.v1.*
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import de.vulpescloud.node.utils.MongoUtils
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.BsonDocument
@@ -11,6 +12,7 @@ import build.buf.gen.vulpescloud.virtualconfig.v1.VirtualConfig as VirtualConfig
 class VirtualConfigServiceImpl :
     VirtualConfigServiceGrpcKt.VirtualConfigServiceCoroutineImplBase() {
 
+    @RequiresPermission("virtualconfig.list")
     override suspend fun getAll(request: GetAllRequest): GetAllResponse {
         val collection =
             Node.instance.mongoClient
@@ -26,6 +28,7 @@ class VirtualConfigServiceImpl :
         return getAllResponse { this.configs.addAll(configs) }
     }
 
+    @RequiresPermission("virtualconfig.get")
     override suspend fun getByName(request: GetByNameRequest): GetByNameResponse {
 
         require(request.name.isNotEmpty()) { "Name must not be empty" }
@@ -45,6 +48,7 @@ class VirtualConfigServiceImpl :
         return getByNameResponse { this.config = config }
     }
 
+    @RequiresPermission("virtualconfig.create")
     override suspend fun createVirtualConfig(
         request: CreateVirtualConfigRequest
     ): CreateVirtualConfigResponse {
@@ -64,6 +68,7 @@ class VirtualConfigServiceImpl :
         return createVirtualConfigResponse { this.config = config }
     }
 
+    @RequiresPermission("virtualconfig.delete")
     override suspend fun deleteVirtualConfig(
         request: DeleteVirtualConfigRequest
     ): DeleteVirtualConfigResponse {
@@ -75,6 +80,7 @@ class VirtualConfigServiceImpl :
         return deleteVirtualConfigResponse { this.success = true }
     }
 
+    @RequiresPermission("virtualconfig.update")
     override suspend fun updateVirtualConfig(
         request: UpdateVirtualConfigRequest
     ): UpdateVirtualConfigResponse {

@@ -4,12 +4,14 @@ import build.buf.gen.vulpescloud.node.v1.*
 import de.vulpescloud.api.cluster.ClusterNode
 import de.vulpescloud.api.cluster.NodeSnapshot
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.BsonDocument
 import org.bson.BsonString
 
 class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineImplBase() {
 
+    @RequiresPermission("cluster.getAll")
     override suspend fun getAllNodes(request: GetAllNodesRequest): GetAllNodesResponse {
         val collection =
             Node.instance.mongoClient
@@ -27,6 +29,7 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
         return GetAllNodesResponse.newBuilder().addAllNodes(nodes).build()
     }
 
+    @RequiresPermission("cluster.get")
     override suspend fun getNodeByName(request: GetNodeByNameRequest): GetNodeByNameResponse {
         val collection =
             Node.instance.mongoClient
@@ -47,6 +50,7 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
         return GetNodeByNameResponse.newBuilder().setNode(node.toDefinition()).build()
     }
 
+    @RequiresPermission("cluster.getSnapshot")
     override suspend fun getNodeSnapshot(request: GetNodeSnapshotRequest): GetNodeSnapshotResponse {
         val collection =
             Node.instance.mongoClient

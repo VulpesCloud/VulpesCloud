@@ -10,6 +10,7 @@ import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.cluster.ClusterHelper
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
+import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -27,6 +28,7 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
     private val subscribers = CopyOnWriteArrayList<Channel<GrpcEvent>>()
     private val logger = LoggerFactory.getLogger("EventsService")
 
+    @RequiresPermission("events.subscribe")
     override fun subscribe(request: SubscribeRequest): Flow<GrpcEvent> {
         val channel = Channel<GrpcEvent>(capacity = Channel.UNLIMITED)
         subscribers.add(channel)
@@ -42,6 +44,7 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
         }
     }
 
+    @RequiresPermission("events.publish")
     override suspend fun publish(request: PublishRequest): PublishResponse {
         val event = request.event
 

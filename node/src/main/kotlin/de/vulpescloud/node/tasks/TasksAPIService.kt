@@ -3,6 +3,7 @@ package de.vulpescloud.node.tasks
 import build.buf.gen.vulpescloud.tasks.v1.*
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import de.vulpescloud.node.utils.MongoUtils
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.BsonDocument
@@ -13,6 +14,7 @@ class TasksAPIService : TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineImplBase()
 
     private val logger = LoggerFactory.getLogger("TasksAPIService")
 
+    @RequiresPermission("tasks.create")
     override suspend fun createTask(request: CreateTaskRequest): CreateTaskResponse {
         val task = Task.fromDefinition(request.task)
         val collection =
@@ -37,6 +39,7 @@ class TasksAPIService : TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineImplBase()
         return CreateTaskResponse.newBuilder().setTask(request.task).build()
     }
 
+    @RequiresPermission("tasks.delete")
     override suspend fun deleteTask(request: DeleteTaskRequest): DeleteTaskResponse {
         val task = Task.fromDefinition(request.task)
         val collection =
@@ -58,6 +61,7 @@ class TasksAPIService : TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineImplBase()
         return DeleteTaskResponse.newBuilder().setTask(task.toDefinition()).build()
     }
 
+    @RequiresPermission("tasks.getAll")
     override suspend fun getAllTasks(request: GetAllTasksRequest): GetAllTasksResponse {
         val collection =
             Node.instance.mongoClient
@@ -75,6 +79,7 @@ class TasksAPIService : TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineImplBase()
         return GetAllTasksResponse.newBuilder().addAllTasks(tasks).build()
     }
 
+    @RequiresPermission("tasks.get")
     override suspend fun getByName(request: GetByNameRequest): GetByNameResponse {
         val collection =
             Node.instance.mongoClient
@@ -92,6 +97,7 @@ class TasksAPIService : TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineImplBase()
         return GetByNameResponse.newBuilder().setTask(task.toDefinition()).build()
     }
 
+    @RequiresPermission("tasks.update")
     override suspend fun updateTask(request: UpdateTaskRequest): UpdateTaskResponse {
         MongoUtils.updateTask(Task.fromDefinition(request.task))
         return UpdateTaskResponse.newBuilder().setTask(request.task).build()

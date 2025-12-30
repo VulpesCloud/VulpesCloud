@@ -119,6 +119,7 @@ class Node {
                     register(VirtualConfigCommand())
                     register(ClusterCommand())
                     register(AuthCommand())
+                    register(ModuleCommand())
                 }
             } catch (e: Exception) {
                 logger.error("Failed to initialize commands: ${e.stackTraceToString()}")
