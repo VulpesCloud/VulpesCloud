@@ -22,39 +22,52 @@
  * SOFTWARE.
  */
 
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     id("vulpescloud.parent-build-logic")
-    kotlin("jvm") version "2.2.10"
-    id("org.jetbrains.dokka") version "2.0.0"
+    kotlin("jvm") version "2.3.0"
+    id("org.jetbrains.dokka") version "2.1.0"
     id("signing")
     id("maven-publish")
     alias(libs.plugins.shadow)
+    kotlin("plugin.serialization") version "2.3.0"
 }
 
 group = "de.vulpescloud"
 version = "2.0.0"
+
+tasks.named("build") {
+    enabled = false
+}
+
+tasks.named("shadowJar") {
+    enabled = false
+}
 
 allprojects {
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
     apply(plugin = "org.jetbrains.dokka")
     apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
-    version = "2.0.0"
+    version = "3.0.0"
     group = "de.vulpescloud"
 
     repositories {
         mavenCentral()
         maven("https://repo.vulpescloud.de/snapshots")
+        maven {
+            name = "buf"
+            url = uri("https://buf.build/gen/maven")
+        }
     }
 
     dependencies {
-        "implementation"(rootProject.libs.annotations)
-        "implementation"(rootProject.libs.gson)
-        "implementation"(rootProject.libs.guava)
-        "implementation"(kotlin("reflect"))
-        "implementation"(rootProject.libs.koin)
-        "implementation"(rootProject.libs.kotlin.stdlib)
+        compileOnly(rootProject.libs.annotations)
+        compileOnly(rootProject.libs.gson)
     }
 
     publishing {
@@ -92,50 +105,68 @@ allprojects {
             languageVersion.set(JavaLanguageVersion.of(21))
         }
     }
-}
 
-tasks.register("copyFilesForMetaRepo") {
-    dependsOn(project(":VulpesCloud-api").tasks.jar)
-    dependsOn(project(":VulpesCloud-bridge").tasks.jar)
-    dependsOn(project(":VulpesCloud-node").tasks.shadowJar)
-    dependsOn(project(":VulpesCloud-wrapper").tasks.shadowJar)
-    dependsOn(project(":VulpesCloud-connector").tasks.shadowJar)
-    dependsOn(project(":VulpesCloud-launcher").tasks.shadowJar)
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_21)
+        }
+    }
 
-    doLast {
-        copy {
-            from(project(":VulpesCloud-api").buildDir.resolve("libs/vulpescloud-api.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-api.jar" }
-        }
-        copy {
-            from(project(":VulpesCloud-bridge").buildDir.resolve("libs/vulpescloud-bridge.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-bridge.jar" }
-        }
-        copy {
-            from(project(":VulpesCloud-node").buildDir.resolve("libs/vulpescloud-node.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-node.jar" }
-        }
-        copy {
-            from(project(":VulpesCloud-wrapper").buildDir.resolve("libs/vulpescloud-wrapper.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-wrapper.jar" }
-        }
-        copy {
-            from(project(":VulpesCloud-connector").buildDir.resolve("libs/vulpescloud-connector.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-connector.jar" }
-        }
-        copy {
-            from(project(":VulpesCloud-launcher").buildDir.resolve("libs/vulpescloud-launcher.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-launcher.jar" }
-        }
-
-        generateCheckSums("$buildDir/meta-repo")
+    tasks.withType<JavaCompile> {
+        sourceCompatibility = "21"
+        targetCompatibility = "21"
     }
 }
 
+subprojects {
+    tasks.withType<ShadowJar> {
+        archiveBaseName.set("vulpescloud-${project.name}")
+        archiveFileName.set("vulpescloud-${project.name}.jar")
 
+        destinationDirectory.set(file("${rootProject.layout.buildDirectory.get()}/libs"))
+    }
+}
+
+tasks.register("buildAll") {
+    group = "build"
+    description = "Builds all valid subprojects using shadowJar"
+
+
+
+    dependsOn(
+        subprojects.filter { sub ->
+            val hasBuildFile = file("${sub.projectDir}/build.gradle.kts").exists()
+            val hasPlugin = sub.plugins.hasPlugin("java") || sub.plugins.hasPlugin("org.jetbrains.kotlin.jvm")
+            hasBuildFile && hasPlugin
+        }.mapNotNull { sub ->
+            sub.tasks.findByName("shadowJar")
+        }
+    )
+}
+
+tasks.register("copyFilesForMetaRepo") {
+    dependsOn(tasks.named("buildAll"))
+
+    doLast {
+        val buildDir = rootProject.layout.buildDirectory.get().asFile
+        val libsDir = File(buildDir, "libs")
+
+        // Copy all JAR files from the libs directory to the meta-repo directory
+        val metaRepoDir = File(buildDir, "meta-repo")
+        if (metaRepoDir.exists()) {
+            metaRepoDir.deleteRecursively()
+        }
+        metaRepoDir.mkdirs()
+
+        libsDir.listFiles { file -> file.extension == "jar" }?.forEach { jarFile ->
+            jarFile.copyTo(File(metaRepoDir, jarFile.name), overwrite = true)
+        }
+
+        println("All JAR files copied to ${metaRepoDir.absolutePath}")
+
+        val jarFiles = metaRepoDir.listFiles { file -> file.extension == "jar" }
+        if (jarFiles != null && jarFiles.isNotEmpty()) {
+            generateCheckSums(File(buildDir, "meta-repo").toPath(), jarFiles.map { it.name })
+        }
+    }
+}

@@ -20,11 +20,11 @@ repositories {
 
 | artifact id           | usage                                                                                         |
 |-----------------------|-----------------------------------------------------------------------------------------------|
-| VulpesCloud-api       | When developing almost anything related to VulpesCloud                                        |
-| VulpesCloud-bridge    | When developing Minecraft plugins for VulpesCloud                                             |
-| VulpesCloud-connector | When developing something that needs access to the Main Plugin, for example a Minestom Server |
-| VulpesCloud-node      | When developing modules for the Cloud                                                         |
-| VulpesCloud-wrapper   | Generally no usage for Developers                                                             |
+| api       | When developing almost anything related to VulpesCloud                                        |
+| bridge    | When developing Minecraft plugins for VulpesCloud                                             |
+| connector | When developing something that needs access to the Main Plugin, for example a Minestom Server |
+| node      | When developing modules for the Cloud                                                         |
+| wrapper   | Generally no usage for Developers                                                             |
 
 ### Adding VulpesCloud to the Dependencies 
 #### build.gradle.kts
@@ -34,11 +34,11 @@ repositories {
 }
 
 dependencies {
-    compileOnly("de.vulpescloud:VulpesCloud-api:%version%")
-    compileOnly("de.vulpescloud:VulpesCloud-node:%version%")
-    compileOnly("de.vulpescloud:VulpesCloud-bridge:%version%")
-    compileOnly("de.vulpescloud:VulpesCloud-connector:%version%")
-    compileOnly("de.vulpescloud:VulpesCloud-wrapper:%version%")
+    compileOnly("de.vulpescloud:api:%version%")
+    compileOnly("de.vulpescloud:node:%version%")
+    compileOnly("de.vulpescloud:bridge:%version%")
+    compileOnly("de.vulpescloud:connector:%version%")
+    compileOnly("de.vulpescloud:wrapper:%version%")
 }
 ```
 #### Replace the `%version%` to the latest version of VulpesCloud (current: `2.0.0-ALPHA)

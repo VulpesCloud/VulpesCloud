@@ -1,0 +1,9 @@
+{
+  "id": "vulpescloud-connector",
+  "name": "VulpesCloud-Connector",
+  "version": "3.0.0",
+  "authors": [
+    "TheCGuy"
+  ],
+  "main": "de.vulpescloud.connector.velocity.VelocityConnector"
+}

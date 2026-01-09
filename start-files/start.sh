@@ -1,1 +1,1 @@
-screen -S VulpesCloud java -jar vulpescloud-launcher.jar
+screen -S VulpesCloud java --enable-native-access=ALL-UNNAMED --sun-misc-unsafe-memory-access=allow -jar vulpescloud-launcher.jar

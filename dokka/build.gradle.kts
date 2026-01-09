@@ -4,13 +4,13 @@ plugins {
 }
 
 dependencies {
-    implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.0.0")
-    dokka(project(":VulpesCloud-api"))
-    dokka(project(":VulpesCloud-bridge"))
-    dokka(project(":VulpesCloud-connector"))
-    dokka(project(":VulpesCloud-launcher"))
-    dokka(project(":VulpesCloud-node"))
-    dokka(project(":VulpesCloud-wrapper"))
+    implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.1.0")
+    dokka(project(":api"))
+    dokka(project(":bridge"))
+    dokka(project(":connector"))
+    dokka(project(":launcher"))
+    dokka(project(":node"))
+    dokka(project(":wrapper"))
 }
 
 dokka {

@@ -1,9 +1,0 @@
-{
-  "id": "vulpescloud-connector",
-  "name": "VulpesCloud-Connector",
-  "version": "1.0.0",
-  "authors": [
-    "TheCGuy"
-  ],
-  "main": "de.vulpescloud.connector.velocity.VelocityConnectorPlugin"
-}
