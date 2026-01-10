@@ -133,7 +133,7 @@ class DockerServiceFactory : AbstractServiceFactory() {
         val ports = Ports()
         ports.bind(ExposedPort.tcp(25565), Ports.Binding.bindPort(service.port))
 
-        service.task.attributes?.fieldsMap?.get("docker-extra-ports")?.toString()
+        service.task.attributes.get("docker-extra-ports")
             ?.split(",")
             ?.map { it.trim() }
             ?.filter { it.isNotEmpty() }

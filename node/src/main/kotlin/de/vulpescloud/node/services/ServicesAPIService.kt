@@ -5,6 +5,7 @@ import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
+import de.vulpescloud.node.utils.MongoUtils
 import kotlinx.coroutines.flow.firstOrNull
 import org.bson.BsonDocument
 import org.bson.BsonString
@@ -192,5 +193,15 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         abstractService.command(request.command)
 
         return SendCommandResponse.newBuilder().setSuccess(true).build()
+    }
+
+    override suspend fun updatePlayerCount(
+        request: UpdatePlayerCountRequest
+    ): UpdatePlayerCountResponse {
+        val service = Service.fromDefinition(request.service)
+
+        MongoUtils.updateService(service.copy(playerCount = request.playerCount))
+
+        return UpdatePlayerCountResponse.newBuilder().build()
     }
 }

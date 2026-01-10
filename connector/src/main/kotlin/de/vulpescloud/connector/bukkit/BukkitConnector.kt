@@ -5,6 +5,7 @@ import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.bridge.BridgeAPI
 import de.vulpescloud.wrapper.Wrapper
 import org.bstats.bukkit.Metrics
+import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
 import java.util.concurrent.TimeUnit
 
@@ -40,6 +41,8 @@ class BukkitConnector : JavaPlugin() {
             server.pluginManager.disablePlugin(this)
             return
         }
+
+        Bukkit.getPluginManager().registerEvents(PlayerJoinEventListener(), this)
 
         bridgeAPI
             .getEventAPI()
