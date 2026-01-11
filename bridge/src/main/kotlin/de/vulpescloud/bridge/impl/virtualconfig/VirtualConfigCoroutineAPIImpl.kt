@@ -8,11 +8,11 @@ import de.vulpescloud.api.virtualconfig.VirtualConfig
 import de.vulpescloud.bridge.VirtualConfigAPI
 import de.vulpescloud.wrapper.Wrapper
 import de.vulpescloud.wrapper.grpc.AuthClientInterceptor
+import java.nio.file.Path
+import kotlin.io.path.Path
 import kotlinx.serialization.KSerializer
 import kotlinx.serialization.json.Json
 import org.json.JSONObject
-import java.nio.file.Path
-import kotlin.io.path.Path
 
 class VirtualConfigCoroutineAPIImpl : VirtualConfigAPI.VirtualConfigCoroutineAPI {
 
@@ -58,22 +58,19 @@ class VirtualConfigCoroutineAPIImpl : VirtualConfigAPI.VirtualConfigCoroutineAPI
     override suspend fun getCustomConfig(name: String, forceGet: Boolean): VirtualConfig? {
         val file = tempConfigsPath.resolve("$name.json").toFile()
         if (!forceGet) {
-
-            return getLocalConfig(name)
+            if (file.exists()) {
+                return getLocalConfig(name)
+            }
         }
         val config = stub.getByName(getByNameRequest { this.name = name }).configOrNull
+
         if (config == null) {
             return null
         }
 
         file.parentFile.mkdirs()
         file.writeText(JSONObject(VirtualConfig.fromDefinition(config)).toString())
-        return VirtualConfig(
-            config.name,
-            config.createdAt,
-            config.lastUpdatedAt,
-            JSONObject(config.config),
-        )
+        return VirtualConfig.fromDefinition(config)
     }
 
     override suspend fun <T> updateCustomConfig(
