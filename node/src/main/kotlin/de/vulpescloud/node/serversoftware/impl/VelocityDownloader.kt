@@ -14,6 +14,9 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 
 object VelocityDownloader : ServerSoftwareDownloader {
+    override val id: String = "velocity"
+    override val displayName: String = "Velocity"
+
     private const val BASE_API_URL = "https://fill.papermc.io/v3"
     private val logger = LoggerFactory.getLogger("VelocityDownloader")
 
@@ -22,10 +25,11 @@ object VelocityDownloader : ServerSoftwareDownloader {
         val downloadUrl = getDownloadUrl(version)
 
         val client = OkHttpClient()
-        val request = Request.Builder()
-            .url(downloadUrl.toString())
-            .header("User-Agent", "VulpesCloud-Node/1.0")
-            .build()
+        val request =
+            Request.Builder()
+                .url(downloadUrl.toString())
+                .header("User-Agent", "VulpesCloud-Node/1.0")
+                .build()
 
         val downloadFileName = downloadUrl.path.substringAfterLast('/')
         logger.info("Downloading $downloadFileName ...")
@@ -65,10 +69,8 @@ object VelocityDownloader : ServerSoftwareDownloader {
 
         val client = OkHttpClient()
 
-        val request = Request.Builder()
-            .url(apiUrl)
-            .header("User-Agent", "VulpesCloud-Node/1.0")
-            .build()
+        val request =
+            Request.Builder().url(apiUrl).header("User-Agent", "VulpesCloud-Node/1.0").build()
 
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw Exception("Unexpected code $response")
@@ -77,10 +79,11 @@ object VelocityDownloader : ServerSoftwareDownloader {
 
             val jResponse = JSONObject(responseBody)
 
-            val downloadUrl = jResponse
-                .getJSONObject("downloads")
-                .getJSONObject("server:default")
-                .getString("url")
+            val downloadUrl =
+                jResponse
+                    .getJSONObject("downloads")
+                    .getJSONObject("server:default")
+                    .getString("url")
             return URI(downloadUrl)
         }
     }
@@ -90,10 +93,8 @@ object VelocityDownloader : ServerSoftwareDownloader {
 
         val client = OkHttpClient()
 
-        val request = Request.Builder()
-            .url(apiUrl)
-            .header("User-Agent", "VulpesCloud-Node/1.0")
-            .build()
+        val request =
+            Request.Builder().url(apiUrl).header("User-Agent", "VulpesCloud-Node/1.0").build()
 
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw Exception("Unexpected code $response")
@@ -111,16 +112,18 @@ object VelocityDownloader : ServerSoftwareDownloader {
 
                 val downloadUrl = getDownloadUrl(version.getString("id"))
 
-                val build = downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
+                val build =
+                    downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
 
-                val software = ServerSoftware(
-                    name = "Velocity",
-                    version = version.getString("id"),
-                    build = build ?: 1,
-                    url = downloadUrl.toString(),
-                    pluginDir = "plugins",
-                    type = SoftwareType.PROXY
-                )
+                val software =
+                    ServerSoftware(
+                        name = "Velocity",
+                        version = version.getString("id"),
+                        build = build ?: 1,
+                        url = downloadUrl.toString(),
+                        pluginDir = "plugins",
+                        type = SoftwareType.PROXY,
+                    )
 
                 softwareList.add(software)
             }
@@ -135,10 +138,8 @@ object VelocityDownloader : ServerSoftwareDownloader {
 
         val client = OkHttpClient()
 
-        val request = Request.Builder()
-            .url(apiUrl)
-            .header("User-Agent", "VulpesCloud-Node/1.0")
-            .build()
+        val request =
+            Request.Builder().url(apiUrl).header("User-Agent", "VulpesCloud-Node/1.0").build()
 
         if (version == null) {
             client.newCall(request).execute().use { response ->
@@ -156,7 +157,8 @@ object VelocityDownloader : ServerSoftwareDownloader {
 
                 val downloadUrl = getDownloadUrl(latestVersion.getString("id"))
 
-                val build = downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
+                val build =
+                    downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
 
                 return ServerSoftware(
                     name = "Velocity",
@@ -164,12 +166,13 @@ object VelocityDownloader : ServerSoftwareDownloader {
                     build = build ?: 1,
                     url = downloadUrl.toString(),
                     pluginDir = "plugins",
-                    type = SoftwareType.PROXY
+                    type = SoftwareType.PROXY,
                 )
             }
         } else {
             val matchingVersion = allVersions.find { it.version == version }
-            if (matchingVersion == null) throw Exception("No version found for Velocity with version $version")
+            if (matchingVersion == null)
+                throw Exception("No version found for Velocity with version $version")
 
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) throw Exception("Unexpected code $response")
@@ -182,14 +185,18 @@ object VelocityDownloader : ServerSoftwareDownloader {
 
                 if (versions.length() == 0) throw Exception("No versions found")
 
-                val latestVersion = versions
-                    .find { (it as JSONObject).getJSONObject("version").getString("id") == version }
-                    ?.let { (it as JSONObject).getJSONObject("version") }
-                    ?: throw Exception("No version found for Velocity with version $version")
+                val latestVersion =
+                    versions
+                        .find {
+                            (it as JSONObject).getJSONObject("version").getString("id") == version
+                        }
+                        ?.let { (it as JSONObject).getJSONObject("version") }
+                        ?: throw Exception("No version found for Velocity with version $version")
 
                 val downloadUrl = getDownloadUrl(version)
 
-                val build = downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
+                val build =
+                    downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
 
                 return ServerSoftware(
                     name = "Velocity",
@@ -197,7 +204,7 @@ object VelocityDownloader : ServerSoftwareDownloader {
                     build = build ?: 1,
                     url = downloadUrl.toString(),
                     pluginDir = "plugins",
-                    type = SoftwareType.PROXY
+                    type = SoftwareType.PROXY,
                 )
             }
         }

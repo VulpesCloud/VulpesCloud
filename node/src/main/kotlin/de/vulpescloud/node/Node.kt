@@ -120,6 +120,7 @@ class Node {
                     register(ClusterCommand())
                     register(AuthCommand())
                     register(ModuleCommand())
+                    register(SoftwareCommand())
                 }
             } catch (e: Exception) {
                 logger.error("Failed to initialize commands: ${e.stackTraceToString()}")
