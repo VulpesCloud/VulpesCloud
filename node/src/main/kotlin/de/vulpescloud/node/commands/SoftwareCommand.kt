@@ -2,7 +2,10 @@ package de.vulpescloud.node.commands
 
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
-import de.vulpescloud.node.serversoftware.impl.*
+import de.vulpescloud.node.serversoftware.impl.FoliaDownloader
+import de.vulpescloud.node.serversoftware.impl.PaperDownloader
+import de.vulpescloud.node.serversoftware.impl.PurpurDownloader
+import de.vulpescloud.node.serversoftware.impl.VelocityDownloader
 import de.vulpescloud.node.terminal.COLOR.VULPES_ORANGE
 import kotlinx.coroutines.launch
 import org.incendo.cloud.annotations.Command
@@ -14,7 +17,8 @@ class SoftwareCommand {
 
     private val downloaders =
         listOf(
-            CanvasDownloader,
+            // CanvasDownloader, //TODO: The Canvas API has 'changed' a bit i think. The response is
+            // a bit different then what we expected
             FoliaDownloader,
             PaperDownloader,
             PurpurDownloader,
