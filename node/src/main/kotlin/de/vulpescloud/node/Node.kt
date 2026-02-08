@@ -36,12 +36,13 @@ import de.vulpescloud.node.templates.TemplateStorageProvider
 import de.vulpescloud.node.terminal.Terminal
 import de.vulpescloud.node.virtualconfig.VirtualConfigProvider
 import de.vulpescloud.node.virtualconfig.VirtualConfigServiceImpl
+import io.grpc.BindableService
 import io.grpc.ChannelCredentials
-import kotlinx.coroutines.*
-import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
+import kotlinx.coroutines.*
+import org.slf4j.LoggerFactory
 
 class Node {
     private val logger = LoggerFactory.getLogger("Node")
@@ -66,8 +67,10 @@ class Node {
     val virtualConfigProvider = VirtualConfigProvider()
     val clusterProvider = ClusterProvider()
     val moduleProvider = ModuleProvider(Path("modules"))
-
     val virtualConfigServiceImpl = VirtualConfigServiceImpl()
+
+    private val grpcServices = mutableListOf<BindableService>()
+    private var allowGrpcServiceAdding = true
 
     suspend fun init(scope: CoroutineScope) =
         withContext(Dispatchers.IO) {
@@ -104,10 +107,12 @@ class Node {
 
             terminal.changePrompt("")
 
+            commandProvider.initialize()
+
+            allowGrpcServiceAdding = true
             moduleProvider.loadAllModules()
 
             try {
-                commandProvider.initialize()
                 commandProvider.apply {
                     register(ClearCommand(terminal))
                     register(HelpCommand(commandProvider))
@@ -150,22 +155,26 @@ class Node {
                 return@withContext
             }
 
+            grpcServices.addAll(
+                listOf(
+                    TasksAPIService(),
+                    ServicesAPIService(),
+                    EventsService(),
+                    virtualConfigServiceImpl,
+                    ClusterAPIServiceImpl(),
+                    AuthServiceImpl(
+                        configProvider.config.auth.jwtSecret,
+                        configProvider.config.auth.jwtRefreshSecret,
+                    ),
+                )
+            )
+
+            allowGrpcServiceAdding = false
             grpcServer =
                 GrpcServer(
                     host = configProvider.config.grpcHost,
                     port = configProvider.config.grpcPort,
-                    services =
-                        listOf(
-                            TasksAPIService(),
-                            ServicesAPIService(),
-                            EventsService(),
-                            virtualConfigServiceImpl,
-                            ClusterAPIServiceImpl(),
-                            AuthServiceImpl(
-                                configProvider.config.auth.jwtSecret,
-                                configProvider.config.auth.jwtRefreshSecret,
-                            ),
-                        ),
+                    services = grpcServices,
                     interceptors =
                         listOf(
                             PermissionInterceptor(),
@@ -248,6 +257,14 @@ class Node {
     fun getVelocitySecret(): String {
         val secretFactory = SecretFactory()
         return secretFactory.loadOrCreateSecret(Path("launcher/secret/.velocity.secret"))
+    }
+
+    fun addGrpcService(service: BindableService) {
+        if (allowGrpcServiceAdding) {
+            grpcServices.add(service)
+        } else {
+            logger.error("Cannot add gRPC Service ${service.bindService().serviceDescriptor.name} after startup!")
+        }
     }
 
     companion object {
