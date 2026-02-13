@@ -5,15 +5,16 @@ import com.github.dockerjava.core.DockerClientConfig
 import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import com.github.dockerjava.transport.DockerHttpClient
-import com.mongodb.ConnectionString
-import com.mongodb.MongoClientSettings
-import com.mongodb.kotlin.client.coroutine.MongoClient
 import de.vulpescloud.node.auth.AuthServiceImpl
 import de.vulpescloud.node.cluster.ClusterAPIServiceImpl
 import de.vulpescloud.node.cluster.ClusterProvider
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.commands.*
 import de.vulpescloud.node.config.ConfigProvider
+import de.vulpescloud.node.db.DatabaseProvider
+import de.vulpescloud.node.db.impl.mariadb.MariaDBDatabaseProvider
+import de.vulpescloud.node.db.impl.mongo.MongoDBDatabaseProvider
+import de.vulpescloud.node.db.impl.sqlite.SQLiteDatabaseProvider
 import de.vulpescloud.node.event.EventListenHelper
 import de.vulpescloud.node.event.EventsService
 import de.vulpescloud.node.grpc.GrpcServer
@@ -38,11 +39,10 @@ import de.vulpescloud.node.virtualconfig.VirtualConfigProvider
 import de.vulpescloud.node.virtualconfig.VirtualConfigServiceImpl
 import io.grpc.BindableService
 import io.grpc.ChannelCredentials
-import java.time.Duration
-import java.util.concurrent.TimeUnit
-import kotlin.io.path.Path
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
+import java.time.Duration
+import kotlin.io.path.Path
 
 class Node {
     private val logger = LoggerFactory.getLogger("Node")
@@ -50,16 +50,17 @@ class Node {
     val terminal = Terminal()
     val commandProvider = CommandProvider()
     val configProvider = ConfigProvider()
-    lateinit var mongoClient: MongoClient
+
     lateinit var grpcServer: GrpcServer
     lateinit var secret: String
     lateinit var setupProvider: SetupProvider
-    lateinit var creds: ChannelCredentials
+    lateinit var credentials: ChannelCredentials
     var inputJob: Job? = null
         private set
 
     lateinit var dockerClientConfig: DockerClientConfig
     lateinit var dockerHttpClient: DockerHttpClient
+
     val templateStorageProvider = TemplateStorageProvider()
     val localGrpcClient = LocalGrpcClient()
     val serviceFactoryProvider = ServiceFactoryProvider()
@@ -132,27 +133,13 @@ class Node {
                 return@withContext
             }
 
-            val connectionString = configProvider.config.mongodb.connectionString
-            try {
-                val settings =
-                    MongoClientSettings.builder()
-                        .applyConnectionString(ConnectionString(connectionString))
-                        .applyToConnectionPoolSettings {
-                            it.maxSize(50)
-                            it.maxWaitTime(10, TimeUnit.SECONDS)
-                        }
-                        .applyToSocketSettings {
-                            it.connectTimeout(10, TimeUnit.SECONDS)
-                            it.readTimeout(10, TimeUnit.SECONDS)
-                        }
-                        .retryWrites(true)
-                        .build()
+            DatabaseProvider.apply {
+                addDatabaseProvider("sqlite", SQLiteDatabaseProvider())
+                addDatabaseProvider("mariadb", MariaDBDatabaseProvider())
+                addDatabaseProvider("mongodb", MongoDBDatabaseProvider())
 
-                mongoClient = MongoClient.create(settings)
-                logger.info("Successfully connected to MongoDB!")
-            } catch (e: Exception) {
-                logger.error("Failed to connect to MongoDB: ${e.message}")
-                return@withContext
+                lockDatabaseProviderAdding()
+                setAndInitializeMainDatabaseProvider()
             }
 
             grpcServices.addAll(
@@ -233,9 +220,6 @@ class Node {
                     logger.info(
                         "Successfully connected to Docker! Version: ${version.version}, API Version: ${version.apiVersion}"
                     )
-
-                    // build docker image
-
                 } catch (e: Exception) {
                     logger.error("Failed to connect to Docker: ${e.message}")
                     return@withContext
@@ -263,9 +247,13 @@ class Node {
         if (allowGrpcServiceAdding) {
             grpcServices.add(service)
         } else {
-            logger.error("Cannot add gRPC Service ${service.bindService().serviceDescriptor.name} after startup!")
+            logger.error(
+                "Cannot add gRPC Service ${service.bindService().serviceDescriptor.name} after startup!"
+            )
         }
     }
+
+    fun getDatabaseProvider() = DatabaseProvider.getMainDatabaseProvider()
 
     companion object {
         lateinit var instance: Node

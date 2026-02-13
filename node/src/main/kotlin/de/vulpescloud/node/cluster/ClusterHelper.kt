@@ -6,45 +6,30 @@ import de.vulpescloud.api.events.EventSerializer
 import de.vulpescloud.api.events.cluster.NodeStateChangeEvent
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.event.EventsService
-import kotlinx.coroutines.flow.firstOrNull
-import org.bson.BsonDocument
-import org.bson.BsonString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
 
 object ClusterHelper {
 
-    suspend fun updateNodeState(state: NodeState) {
-        val collection =
-            Node.instance.mongoClient
-                .getDatabase(Node.instance.configProvider.config.mongodb.database)
-                .getCollection<BsonDocument>(
-                    Node.instance.configProvider.config.mongodb.collectionPrefix + "nodes"
-                )
+    private val nodesDatabase by lazy {
+        Node.instance.getDatabaseProvider().getOrCreateDatabase("nodes")
+    }
+    private val json = Json
 
-        val filter = BsonDocument("name", BsonString(Node.instance.configProvider.config.nodeName))
+    suspend fun updateNodeState(state: NodeState) {
         val node = getLocalNode()
         val newNode = node.copy(state = state)
-        collection.replaceOne(filter, newNode.toDocument())
+        nodesDatabase.upsert(newNode.name, json.encodeToJsonElement(newNode))
 
         EventsService.publish(
-            EventSerializer.encode(
-                NodeStateChangeEvent(getLocalNode(), NodeState.BOOTING, NodeState.ONLINE)
-            ),
-            true
+            EventSerializer.encode(NodeStateChangeEvent(node, node.state, state)),
+            true,
         )
     }
 
     suspend fun getLocalNode(): ClusterNode {
-        val collection =
-            Node.instance.mongoClient
-                .getDatabase(Node.instance.configProvider.config.mongodb.database)
-                .getCollection<BsonDocument>(
-                    Node.instance.configProvider.config.mongodb.collectionPrefix + "nodes"
-                )
-
-        val filter = BsonDocument("name", BsonString(Node.instance.configProvider.config.nodeName))
-        val document = collection.find(filter).firstOrNull()
-        if (document != null) {
-            return ClusterNode.fromDocument(document)
+        nodesDatabase.get(Node.instance.configProvider.config.nodeName)?.let {
+            return json.decodeFromJsonElement(ClusterNode.serializer(), it)
         }
         val node =
             ClusterNode(
@@ -57,31 +42,18 @@ object ClusterHelper {
                 false,
                 System.currentTimeMillis(),
             )
-        collection.insertOne(node.toDocument())
+        nodesDatabase.upsert(node.name, json.encodeToJsonElement(node))
         return node
     }
 
     suspend fun updateNode(node: ClusterNode) {
-        val collection =
-            Node.instance.mongoClient
-                .getDatabase(Node.instance.configProvider.config.mongodb.database)
-                .getCollection<BsonDocument>(
-                    Node.instance.configProvider.config.mongodb.collectionPrefix + "nodes"
-                )
-        val filter = BsonDocument("name", BsonString(node.name))
-        collection.replaceOne(filter, node.toDocument())
+        nodesDatabase.upsert(node.name, json.encodeToJsonElement(node))
     }
 
     suspend fun getAllNodes(): List<ClusterNode> {
-        val collection =
-            Node.instance.mongoClient
-                .getDatabase(Node.instance.configProvider.config.mongodb.database)
-                .getCollection<BsonDocument>(
-                    Node.instance.configProvider.config.mongodb.collectionPrefix + "nodes"
-                )
-        val nodes = mutableListOf<ClusterNode>()
-        collection.find().collect { nodes.add(ClusterNode.fromDocument(it)) }
-        return nodes.toList()
+        return nodesDatabase.getAll().map {
+            json.decodeFromJsonElement(ClusterNode.serializer(), it)
+        }
     }
 
     suspend fun getHeadNode(): ClusterNode? {

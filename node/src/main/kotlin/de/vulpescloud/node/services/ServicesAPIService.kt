@@ -6,64 +6,42 @@ import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import de.vulpescloud.node.utils.MongoUtils
-import kotlinx.coroutines.flow.firstOrNull
-import org.bson.BsonDocument
-import org.bson.BsonString
+import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
 class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImplBase() {
 
     private val logger = LoggerFactory.getLogger("ServicesAPIService")
+    private val servicesDatabase by lazy {
+        Node.instance.getDatabaseProvider().getOrCreateDatabase("services")
+    }
 
     @RequiresPermission("services.list")
     override suspend fun getAllServices(request: GetAllServicesRequest): GetAllServicesResponse {
-        val collection =
-            Node.instance.mongoClient
-                .getDatabase(Node.instance.configProvider.config.mongodb.database)
-                .getCollection<BsonDocument>(
-                    Node.instance.configProvider.config.mongodb.collectionPrefix + "services"
-                )
-
-        val services = mutableListOf<ServiceDefinition>()
-
-        collection.find().collect {
-            services.add(Service.fromDocument(it.toBsonDocument()).toDefinition())
-        }
+        val services =
+            servicesDatabase
+                .getAll()
+                .map { Json.decodeFromJsonElement(Service.serializer(), it) }
+                .map { it.toDefinition() }
 
         return GetAllServicesResponse.newBuilder().addAllServices(services).build()
     }
 
     @RequiresPermission("services.get")
     override suspend fun getByName(request: GetByNameRequest): GetByNameResponse {
-        val collection =
-            Node.instance.mongoClient
-                .getDatabase(Node.instance.configProvider.config.mongodb.database)
-                .getCollection<BsonDocument>(
-                    Node.instance.configProvider.config.mongodb.collectionPrefix + "services"
-                )
-        val filter = BsonDocument("name", BsonString(request.name))
-        val serviceDoc = collection.find(filter).firstOrNull()
-        val service = serviceDoc?.let { Service.fromDocument(it) }
-        if (service == null) {
-            return GetByNameResponse.newBuilder().build()
-        }
-        return GetByNameResponse.newBuilder().setService(service.toDefinition()).build()
+        val service =
+            getAllServices(getAllServicesRequest {}).servicesList.find {
+                "${it.task.name}-${it.orderedId}" == request.name
+            } ?: return GetByNameResponse.newBuilder().build()
+        return GetByNameResponse.newBuilder().setService(service).build()
     }
 
     @RequiresPermission("services.get")
     override suspend fun getByUuid(request: GetByUuidRequest): GetByUuidResponse {
-        val collection =
-            Node.instance.mongoClient
-                .getDatabase(Node.instance.configProvider.config.mongodb.database)
-                .getCollection<BsonDocument>(
-                    Node.instance.configProvider.config.mongodb.collectionPrefix + "services"
-                )
-        val filter = BsonDocument("uuid", BsonString(request.uuid.toString()))
-        val serviceDoc = collection.find(filter).firstOrNull()
-        val service = serviceDoc?.let { Service.fromDocument(it) }
-        if (service == null) {
-            return GetByUuidResponse.newBuilder().build()
-        }
+        val service =
+            servicesDatabase.get(request.uuid)?.let {
+                Json.decodeFromJsonElement(Service.serializer(), it)
+            } ?: return GetByUuidResponse.newBuilder().build()
         return GetByUuidResponse.newBuilder().setService(service.toDefinition()).build()
     }
 
@@ -75,11 +53,9 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
 
         val serviceFactory =
             Node.instance.serviceFactoryProvider.findServiceFactory(task.serviceFactoryName)
-        if (serviceFactory == null) {
-            throw IllegalArgumentException(
-                "Unable to find ServiceFactory ${task.serviceFactoryName}"
-            )
-        }
+                ?: throw IllegalArgumentException(
+                    "Unable to find ServiceFactory ${task.serviceFactoryName}"
+                )
         val service = serviceFactory.prepareService(task)
 
         return PrepareServiceByTaskResponse.newBuilder()
