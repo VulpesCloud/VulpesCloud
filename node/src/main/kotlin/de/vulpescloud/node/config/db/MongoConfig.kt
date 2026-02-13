@@ -1,4 +1,4 @@
-package de.vulpescloud.node.config
+package de.vulpescloud.node.config.db
 
 import kotlinx.serialization.Serializable
 
