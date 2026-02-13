@@ -8,6 +8,7 @@ import kotlinx.serialization.Serializable
 data class ConnectorConfig(
     val hubCommandConfig: HubCommandConfig = HubCommandConfig(),
     val cloudCommandConfig: CloudCommandConfig = CloudCommandConfig(),
+    val disconnectNoAvailableServerMessage: String = "<red>There is no available server for you to connect to!</red>",
     val prefix: String = "<gray>[<gradient:#EE660A:#D9BC40>VulpesCloud</gradient>]</gray> ",
 )
 

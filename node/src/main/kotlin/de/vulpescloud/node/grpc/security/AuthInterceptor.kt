@@ -11,7 +11,7 @@ class AuthInterceptor(private val internalToken: String, jwtSecret: String) : Se
     private val jwtVerifier: JWTVerifier =
         JWT.require(Algorithm.HMAC256(jwtSecret)).withIssuer("vulpescloud").build()
 
-    private val publicRpcs = setOf("authenticate", "refreshToken", "isTokenValid")
+    private val publicRpcs = setOf("authenticate", "refreshtoken", "istokenvalid")
 
     override fun <ReqT : Any?, RespT : Any?> interceptCall(
         call: ServerCall<ReqT, RespT>,

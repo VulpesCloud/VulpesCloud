@@ -25,7 +25,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
  */
 
 plugins {
-    kotlin("jvm") version "2.3.0"
+    kotlin("jvm") version "2.3.10"
     alias(libs.plugins.shadow)
 }
 
@@ -76,6 +76,13 @@ dependencies {
     compileOnly(kotlin("reflect"))
     compileOnly(libs.javaJWT)
     compileOnly(libs.bcrypt)
+
+    compileOnly(libs.sqlite)
+    compileOnly(libs.mariadb)
+
+    compileOnly(libs.exposed.core)
+    compileOnly(libs.exposed.jdbc)
+    compileOnly(libs.hikaricp)
 }
 
 sourceSets { getByName("main") { kotlin { srcDir("src/main/kotlin") } } }

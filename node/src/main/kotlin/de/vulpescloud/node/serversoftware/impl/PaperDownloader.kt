@@ -14,6 +14,9 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 
 object PaperDownloader : ServerSoftwareDownloader {
+    override val id: String = "paper"
+    override val displayName: String = "Paper"
+
     private const val BASE_API_URL = "https://fill.papermc.io/v3"
     private val logger = LoggerFactory.getLogger("PaperDownloader")
 

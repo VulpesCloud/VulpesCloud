@@ -6,12 +6,12 @@ import com.google.protobuf.Timestamp
 import de.vulpescloud.api.serializer.TimestampSerializer
 import de.vulpescloud.api.serializer.UUIDSerializer
 import de.vulpescloud.api.tasks.Task
+import java.util.*
 import kotlinx.serialization.Serializable
 import org.bson.BsonDocument
 import org.bson.BsonInt32
 import org.bson.BsonInt64
 import org.bson.BsonString
-import java.util.*
 
 @Serializable
 data class Service(
@@ -24,7 +24,10 @@ data class Service(
     @Serializable(TimestampSerializer::class) val startTime: Timestamp,
     val state: ServiceStates,
     val hostname: String,
+    val metadata: Map<String, String> = emptyMap(),
 ) {
+    fun name(): String = task.name + "-" + orderedId
+
     fun toDocument(): BsonDocument =
         BsonDocument().apply {
             append("task", task.toDocument())
@@ -36,6 +39,10 @@ data class Service(
             append("startTime", BsonInt64(startTime.seconds))
             append("state", BsonInt32(state.ordinal))
             append("hostname", BsonString(hostname))
+            append(
+                "metadata",
+                BsonDocument().apply { metadata.forEach { append(it.key, BsonString(it.value)) } },
+            )
         }
 
     fun toDefinition(): ServiceDefinition =
@@ -57,6 +64,7 @@ data class Service(
                 }
             )
             .setHostname(hostname)
+            .putAllMetadata(metadata)
             .build()
 
     companion object {
@@ -78,6 +86,7 @@ data class Service(
                     ServiceState.UNRECOGNIZED -> ServiceStates.UNKNOWN
                 },
                 definition.hostname,
+                definition.metadataMap,
             )
         }
 
@@ -94,6 +103,9 @@ data class Service(
                 },
                 ServiceStates.entries[document.getInt32("state").value],
                 document.getString("hostname").value,
+                document.getDocument("metadata")?.entries?.associate {
+                    it.key to it.value.asString().value
+                } ?: emptyMap(),
             )
         }
     }

@@ -9,14 +9,14 @@ import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.event.EventsService
 import de.vulpescloud.node.services.AbstractService
 import de.vulpescloud.node.utils.MongoUtils
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import org.slf4j.LoggerFactory
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 import java.nio.file.Path
 import kotlin.io.path.exists
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import org.slf4j.LoggerFactory
 
 class LocalService(override val service: Service) : AbstractService {
 
@@ -73,6 +73,10 @@ class LocalService(override val service: Service) : AbstractService {
                 Node.instance.nodeServices.removeIf { it.service.uuid == service.uuid }
 
                 logger.info("Service ${service.task.name}-${service.orderedId} stopped!")
+
+                if (!service.task.staticServices) {
+                    path().toFile().deleteRecursively()
+                }
 
                 if (this.processTracking != null) {
                     processTracking!!.interrupt()

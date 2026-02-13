@@ -11,7 +11,7 @@ import kotlin.reflect.full.findAnnotation
 class PermissionInterceptor : ServerInterceptor {
 
     private val publicRpcs =
-        setOf("authenticate", "refreshToken", "isTokenValid")
+        setOf("authenticate", "refreshtoken", "istokenvalid")
 
     override fun <ReqT : Any?, RespT : Any?> interceptCall(
         call: ServerCall<ReqT, RespT>,

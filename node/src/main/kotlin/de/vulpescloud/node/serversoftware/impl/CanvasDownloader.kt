@@ -15,6 +15,9 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 
 object CanvasDownloader : ServerSoftwareDownloader {
+    override val id: String = "canvas"
+    override val displayName: String = "Canvas"
+
     private const val BASE_API_URL = "https://canvasmc.io/api/v2"
     private val logger = LoggerFactory.getLogger("CanvasDownloader")
 

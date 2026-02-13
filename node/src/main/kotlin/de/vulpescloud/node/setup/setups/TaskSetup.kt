@@ -38,7 +38,7 @@ class TaskSetup() : Setup {
             "",
             1,
             ServerSoftware("UNKNOWN", "UNKNOWN", 0, "", "", SoftwareType.SERVER),
-            null,
+            emptyMap(),
             emptyList(),
             emptyList(),
             false,

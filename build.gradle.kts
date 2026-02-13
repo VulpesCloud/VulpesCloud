@@ -27,16 +27,16 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("vulpescloud.parent-build-logic")
-    kotlin("jvm") version "2.3.0"
+    kotlin("jvm") version "2.3.10"
     id("org.jetbrains.dokka") version "2.1.0"
     id("signing")
     id("maven-publish")
     alias(libs.plugins.shadow)
-    kotlin("plugin.serialization") version "2.3.0"
+    kotlin("plugin.serialization") version "2.3.10"
 }
 
 group = "de.vulpescloud"
-version = "2.0.0"
+version = "3.0.0-beta2"
 
 tasks.named("build") {
     enabled = false
@@ -53,7 +53,7 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
-    version = "3.0.0"
+    version = "3.0.0-beta2"
     group = "de.vulpescloud"
 
     repositories {

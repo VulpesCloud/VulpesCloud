@@ -3,12 +3,15 @@ package de.vulpescloud.api.cluster
 import build.buf.gen.vulpescloud.node.v1.NodeSnapshot
 import build.buf.gen.vulpescloud.node.v1.NodeStates
 import build.buf.gen.vulpescloud.node.v1.nodeSnapshot
+import de.vulpescloud.api.serializer.UUIDSerializer
+import kotlinx.serialization.Serializable
 import org.bson.*
 import java.util.*
 
+@Serializable
 data class NodeSnapshot(
     val name: String,
-    val uuid: UUID,
+    @Serializable(UUIDSerializer::class) val uuid: UUID,
     val state: NodeState,
     val usedMemory: Int,
     val cpuUsage: Double,

@@ -5,36 +5,30 @@ import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import de.vulpescloud.node.utils.MongoUtils
-import kotlinx.coroutines.flow.firstOrNull
-import org.bson.BsonDocument
-import org.bson.BsonString
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
 import org.slf4j.LoggerFactory
 
 class TasksAPIService : TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineImplBase() {
 
     private val logger = LoggerFactory.getLogger("TasksAPIService")
+    private val tasksDatabase by lazy {
+        Node.instance.getDatabaseProvider().getOrCreateDatabase("tasks")
+    }
 
     @RequiresPermission("tasks.create")
     override suspend fun createTask(request: CreateTaskRequest): CreateTaskResponse {
         val task = Task.fromDefinition(request.task)
-        val collection =
-            Node.instance.mongoClient
-                .getDatabase(Node.instance.configProvider.config.mongodb.database)
-                .getCollection<BsonDocument>(
-                    Node.instance.configProvider.config.mongodb.collectionPrefix + "tasks"
-                )
 
-        val filter = BsonDocument("name", BsonString(task.name))
-        val existingTaskDoc = collection.find(filter).firstOrNull()
-        val existingTask = existingTaskDoc?.let { Task.fromDocument(it) }
+        val hasTask = tasksDatabase.get(task.name) != null
 
-        if (existingTask != null) {
+        if (hasTask) {
             logger.info("Task with name ${task.name} already exists!")
-            return CreateTaskResponse.newBuilder().setTask(existingTask.toDefinition()).build()
+            return CreateTaskResponse.newBuilder().build()
         }
 
         logger.info("Creating task ${task.name}...")
-        collection.insertOne(task.toDocument())
+        tasksDatabase.upsert(task.name, Json.encodeToJsonElement(task))
 
         return CreateTaskResponse.newBuilder().setTask(request.task).build()
     }
@@ -42,58 +36,37 @@ class TasksAPIService : TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineImplBase()
     @RequiresPermission("tasks.delete")
     override suspend fun deleteTask(request: DeleteTaskRequest): DeleteTaskResponse {
         val task = Task.fromDefinition(request.task)
-        val collection =
-            Node.instance.mongoClient
-                .getDatabase(Node.instance.configProvider.config.mongodb.database)
-                .getCollection<BsonDocument>(
-                    Node.instance.configProvider.config.mongodb.collectionPrefix + "tasks"
-                )
-        val filter = BsonDocument("name", BsonString(task.name))
-        val existingTaskDoc = collection.find(filter).firstOrNull()
-        val existingTask = existingTaskDoc?.let { Task.fromDocument(it) }
-        if (existingTask == null) {
+
+        val hasTask = tasksDatabase.get(task.name) != null
+
+        if (!hasTask) {
             logger.info("Task with name ${task.name} does not exist!")
             return DeleteTaskResponse.newBuilder().setTask(task.toDefinition()).build()
         }
         logger.info("Deleting task ${task.name}...")
-        collection.deleteOne(filter)
+        tasksDatabase.delete(task.name)
 
         return DeleteTaskResponse.newBuilder().setTask(task.toDefinition()).build()
     }
 
     @RequiresPermission("tasks.getAll")
     override suspend fun getAllTasks(request: GetAllTasksRequest): GetAllTasksResponse {
-        val collection =
-            Node.instance.mongoClient
-                .getDatabase(Node.instance.configProvider.config.mongodb.database)
-                .getCollection<BsonDocument>(
-                    Node.instance.configProvider.config.mongodb.collectionPrefix + "tasks"
-                )
-
-        val tasks = mutableListOf<TaskDefinition>()
-
-        collection.find().collect {
-            tasks.add(Task.fromDocument(it.toBsonDocument()).toDefinition())
-        }
+        val tasks =
+            tasksDatabase
+                .getAll()
+                .map { Json.decodeFromJsonElement(Task.serializer(), it) }
+                .map { it.toDefinition() }
 
         return GetAllTasksResponse.newBuilder().addAllTasks(tasks).build()
     }
 
     @RequiresPermission("tasks.get")
     override suspend fun getByName(request: GetByNameRequest): GetByNameResponse {
-        val collection =
-            Node.instance.mongoClient
-                .getDatabase(Node.instance.configProvider.config.mongodb.database)
-                .getCollection<BsonDocument>(
-                    Node.instance.configProvider.config.mongodb.collectionPrefix + "tasks"
-                )
-        val filter = BsonDocument("name", BsonString(request.name))
-        val taskDoc = collection.find(filter).firstOrNull()
-        val task = taskDoc?.let { Task.fromDocument(it) }
-        if (task == null) {
-            logger.info("Task with name ${request.name} does not exist!")
-            return GetByNameResponse.newBuilder().build()
-        }
+        val task =
+            Json.decodeFromJsonElement(
+                Task.serializer(),
+                tasksDatabase.get(request.name) ?: return GetByNameResponse.newBuilder().build(),
+            )
         return GetByNameResponse.newBuilder().setTask(task.toDefinition()).build()
     }
 

@@ -1,6 +1,7 @@
 package de.vulpescloud.node.config
 
 import de.vulpescloud.api.serializer.UUIDSerializer
+import de.vulpescloud.node.config.db.MongoConfig
 import kotlinx.serialization.Serializable
 import java.util.*
 
@@ -11,10 +12,10 @@ data class NodeConfig(
     val grpcPort: Int,
     val grpcHost: String,
     val serviceBindAdress: String,
-    val mongodb: MongoConfig,
     val maxMemory: Int = 1024, // MB
     val defaultServiceType: String = "LOCAL", // can be "LOCAL" or "DOCKER"
     val docker: DockerConfig,
     val useModernForwarding: Boolean,
     val auth: AuthConfig = AuthConfig("changeme", "changeme2", true),
+    val databaseType: String = "sqlite"
 )

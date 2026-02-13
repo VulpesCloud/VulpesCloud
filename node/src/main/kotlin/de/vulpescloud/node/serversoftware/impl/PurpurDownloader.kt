@@ -14,6 +14,9 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 
 object PurpurDownloader : ServerSoftwareDownloader {
+    override val id: String = "purpur"
+    override val displayName: String = "Purpur"
+
     private const val BASE_API_URL = "https://api.purpurmc.org/v2"
     private val logger = LoggerFactory.getLogger("PurpurDownloader")
 

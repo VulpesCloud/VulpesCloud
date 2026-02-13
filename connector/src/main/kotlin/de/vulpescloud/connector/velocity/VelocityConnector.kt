@@ -1,8 +1,11 @@
 package de.vulpescloud.connector.velocity
 
+import build.buf.gen.vulpescloud.services.v1.UpdatePlayerCountRequest
 import build.buf.gen.vulpescloud.virtualconfig.v1.createVirtualConfigRequest
 import com.velocitypowered.api.event.EventManager
 import com.velocitypowered.api.event.Subscribe
+import com.velocitypowered.api.event.connection.DisconnectEvent
+import com.velocitypowered.api.event.connection.LoginEvent
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.plugin.Plugin
@@ -51,12 +54,15 @@ constructor(
         eventManager.register(this, PlayerChooseInitialServerEventListener(bridgeAPI, proxyServer))
 
         runBlocking {
-            BridgeAPI.getCoroutineAPI().getVirtualConfigAPI().stub.createVirtualConfig(
-                createVirtualConfigRequest {
-                    this.name = "vc_connector"
-                    this.config = Json.encodeToString(ConnectorConfig())
-                }
-            )
+            BridgeAPI.getCoroutineAPI()
+                .getVirtualConfigAPI()
+                .stub
+                .createVirtualConfig(
+                    createVirtualConfigRequest {
+                        this.name = "vc_connector"
+                        this.config = Json.encodeToString(ConnectorConfig())
+                    }
+                )
         }
 
         val localService =
@@ -94,5 +100,31 @@ constructor(
     fun onProxyShutdownEvent(event: ProxyShutdownEvent) {
         metrics.shutdown()
         velocityServerRegistrationHandler.shutdown()
+    }
+
+    @Subscribe
+    fun onLoginEvent(event: LoginEvent) {
+        runBlocking {
+            val service = bridgeAPI.getServicesAPI().getLocalService().get()!!
+            Wrapper.instance.grpcClient.serviceAPI.updatePlayerCount(
+                UpdatePlayerCountRequest.newBuilder()
+                    .setPlayerCount(proxyServer.playerCount)
+                    .setService(service.toDefinition())
+                    .build()
+            )
+        }
+    }
+
+    @Subscribe
+    fun onDisconnectEvent(event: DisconnectEvent) {
+        runBlocking {
+            val service = bridgeAPI.getServicesAPI().getLocalService().get()!!
+            Wrapper.instance.grpcClient.serviceAPI.updatePlayerCount(
+                UpdatePlayerCountRequest.newBuilder()
+                    .setPlayerCount(proxyServer.playerCount)
+                    .setService(service.toDefinition())
+                    .build()
+            )
+        }
     }
 }

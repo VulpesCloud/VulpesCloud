@@ -1,7 +1,7 @@
 [versions]
 # kotlin
-stdlib = "2.3.0"
-kotlinx-serialization = "1.9.0"
+stdlib = "2.3.10"
+kotlinx-serialization = "1.10.0"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-coroutines = "1.10.2"
 
@@ -13,10 +13,10 @@ annotations = "26.0.2-1"
 bcrypt = "0.10.2"
 
 # network
-protobuf = "4.33.2"
+protobuf = "4.33.5"
 grpc = "1.78.0"
 grpc-kotlin = "1.5.0"
-protospecs-grpc = "1.5.0.1.20251207133204.c51434a3e86a"
+protospecs-grpc = "1.5.0.1.20260110191719.2594fcc093fc"
 perfmark = "0.27.0"
 
 javaJWT = "4.5.0"
@@ -28,13 +28,18 @@ okio = "3.16.4"
 # docker
 docker-java = "3.7.0"
 
-# mongo
-mongodb = "5.6.2"
-reactor = "3.8.1"
+# Database
+exposed = "1.0.0"
+mongodb = "5.6.3"
+sqlite = "3.51.2.0"
+mariadb = "3.5.7"
+hikaricp = "7.0.2"
+
+reactor = "3.8.3"
 
 # logging
 slf4j = "2.1.0-alpha1"
-logback = "1.5.24"
+logback = "1.5.29"
 adventure = "4.26.1"
 
 # configuration
@@ -47,7 +52,7 @@ cloud = "2.0.0"
 
 # platforms
 paper = "1.17-R0.1-SNAPSHOT"
-velocity = "3.4.0-SNAPSHOT"
+velocity = "3.4.0"
 
 # config
 night-config = "3.8.3"
@@ -99,9 +104,15 @@ perfmark = { group = "io.perfmark", name = "perfmark-api", version.ref = "perfma
 
 javaJWT = { group = "com.auth0", name = "java-jwt", version.ref = "javaJWT" }
 
-# mongo
+# Database
+exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
+exposed-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref = "exposed" }
 mongodb-driver-coroutine = { group = "org.mongodb", name = "mongodb-driver-kotlin-coroutine", version.ref = "mongodb" }
 mongodb-bson-kotlinx = { group = "org.mongodb", name = "bson-kotlinx", version.ref = "mongodb" }
+sqlite = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqlite" }
+mariadb = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.ref = "mariadb" }
+hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
+
 reactor-core = { group = "io.projectreactor", name = "reactor-core", version.ref = "reactor" }
 
 # docker

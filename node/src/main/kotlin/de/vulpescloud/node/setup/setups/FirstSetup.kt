@@ -2,7 +2,7 @@ package de.vulpescloud.node.setup.setups
 
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.config.DockerConfig
-import de.vulpescloud.node.config.MongoConfig
+import de.vulpescloud.node.config.db.MongoConfig
 import de.vulpescloud.node.config.NodeConfig
 import de.vulpescloud.node.setup.Setup
 import de.vulpescloud.node.setup.annotations.SetupFinish
@@ -152,55 +152,6 @@ class FirstSetup : Setup {
 
     @SetupQuestion(
         index = 6,
-        translationKey = "Please enter the MongoDB connection string",
-        forceAnswer = false,
-        default = ["mongodb://localhost:27017/"],
-    )
-    fun q7(answer: String): Boolean {
-        val effective = answer.ifBlank { mongoConnectionString }.trim()
-        if (!(!effective.startsWith("mongodb://") && !effective.startsWith("mongodb+srv://"))) {
-            mongoConnectionString = effective
-            return true
-        } else {
-            return false
-        }
-    }
-
-    @SetupQuestion(
-        index = 7,
-        translationKey = "Please enter the MongoDB database name",
-        forceAnswer = false,
-        default = ["vulpescloud"],
-    )
-    fun q8(answer: String): Boolean {
-        val effective = answer.ifBlank { mongoDatabase }.trim()
-        if (effective.isNotEmpty()) {
-            mongoDatabase = effective
-            return true
-        } else {
-            return false
-        }
-    }
-
-    @SetupQuestion(
-        index = 8,
-        translationKey =
-            "Please enter the MongoDB collection prefix (keep default if you don't know what this is)",
-        forceAnswer = false,
-        default = ["vc_"],
-    )
-    fun q9(answer: String): Boolean {
-        val effective = answer.ifBlank { mongoCollectionPrefix }.trim()
-        if (effective.isNotEmpty()) {
-            mongoCollectionPrefix = effective
-            return true
-        } else {
-            return false
-        }
-    }
-
-    @SetupQuestion(
-        index = 9,
         translationKey =
             "Should the Services be configured for Velocity Modern Forwarding automatically?",
         forceAnswer = true,
@@ -220,7 +171,6 @@ class FirstSetup : Setup {
                 grpcAddress.split(":")[1].toInt(),
                 grpcAddress.split(":")[0],
                 bindAddress,
-                MongoConfig(mongoConnectionString, mongoDatabase, mongoCollectionPrefix),
                 totalAllowedMemoryMb.toInt(),
                 serviceType,
                 docker = DockerConfig(),

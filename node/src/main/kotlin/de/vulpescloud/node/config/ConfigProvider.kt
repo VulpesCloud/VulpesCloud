@@ -23,6 +23,7 @@ class ConfigProvider {
     fun loadConfig(): Boolean {
         if (Files.exists(Path("config.json"))) {
             config = json.decodeFromString(Files.readString(Path("config.json")))
+            Files.writeString(Path("config.json"), json.encodeToString(config))
             return true
         } else {
             val defaultConfig =
@@ -32,7 +33,6 @@ class ConfigProvider {
                     6565,
                     "0.0.0.0",
                     "0.0.0.0",
-                    MongoConfig("mongodb://localhost:27017/", "vulpescloud", "vc_"),
                     4096,
                     "LOCAL",
                     DockerConfig(),

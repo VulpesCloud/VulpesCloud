@@ -12,9 +12,40 @@ import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.services.impl.docker.DockerService
 import de.vulpescloud.node.virtualconfig.VirtualConfigDebugHelper
 import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
 import org.incendo.cloud.annotations.Command
 
 class DebugCommand {
+
+    private val debugProxyTask =
+        Task(
+            "Proxy",
+            512,
+            512,
+            28879,
+            listOf(),
+            true,
+            1,
+            1,
+            false,
+            false,
+            "local",
+            "",
+            1,
+            ServerSoftware(
+                "Velocity",
+                "3.4.0-SNAPSHOT",
+                533,
+                "https://fill-data.papermc.io/v1/objects/cb33a12f4b6057fe2f862212ab4c033202b86172527168a41e30a30c1d05d27e/velocity-3.4.0-SNAPSHOT-533.jar",
+                "plugins",
+                SoftwareType.PROXY,
+            ),
+            emptyMap(),
+            emptyList(),
+            emptyList(),
+            false,
+        )
 
     @Command("debug create task default")
     fun createDefaultTask(source: CommandSource) {
@@ -45,7 +76,7 @@ class DebugCommand {
                                     "plugins",
                                     SoftwareType.SERVER,
                                 ),
-                                null,
+                                emptyMap(),
                                 emptyList(),
                                 emptyList(),
                                 true,
@@ -87,7 +118,7 @@ class DebugCommand {
                                     "plugins",
                                     SoftwareType.PROXY,
                                 ),
-                                null,
+                                emptyMap(),
                                 emptyList(),
                                 emptyList(),
                                 false,
@@ -130,7 +161,7 @@ class DebugCommand {
                                         "plugins",
                                         SoftwareType.SERVER,
                                     ),
-                                    null,
+                                    emptyMap(),
                                     emptyList(),
                                     emptyList(),
                                     true,
@@ -178,7 +209,7 @@ class DebugCommand {
                                         "plugins",
                                         SoftwareType.PROXY,
                                     ),
-                                    null,
+                                    emptyMap(),
                                     emptyList(),
                                     emptyList(),
                                     false,
@@ -225,6 +256,45 @@ class DebugCommand {
             source.sendMessage("Updating config")
             VirtualConfigDebugHelper.updateDebugConfig()
             source.sendMessage("Successfully updated config")
+        }
+    }
+
+    @Command("debug database main insert")
+    fun debugInsertData(source: CommandSource) {
+        NodeCoroutineScope.launch {
+            source.sendMessage("Inserting data into database")
+            Node.instance
+                .getDatabaseProvider()
+                .getOrCreateDatabase("debug")
+                .upsert(debugProxyTask.name, Json.encodeToJsonElement(debugProxyTask))
+            source.sendMessage("Successfully inserted data into database")
+        }
+    }
+
+    @Command("debug database main delete")
+    fun debugDeleteData(source: CommandSource) {
+        NodeCoroutineScope.launch {
+            source.sendMessage("Deleting data from database")
+            Node.instance
+                .getDatabaseProvider()
+                .getOrCreateDatabase("debug")
+                .delete(debugProxyTask.name)
+            source.sendMessage("Successfully deleted data from database")
+        }
+    }
+
+    @Command("debug database main get")
+    fun debugGetData(source: CommandSource) {
+        NodeCoroutineScope.launch {
+            source.sendMessage("Getting data from database")
+            val jsonElement =
+                Node.instance
+                    .getDatabaseProvider()
+                    .getOrCreateDatabase("debug")
+                    .get(debugProxyTask.name)
+            source.sendMessage(jsonElement.toString())
+            val task = Json.decodeFromJsonElement(Task.serializer(), jsonElement!!)
+            source.sendMessage(task.toString())
         }
     }
 }
