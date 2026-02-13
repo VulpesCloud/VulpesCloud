@@ -230,7 +230,7 @@ class Node {
 
             clusterProvider.startupDone()
             val time =
-                (System.getProperty("startup").toLongOrNull() ?: 0) - System.currentTimeMillis()
+                System.currentTimeMillis() - (System.getProperty("startup").toLongOrNull() ?: 0)
             logger.info("Startup Done! Took {}ms", time)
 
             ServiceScheduler.start()
