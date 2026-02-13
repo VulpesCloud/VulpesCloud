@@ -26,7 +26,7 @@ class Config {
         try {
             autoUpdatesBranch()
         } catch (e: NullPointerException) {
-            config.set<Boolean>("auto-updates.branch", "stable")
+            config.set<Boolean>("auto-updates.branch", "v3")
             config.save()
         }
     }

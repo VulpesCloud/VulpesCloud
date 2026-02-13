@@ -28,8 +28,13 @@ okio = "3.16.4"
 # docker
 docker-java = "3.7.0"
 
-# mongo
+# Database
+exposed = "1.0.0"
 mongodb = "5.6.3"
+sqlite = "3.50.2.0"
+mariadb = "3.5.6"
+hikaricp = "7.0.2"
+
 reactor = "3.8.3"
 
 # logging
@@ -99,9 +104,15 @@ perfmark = { group = "io.perfmark", name = "perfmark-api", version.ref = "perfma
 
 javaJWT = { group = "com.auth0", name = "java-jwt", version.ref = "javaJWT" }
 
-# mongo
+# Database
+exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
+exposed-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref = "exposed" }
 mongodb-driver-coroutine = { group = "org.mongodb", name = "mongodb-driver-kotlin-coroutine", version.ref = "mongodb" }
 mongodb-bson-kotlinx = { group = "org.mongodb", name = "bson-kotlinx", version.ref = "mongodb" }
+sqlite = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqlite" }
+mariadb = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.ref = "mariadb" }
+hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
+
 reactor-core = { group = "io.projectreactor", name = "reactor-core", version.ref = "reactor" }
 
 # docker

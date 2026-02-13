@@ -1,29 +1,28 @@
 package de.vulpescloud.node.virtualconfig
 
 import build.buf.gen.vulpescloud.virtualconfig.v1.*
+import de.vulpescloud.api.virtualconfig.VirtualConfig
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import de.vulpescloud.node.utils.MongoUtils
-import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.serialization.json.Json
 import org.bson.BsonDocument
-import org.bson.BsonString
 import build.buf.gen.vulpescloud.virtualconfig.v1.VirtualConfig as VirtualConfigDefinition
 
 class VirtualConfigServiceImpl :
     VirtualConfigServiceGrpcKt.VirtualConfigServiceCoroutineImplBase() {
 
+    private val virtualConfigDatabase by lazy {
+        Node.instance.getDatabaseProvider().getOrCreateDatabase("virtualconfigs")
+    }
+
     @RequiresPermission("virtualconfig.list")
     override suspend fun getAll(request: GetAllRequest): GetAllResponse {
-        val collection =
-            Node.instance.mongoClient
-                .getDatabase(Node.instance.configProvider.config.mongodb.database)
-                .getCollection<BsonDocument>(
-                    Node.instance.configProvider.config.mongodb.collectionPrefix + "virtualconfigs"
-                )
-
-        val configs = mutableListOf<VirtualConfigDefinition>()
-
-        collection.find().collect { configs.add(fromDocumentToDefinition(it.toBsonDocument())) }
+        val configs =
+            virtualConfigDatabase
+                .getAll()
+                .map { Json.decodeFromJsonElement(VirtualConfig.serializer(), it) }
+                .map { it.toDefinition() }
 
         return getAllResponse { this.configs.addAll(configs) }
     }
@@ -33,18 +32,13 @@ class VirtualConfigServiceImpl :
 
         require(request.name.isNotEmpty()) { "Name must not be empty" }
 
-        val collection =
-            Node.instance.mongoClient
-                .getDatabase(Node.instance.configProvider.config.mongodb.database)
-                .getCollection<BsonDocument>(
-                    Node.instance.configProvider.config.mongodb.collectionPrefix + "virtualconfigs"
+        val config =
+            Json.decodeFromJsonElement(
+                    VirtualConfig.serializer(),
+                    virtualConfigDatabase.get(request.name)
+                        ?: return GetByNameResponse.newBuilder().build(),
                 )
-        val filter = BsonDocument("name", BsonString(request.name))
-        val configDoc = collection.find(filter).firstOrNull()
-        val config = configDoc?.let { fromDocumentToDefinition(it) }
-        if (config == null) {
-            return getByNameResponse {}
-        }
+                .toDefinition()
         return getByNameResponse { this.config = config }
     }
 

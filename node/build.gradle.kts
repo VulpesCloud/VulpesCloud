@@ -76,6 +76,13 @@ dependencies {
     compileOnly(kotlin("reflect"))
     compileOnly(libs.javaJWT)
     compileOnly(libs.bcrypt)
+
+    compileOnly(libs.sqlite)
+    compileOnly(libs.mariadb)
+
+    compileOnly(libs.exposed.core)
+    compileOnly(libs.exposed.jdbc)
+    compileOnly(libs.hikaricp)
 }
 
 sourceSets { getByName("main") { kotlin { srcDir("src/main/kotlin") } } }
