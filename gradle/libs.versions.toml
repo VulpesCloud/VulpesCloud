@@ -32,7 +32,7 @@ docker-java = "3.7.0"
 exposed = "1.0.0"
 mongodb = "5.6.3"
 sqlite = "3.51.2.0"
-mariadb = "3.5.6"
+mariadb = "3.5.7"
 hikaricp = "7.0.2"
 
 reactor = "3.8.3"
