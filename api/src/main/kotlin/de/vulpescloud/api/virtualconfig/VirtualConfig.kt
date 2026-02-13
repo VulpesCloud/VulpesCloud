@@ -1,15 +1,18 @@
 package de.vulpescloud.api.virtualconfig
 
+import de.vulpescloud.api.serializer.JSONObjectSerializer
+import kotlinx.serialization.Serializable
 import org.bson.BsonDocument
 import org.bson.BsonInt64
 import org.bson.BsonString
 import org.json.JSONObject
 
+@Serializable
 data class VirtualConfig(
     val name: String,
     val createdAt: Long,
     val lastUpdatedAt: Long,
-    val config: JSONObject,
+    @Serializable(JSONObjectSerializer::class) val config: JSONObject,
 ) {
 
     fun toDefinition(): build.buf.gen.vulpescloud.virtualconfig.v1.VirtualConfig {
