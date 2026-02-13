@@ -34,14 +34,10 @@ class MongoDBDatabase(
     }
 
     override suspend fun insert(key: String, value: JsonElement) {
-        collection.updateOne(
-            Filters.eq("key", key),
-            Updates.combine(
-                Updates.setOnInsert("key", key),
-                Updates.setOnInsert("value", value.toString()),
-            ),
-            UpdateOptions().upsert(true),
-        )
+        val exists = collection.countDocuments(Filters.eq("key", key)) > 0
+        if (!exists) {
+            collection.insertOne(MongoKVModel(key, value))
+        }
     }
 
     override suspend fun get(key: String): JsonElement? {
