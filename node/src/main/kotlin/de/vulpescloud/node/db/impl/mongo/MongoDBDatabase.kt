@@ -36,7 +36,10 @@ class MongoDBDatabase(
     override suspend fun insert(key: String, value: JsonElement) {
         collection.updateOne(
             Filters.eq("key", key),
-            Updates.combine(Updates.setOnInsert("key", key), Updates.setOnInsert("value", value)),
+            Updates.combine(
+                Updates.setOnInsert("key", key),
+                Updates.setOnInsert("value", value.toString()),
+            ),
             UpdateOptions().upsert(true),
         )
     }
