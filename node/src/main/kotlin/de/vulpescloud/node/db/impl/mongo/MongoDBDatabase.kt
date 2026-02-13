@@ -2,6 +2,8 @@ package de.vulpescloud.node.db.impl.mongo
 
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.ReplaceOptions
+import com.mongodb.client.model.UpdateOptions
+import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import de.vulpescloud.node.db.Database
 import kotlinx.coroutines.flow.firstOrNull
@@ -32,7 +34,11 @@ class MongoDBDatabase(
     }
 
     override suspend fun insert(key: String, value: JsonElement) {
-        collection.insertOne(MongoKVModel(key, value))
+        collection.updateOne(
+            Filters.eq("key", key),
+            Updates.combine(Updates.setOnInsert("key", key), Updates.setOnInsert("value", value)),
+            UpdateOptions().upsert(true),
+        )
     }
 
     override suspend fun get(key: String): JsonElement? {
