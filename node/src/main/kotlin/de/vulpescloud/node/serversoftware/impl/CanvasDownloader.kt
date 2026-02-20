@@ -107,7 +107,7 @@ object CanvasDownloader : ServerSoftwareDownloader {
         }
     }
 
-    override suspend fun getAvailableVersions(): List<ServerSoftware> {
+    override suspend fun getAvailableVersions(refreshList: Boolean): List<ServerSoftware> {
         val builds = getAllBuilds()
 
         val versions = builds.map { it.getString("minecraftVersion") }.distinct().sortedByDescending {
