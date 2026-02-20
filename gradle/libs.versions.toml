@@ -19,7 +19,7 @@ grpc-kotlin = "1.5.0"
 protospecs-grpc = "1.5.0.1.20260110191719.2594fcc093fc"
 perfmark = "0.27.0"
 
-javaJWT = "4.5.0"
+javaJWT = "4.5.1"
 
 # ok
 okhttp = "5.3.2"
@@ -32,14 +32,14 @@ docker-java = "3.7.0"
 exposed = "1.0.0"
 mongodb = "5.6.3"
 sqlite = "3.51.2.0"
-mariadb = "3.5.6"
+mariadb = "3.5.7"
 hikaricp = "7.0.2"
 
 reactor = "3.8.3"
 
 # logging
 slf4j = "2.1.0-alpha1"
-logback = "1.5.29"
+logback = "1.5.32"
 adventure = "4.26.1"
 
 # configuration
