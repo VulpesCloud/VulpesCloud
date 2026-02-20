@@ -9,15 +9,16 @@ import de.vulpescloud.api.templates.Template
 import de.vulpescloud.api.templates.TemplateStorages
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
+import de.vulpescloud.node.serversoftware.ServerSoftwareDownloader
 import de.vulpescloud.node.serversoftware.impl.*
 import de.vulpescloud.node.setup.Setup
 import de.vulpescloud.node.setup.annotations.SetupFinish
 import de.vulpescloud.node.setup.annotations.SetupQuestion
 import de.vulpescloud.node.setup.answers.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 class TaskSetup() : Setup {
 
@@ -45,7 +46,7 @@ class TaskSetup() : Setup {
         )
 
     companion object {
-        var softwareName: String? = null
+        var downloader: ServerSoftwareDownloader? = null
             private set
     }
 
@@ -73,7 +74,14 @@ class TaskSetup() : Setup {
             return true
         }
 
-        softwareName = software
+        downloader = Node.instance.serverSoftwareProvider.getFromDisplayName(software)
+
+        if (downloader == null) {
+            Node.instance.terminal.printSetup(
+                "Could not find downloader for $software! How? Just how was this even possible?!"
+            )
+            return false
+        }
 
         return true
     }
@@ -87,15 +95,7 @@ class TaskSetup() : Setup {
     fun q2(version: String): Boolean {
         return CompletableFuture.supplyAsync {
                 runBlocking {
-                    val ver =
-                        when (softwareName) {
-                            "Velocity" -> VelocityDownloader.getLatestVersion(version)
-                            "Paper" -> PaperDownloader.getLatestVersion(version)
-                            "Purpur" -> PurpurDownloader.getLatestVersion(version)
-                            "Folia" -> FoliaDownloader.getLatestVersion(version)
-                            "Canvas" -> CanvasDownloader.getLatestVersion(version)
-                            else -> null
-                        }
+                    val ver = downloader?.getLatestVersion(version)
 
                     if (ver == null) {
                         Node.instance.terminal.printSetup("The version $version is not found!")
@@ -121,7 +121,7 @@ class TaskSetup() : Setup {
 
     @SetupQuestion(
         3,
-        "How much memory should this service be able to use?",
+        "How much memory should services of this task be able to use? (Value must be in MB)",
         MemorySetupAnswer::class,
     )
     fun q3(answer: String): Boolean {
@@ -159,7 +159,12 @@ class TaskSetup() : Setup {
         return true
     }
 
-    @SetupQuestion(7, "Should this task be in maintenance mode?", BooleanSetupAnswer::class, true)
+    @SetupQuestion(
+        7,
+        "Should this task be in maintenance mode? (This prevents auto starting of services)",
+        BooleanSetupAnswer::class,
+        true,
+    )
     fun q7(answer: String): Boolean {
         task = task.copy(maintenance = answer.toBoolean())
         return true

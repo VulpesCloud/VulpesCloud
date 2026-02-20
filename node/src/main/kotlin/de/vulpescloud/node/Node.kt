@@ -24,6 +24,11 @@ import de.vulpescloud.node.grpc.security.AuthInterceptor
 import de.vulpescloud.node.grpc.security.PermissionInterceptor
 import de.vulpescloud.node.modules.ModuleProvider
 import de.vulpescloud.node.secret.SecretFactory
+import de.vulpescloud.node.serversoftware.ServerSoftwareProvider
+import de.vulpescloud.node.serversoftware.impl.FoliaDownloader
+import de.vulpescloud.node.serversoftware.impl.PaperDownloader
+import de.vulpescloud.node.serversoftware.impl.PurpurDownloader
+import de.vulpescloud.node.serversoftware.impl.VelocityDownloader
 import de.vulpescloud.node.services.AbstractService
 import de.vulpescloud.node.services.ServiceFactoryProvider
 import de.vulpescloud.node.services.ServiceScheduler
@@ -39,10 +44,10 @@ import de.vulpescloud.node.virtualconfig.VirtualConfigProvider
 import de.vulpescloud.node.virtualconfig.VirtualConfigServiceImpl
 import io.grpc.BindableService
 import io.grpc.ChannelCredentials
-import kotlinx.coroutines.*
-import org.slf4j.LoggerFactory
 import java.time.Duration
 import kotlin.io.path.Path
+import kotlinx.coroutines.*
+import org.slf4j.LoggerFactory
 
 class Node {
     private val logger = LoggerFactory.getLogger("Node")
@@ -69,6 +74,7 @@ class Node {
     val clusterProvider = ClusterProvider()
     val moduleProvider = ModuleProvider(Path("modules"))
     val virtualConfigServiceImpl = VirtualConfigServiceImpl()
+    val serverSoftwareProvider = ServerSoftwareProvider()
 
     private val grpcServices = mutableListOf<BindableService>()
     private var allowGrpcServiceAdding = true
@@ -224,6 +230,15 @@ class Node {
                     logger.error("Failed to connect to Docker: ${e.message}")
                     return@withContext
                 }
+            }
+
+            serverSoftwareProvider.apply {
+                registerDownloader(FoliaDownloader)
+                registerDownloader(PaperDownloader)
+                registerDownloader(PurpurDownloader)
+                registerDownloader(VelocityDownloader)
+
+                lock()
             }
 
             moduleProvider.startAllModules()
