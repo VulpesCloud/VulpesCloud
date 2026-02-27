@@ -237,6 +237,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
 
     fun updatePaperGlobalConfig(service: LocalService) {
         if (Node.instance.configProvider.config.useModernForwarding) {
+            service.path().resolve("config").toFile().mkdirs()
             val globalConf =
                 FileConfig.builder(
                         service.path().resolve("config/paper-global.yml"),
