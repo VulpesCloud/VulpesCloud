@@ -29,7 +29,7 @@ okio = "3.16.4"
 docker-java = "3.7.0"
 
 # Database
-exposed = "1.0.0"
+exposed = "1.1.1"
 mongodb = "5.6.3"
 sqlite = "3.51.2.0"
 mariadb = "3.5.7"
