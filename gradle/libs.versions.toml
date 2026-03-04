@@ -56,7 +56,7 @@ velocity = "3.4.0"
 
 # config
 night-config = "3.8.3"
-snakeyml = "2.5"
+snakeyml = "2.6"
 
 # command api
 commandapi = "11.1.0"
