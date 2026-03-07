@@ -8,6 +8,7 @@ import org.bukkit.Bukkit
 import org.bukkit.event.EventHandler
 import org.bukkit.event.Listener
 import org.bukkit.event.player.PlayerJoinEvent
+import org.bukkit.event.player.PlayerQuitEvent
 
 class PlayerJoinEventListener : Listener {
 
@@ -15,6 +16,19 @@ class PlayerJoinEventListener : Listener {
 
     @EventHandler
     fun onPlayerJoinEvent(event: PlayerJoinEvent) {
+        runBlocking {
+            val service = bridgeAPI.getServicesAPI().getLocalService()!!
+            Wrapper.instance.grpcClient.serviceAPI.updatePlayerCount(
+                UpdatePlayerCountRequest.newBuilder()
+                    .setPlayerCount(Bukkit.getOnlinePlayers().size)
+                    .setService(service.toDefinition())
+                    .build()
+            )
+        }
+    }
+
+    @EventHandler
+    fun onPlayerQuitEvent(event: PlayerQuitEvent) {
         runBlocking {
             val service = bridgeAPI.getServicesAPI().getLocalService()!!
             Wrapper.instance.grpcClient.serviceAPI.updatePlayerCount(
