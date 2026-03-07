@@ -4,6 +4,7 @@ import build.buf.gen.vulpescloud.services.v1.*
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import de.vulpescloud.node.utils.MongoUtils
 import kotlinx.serialization.json.Json
@@ -89,16 +90,44 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
 
         val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
         if (abstractService == null) {
-            logger.error(
-                "Unable to start Service ${service.task.name}-${service.orderedId} as it is not registered!"
+            logger.warn(
+                "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
             )
-            return StartServiceResponse.newBuilder().build()
+            val correctNode =
+                Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == service.node }
+
+            if (correctNode == null) {
+                logger.error(
+                    "Unable to start Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
+                )
+                return StartServiceResponse.newBuilder()
+                    .setSuccess(false)
+                    .setError("node.notFound")
+                    .build()
+            }
+
+            if (correctNode.channel == null) {
+                logger.error(
+                    "Unable to start Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
+                )
+                return StartServiceResponse.newBuilder()
+                    .setSuccess(false)
+                    .setError("node.channel.null")
+                    .build()
+            }
+
+            val stub =
+                ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(correctNode.channel!!)
+                    .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+
+            stub.startService(request)
+
+            return StartServiceResponse.newBuilder().setSuccess(true).build()
         }
+
         abstractService.start()
 
-        return StartServiceResponse.newBuilder()
-            .setService(abstractService.service.toDefinition())
-            .build()
+        return StartServiceResponse.newBuilder().setSuccess(true).build()
     }
 
     @RequiresPermission("services.stop")
@@ -107,16 +136,42 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
 
         val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
         if (abstractService == null) {
-            logger.error(
-                "Unable to stop Service ${service.task.name}-${service.orderedId} as it is not registered!"
+            logger.warn(
+                "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
             )
-            return StopServiceResponse.newBuilder().build()
+            val correctNode =
+                Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == service.node }
+
+            if (correctNode == null) {
+                logger.error(
+                    "Unable to stop Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
+                )
+                return StopServiceResponse.newBuilder()
+                    .setSuccess(false)
+                    .setError("node.notFound")
+                    .build()
+            }
+
+            if (correctNode.channel == null) {
+                logger.error(
+                    "Unable to stop Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
+                )
+                return StopServiceResponse.newBuilder()
+                    .setSuccess(false)
+                    .setError("node.channel.null")
+                    .build()
+            }
+
+            val stub =
+                ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(correctNode.channel!!)
+                    .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+
+            return stub.stopService(request)
         }
+
         abstractService.stop()
 
-        return StopServiceResponse.newBuilder()
-            .setService(abstractService.service.toDefinition())
-            .build()
+        return StopServiceResponse.newBuilder().setSuccess(true).build()
     }
 
     @RequiresPermission("services.restart")
@@ -125,16 +180,42 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
 
         val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
         if (abstractService == null) {
-            logger.error(
-                "Unable to restart Service ${service.task.name}-${service.orderedId} as it is not registered!"
+            logger.warn(
+                "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
             )
-            return RestartServiceResponse.newBuilder().build()
+            val correctNode =
+                Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == service.node }
+
+            if (correctNode == null) {
+                logger.error(
+                    "Unable to restart Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
+                )
+                return RestartServiceResponse.newBuilder()
+                    .setSuccess(false)
+                    .setError("node.notFound")
+                    .build()
+            }
+
+            if (correctNode.channel == null) {
+                logger.error(
+                    "Unable to restart Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
+                )
+                return RestartServiceResponse.newBuilder()
+                    .setSuccess(false)
+                    .setError("node.channel.null")
+                    .build()
+            }
+
+            val stub =
+                ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(correctNode.channel!!)
+                    .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+
+            return stub.restartService(request)
         }
+
         abstractService.restart()
 
-        return RestartServiceResponse.newBuilder()
-            .setService(abstractService.service.toDefinition())
-            .build()
+        return RestartServiceResponse.newBuilder().setSuccess(true).build()
     }
 
     @RequiresPermission("services.delete")
@@ -143,16 +224,41 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
 
         val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
         if (abstractService == null) {
-            logger.error(
-                "Unable to delete Service ${service.task.name}-${service.orderedId} as it is not registered!"
+            logger.warn(
+                "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
             )
-            return DeleteServiceResponse.newBuilder().build()
+            val correctNode =
+                Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == service.node }
+
+            if (correctNode == null) {
+                logger.error(
+                    "Unable to delete Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
+                )
+                return DeleteServiceResponse.newBuilder()
+                    .setSuccess(false)
+                    .setError("node.notFound")
+                    .build()
+            }
+
+            if (correctNode.channel == null) {
+                logger.error(
+                    "Unable to delete Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
+                )
+                return DeleteServiceResponse.newBuilder()
+                    .setSuccess(false)
+                    .setError("node.channel.null")
+                    .build()
+            }
+
+            val stub =
+                ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(correctNode.channel!!)
+                    .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+
+            return stub.deleteService(request)
         }
         abstractService.delete()
 
-        return DeleteServiceResponse.newBuilder()
-            .setService(abstractService.service.toDefinition())
-            .build()
+        return DeleteServiceResponse.newBuilder().setSuccess(true).build()
     }
 
     @RequiresPermission("services.sendCommand")

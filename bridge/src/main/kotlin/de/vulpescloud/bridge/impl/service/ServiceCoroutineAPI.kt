@@ -65,36 +65,28 @@ class ServiceCoroutineAPI : ServiceAPI.ServiceCoroutineAPI {
         )
     }
 
-    override suspend fun startService(service: Service): Service? {
-        return Service.fromDefinition(
-            serviceStub
-                .startService(startServiceRequest { this.service = service.toDefinition() })
-                .serviceOrNull ?: return null
-        )
+    override suspend fun startService(service: Service): String {
+        return serviceStub
+            .startService(startServiceRequest { this.service = service.toDefinition() })
+            .error
     }
 
-    override suspend fun stopService(service: Service): Service? {
-        return Service.fromDefinition(
-            serviceStub
-                .stopService(stopServiceRequest { this.service = service.toDefinition() })
-                .serviceOrNull ?: return null
-        )
+    override suspend fun stopService(service: Service): String {
+        return serviceStub
+            .stopService(stopServiceRequest { this.service = service.toDefinition() })
+            .error
     }
 
-    override suspend fun deleteService(service: Service): Service? {
-        return Service.fromDefinition(
-            serviceStub
-                .deleteService(deleteServiceRequest { this.service = service.toDefinition() })
-                .serviceOrNull ?: return null
-        )
+    override suspend fun deleteService(service: Service): String {
+        return serviceStub
+            .deleteService(deleteServiceRequest { this.service = service.toDefinition() })
+            .error
     }
 
-    override suspend fun restartService(service: Service): Service? {
-        return Service.fromDefinition(
-            serviceStub
-                .restartService(restartServiceRequest { this.service = service.toDefinition() })
-                .serviceOrNull ?: return null
-        )
+    override suspend fun restartService(service: Service): String {
+        return serviceStub
+            .restartService(restartServiceRequest { this.service = service.toDefinition() })
+            .error
     }
 
     override suspend fun sendCommand(service: Service, command: String): Boolean {
