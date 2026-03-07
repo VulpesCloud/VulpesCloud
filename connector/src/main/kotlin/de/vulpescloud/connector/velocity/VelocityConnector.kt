@@ -85,7 +85,7 @@ constructor(
             return
         }
 
-        HubCommand(proxyServer)
+        HubCommand(proxyServer).command.register()
         CloudCommand()
 
         bridgeAPI
