@@ -36,7 +36,7 @@ plugins {
 }
 
 group = "de.vulpescloud"
-version = "3.0.0-beta2"
+version = "3.0.0-beta3"
 
 tasks.named("build") {
     enabled = false
@@ -53,7 +53,7 @@ allprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
-    version = "3.0.0-beta2"
+    version = "3.0.0-beta3"
     group = "de.vulpescloud"
 
     repositories {
