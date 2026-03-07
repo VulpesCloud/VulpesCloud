@@ -30,7 +30,7 @@ docker-java = "3.7.0"
 
 # Database
 exposed = "1.1.1"
-mongodb = "5.6.3"
+mongodb = "5.6.4"
 sqlite = "3.51.2.0"
 mariadb = "3.5.7"
 hikaricp = "7.0.2"
@@ -47,7 +47,7 @@ gson = "2.13.2"
 json = "20250517"
 
 # console
-jline = "3.30.6"
+jline = "3.30.7"
 cloud = "2.0.0"
 
 # platforms
@@ -62,7 +62,7 @@ snakeyml = "2.6"
 commandapi = "11.1.0"
 
 # shadowJar
-shadow = "9.3.1"
+shadow = "9.3.2"
 
 # bouncy castle
 bouncy-castle = "1.70"
