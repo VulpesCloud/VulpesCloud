@@ -24,7 +24,9 @@ class VelocityServerRegistrationHandler(
         }
 
         bridgeAPI.getServicesAPI().getAllServices().get(5, TimeUnit.SECONDS).forEach {
-            this.registerServer("${it.task.name}-${it.orderedId}", it.hostname, it.port)
+            if (it.task.software.type != SoftwareType.PROXY) {
+                this.registerServer("${it.task.name}-${it.orderedId}", it.hostname, it.port)
+            }
         }
 
         serviceStateChangeEventJob =
