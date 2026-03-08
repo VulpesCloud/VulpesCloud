@@ -50,7 +50,8 @@ class LocalService(override val service: Service) : AbstractService {
                     reader.forEachLine { line ->
                         runBlocking {
                             EventsService.publish(
-                                EventSerializer.encode(ServiceLogEvent(service, line.trim()))
+                                EventSerializer.encode(ServiceLogEvent(service, line.trim())),
+                                true,
                             )
                         }
                     }
