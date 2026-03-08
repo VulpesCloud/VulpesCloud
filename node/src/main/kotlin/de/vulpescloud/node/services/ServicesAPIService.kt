@@ -5,6 +5,7 @@ import de.vulpescloud.api.events.services.ServiceLogEvent
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.cluster.ClusterHelper
 import de.vulpescloud.node.event.EventsService
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
@@ -100,6 +101,11 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             )
             val correctNode =
                 Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == service.node }
+            if (correctNode?.endpoint?.name == ClusterHelper.getLocalNode().name) {
+                logger.error(
+                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                )
+            }
 
             if (correctNode == null) {
                 logger.error(
@@ -146,6 +152,11 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             )
             val correctNode =
                 Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == service.node }
+            if (correctNode?.endpoint?.name == ClusterHelper.getLocalNode().name) {
+                logger.error(
+                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                )
+            }
 
             if (correctNode == null) {
                 logger.error(
@@ -190,6 +201,11 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             )
             val correctNode =
                 Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == service.node }
+            if (correctNode?.endpoint?.name == ClusterHelper.getLocalNode().name) {
+                logger.error(
+                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                )
+            }
 
             if (correctNode == null) {
                 logger.error(
@@ -234,6 +250,11 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             )
             val correctNode =
                 Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == service.node }
+            if (correctNode?.endpoint?.name == ClusterHelper.getLocalNode().name) {
+                logger.error(
+                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                )
+            }
 
             if (correctNode == null) {
                 logger.error(
@@ -272,10 +293,36 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
 
         val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
         if (abstractService == null) {
-            logger.error(
-                "Unable to send command to Service ${service.task.name}-${service.orderedId} as it is not registered!"
+            logger.warn(
+                "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
             )
-            return SendCommandResponse.newBuilder().build()
+            val correctNode =
+                Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == service.node }
+            if (correctNode?.endpoint?.name == ClusterHelper.getLocalNode().name) {
+                logger.error(
+                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                )
+            }
+
+            if (correctNode == null) {
+                logger.error(
+                    "Unable to send command to Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
+                )
+                return SendCommandResponse.newBuilder().setSuccess(false).build()
+            }
+
+            if (correctNode.channel == null) {
+                logger.error(
+                    "Unable to send command to Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
+                )
+                return SendCommandResponse.newBuilder().setSuccess(false).build()
+            }
+
+            val stub =
+                ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(correctNode.channel!!)
+                    .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+
+            return stub.sendCommand(request)
         }
         abstractService.command(request.command)
 
