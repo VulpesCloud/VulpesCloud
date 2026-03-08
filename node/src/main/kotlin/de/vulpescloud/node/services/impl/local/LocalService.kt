@@ -50,8 +50,14 @@ class LocalService(override val service: Service) : AbstractService {
                     reader.forEachLine { line ->
                         runBlocking {
                             EventsService.publish(
-                                EventSerializer.encode(ServiceLogEvent(service, line.trim())),
-                                true,
+                                EventSerializer.encode(ServiceLogEvent(service, line.trim()))
+                                // true,
+                                /**
+                                 * TODO I have temporarily disabled broadcast. In my Testing this
+                                 * caused really really big issues. Especially with many
+                                 * Services/heavy logging
+                                 * - TheCGuy
+                                 */
                             )
                         }
                     }
