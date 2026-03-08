@@ -4,10 +4,10 @@ import build.buf.gen.vulpescloud.node.v1.Node
 import build.buf.gen.vulpescloud.node.v1.NodeStates
 import build.buf.gen.vulpescloud.node.v1.node
 import de.vulpescloud.api.serializer.UUIDSerializer
+import java.util.*
 import kotlinx.serialization.Serializable
 import org.bson.BsonDocument
 import org.bson.BsonString
-import java.util.*
 
 @Serializable
 data class ClusterNode(
@@ -20,6 +20,11 @@ data class ClusterNode(
     val head: Boolean,
     val bootTimestamp: Long,
 ) {
+
+    fun isRunning(): Boolean {
+        return state == NodeState.ONLINE || state == NodeState.DRAINING
+    }
+
     fun toDefinition(): Node {
         return node {
             this.name = this@ClusterNode.name

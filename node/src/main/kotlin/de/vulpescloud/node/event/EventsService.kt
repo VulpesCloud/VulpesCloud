@@ -1,5 +1,6 @@
 package de.vulpescloud.node.event
 
+import build.buf.gen.vulpescloud.events.v1.Event as GrpcEvent
 import build.buf.gen.vulpescloud.events.v1.EventServiceGrpcKt
 import build.buf.gen.vulpescloud.events.v1.PublishRequest
 import build.buf.gen.vulpescloud.events.v1.PublishResponse
@@ -11,6 +12,9 @@ import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.cluster.ClusterHelper
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
+import java.util.*
+import java.util.concurrent.CopyOnWriteArrayList
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
@@ -18,10 +22,6 @@ import kotlinx.coroutines.flow.consumeAsFlow
 import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
-import java.util.*
-import java.util.concurrent.CopyOnWriteArrayList
-import kotlin.coroutines.cancellation.CancellationException
-import build.buf.gen.vulpescloud.events.v1.Event as GrpcEvent
 
 class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
 
@@ -51,6 +51,7 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
         if (request.forwardToOtherNodes) {
             Node.instance.clusterProvider.remoteNodes
                 .filter { it.endpoint.name != ClusterHelper.getLocalNode().name }
+                .filter { it.getNode().isRunning() }
                 .forEach { node ->
                     val stub =
                         EventServiceGrpcKt.EventServiceCoroutineStub(node.channel ?: return@forEach)
