@@ -24,7 +24,7 @@
 
 plugins {
     id("java")
-    kotlin("jvm") version "2.3.10"
+    kotlin("jvm") version "2.3.20"
     alias(libs.plugins.shadow)
 
 }
