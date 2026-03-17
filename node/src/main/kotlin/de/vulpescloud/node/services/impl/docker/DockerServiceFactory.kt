@@ -252,7 +252,7 @@ class DockerServiceFactory : AbstractServiceFactory() {
         //        }
         binds.add(Bind.parse("${dockerService.path().toAbsolutePath()}:/app"))
 
-        //        binds.add(
+        // binds.add(
         //            Bind.parse(
         //
         // "${Path("launcher/dependencies/vulpescloud/vulpescloud-connector.jar").toAbsolutePath()}:/app/plugins/vulpescloud-connector.jar"
@@ -270,12 +270,11 @@ class DockerServiceFactory : AbstractServiceFactory() {
         // "${Path("launcher/dependencies/maven").toAbsolutePath()}:/launcher/dependencies/maven"
         //            )
         //        )
-        //        binds.add(
-        //            Bind.parse(
-        //
-        // "${Path("launcher/dependencies/vulpescloud").toAbsolutePath()}:/launcher/dependencies/vulpescloud"
-        //            )
-        //        )
+        binds.add(
+            Bind.parse(
+                "${Path("launcher/dependencies/vulpescloud").toAbsolutePath()}:/launcher/dependencies/vulpescloud"
+            )
+        )
         //        binds.add(Bind.parse("${Path("certs").toAbsolutePath()}:/vulpescloud/certs"))
         //        binds.add(Bind.parse("${Path("certs").toAbsolutePath()}:/app/vulpescloud/certs"))
 
@@ -288,9 +287,9 @@ class DockerServiceFactory : AbstractServiceFactory() {
             .createContainerCmd(imageName)
             .withEnv(env)
             .withVolumes(
-                Volume(dockerService.path().absolutePathString())
+                Volume(dockerService.path().absolutePathString()),
                 //                Volume("launcher/dependencies/maven"),
-                //                Volume("launcher/dependencies/vulpescloud"),
+                Volume("launcher/dependencies/vulpescloud"),
                 //                Volume("vulpescloud/certs"),
                 //                Volume("/app/vulpescloud/certs"),
             )
