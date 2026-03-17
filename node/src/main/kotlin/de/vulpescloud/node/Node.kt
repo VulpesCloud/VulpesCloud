@@ -187,8 +187,8 @@ class Node {
             EventListenHelper.subscribeToEvents()
 
             clusterProvider.initClusterConfig()
-            clusterProvider.connectToOtherNodes()
             clusterProvider.init()
+            clusterProvider.connectToOtherNodes()
 
             serviceFactoryProvider.apply {
                 registerServiceFactory(DockerServiceFactory())

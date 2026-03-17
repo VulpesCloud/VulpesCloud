@@ -8,11 +8,17 @@ import de.vulpescloud.api.events.EventSerializer
 import de.vulpescloud.api.events.cluster.ChoseNewHeadEvent
 import de.vulpescloud.api.events.cluster.NodeStateChangeEvent
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.NodeShutdown
 import de.vulpescloud.node.event.EventsService
+import kotlinx.coroutines.delay
+import org.slf4j.LoggerFactory
+import kotlin.system.exitProcess
+import kotlin.time.Duration.Companion.seconds
 
 class ClusterProvider {
 
     val remoteNodes = mutableListOf<RemoteNode>()
+    private val logger = LoggerFactory.getLogger("ClusterProvider")
 
     suspend fun connectToOtherNodes() {
         val nodes = getClusterConfig().nodes
@@ -32,6 +38,13 @@ class ClusterProvider {
 
     suspend fun init() {
         val head = ClusterHelper.getHeadNode()
+        val localNode = ClusterHelper.getLocalNode()
+
+        if (localNode.state == NodeState.ONLINE) {
+            logger.error("Node with same Name is already online! Stopping in 15 seconds...")
+            delay(15.seconds)
+            NodeShutdown.shutdown()
+        }
 
         if (head == null) {
             val localNode =

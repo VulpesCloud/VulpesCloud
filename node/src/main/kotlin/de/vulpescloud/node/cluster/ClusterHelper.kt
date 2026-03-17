@@ -37,7 +37,7 @@ object ClusterHelper {
                 Node.instance.configProvider.config.uuid,
                 Node.instance.configProvider.config.grpcHost,
                 Node.instance.configProvider.config.grpcPort,
-                NodeState.ONLINE,
+                NodeState.OFFLINE,
                 Node.instance.configProvider.config.maxMemory,
                 false,
                 System.currentTimeMillis(),
