@@ -9,6 +9,8 @@ import de.vulpescloud.node.Node
 import de.vulpescloud.node.serversoftware.impl.*
 import de.vulpescloud.node.services.AbstractServiceFactory
 import de.vulpescloud.node.utils.MongoUtils
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.*
@@ -170,14 +172,16 @@ class LocalServiceFactory : AbstractServiceFactory() {
         processBuilder.environment()["port"] = service.port.toString()
         processBuilder.environment()["secret"] = Node.instance.secret
 
-        Files.copy(
-            Path("launcher/dependencies/vulpescloud/vulpescloud-connector.jar"),
-            localService
-                .path()
-                .resolve(service.task.software.pluginDir)
-                .resolve("vulpescloud-connector.jar"),
-            StandardCopyOption.REPLACE_EXISTING,
-        )
+        withContext(Dispatchers.IO) {
+            Files.copy(
+                Path("launcher/dependencies/vulpescloud/vulpescloud-connector.jar"),
+                localService
+                    .path()
+                    .resolve(service.task.software.pluginDir)
+                    .resolve("vulpescloud-connector.jar"),
+                StandardCopyOption.REPLACE_EXISTING,
+            )
+        }
 
         Node.instance.moduleProvider
             .getAllModules()

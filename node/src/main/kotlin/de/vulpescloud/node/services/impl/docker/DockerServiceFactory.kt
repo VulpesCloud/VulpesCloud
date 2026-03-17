@@ -1,25 +1,47 @@
 package de.vulpescloud.node.services.impl.docker
 
+import com.electronwill.nightconfig.core.file.FileConfig
+import com.electronwill.nightconfig.toml.TomlFormat
+import com.electronwill.nightconfig.yaml.YamlFormat
 import com.github.dockerjava.api.command.PullImageResultCallback
 import com.github.dockerjava.api.model.*
 import com.github.dockerjava.core.DockerClientImpl
 import de.vulpescloud.api.serversoftware.SoftwareType
 import de.vulpescloud.api.services.Service
+import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.serversoftware.impl.*
 import de.vulpescloud.node.services.AbstractServiceFactory
+import de.vulpescloud.node.utils.MongoUtils
+import java.nio.file.Files
+import java.nio.file.StandardCopyOption
 import java.util.*
 import kotlin.io.path.Path
+import kotlin.io.path.absolutePathString
 import kotlin.io.path.copyTo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class DockerServiceFactory : AbstractServiceFactory() {
 
     override val factoryName: String = "docker"
 
     override suspend fun prepareService(service: Service): DockerService {
-        val dockerService = DockerService(service)
+        val dockerService =
+            DockerService(
+                service.copy(
+                    state = ServiceStates.PREPARED,
+                    node = Node.instance.configProvider.config.nodeName,
+                )
+            )
 
-        dockerService.path().resolve(dockerService.service.task.software.pluginDir).toFile().mkdirs()
+        MongoUtils.updateService(dockerService.service)
+
+        dockerService
+            .path()
+            .resolve(dockerService.service.task.software.pluginDir)
+            .toFile()
+            .mkdirs()
 
         service.task.templates
             .sortedBy { it.weight }
@@ -29,44 +51,6 @@ class DockerServiceFactory : AbstractServiceFactory() {
                     copyTemplateToPath(template, dockerService.path())
                 }
             }
-
-        when (service.task.software.name) {
-            "Canvas" -> {
-                CanvasDownloader.apply {
-                    downloadSoftware(service.task.software.version)
-                    getLatestVersionPath(service.task.software.version)
-                        .copyTo(dockerService.path().resolve("server.jar"), overwrite = true)
-                }
-            }
-            "Folia" -> {
-                FoliaDownloader.apply {
-                    downloadSoftware(service.task.software.version)
-                    getLatestVersionPath(service.task.software.version)
-                        .copyTo(dockerService.path().resolve("server.jar"), overwrite = true)
-                }
-            }
-            "Paper" -> {
-                PaperDownloader.apply {
-                    downloadSoftware(service.task.software.version)
-                    getLatestVersionPath(service.task.software.version)
-                        .copyTo(dockerService.path().resolve("server.jar"), overwrite = true)
-                }
-            }
-            "Purpur" -> {
-                PurpurDownloader.apply {
-                    downloadSoftware(service.task.software.version)
-                    getLatestVersionPath(service.task.software.version)
-                        .copyTo(dockerService.path().resolve("server.jar"), overwrite = true)
-                }
-            }
-            "Velocity" -> {
-                VelocityDownloader.apply {
-                    downloadSoftware(service.task.software.version)
-                    getLatestVersionPath(service.task.software.version)
-                        .copyTo(dockerService.path().resolve("server.jar"), overwrite = true)
-                }
-            }
-        }
 
         val jvmArgs = mutableListOf<String>()
         val env = mutableListOf<String>()
@@ -95,9 +79,7 @@ class DockerServiceFactory : AbstractServiceFactory() {
             )
         )
 
-        jvmArgs.add(
-            "-javaagent:/launcher/dependencies/vulpescloud/vulpescloud-wrapper.jar"
-        )
+        jvmArgs.add("-javaagent:/launcher/dependencies/vulpescloud/vulpescloud-wrapper.jar")
 
         jvmArgs.add("de.vulpescloud.wrapper.Wrapper")
         if (service.task.software.type == SoftwareType.SERVER) {
@@ -105,19 +87,126 @@ class DockerServiceFactory : AbstractServiceFactory() {
         }
         jvmArgs.addAll(service.task.jvmArgs)
 
-        val dockerClient = DockerClientImpl.getInstance(Node.instance.dockerClientConfig, Node.instance.dockerHttpClient)
+        when (service.task.software.name) {
+            "Canvas" -> {
+                CanvasDownloader.apply {
+                    downloadSoftware(service.task.software.version)
+                    getLatestVersionPath(service.task.software.version)
+                        .copyTo(dockerService.path().resolve("server.jar"), true)
+                }
+                acceptEULA(dockerService)
+                setServerProperties(dockerService)
+                updatePaperGlobalConfig(dockerService)
+            }
+            "Folia" -> {
+                FoliaDownloader.apply {
+                    downloadSoftware(service.task.software.version)
+                    getLatestVersionPath(service.task.software.version)
+                        .copyTo(dockerService.path().resolve("server.jar"), true)
+                }
+                acceptEULA(dockerService)
+                setServerProperties(dockerService)
+                updatePaperGlobalConfig(dockerService)
+
+                env.add("separateClassLoader")
+            }
+            "Paper" -> {
+                PaperDownloader.apply {
+                    downloadSoftware(service.task.software.version)
+                    getLatestVersionPath(service.task.software.version)
+                        .copyTo(dockerService.path().resolve("server.jar"), true)
+                }
+                acceptEULA(dockerService)
+                setServerProperties(dockerService)
+                updatePaperGlobalConfig(dockerService)
+
+                env.add("separateClassLoader")
+            }
+            "Purpur" -> {
+                PurpurDownloader.apply {
+                    downloadSoftware(service.task.software.version)
+                    getLatestVersionPath(service.task.software.version)
+                        .copyTo(dockerService.path().resolve("server.jar"), true)
+                }
+                acceptEULA(dockerService)
+                setServerProperties(dockerService)
+                updatePaperGlobalConfig(dockerService)
+
+                env.add("separateClassLoader")
+            }
+            "Velocity" -> {
+                VelocityDownloader.apply {
+                    downloadSoftware(service.task.software.version)
+                    getLatestVersionPath(service.task.software.version)
+                        .copyTo(dockerService.path().resolve("server.jar"), true)
+                }
+                updateVelocityConfig(dockerService)
+            }
+            "Minestom" -> {
+                if (Node.instance.configProvider.config.useModernForwarding) {
+                    withContext(Dispatchers.IO) {
+                        Files.writeString(
+                            dockerService.path().resolve("forwarding.secret"),
+                            Node.instance.getVelocitySecret(),
+                        )
+                    }
+                }
+            }
+        }
+
+        withContext(Dispatchers.IO) {
+            Files.copy(
+                Path("launcher/dependencies/vulpescloud/vulpescloud-connector.jar"),
+                dockerService
+                    .path()
+                    .resolve(service.task.software.pluginDir)
+                    .resolve("vulpescloud-connector.jar"),
+                StandardCopyOption.REPLACE_EXISTING,
+            )
+        }
+
+        Node.instance.moduleProvider
+            .getAllModules()
+            .filter { module ->
+                module.moduleInfo.copyToServices &&
+                    module.moduleInfo.platforms
+                        .map { it.lowercase() }
+                        .contains(service.task.software.name.lowercase())
+            }
+            .forEach {
+                Files.copy(
+                    Node.instance.moduleProvider.moduleFolder.resolve("${it.moduleInfo.name}.jar"),
+                    dockerService
+                        .path()
+                        .resolve(service.task.software.pluginDir)
+                        .resolve("${it.moduleInfo.name}.jar"),
+                    StandardCopyOption.REPLACE_EXISTING,
+                )
+            }
+
+        val dockerClient =
+            DockerClientImpl.getInstance(
+                Node.instance.dockerClientConfig,
+                Node.instance.dockerHttpClient,
+            )
         val imageName = "bypixeltv/vulpescloud-wrapper"
 
-        dockerClient.pullImageCmd(imageName)
+        dockerClient
+            .pullImageCmd(imageName)
             .withTag("latest")
             .exec(PullImageResultCallback())
             .awaitCompletion()
 
-        val existsImage = dockerClient.listImagesCmd().withImageNameFilter(imageName).exec().firstOrNull { img ->
-            img.repoTags?.contains("$imageName:latest") == true
-        }
+        val existsImage =
+            dockerClient.listImagesCmd().withImageNameFilter(imageName).exec().firstOrNull { img ->
+                img.repoTags?.contains("$imageName:latest") == true
+            }
 
-        if (existsImage == null || existsImage.repoTags == null || !existsImage.repoTags.contains("$imageName:latest")) {
+        if (
+            existsImage == null ||
+                existsImage.repoTags == null ||
+                !existsImage.repoTags.contains("$imageName:latest")
+        ) {
             throw Exception("Docker image not found")
         }
 
@@ -131,9 +220,9 @@ class DockerServiceFactory : AbstractServiceFactory() {
         env.add("secret=${Node.instance.secret}")
 
         val ports = Ports()
-        ports.bind(ExposedPort.tcp(25565), Ports.Binding.bindPort(service.port))
+        ports.bind(ExposedPort.tcp(service.port), Ports.Binding.bindPort(service.port))
 
-        service.task.attributes.get("docker-extra-ports")
+        service.task.attributes["docker-extra-ports"]
             ?.split(",")
             ?.map { it.trim() }
             ?.filter { it.isNotEmpty() }
@@ -142,51 +231,156 @@ class DockerServiceFactory : AbstractServiceFactory() {
                 val port = parts[0].toInt()
                 val protocol = if (parts.size > 1 && parts[1].lowercase() == "udp") "udp" else "tcp"
 
-                val exposed = if (protocol == "udp") ExposedPort.udp(port) else ExposedPort.tcp(port)
+                val exposed =
+                    if (protocol == "udp") ExposedPort.udp(port) else ExposedPort.tcp(port)
                 ports.bind(exposed, Ports.Binding.bindPort(port))
             }
 
         val binds = mutableListOf<Bind>()
 
-        if (service.task.staticServices) {
-            val volumeName = "vulpescloud-static-${service.task.name}-${service.orderedId}-${service.uuid}"
-            try {
-                dockerClient.createVolumeCmd().withName(volumeName).exec()
-            } catch (_: Exception) {
-            }
+        //        if (service.task.staticServices) {
+        //            val volumeName =
+        //
+        // "vulpescloud-static-${service.task.name}-${service.orderedId}-${service.uuid}"
+        //            try {
+        //                dockerClient.createVolumeCmd().withName(volumeName).exec()
+        //            } catch (_: Exception) {}
+        //
+        //            binds.add(Bind.parse("$volumeName:/app"))
+        //        } else {
+        //            binds.add(Bind.parse("${dockerService.path().toAbsolutePath()}:/app"))
+        //        }
+        binds.add(Bind.parse("${dockerService.path().toAbsolutePath()}:/app"))
 
-            binds.add(Bind.parse("$volumeName:/app"))
-        } else {
-            binds.add(Bind.parse("${dockerService.path().toAbsolutePath()}:/app"))
-        }
+        //        binds.add(
+        //            Bind.parse(
+        //
+        // "${Path("launcher/dependencies/vulpescloud/vulpescloud-connector.jar").toAbsolutePath()}:/app/plugins/vulpescloud-connector.jar"
+        //            )
+        //        )
+        //        binds.add(
+        //            Bind.parse(
+        //
+        // "${Path("${dockerService.path().toAbsolutePath()}/server.jar").toAbsolutePath()}:/app/server.jar"
+        //            )
+        //        )
+        //        binds.add(
+        //            Bind.parse(
+        //
+        // "${Path("launcher/dependencies/maven").toAbsolutePath()}:/launcher/dependencies/maven"
+        //            )
+        //        )
+        //        binds.add(
+        //            Bind.parse(
+        //
+        // "${Path("launcher/dependencies/vulpescloud").toAbsolutePath()}:/launcher/dependencies/vulpescloud"
+        //            )
+        //        )
+        //        binds.add(Bind.parse("${Path("certs").toAbsolutePath()}:/vulpescloud/certs"))
+        //        binds.add(Bind.parse("${Path("certs").toAbsolutePath()}:/app/vulpescloud/certs"))
 
-        binds.add(Bind.parse("${Path("launcher/dependencies/vulpescloud/vulpescloud-connector.jar").toAbsolutePath()}:/app/plugins/vulpescloud-connector.jar"))
-        binds.add(Bind.parse("${Path("${dockerService.path().toAbsolutePath()}/server.jar").toAbsolutePath()}:/app/server.jar"))
-        binds.add(Bind.parse("${Path("launcher/dependencies/maven").toAbsolutePath()}:/launcher/dependencies/maven"))
-        binds.add(Bind.parse("${Path("launcher/dependencies/vulpescloud").toAbsolutePath()}:/launcher/dependencies/vulpescloud"))
-        binds.add(Bind.parse("${Path("certs").toAbsolutePath()}:/vulpescloud/certs"))
-        binds.add(Bind.parse("${Path("certs").toAbsolutePath()}:/app/vulpescloud/certs"))
+        val hostConfig = HostConfig.newHostConfig().withBinds(binds).withPortBindings(ports)
 
-        val hostConfig = HostConfig.newHostConfig()
-            .withBinds(binds)
-            .withPortBindings(ports)
-
-        DockerClientImpl.getInstance(Node.instance.dockerClientConfig, Node.instance.dockerHttpClient).createContainerCmd(imageName)
+        DockerClientImpl.getInstance(
+                Node.instance.dockerClientConfig,
+                Node.instance.dockerHttpClient,
+            )
+            .createContainerCmd(imageName)
             .withEnv(env)
             .withVolumes(
-                Volume(dockerService.path().toString()),
-                Volume("launcher/dependencies/maven"),
-                Volume("launcher/dependencies/vulpescloud"),
-                Volume("vulpescloud/certs"),
-                Volume("/app/vulpescloud/certs"),
+                Volume(dockerService.path().absolutePathString())
+                //                Volume("launcher/dependencies/maven"),
+                //                Volume("launcher/dependencies/vulpescloud"),
+                //                Volume("vulpescloud/certs"),
+                //                Volume("/app/vulpescloud/certs"),
             )
             .withHostConfig(hostConfig)
-            .withName("vulpescloud-service-${service.task.name}-${service.orderedId}-${service.uuid}")
-            .withExposedPorts(ExposedPort.tcp(25565))
+            .withName(
+                "vulpescloud-service-${service.task.name}-${service.orderedId}-${service.uuid}"
+            )
+            .withExposedPorts(ExposedPort.tcp(service.port))
             .exec()
 
         Node.instance.nodeServices.add(dockerService)
 
         return dockerService
+    }
+
+    private fun acceptEULA(service: DockerService) {
+        val properties = Properties()
+        properties.clear()
+
+        properties.setProperty("eula", "true")
+
+        val outEula = Files.newOutputStream(service.path().resolve("eula.txt"))
+        properties.store(
+            outEula,
+            "Auto Eula by VulpesCloud (https://account.mojang.com/documents/minecraft_eula)",
+        )
+    }
+
+    private fun setServerProperties(service: DockerService) {
+        val properties = Properties()
+        val out = Files.newOutputStream(service.path().resolve("server.properties"))
+        if (!service.path().resolve("server.properties").toFile().exists())
+            properties.store(out, null)
+
+        properties.load(service.path().resolve("server.properties").toFile().inputStream())
+
+        properties.setProperty("server-ip", Node.instance.configProvider.config.serviceBindAdress)
+        properties.setProperty("server-port", service.service.port.toString())
+        properties.setProperty("motd", "A VulpesCloud Service!")
+        properties.setProperty("online-mode", false.toString())
+        properties.setProperty("max-players", service.service.task.maxPlayers.toString())
+
+        properties.store(out, "Minecraft server properties - edited by VulpesCloud")
+    }
+
+    fun updatePaperGlobalConfig(service: DockerService) {
+        if (Node.instance.configProvider.config.useModernForwarding) {
+            service.path().resolve("config").toFile().mkdirs()
+            val globalConf =
+                FileConfig.builder(
+                        service.path().resolve("config/paper-global.yml"),
+                        YamlFormat.defaultInstance(),
+                    )
+                    .sync()
+                    .preserveInsertionOrder()
+                    .build()
+
+            globalConf.load()
+            globalConf.set<String>("proxies.velocity.secret", Node.instance.getVelocitySecret())
+            globalConf.set<Boolean>("proxies.velocity.enabled", true)
+            globalConf.save()
+        }
+    }
+
+    fun updateVelocityConfig(service: DockerService) {
+        val config =
+            FileConfig.builder(
+                    service.path().resolve("velocity.toml").toFile(),
+                    TomlFormat.instance(),
+                )
+                .sync()
+                .preserveInsertionOrder()
+                .build()
+
+        config.load()
+
+        config.set<String>(
+            "bind",
+            Node.instance.configProvider.config.serviceBindAdress + ":" + service.service.port,
+        )
+
+        if (Node.instance.configProvider.config.useModernForwarding) {
+            config.set<String>("player-info-forwarding-mode", "modern")
+            Files.writeString(
+                service.path().resolve("forwarding.secret"),
+                Node.instance.getVelocitySecret(),
+            )
+        }
+
+        config.save()
+        config.close()
     }
 }
