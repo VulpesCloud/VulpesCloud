@@ -65,7 +65,7 @@ class DockerServiceFactory : AbstractServiceFactory() {
 
         jvmArgs.add("-cp")
 
-        val path = "/launcher/dependencies/vulpescloud"
+        val path = "/launcher/dependencies/vulpescloud/"
 
         val neededDependencies =
             listOf("vulpescloud-api.jar", "vulpescloud-wrapper.jar", "vulpescloud-bridge.jar")
@@ -189,7 +189,7 @@ class DockerServiceFactory : AbstractServiceFactory() {
                 Node.instance.dockerClientConfig,
                 Node.instance.dockerHttpClient,
             )
-        val imageName = "bypixeltv/vulpescloud-wrapper"
+        val imageName = "ghcr.io/vulpescloud/wrapper"
 
         dockerClient
             .pullImageCmd(imageName)
@@ -270,11 +270,12 @@ class DockerServiceFactory : AbstractServiceFactory() {
         // "${Path("launcher/dependencies/maven").toAbsolutePath()}:/launcher/dependencies/maven"
         //            )
         //        )
-        binds.add(
-            Bind.parse(
-                "${Path("launcher/dependencies/vulpescloud").toAbsolutePath()}:/launcher/dependencies/vulpescloud"
-            )
-        )
+                binds.add(
+                    Bind.parse(
+
+         "${Path("launcher/dependencies/vulpescloud").toAbsolutePath()}:/launcher/dependencies/vulpescloud"
+                    )
+                )
         //        binds.add(Bind.parse("${Path("certs").toAbsolutePath()}:/vulpescloud/certs"))
         //        binds.add(Bind.parse("${Path("certs").toAbsolutePath()}:/app/vulpescloud/certs"))
 
@@ -286,6 +287,7 @@ class DockerServiceFactory : AbstractServiceFactory() {
             )
             .createContainerCmd(imageName)
             .withEnv(env)
+            .withNetworkMode("host")
             .withVolumes(
                 Volume(dockerService.path().absolutePathString()),
                 //                Volume("launcher/dependencies/maven"),

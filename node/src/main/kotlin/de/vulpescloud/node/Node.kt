@@ -226,6 +226,9 @@ class Node {
                     logger.info(
                         "Successfully connected to Docker! Version: ${version.version}, API Version: ${version.apiVersion}"
                     )
+                    logger.warn(
+                        "NOTE: Docker Services will start using 'network-mode: host', if you do not want this tell us!"
+                    )
                 } catch (e: Exception) {
                     logger.error("Failed to connect to Docker: ${e.message}")
                     return@withContext
