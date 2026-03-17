@@ -10,6 +10,7 @@ class ServerSoftwareProvider {
     fun registerDownloader(downloader: ServerSoftwareDownloader) {
         if (allowDownloaderAdding) {
             downloaders[downloader.id] = downloader
+            return
         }
         logger.error("Cannot add downloader ${downloader.id} after startup!")
     }
