@@ -14,7 +14,7 @@ bcrypt = "0.10.2"
 
 # network
 protobuf = "4.34.0"
-grpc = "1.80.0"
+grpc = "1.79.0"
 grpc-kotlin = "1.5.0"
 protospecs-grpc = "1.5.0.2.20260308144322.e49e73de4b22"
 perfmark = "0.27.0"
