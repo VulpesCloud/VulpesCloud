@@ -7,6 +7,8 @@ import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpc
 import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpcKt
 import io.grpc.ManagedChannel
 import io.grpc.netty.NettyChannelBuilder
+import io.netty.channel.nio.NioEventLoopGroup
+import io.netty.channel.socket.nio.NioSocketChannel
 import java.net.InetSocketAddress
 
 class GrpcClient {
@@ -29,8 +31,8 @@ class GrpcClient {
 
         channel =
             NettyChannelBuilder.forAddress(InetSocketAddress(host, port))
-                // .eventLoopGroup(NioEventLoopGroup()) // force NIO transport
-                // .channelType(NioSocketChannel::class.java) // force TCP
+                 .eventLoopGroup(NioEventLoopGroup()) // force NIO transport
+                 .channelType(NioSocketChannel::class.java) // force TCP
                 // .sslContext(sslContext)
                 .usePlaintext()
                 .build()
