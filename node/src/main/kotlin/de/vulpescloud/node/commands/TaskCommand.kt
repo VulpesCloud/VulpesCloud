@@ -82,7 +82,7 @@ class TaskCommand {
             tasks.forEach {
                 val name = it.name.padEnd(maxNameLength)
                 source.sendMessage(
-                    " &8- &m$name &7Maintenance: &e${it.maintenance}&8, &7MaxPlayers: &e${it.maxPlayers}&8, &7MaxMemory: &e${it.maxMemory}MB&8, &7Static: &e${it.staticServices}&8, &7Fallback: &eNOT IMPLEMENTED&8, &7StartPort: &e${it.startPort}&8, &7Version: &e${it.software.name}-${it.software.version}"
+                    " &8- &m$name &7Maintenance: &e${it.maintenance}&8, &7MaxPlayers: &e${it.maxPlayers}&8, &7MaxMemory: &e${it.maxMemory}MB&8, &7Static: &e${it.staticServices}&8, &7Fallback: &e${it.fallback}&8, &7StartPort: &e${it.startPort}&8, &7Version: &e${it.software.name}-${it.software.version}"
                 )
             }
         }
@@ -235,6 +235,21 @@ class TaskCommand {
                     updateTaskRequest { this.task = newTask.toDefinition() }
                 )
             }
+        }
+    }
+
+    @Command("task|tasks task <task> set minServiceCount <count>")
+    fun setMinServiceCount(
+        source: CommandSource,
+        @Argument("task") task: Task,
+        @Argument("count") count: Int,
+    ) {
+        NodeCoroutineScope.launch {
+            source.sendMessage("Setting minServiceCount for task &m${task.name} to &e$count")
+            val newTask = task.copy(minOnlineServices = count)
+            Node.instance.localGrpcClient.tasksAPI.updateTask(
+                updateTaskRequest { this.task = newTask.toDefinition() }
+            )
         }
     }
 }

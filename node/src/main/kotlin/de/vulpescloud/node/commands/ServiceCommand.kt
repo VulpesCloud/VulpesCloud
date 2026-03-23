@@ -82,7 +82,12 @@ class ServiceCommand {
     fun infoService(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
             source.sendMessage(
-                "Service: &f${it.task.name}-${it.orderedId} &8- &7${it.state.name} &8- &7${it.port}"
+                "&7Name: &e${it.name()} \n" +
+                    "&7UUID: &e${it.uuid} \n" +
+                    "&7Port: &e${it.port} \n" +
+                    "&7Node: &e${it.node} \n" +
+                    "&7PlayerCount: &e${it.playerCount} \n" +
+                    "&8State: &e${it.state}"
             )
         }
     }
