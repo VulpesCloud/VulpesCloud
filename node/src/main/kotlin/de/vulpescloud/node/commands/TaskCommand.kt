@@ -238,7 +238,7 @@ class TaskCommand {
         }
     }
 
-    @Command("task|tasks task <task> set minServiceCount <count>")
+    @Command("task|tasks task <tasks> set minServiceCount <count>")
     fun setMinServiceCount(
         source: CommandSource,
         @Argument("tasks") tasks: List<Task>,
