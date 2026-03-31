@@ -241,15 +241,17 @@ class TaskCommand {
     @Command("task|tasks task <task> set minServiceCount <count>")
     fun setMinServiceCount(
         source: CommandSource,
-        @Argument("task") task: Task,
+        @Argument("task") tasks: List<Task>,
         @Argument("count") count: Int,
     ) {
         NodeCoroutineScope.launch {
-            source.sendMessage("Setting minServiceCount for task &m${task.name} to &e$count")
-            val newTask = task.copy(minOnlineServices = count)
-            Node.instance.localGrpcClient.tasksAPI.updateTask(
-                updateTaskRequest { this.task = newTask.toDefinition() }
-            )
+            tasks.forEach { task ->
+                source.sendMessage("Setting minServiceCount for task &m${task.name} to &e$count")
+                val newTask = task.copy(minOnlineServices = count)
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
         }
     }
 }
