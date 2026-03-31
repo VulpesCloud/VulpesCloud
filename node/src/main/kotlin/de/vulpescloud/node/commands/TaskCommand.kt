@@ -241,7 +241,7 @@ class TaskCommand {
     @Command("task|tasks task <task> set minServiceCount <count>")
     fun setMinServiceCount(
         source: CommandSource,
-        @Argument("task") tasks: List<Task>,
+        @Argument("tasks") tasks: List<Task>,
         @Argument("count") count: Int,
     ) {
         NodeCoroutineScope.launch {
