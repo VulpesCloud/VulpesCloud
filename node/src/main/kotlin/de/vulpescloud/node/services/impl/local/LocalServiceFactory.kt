@@ -3,9 +3,12 @@ package de.vulpescloud.node.services.impl.local
 import com.electronwill.nightconfig.core.file.FileConfig
 import com.electronwill.nightconfig.toml.TomlFormat
 import com.electronwill.nightconfig.yaml.YamlFormat
+import de.vulpescloud.api.events.EventSerializer
+import de.vulpescloud.api.events.services.ServicePreparedEvent
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.event.EventsService
 import de.vulpescloud.node.serversoftware.impl.*
 import de.vulpescloud.node.services.AbstractServiceFactory
 import de.vulpescloud.node.utils.MongoUtils
@@ -14,6 +17,8 @@ import java.nio.file.StandardCopyOption
 import java.util.*
 import kotlin.io.path.Path
 import kotlin.io.path.copyTo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class LocalServiceFactory : AbstractServiceFactory() {
 
@@ -145,10 +150,12 @@ class LocalServiceFactory : AbstractServiceFactory() {
             }
             "Minestom" -> {
                 if (Node.instance.configProvider.config.useModernForwarding) {
-                    Files.writeString(
-                        localService.path().resolve("forwarding.secret"),
-                        Node.instance.getVelocitySecret(),
-                    )
+                    withContext(Dispatchers.IO) {
+                        Files.writeString(
+                            localService.path().resolve("forwarding.secret"),
+                            Node.instance.getVelocitySecret(),
+                        )
+                    }
                 }
             }
         }
@@ -170,14 +177,16 @@ class LocalServiceFactory : AbstractServiceFactory() {
         processBuilder.environment()["port"] = service.port.toString()
         processBuilder.environment()["secret"] = Node.instance.secret
 
-        Files.copy(
-            Path("launcher/dependencies/vulpescloud/vulpescloud-connector.jar"),
-            localService
-                .path()
-                .resolve(service.task.software.pluginDir)
-                .resolve("vulpescloud-connector.jar"),
-            StandardCopyOption.REPLACE_EXISTING,
-        )
+        withContext(Dispatchers.IO) {
+            Files.copy(
+                Path("launcher/dependencies/vulpescloud/vulpescloud-connector.jar"),
+                localService
+                    .path()
+                    .resolve(service.task.software.pluginDir)
+                    .resolve("vulpescloud-connector.jar"),
+                StandardCopyOption.REPLACE_EXISTING,
+            )
+        }
 
         Node.instance.moduleProvider
             .getAllModules()
@@ -201,6 +210,8 @@ class LocalServiceFactory : AbstractServiceFactory() {
         localService.processBuilder = processBuilder
 
         MongoUtils.updateService(localService.service)
+
+        EventsService.publish(EventSerializer.encode(ServicePreparedEvent(service)), true)
 
         return localService
     }

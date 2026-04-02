@@ -17,8 +17,7 @@ class RemoteNode(val endpoint: NodeEndpointDetails) {
     private val logger = LoggerFactory.getLogger("RemoteNode-${endpoint.name}")
 
     suspend fun getNode(): ClusterNode {
-        return ClusterHelper.getAllNodes().find { it.name == endpoint.name }
-            ?: throw Exception("Node not found!")
+        return ClusterHelper.getNode(endpoint.name) ?: throw Exception("Node not found!")
     }
 
     suspend fun connect() {
