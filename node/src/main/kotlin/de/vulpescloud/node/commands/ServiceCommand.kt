@@ -11,11 +11,10 @@ import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.annotation.Alias
 import de.vulpescloud.node.services.ServiceLogHandler
-import java.util.concurrent.CompletableFuture
 import java.util.stream.Stream
-import kotlinx.coroutines.async
-import kotlinx.coroutines.future.asCompletableFuture
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
@@ -28,32 +27,28 @@ import org.incendo.cloud.processors.confirmation.annotation.Confirmation
 class ServiceCommand {
 
     @Suggestions("service")
-    fun serviceSuggestions(): CompletableFuture<Stream<String>> {
-        return NodeCoroutineScope.async {
-                Node.instance.localGrpcClient.serviceAPI
-                    .getAllServices(GetAllServicesRequest.newBuilder().build())
-                    .servicesList
-                    .filter { it.hasTask() && !it.task.name.isNullOrEmpty() }
-                    .map { "${it.task.name}-${it.orderedId}" }
-                    .stream()
-            }
-            .asCompletableFuture()
-            .exceptionally { Stream.empty() }
+    fun serviceSuggestions(): Stream<String> {
+        return runBlocking(Dispatchers.IO) {
+            Node.instance.localGrpcClient.serviceAPI
+                .getAllServices(GetAllServicesRequest.newBuilder().build())
+                .servicesList
+                .filter { it.hasTask() && !it.task.name.isNullOrEmpty() }
+                .map { "${it.task.name}-${it.orderedId}" }
+                .stream()
+        }
     }
 
     @Parser(suggestions = "service")
-    fun serviceParser(input: CommandInput): CompletableFuture<List<Service>> {
+    fun serviceParser(input: CommandInput): List<Service> {
         val regex = Regex(input.readString().replace("*", ".*"))
 
-        return NodeCoroutineScope.async {
-                Node.instance.localGrpcClient.serviceAPI
-                    .getAllServices(GetAllServicesRequest.newBuilder().build())
-                    .servicesList
-                    .filter { regex.matches("${it.task.name}-${it.orderedId}") }
-                    .map { Service.fromDefinition(it) }
-            }
-            .asCompletableFuture()
-            .exceptionally { emptyList() }
+        return runBlocking(Dispatchers.IO) {
+            Node.instance.localGrpcClient.serviceAPI
+                .getAllServices(GetAllServicesRequest.newBuilder().build())
+                .servicesList
+                .filter { regex.matches("${it.task.name}-${it.orderedId}") }
+                .map { Service.fromDefinition(it) }
+        }
     }
 
     @Command("services|ser list")
