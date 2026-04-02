@@ -2,8 +2,11 @@ package de.vulpescloud.node.commands
 
 import build.buf.gen.vulpescloud.services.v1.DeleteServiceRequest
 import build.buf.gen.vulpescloud.services.v1.GetAllServicesRequest
+import build.buf.gen.vulpescloud.services.v1.ServiceDefinition
 import build.buf.gen.vulpescloud.services.v1.StartServiceRequest
 import build.buf.gen.vulpescloud.services.v1.StopServiceRequest
+import build.buf.gen.vulpescloud.services.v1.getAllServicesRequest
+import com.github.benmanes.caffeine.cache.Caffeine
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
@@ -11,8 +14,8 @@ import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.annotation.Alias
 import de.vulpescloud.node.services.ServiceLogHandler
+import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotation.specifier.Greedy
@@ -28,27 +31,17 @@ class ServiceCommand {
 
     @Suggestions("service")
     fun serviceSuggestions(): Stream<String> {
-        return runBlocking(Dispatchers.IO) {
-            Node.instance.localGrpcClient.serviceAPI
-                .getAllServices(GetAllServicesRequest.newBuilder().build())
-                .servicesList
-                .filter { it.hasTask() && !it.task.name.isNullOrEmpty() }
-                .map { "${it.task.name}-${it.orderedId}" }
-                .stream()
-        }
+        return ServiceCache.getTasks().map { Service.fromDefinition(it).name() }.stream()
     }
 
     @Parser(suggestions = "service")
     fun serviceParser(input: CommandInput): List<Service> {
-        val regex = Regex(input.readString().replace("*", ".*"))
+        val pattern = Regex.escape(input.readString()).replace("\\*", ".*")
+        val regex = Regex("^$pattern$")
 
-        return runBlocking(Dispatchers.IO) {
-            Node.instance.localGrpcClient.serviceAPI
-                .getAllServices(GetAllServicesRequest.newBuilder().build())
-                .servicesList
-                .filter { regex.matches("${it.task.name}-${it.orderedId}") }
-                .map { Service.fromDefinition(it) }
-        }
+        return ServiceCache.getTasks()
+            .filter { regex.matches(Service.fromDefinition(it).name()) }
+            .map { Service.fromDefinition(it) }
     }
 
     @Command("services|ser list")
@@ -182,6 +175,23 @@ class ServiceCommand {
     fun toggleScreen(@Argument("service") service: List<Service>) {
         service.forEach {
             ServiceLogHandler.toggleServiceLogging("${it.task.name}-${it.orderedId}")
+        }
+    }
+}
+
+object ServiceCache {
+    private val cache =
+        Caffeine.newBuilder()
+            .expireAfterWrite(1, TimeUnit.MINUTES)
+            .build<String, List<ServiceDefinition>>()
+
+    fun getTasks(): List<ServiceDefinition> {
+        return cache.get("tasks") {
+            runBlocking {
+                Node.instance.localGrpcClient.serviceAPI
+                    .getAllServices(getAllServicesRequest {})
+                    .servicesList
+            }
         }
     }
 }

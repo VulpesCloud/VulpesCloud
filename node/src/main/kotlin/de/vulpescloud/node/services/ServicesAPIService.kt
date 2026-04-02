@@ -1,6 +1,7 @@
 package de.vulpescloud.node.services
 
 import build.buf.gen.vulpescloud.services.v1.*
+import com.github.benmanes.caffeine.cache.Caffeine
 import de.vulpescloud.api.events.services.ServiceLogEvent
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.tasks.Task
@@ -10,6 +11,7 @@ import de.vulpescloud.node.event.EventsService
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import de.vulpescloud.node.utils.MongoUtils
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -22,13 +24,21 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
     private val servicesDatabase by lazy {
         Node.instance.getDatabaseProvider().getOrCreateDatabase("services")
     }
+    private val cache =
+        Caffeine.newBuilder().expireAfterWrite(15, TimeUnit.SECONDS).build<String, Service>()
 
-    @RequiresPermission("services.list")
+    @RequiresPermission("services.getAll")
     override suspend fun getAllServices(request: GetAllServicesRequest): GetAllServicesResponse {
+        val cached = cache.asMap().values.toList()
+
         val services =
-            servicesDatabase
-                .getAll()
-                .map { Json.decodeFromJsonElement(Service.serializer(), it) }
+            cached
+                .ifEmpty {
+                    servicesDatabase
+                        .getAll()
+                        .map { Json.decodeFromJsonElement(Service.serializer(), it) }
+                        .onEach { cache.put("${it.task.name}-${it.orderedId}", it) }
+                }
                 .map { it.toDefinition() }
 
         return GetAllServicesResponse.newBuilder().addAllServices(services).build()
@@ -37,10 +47,18 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
     @RequiresPermission("services.get")
     override suspend fun getByName(request: GetByNameRequest): GetByNameResponse {
         val service =
-            getAllServices(getAllServicesRequest {}).servicesList.find {
-                "${it.task.name}-${it.orderedId}" == request.name
-            } ?: return GetByNameResponse.newBuilder().build()
-        return GetByNameResponse.newBuilder().setService(service).build()
+            cache.getIfPresent(request.name)
+                ?: servicesDatabase
+                    .getAll()
+                    .map { Json.decodeFromJsonElement(Service.serializer(), it) }
+                    .find { "${it.task.name}-${it.orderedId}" == request.name }
+                    ?.also { cache.put(request.name, it) }
+
+        return if (service != null) {
+            GetByNameResponse.newBuilder().setService(service.toDefinition()).build()
+        } else {
+            GetByNameResponse.newBuilder().build()
+        }
     }
 
     @RequiresPermission("services.get")
@@ -49,6 +67,10 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             servicesDatabase.get(request.uuid)?.let {
                 Json.decodeFromJsonElement(Service.serializer(), it)
             } ?: return GetByUuidResponse.newBuilder().build()
+
+        // update cache using name key
+        cache.put("${service.task.name}-${service.orderedId}", service)
+
         return GetByUuidResponse.newBuilder().setService(service.toDefinition()).build()
     }
 
