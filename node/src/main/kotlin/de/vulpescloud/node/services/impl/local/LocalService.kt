@@ -49,9 +49,15 @@ class LocalService(override val service: Service) : AbstractService {
                 process?.inputStream?.bufferedReader()?.use { reader ->
                     reader.forEachLine { line ->
                         runBlocking {
+
+                            /**
+                             * I am done with this. The Event system is so bad. I hate it.
+                             * For some reason broadcasting the event breaks so much.
+                             *  - TheCGuy
+                             */
                             EventsService.publish(
                                 EventSerializer.encode(ServiceLogEvent(service, line.trim())),
-                                true,
+                                //true,
                             )
                         }
                     }
