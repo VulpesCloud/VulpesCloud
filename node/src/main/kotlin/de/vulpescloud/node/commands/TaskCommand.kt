@@ -2,17 +2,19 @@ package de.vulpescloud.node.commands
 
 import build.buf.gen.vulpescloud.services.v1.prepareServiceByTaskRequest
 import build.buf.gen.vulpescloud.services.v1.startServiceRequest
+import build.buf.gen.vulpescloud.tasks.v1.TaskDefinition
 import build.buf.gen.vulpescloud.tasks.v1.deleteTaskRequest
 import build.buf.gen.vulpescloud.tasks.v1.getAllTasksRequest
 import build.buf.gen.vulpescloud.tasks.v1.updateTaskRequest
+import com.github.benmanes.caffeine.cache.Caffeine
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.annotation.Alias
 import de.vulpescloud.node.setup.setups.TaskSetup
+import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
@@ -29,26 +31,17 @@ class TaskCommand {
 
     @Suggestions("tasks")
     fun taskSuggestions(): Stream<String> {
-        return runBlocking(Dispatchers.IO) {
-            Node.instance.localGrpcClient.tasksAPI
-                .getAllTasks(getAllTasksRequest {})
-                .tasksList
-                .map { it.name }
-                .stream()
-        }
+        return TaskCache.getTasks().map { it.name }.stream()
     }
 
     @Parser(suggestions = "tasks")
     fun taskParser(input: CommandInput): List<Task> {
-        val regex = Regex(input.readString().replace("*", ".*"))
+        val pattern = Regex.escape(input.readString()).replace("\\*", ".*")
+        val regex = Regex("^$pattern$")
 
-        return runBlocking(Dispatchers.IO) {
-            Node.instance.localGrpcClient.tasksAPI
-                .getAllTasks(getAllTasksRequest {})
-                .tasksList
-                .filter { regex.matches(it.name) }
-                .map { Task.fromDefinition(it) }
-        }
+        return TaskCache.getTasks()
+            .filter { regex.matches(it.name) }
+            .map { Task.fromDefinition(it) }
     }
 
     @Command("task|tasks setup")
@@ -87,17 +80,17 @@ class TaskCommand {
                     "&7Static: &e${it.staticServices} \n" +
                     "&7Fallback: &e${it.fallback} \n" +
                     "&7StartPort: &e${it.startPort} \n" +
-                    "&7Version: &e${it.software.name}-${it.software.version}" +
+                    "&7Version: &e${it.software.name}-${it.software.version} \n" +
                     "&7StaticServices: &e${it.staticServices} \n" +
-                    "&7Maintenance: &e${it.maintenance}" +
-                    "&7PreferredNode: &e${it.preferredNode}" +
-                    "&7ServiceFactory: &e${it.serviceFactoryName}" +
-                    "&7CopyTemplatesToStatic: &e${it.copyTemplatesToStatic}" +
+                    "&7Maintenance: &e${it.maintenance} \n" +
+                    "&7PreferredNode: &e${it.preferredNode} \n" +
+                    "&7ServiceFactory: &e${it.serviceFactoryName} \n" +
+                    "&7CopyTemplatesToStatic: &e${it.copyTemplatesToStatic} \n" +
                     "&7MinOnlineServices: &e${it.minOnlineServices} \n" +
                     "&7MaxOnlineServices: &e${it.maxOnlineServices} \n" +
                     "&7JvmArgs: &e${it.jvmArgs.joinToString(", ")} \n" +
-                    "&7EnvVars: &e${it.envVars.joinToString(", ")}" +
-                    "&7Attributes: &e${it.attributes?.toString() ?: "None"}"
+                    "&7EnvVars: &e${it.envVars.joinToString(", ")} \n" +
+                    "&7Attributes: &e${it.attributes}"
             )
         }
     }
@@ -240,6 +233,21 @@ class TaskCommand {
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
                 )
+            }
+        }
+    }
+}
+
+object TaskCache {
+    private val cache =
+        Caffeine.newBuilder()
+            .expireAfterWrite(1, TimeUnit.MINUTES)
+            .build<String, List<TaskDefinition>>()
+
+    fun getTasks(): List<TaskDefinition> {
+        return cache.get("tasks") {
+            runBlocking {
+                Node.instance.localGrpcClient.tasksAPI.getAllTasks(getAllTasksRequest {}).tasksList
             }
         }
     }

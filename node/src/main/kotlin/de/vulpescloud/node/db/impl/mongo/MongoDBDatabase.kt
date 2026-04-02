@@ -22,11 +22,16 @@ class MongoDBDatabase(
     val collectionName = collectionPrefix + name
     private val logger = LoggerFactory.getLogger(MongoDBDatabase::class.java)
 
-    private inline fun <T> measureTime(operation: String, block: () -> T): T {
+    private suspend inline fun <T> measureTime(
+        operation: String,
+        crossinline block: suspend () -> T
+    ): T {
         if (!PropertyUtils.isDBTiming()) return block()
+
         val start = System.nanoTime()
         val result = block()
         val duration = (System.nanoTime() - start) / 1_000_000.0
+
         logger.info("MongoDB[$collectionName]> $operation took ${duration}ms")
         return result
     }
