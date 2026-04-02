@@ -6,10 +6,12 @@ import com.mongodb.kotlin.client.coroutine.MongoClient
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import de.vulpescloud.node.config.db.MongoConfig
 import de.vulpescloud.node.db.DatabaseProvider
-import kotlinx.serialization.json.Json
+import de.vulpescloud.node.utils.PropertyUtils
 import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
 import kotlin.io.path.exists
+import kotlinx.serialization.json.Json
+import org.slf4j.LoggerFactory
 
 class MongoDBDatabaseProvider : DatabaseProvider {
 
@@ -17,6 +19,7 @@ class MongoDBDatabaseProvider : DatabaseProvider {
     private lateinit var database: MongoDatabase
     private var databases = mutableMapOf<String, MongoDBDatabase>()
     private lateinit var options: MongoConfig
+    private val logger = LoggerFactory.getLogger(MongoDBDatabaseProvider::class.java)
 
     override fun initialize() {
         options = getMongoConfig()
@@ -41,6 +44,7 @@ class MongoDBDatabaseProvider : DatabaseProvider {
     }
 
     override fun getOrCreateDatabase(name: String): MongoDBDatabase {
+        if (PropertyUtils.isMoreDBLogging()) logger.info("Getting or creating database $name")
         return databases.getOrPut(name) {
             MongoDBDatabase(name, database, options.collectionPrefix)
         }
