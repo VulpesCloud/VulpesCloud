@@ -27,7 +27,7 @@ import org.incendo.cloud.processors.confirmation.annotation.Confirmation
 @Alias(["ser"])
 class ServiceCommand {
 
-    @Suggestions("services")
+    @Suggestions("service")
     fun serviceSuggestions(): CompletableFuture<Stream<String>> {
         return NodeCoroutineScope.async {
                 Node.instance.localGrpcClient.serviceAPI
@@ -41,7 +41,7 @@ class ServiceCommand {
             .exceptionally { Stream.empty() }
     }
 
-    @Parser(suggestions = "services")
+    @Parser(suggestions = "service")
     fun serviceParser(input: CommandInput): CompletableFuture<List<Service>> {
         val regex = Regex(input.readString().replace("*", ".*"))
 
