@@ -12,10 +12,10 @@ import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.annotation.Alias
 import de.vulpescloud.node.services.ServiceLogHandler
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
+import kotlinx.coroutines.async
+import kotlinx.coroutines.future.asCompletableFuture
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
@@ -28,39 +28,32 @@ import org.incendo.cloud.processors.confirmation.annotation.Confirmation
 class ServiceCommand {
 
     @Suggestions("services")
-    fun serviceSuggestions(): Stream<String> {
-        return CompletableFuture.supplyAsync {
-                runBlocking {
-                    Node.instance.localGrpcClient.serviceAPI
-                        .getAllServices(GetAllServicesRequest.newBuilder().build())
-                        .servicesList
-                        .filter { it != null && it.hasTask() && !it.task.name.isNullOrEmpty() }
-                        .map { "${it.task.name}-${it.orderedId}" }
-                }
+    fun serviceSuggestions(): CompletableFuture<Stream<String>> {
+        return NodeCoroutineScope.async {
+                Node.instance.localGrpcClient.serviceAPI
+                    .getAllServices(GetAllServicesRequest.newBuilder().build())
+                    .servicesList
+                    .filter { it.hasTask() && !it.task.name.isNullOrEmpty() }
+                    .map { "${it.task.name}-${it.orderedId}" }
+                    .stream()
             }
-            .thenApply { it.stream() }
+            .asCompletableFuture()
             .exceptionally { Stream.empty() }
-            .get(5, TimeUnit.SECONDS)
     }
 
     @Parser(suggestions = "services")
-    fun serviceParser(input: CommandInput): List<Service>? {
-        return CompletableFuture.supplyAsync {
-                runBlocking {
-                    val regexPattern = input.readString()
-                    regexPattern.replace("*", ".*")
-                    val regex = Regex(regexPattern)
+    fun serviceParser(input: CommandInput): CompletableFuture<List<Service>> {
+        val regex = Regex(input.readString().replace("*", ".*"))
 
-                    Node.instance.localGrpcClient.serviceAPI
-                        .getAllServices(GetAllServicesRequest.newBuilder().build())
-                        .servicesList
-                        .filter { regex.matches("${it.task.name}-${it.orderedId}") }
-                        .map { Service.fromDefinition(it) }
-                }
+        return NodeCoroutineScope.async {
+                Node.instance.localGrpcClient.serviceAPI
+                    .getAllServices(GetAllServicesRequest.newBuilder().build())
+                    .servicesList
+                    .filter { regex.matches("${it.task.name}-${it.orderedId}") }
+                    .map { Service.fromDefinition(it) }
             }
-            .thenApply { it }
-            .exceptionally { throw it }
-            .get(5, TimeUnit.SECONDS)
+            .asCompletableFuture()
+            .exceptionally { emptyList() }
     }
 
     @Command("services|ser list")

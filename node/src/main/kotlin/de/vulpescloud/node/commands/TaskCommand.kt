@@ -11,6 +11,8 @@ import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.annotation.Alias
 import de.vulpescloud.node.setup.setups.TaskSetup
+import kotlinx.coroutines.async
+import kotlinx.coroutines.future.asCompletableFuture
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
@@ -29,37 +31,28 @@ import org.incendo.cloud.processors.confirmation.annotation.Confirmation
 class TaskCommand {
 
     @Suggestions("tasks")
-    fun taskSuggestions(): Stream<String> {
-        return CompletableFuture.supplyAsync {
-                runBlocking {
-                    Node.instance.localGrpcClient.tasksAPI
-                        .getAllTasks(getAllTasksRequest {})
-                        .tasksList
-                        .map { it.name }
-                }
-            }
-            .thenApply { it.stream() }
-            .exceptionally { Stream.empty() }
-            .get(5, TimeUnit.SECONDS)
+    fun taskSuggestions(): CompletableFuture<Stream<String>> {
+        return NodeCoroutineScope.async {
+            Node.instance.localGrpcClient.tasksAPI
+                .getAllTasks(getAllTasksRequest {})
+                .tasksList
+                .map { it.name }
+                .stream()
+        }.asCompletableFuture().exceptionally { Stream.empty() }
     }
 
     @Parser(suggestions = "tasks")
-    fun taskParser(input: CommandInput): List<Task> {
-        return CompletableFuture.supplyAsync {
-                runBlocking {
-                    val regexPattern = input.readString().replace("*", ".*")
-                    val regex = Regex(regexPattern)
+    fun taskParser(input: CommandInput): CompletableFuture<List<Task>> {
+        val regexPattern = input.readString().replace("*", ".*")
+        val regex = Regex(regexPattern)
 
-                    Node.instance.localGrpcClient.tasksAPI
-                        .getAllTasks(getAllTasksRequest {})
-                        .tasksList
-                        .filter { regex.matches(it.name) }
-                        .map { Task.fromDefinition(it) }
-                }
-            }
-            .thenApply { it }
-            .exceptionally { throw it }
-            .get(5, TimeUnit.SECONDS)
+        return NodeCoroutineScope.async {
+            Node.instance.localGrpcClient.tasksAPI
+                .getAllTasks(getAllTasksRequest {})
+                .tasksList
+                .filter { regex.matches(it.name) }
+                .map { Task.fromDefinition(it) }
+        }.asCompletableFuture().exceptionally { emptyList() }
     }
 
     @Command("task|tasks setup")
