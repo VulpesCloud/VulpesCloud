@@ -211,7 +211,12 @@ class LocalServiceFactory : AbstractServiceFactory() {
 
         MongoUtils.updateService(localService.service)
 
-        EventsService.publish(EventSerializer.encode(ServicePreparedEvent(localService.service)), true)
+        EventsService.publish(
+            EventSerializer.encode(ServicePreparedEvent(localService.service)),
+            true,
+        )
+
+        servicePrepareSyncHooks.forEach { hook -> hook(localService)}
 
         return localService
     }
@@ -292,5 +297,13 @@ class LocalServiceFactory : AbstractServiceFactory() {
 
         config.save()
         config.close()
+    }
+
+    companion object {
+        private val servicePrepareSyncHooks = mutableListOf<suspend (LocalService) -> Unit>()
+
+        fun addServicePrepareSyncHook(hook: suspend (LocalService) -> Unit) {
+            servicePrepareSyncHooks.add(hook)
+        }
     }
 }
