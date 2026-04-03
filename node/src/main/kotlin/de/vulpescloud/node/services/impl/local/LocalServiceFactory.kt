@@ -211,7 +211,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
 
         MongoUtils.updateService(localService.service)
 
-        EventsService.publish(EventSerializer.encode(ServicePreparedEvent(service)), true)
+        EventsService.publish(EventSerializer.encode(ServicePreparedEvent(localService.service)), true)
 
         return localService
     }
