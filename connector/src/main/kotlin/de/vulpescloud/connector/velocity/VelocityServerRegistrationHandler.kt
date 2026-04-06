@@ -25,7 +25,7 @@ class VelocityServerRegistrationHandler(
     private val serviceStateChangeEventJob: Job
     private val logger = LoggerFactory.getLogger(VelocityServerRegistrationHandler::class.java)
     private val tempJob =
-        CoroutineScope(Dispatchers.Main).launch {
+        CoroutineScope(Dispatchers.IO).launch {
             while (true) {
                 logger.info(
                     "Temp-Debug: job-active: ${serviceStateChangeEventJob.isActive}, job-completed: ${serviceStateChangeEventJob.isCompleted}, job-cancelled: ${serviceStateChangeEventJob.isCancelled}"
