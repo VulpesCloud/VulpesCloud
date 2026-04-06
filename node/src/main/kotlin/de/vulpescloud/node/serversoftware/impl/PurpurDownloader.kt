@@ -1,5 +1,6 @@
 package de.vulpescloud.node.serversoftware.impl
 
+import com.github.benmanes.caffeine.cache.Caffeine
 import de.vulpescloud.api.serversoftware.ServerSoftware
 import de.vulpescloud.api.serversoftware.SoftwareType
 import de.vulpescloud.node.serversoftware.ServerSoftwareDownloader
@@ -7,7 +8,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.net.URI
 import java.nio.file.Path
-import kotlin.collections.ifEmpty
+import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -20,7 +21,18 @@ object PurpurDownloader : ServerSoftwareDownloader {
 
     private const val BASE_API_URL = "https://api.purpurmc.org/v2"
     private val logger = LoggerFactory.getLogger("PurpurDownloader")
-    private val availableVersions = mutableListOf<ServerSoftware>()
+
+    private val availableVersionsCache = Caffeine.newBuilder()
+        .expireAfterWrite(30, TimeUnit.MINUTES)
+        .build<String, List<ServerSoftware>>()
+
+    private val downloadUrlCache = Caffeine.newBuilder()
+        .expireAfterWrite(30, TimeUnit.MINUTES)
+        .build<String, URI>()
+
+    private val latestVersionCache = Caffeine.newBuilder()
+        .expireAfterWrite(30, TimeUnit.MINUTES)
+        .build<String, ServerSoftware>()
 
     override suspend fun downloadSoftware(version: String) {
         val start = System.currentTimeMillis()
@@ -64,13 +76,16 @@ object PurpurDownloader : ServerSoftwareDownloader {
     }
 
     override suspend fun getDownloadUrl(version: String): URI {
+        val cached = downloadUrlCache.getIfPresent(version)
+        if (cached != null) return cached
+
         val latestBuildUrl = "$BASE_API_URL/purpur/$version"
 
         val client = OkHttpClient()
 
         val buildRequest = Request.Builder().url(latestBuildUrl).build()
 
-        client.newCall(buildRequest).execute().use { buildResponse ->
+        val result = client.newCall(buildRequest).execute().use { buildResponse ->
             if (!buildResponse.isSuccessful) throw Exception("Unexpected code $buildResponse")
 
             val buildResponseBody = buildResponse.body.string()
@@ -78,42 +93,24 @@ object PurpurDownloader : ServerSoftwareDownloader {
 
             val build = jBuildResponse.getJSONObject("builds").getString("latest")
 
-            return URI("$BASE_API_URL/purpur/$version/$build/download")
+            URI("$BASE_API_URL/purpur/$version/$build/download")
         }
+
+        downloadUrlCache.put(version, result)
+        return result
     }
 
     override suspend fun getAvailableVersions(refreshList: Boolean): List<ServerSoftware> {
-        if (refreshList) availableVersions.clear()
-        return availableVersions.ifEmpty {
-            val apiUrl = "$BASE_API_URL/purpur"
-
-            val client = OkHttpClient()
-
-            val request = Request.Builder().url(apiUrl).build()
-
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) throw Exception("Unexpected code $response")
-
-                val responseBody = response.body.string()
-
-                val jResponse = JSONObject(responseBody)
-
-                val versions = jResponse.getJSONArray("versions").toList().reversed()
-
-                return versions.map {
-                    val version = it as String
-                    val downloadUrl = getDownloadUrl(version)
-                    ServerSoftware(
-                        name = "Purpur",
-                        version = version,
-                        build = downloadUrl.path.split("/")[4].toInt(),
-                        url = downloadUrl.toString(),
-                        pluginDir = "plugins",
-                        type = SoftwareType.SERVER,
-                    )
-                }
-            }
+        if (refreshList) {
+            availableVersionsCache.invalidate("all")
         }
+
+        val cached = availableVersionsCache.getIfPresent("all")
+        if (cached != null) return cached
+
+        val result = pullAvailableVersions()
+        availableVersionsCache.put("all", result)
+        return result
     }
 
     override suspend fun getLatestVersionPath(version: String): Path {
@@ -123,6 +120,10 @@ object PurpurDownloader : ServerSoftwareDownloader {
     }
 
     override suspend fun getLatestVersion(version: String?): ServerSoftware {
+        val cacheKey = version ?: "latest"
+        val cached = latestVersionCache.getIfPresent(cacheKey)
+        if (cached != null) return cached
+
         val getCurrentVersionApiUrl = "$BASE_API_URL/purpur"
         val allVersions = getAvailableVersions()
 
@@ -134,7 +135,7 @@ object PurpurDownloader : ServerSoftwareDownloader {
                 .header("User-Agent", "VulpesCloud-Node/1.0")
                 .build()
 
-        if (version == null) {
+        val result = if (version == null) {
             client.newCall(versionRequest).execute().use { response ->
                 if (!response.isSuccessful) throw Exception("Unexpected code $response")
 
@@ -156,7 +157,7 @@ object PurpurDownloader : ServerSoftwareDownloader {
                     if (!buildResponse.isSuccessful)
                         throw Exception("Unexpected code $buildResponse")
 
-                    return ServerSoftware(
+                    ServerSoftware(
                         name = "Purpur",
                         version = latestVersion,
                         build = jVersionResponse.getJSONObject("builds").getInt("latest"),
@@ -184,11 +185,45 @@ object PurpurDownloader : ServerSoftwareDownloader {
 
                 val jBuildResponse = JSONObject(buildResponse.body.string())
 
-                return ServerSoftware(
+                ServerSoftware(
                     name = "Purpur",
                     version = version,
                     build = jBuildResponse.getJSONObject("builds").getInt("latest"),
                     url = getDownloadUrl(version).toString(),
+                    pluginDir = "plugins",
+                    type = SoftwareType.SERVER,
+                )
+            }
+        }
+
+        latestVersionCache.put(cacheKey, result)
+        return result
+    }
+
+    private suspend fun pullAvailableVersions(): List<ServerSoftware> {
+        val apiUrl = "$BASE_API_URL/purpur"
+
+        val client = OkHttpClient()
+
+        val request = Request.Builder().url(apiUrl).build()
+
+        client.newCall(request).execute().use { response ->
+            if (!response.isSuccessful) throw Exception("Unexpected code $response")
+
+            val responseBody = response.body.string()
+
+            val jResponse = JSONObject(responseBody)
+
+            val versions = jResponse.getJSONArray("versions").toList().reversed()
+
+            return versions.map {
+                val version = it as String
+                val downloadUrl = getDownloadUrl(version)
+                ServerSoftware(
+                    name = "Purpur",
+                    version = version,
+                    build = downloadUrl.path.split("/")[4].toInt(),
+                    url = downloadUrl.toString(),
                     pluginDir = "plugins",
                     type = SoftwareType.SERVER,
                 )

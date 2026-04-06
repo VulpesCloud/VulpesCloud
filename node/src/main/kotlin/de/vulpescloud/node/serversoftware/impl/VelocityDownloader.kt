@@ -1,5 +1,6 @@
 package de.vulpescloud.node.serversoftware.impl
 
+import com.github.benmanes.caffeine.cache.Caffeine
 import de.vulpescloud.api.serversoftware.ServerSoftware
 import de.vulpescloud.api.serversoftware.SoftwareType
 import de.vulpescloud.node.serversoftware.ServerSoftwareDownloader
@@ -7,6 +8,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.net.URI
 import java.nio.file.Path
+import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -19,7 +21,18 @@ object VelocityDownloader : ServerSoftwareDownloader {
 
     private const val BASE_API_URL = "https://fill.papermc.io/v3"
     private val logger = LoggerFactory.getLogger("VelocityDownloader")
-    private val availableVersions = mutableListOf<ServerSoftware>()
+
+    private val availableVersionsCache = Caffeine.newBuilder()
+        .expireAfterWrite(30, TimeUnit.MINUTES)
+        .build<String, List<ServerSoftware>>()
+
+    private val downloadUrlCache = Caffeine.newBuilder()
+        .expireAfterWrite(30, TimeUnit.MINUTES)
+        .build<String, URI>()
+
+    private val latestVersionCache = Caffeine.newBuilder()
+        .expireAfterWrite(30, TimeUnit.MINUTES)
+        .build<String, ServerSoftware>()
 
     override suspend fun downloadSoftware(version: String) {
         val start = System.currentTimeMillis()
@@ -66,6 +79,9 @@ object VelocityDownloader : ServerSoftwareDownloader {
     }
 
     override suspend fun getDownloadUrl(version: String): URI {
+        val cached = downloadUrlCache.getIfPresent(version)
+        if (cached != null) return cached
+
         val apiUrl = "$BASE_API_URL/projects/velocity/versions/$version/builds/latest"
 
         val client = OkHttpClient()
@@ -73,7 +89,7 @@ object VelocityDownloader : ServerSoftwareDownloader {
         val request =
             Request.Builder().url(apiUrl).header("User-Agent", "VulpesCloud-Node/1.0").build()
 
-        client.newCall(request).execute().use { response ->
+        val result = client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw Exception("Unexpected code $response")
 
             val responseBody = response.body.string()
@@ -85,16 +101,31 @@ object VelocityDownloader : ServerSoftwareDownloader {
                     .getJSONObject("downloads")
                     .getJSONObject("server:default")
                     .getString("url")
-            return URI(downloadUrl)
+            URI(downloadUrl)
         }
+
+        downloadUrlCache.put(version, result)
+        return result
     }
 
     override suspend fun getAvailableVersions(refreshList: Boolean): List<ServerSoftware> {
-        if (refreshList) availableVersions.clear()
-        return availableVersions.ifEmpty { pullAvailableVersions() }
+        if (refreshList) {
+            availableVersionsCache.invalidate("all")
+        }
+
+        val cached = availableVersionsCache.getIfPresent("all")
+        if (cached != null) return cached
+
+        val result = pullAvailableVersions()
+        availableVersionsCache.put("all", result)
+        return result
     }
 
     override suspend fun getLatestVersion(version: String?): ServerSoftware {
+        val cacheKey = version ?: "latest"
+        val cached = latestVersionCache.getIfPresent(cacheKey)
+        if (cached != null) return cached
+
         val apiUrl = "$BASE_API_URL/projects/velocity/versions"
         val allVersions = getAvailableVersions()
 
@@ -103,7 +134,7 @@ object VelocityDownloader : ServerSoftwareDownloader {
         val request =
             Request.Builder().url(apiUrl).header("User-Agent", "VulpesCloud-Node/1.0").build()
 
-        if (version == null) {
+        val result = if (version == null) {
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) throw Exception("Unexpected code $response")
 
@@ -122,7 +153,7 @@ object VelocityDownloader : ServerSoftwareDownloader {
                 val build =
                     downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
 
-                return ServerSoftware(
+                ServerSoftware(
                     name = "Velocity",
                     version = latestVersion.getString("id"),
                     build = build ?: 1,
@@ -160,7 +191,7 @@ object VelocityDownloader : ServerSoftwareDownloader {
                 val build =
                     downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
 
-                return ServerSoftware(
+                ServerSoftware(
                     name = "Velocity",
                     version = version,
                     build = build ?: 1,
@@ -170,6 +201,9 @@ object VelocityDownloader : ServerSoftwareDownloader {
                 )
             }
         }
+
+        latestVersionCache.put(cacheKey, result)
+        return result
     }
 
     private suspend fun pullAvailableVersions(): List<ServerSoftware> {

@@ -241,7 +241,7 @@ class TaskCommand {
 object TaskCache {
     private val cache =
         Caffeine.newBuilder()
-            .expireAfterWrite(1, TimeUnit.MINUTES)
+            .expireAfterWrite(15, TimeUnit.SECONDS)
             .build<String, List<TaskDefinition>>()
 
     fun getTasks(): List<TaskDefinition> {

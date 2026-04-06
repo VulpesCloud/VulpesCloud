@@ -182,7 +182,7 @@ class ServiceCommand {
 object ServiceCache {
     private val cache =
         Caffeine.newBuilder()
-            .expireAfterWrite(1, TimeUnit.MINUTES)
+            .expireAfterWrite(15, TimeUnit.SECONDS)
             .build<String, List<ServiceDefinition>>()
 
     fun getTasks(): List<ServiceDefinition> {

@@ -6,9 +6,15 @@ import de.vulpescloud.api.events.services.ServiceStateChangeEvent
 import de.vulpescloud.api.serversoftware.SoftwareType
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.bridge.BridgeAPI
-import kotlinx.coroutines.Job
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
+import kotlin.time.Duration.Companion.minutes
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import org.slf4j.LoggerFactory
 
 @Suppress("unused")
 class VelocityServerRegistrationHandler(
@@ -17,6 +23,17 @@ class VelocityServerRegistrationHandler(
 ) {
 
     private val serviceStateChangeEventJob: Job
+    private val logger = LoggerFactory.getLogger(VelocityServerRegistrationHandler::class.java)
+    private val tempJob =
+        CoroutineScope(Dispatchers.Main).launch {
+            while (true) {
+                logger.info(
+                    "Temp-Debug: job-active: ${serviceStateChangeEventJob.isActive}, job-completed: ${serviceStateChangeEventJob.isCompleted}, job-cancelled: ${serviceStateChangeEventJob.isCancelled}"
+                )
+
+                delay(30.minutes)
+            }
+        }
 
     init {
         for (server in servers()) {
@@ -55,10 +72,12 @@ class VelocityServerRegistrationHandler(
     }
 
     private fun registerServer(name: String, address: String, port: Int) {
+        logger.info("Registering server $name at $address:$port")
         proxyServer.registerServer(ServerInfo(name, InetSocketAddress(address, port)))
     }
 
     private fun unregisterServer(name: String) {
+        logger.info("Unregistering server $name")
         proxyServer.getServer(name).ifPresent { proxyServer.unregisterServer(it.serverInfo) }
     }
 
