@@ -2,7 +2,6 @@ package de.vulpescloud.node.cluster
 
 import build.buf.gen.vulpescloud.node.v1.ClusterAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.node.v1.getNodeSnapshotRequest
-import build.buf.gen.vulpescloud.node.v1.snapshotOrNull
 import de.vulpescloud.api.cluster.ClusterNode
 import de.vulpescloud.api.cluster.NodeEndpointDetails
 import de.vulpescloud.node.Node
@@ -20,30 +19,7 @@ class RemoteNode(val endpoint: NodeEndpointDetails) {
         return ClusterHelper.getNode(endpoint.name) ?: throw Exception("Node not found!")
     }
 
-    suspend fun connect() {
-        logger.info("Connecting to ${endpoint.name} at ${endpoint.host}:${endpoint.port}...")
-        channel =
-            ManagedChannelBuilder.forAddress(endpoint.host, endpoint.port).usePlaintext().build()
-
-        val snapshot =
-            try {
-                ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineStub(channel!!)
-                    .withInterceptors(AuthClientInterceptor(Node.instance.secret))
-                    .getNodeSnapshot(getNodeSnapshotRequest { this.name = endpoint.name })
-                    .snapshotOrNull
-            } catch (e: Exception) {
-                logger.error(
-                    "Failed to connect to ${endpoint.name} at ${endpoint.host}:${endpoint.port}!",
-                    e.message,
-                )
-                null
-            }
-
-        val state = channel!!.getState(false)
-        logger.info("Connection state from ${endpoint.name}: $state")
-    }
-
-    suspend fun reConnect() {
+    suspend fun reconnect() {
         channel?.shutdownNow()
         channel = null
 
@@ -51,19 +27,16 @@ class RemoteNode(val endpoint: NodeEndpointDetails) {
         channel =
             ManagedChannelBuilder.forAddress(endpoint.host, endpoint.port).usePlaintext().build()
 
-        val snapshot =
-            try {
-                ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineStub(channel!!)
-                    .withInterceptors(AuthClientInterceptor(Node.instance.secret))
-                    .getNodeSnapshot(getNodeSnapshotRequest { this.name = endpoint.name })
-                    .snapshotOrNull
-            } catch (e: Exception) {
-                logger.error(
-                    "Failed to connect to ${endpoint.name} at ${endpoint.host}:${endpoint.port}!",
-                    e.message,
-                )
-                null
-            }
+        try {
+            ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineStub(channel!!)
+                .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+                .getNodeSnapshot(getNodeSnapshotRequest { this.name = endpoint.name })
+        } catch (e: Exception) {
+            logger.error(
+                "Failed to connect to ${endpoint.name} at ${endpoint.host}:${endpoint.port}!",
+                e.message,
+            )
+        }
 
         val state = channel!!.getState(true)
         logger.info("Connection state from ${endpoint.name}: $state")

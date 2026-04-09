@@ -10,15 +10,15 @@ import de.vulpescloud.api.events.cluster.NodeStateChangeEvent
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeShutdown
 import de.vulpescloud.node.event.EventsService
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import org.slf4j.LoggerFactory
-import kotlin.system.exitProcess
-import kotlin.time.Duration.Companion.seconds
 
 class ClusterProvider {
 
     val remoteNodes = mutableListOf<RemoteNode>()
     private val logger = LoggerFactory.getLogger("ClusterProvider")
+    private var sameNodeAlreadyOnline: Boolean = false
 
     suspend fun connectToOtherNodes() {
         val nodes = getClusterConfig().nodes
@@ -31,7 +31,7 @@ class ClusterProvider {
                 return@forEach
 
             val remoteNode = RemoteNode(node)
-            remoteNode.connect()
+            remoteNode.reconnect()
             remoteNodes.add(remoteNode)
         }
     }
@@ -42,9 +42,11 @@ class ClusterProvider {
 
         if (localNode.state == NodeState.ONLINE) {
             logger.error("Node with same Name is already online! Stopping in 15 seconds...")
+            sameNodeAlreadyOnline = true
             delay(15.seconds)
             NodeShutdown.shutdown()
         }
+        sameNodeAlreadyOnline = false
 
         if (head == null) {
             val localNode =
@@ -70,28 +72,30 @@ class ClusterProvider {
     }
 
     suspend fun shutdown() {
-        val localNode = ClusterHelper.getLocalNode()
-        ClusterHelper.updateNode(localNode.copy(state = NodeState.OFFLINE, head = false))
-        EventsService.publish(
-            EventSerializer.encode(
-                NodeStateChangeEvent(
-                    localNode.copy(state = NodeState.OFFLINE),
-                    localNode.state,
-                    NodeState.OFFLINE,
-                )
-            ),
-            true,
-        )
-        EventsService.publish(
-            EventSerializer.encode(
-                ChoseNewHeadEvent(
-                    ClusterHelper.getAllNodes()
-                        .filter { it.state == NodeState.ONLINE }
-                        .minByOrNull { it.bootTimestamp } ?: return
-                )
-            ),
-            true,
-        )
+        if (!sameNodeAlreadyOnline) {
+            val localNode = ClusterHelper.getLocalNode()
+            ClusterHelper.updateNode(localNode.copy(state = NodeState.OFFLINE, head = false))
+            EventsService.publish(
+                EventSerializer.encode(
+                    NodeStateChangeEvent(
+                        localNode.copy(state = NodeState.OFFLINE),
+                        localNode.state,
+                        NodeState.OFFLINE,
+                    )
+                ),
+                true,
+            )
+            EventsService.publish(
+                EventSerializer.encode(
+                    ChoseNewHeadEvent(
+                        ClusterHelper.getAllNodes()
+                            .filter { it.state == NodeState.ONLINE }
+                            .minByOrNull { it.bootTimestamp } ?: return
+                    )
+                ),
+                true,
+            )
+        }
     }
 
     suspend fun startupDone() {

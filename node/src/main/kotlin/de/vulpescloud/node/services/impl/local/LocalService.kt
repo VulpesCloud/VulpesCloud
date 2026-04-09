@@ -17,6 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
+import kotlin.time.Duration.Companion.seconds
 
 class LocalService(override val service: Service) : AbstractService {
 
@@ -103,7 +104,7 @@ class LocalService(override val service: Service) : AbstractService {
         runBlocking {
             command("stop")
 
-            delay(5000)
+            delay(5.seconds)
 
             if (process != null) {
                 process!!.destroyForcibly()
@@ -114,7 +115,7 @@ class LocalService(override val service: Service) : AbstractService {
     override fun delete() {
         command("stop")
         NodeCoroutineScope.launch {
-            delay(5000)
+            delay(5.seconds)
 
             if (process != null) {
                 process!!.destroyForcibly()
@@ -150,8 +151,6 @@ class LocalService(override val service: Service) : AbstractService {
             logger.error(
                 "Failed to send command to service ${service.task.name}-${service.orderedId}!"
             )
-            // TODO/NOTE: For some stupid reason this doesn't seem to work with Purpur servers, i
-            // don't know if its just a Purpur server not working or all Bukkit Servers
         }
     }
 
@@ -159,7 +158,7 @@ class LocalService(override val service: Service) : AbstractService {
         NodeCoroutineScope.launch {
             command("stop")
 
-            delay(5000)
+            delay(5.seconds)
 
             if (process != null) {
                 process!!.destroyForcibly()

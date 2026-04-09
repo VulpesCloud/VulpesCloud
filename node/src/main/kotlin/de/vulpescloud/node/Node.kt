@@ -48,6 +48,7 @@ import java.time.Duration
 import kotlin.io.path.Path
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
+import kotlin.time.Duration.Companion.milliseconds
 
 class Node {
     private val logger = LoggerFactory.getLogger("Node")
@@ -65,6 +66,8 @@ class Node {
 
     lateinit var dockerClientConfig: DockerClientConfig
     lateinit var dockerHttpClient: DockerHttpClient
+
+    lateinit var internalEventsService: EventsService
 
     val templateStorageProvider = TemplateStorageProvider()
     val localGrpcClient = LocalGrpcClient()
@@ -109,7 +112,7 @@ class Node {
             }
 
             while (setupProvider.currentSetup?.setup is FirstSetup) {
-                delay(500)
+                delay(500.milliseconds)
             }
 
             terminal.changePrompt("")
@@ -148,11 +151,13 @@ class Node {
                 setAndInitializeMainDatabaseProvider()
             }
 
+            internalEventsService = EventsService()
+
             grpcServices.addAll(
                 listOf(
                     TasksAPIService(),
                     ServicesAPIService(),
-                    EventsService(),
+                    internalEventsService,
                     virtualConfigServiceImpl,
                     ClusterAPIServiceImpl(),
                     AuthServiceImpl(

@@ -34,6 +34,10 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
             .expireAfterAccess(5, TimeUnit.MINUTES)
             .build<String, EventServiceGrpcKt.EventServiceCoroutineStub>()
 
+    fun shutdown() {
+        subscribers.forEach { it.close() }
+    }
+
     @RequiresPermission("events.subscribe")
     override fun subscribe(request: SubscribeRequest): Flow<GrpcEvent> {
         val channel = Channel<GrpcEvent>(capacity = Channel.UNLIMITED)
