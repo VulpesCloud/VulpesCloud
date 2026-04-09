@@ -1,9 +1,8 @@
 package de.vulpescloud.node.config
 
 import de.vulpescloud.api.serializer.UUIDSerializer
-import de.vulpescloud.node.config.db.MongoConfig
-import kotlinx.serialization.Serializable
 import java.util.*
+import kotlinx.serialization.Serializable
 
 @Serializable
 data class NodeConfig(
@@ -17,5 +16,6 @@ data class NodeConfig(
     val docker: DockerConfig,
     val useModernForwarding: Boolean,
     val auth: AuthConfig = AuthConfig("changeme", "changeme2", true),
-    val databaseType: String = "sqlite"
+    val databaseType: String = "sqlite",
+    val testing: TestingConfig = TestingConfig(),
 )

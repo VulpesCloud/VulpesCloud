@@ -1,10 +1,11 @@
 package de.vulpescloud.node.services
 
 import de.vulpescloud.api.events.services.ServiceLogEvent
+import de.vulpescloud.node.Node
 import de.vulpescloud.node.event.EventsService
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Job
 import org.slf4j.LoggerFactory
-import java.util.concurrent.ConcurrentHashMap
 
 object ServiceLogHandler {
     private val logBuffers = ConcurrentHashMap<String, MutableList<String>>()
@@ -21,7 +22,7 @@ object ServiceLogHandler {
                 if (
                     servicesToLog.contains("${event.service.task.name}-${event.service.orderedId}")
                 ) {
-                    logger.info(event.message)
+                    logLine(event.service.name(), event.message)
                 }
             }
     }
@@ -55,8 +56,16 @@ object ServiceLogHandler {
             logger.info("Logging for service $serviceName disabled.")
         } else {
             servicesToLog.add(serviceName)
-            getLogs(serviceName).forEach { logger.info(it) }
+            getLogs(serviceName).forEach { logLine(serviceName, it) }
             logger.info("Logging for service $serviceName enabled.")
+        }
+    }
+
+    private fun logLine(serviceName: String, line: String) {
+        if (Node.instance.configProvider.config.testing.newServiceLoggingStyle) {
+            println("[$serviceName] $line")
+        } else {
+            logger.info("[$serviceName] $line")
         }
     }
 }
