@@ -59,7 +59,7 @@ night-config = "3.8.3"
 snakeyml = "2.6"
 
 # command api
-commandapi = "11.1.0"
+commandapi = "11.2.0"
 
 # shadowJar
 shadow = "9.4.0"
