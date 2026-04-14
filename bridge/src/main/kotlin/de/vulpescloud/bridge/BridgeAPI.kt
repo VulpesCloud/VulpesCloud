@@ -30,21 +30,20 @@ interface BridgeAPI {
         private val tasksAPI = TasksFutureAPI()
         private val servicesAPI = ServiceFutureAPI()
         private val eventAPI = EventAPI()
+        private val virtualConfigAPI = VirtualConfigCoroutineAPIImpl()
 
         fun getTasksAPI() = tasksAPI
 
         fun getServicesAPI() = servicesAPI
 
         fun getEventAPI() = eventAPI
+
+        fun getCoroutineVirtualConfigAPI() = virtualConfigAPI
     }
 
     companion object {
+        fun createCoroutineAPI(): BridgeCoroutineAPI = BridgeCoroutineAPI()
 
-        private val coroutineAPI = BridgeCoroutineAPI()
-        private val futureAPI = BridgeFutureAPI()
-
-        fun getCoroutineAPI(): BridgeCoroutineAPI = coroutineAPI
-
-        fun getFutureAPI(): BridgeFutureAPI = futureAPI
+        fun createFutureAPI(): BridgeFutureAPI = BridgeFutureAPI()
     }
 }

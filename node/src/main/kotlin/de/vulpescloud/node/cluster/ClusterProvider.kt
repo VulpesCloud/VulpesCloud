@@ -1,12 +1,10 @@
 package de.vulpescloud.node.cluster
 
+import build.buf.gen.vulpescloud.events.v1.nodeStateChangeEvent
 import build.buf.gen.vulpescloud.virtualconfig.v1.createVirtualConfigRequest
 import de.vulpescloud.api.cluster.ClusterConfig
 import de.vulpescloud.api.cluster.NodeEndpointDetails
 import de.vulpescloud.api.cluster.NodeState
-import de.vulpescloud.api.events.EventSerializer
-import de.vulpescloud.api.events.cluster.ChoseNewHeadEvent
-import de.vulpescloud.api.events.cluster.NodeStateChangeEvent
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeShutdown
 import de.vulpescloud.node.event.EventsService
@@ -53,9 +51,11 @@ class ClusterProvider {
                 ClusterHelper.getLocalNode().copy(state = NodeState.BOOTING, head = true)
             ClusterHelper.updateNode(localNode)
             EventsService.publish(
-                EventSerializer.encode(
-                    NodeStateChangeEvent(localNode, NodeState.OFFLINE, NodeState.BOOTING)
-                ),
+                nodeStateChangeEvent {
+                    this.node = localNode.toDefinition()
+                    this.oldState = localNode.state.toNodeStates()
+                    this.newState = NodeState.BOOTING.toNodeStates()
+                },
                 true,
             )
         } else {
@@ -63,9 +63,11 @@ class ClusterProvider {
                 ClusterHelper.getLocalNode().copy(state = NodeState.BOOTING, head = false)
             ClusterHelper.updateNode(localNode)
             EventsService.publish(
-                EventSerializer.encode(
-                    NodeStateChangeEvent(localNode, NodeState.OFFLINE, NodeState.BOOTING)
-                ),
+                nodeStateChangeEvent {
+                    this.node = localNode.toDefinition()
+                    this.oldState = localNode.state.toNodeStates()
+                    this.newState = NodeState.BOOTING.toNodeStates()
+                },
                 true,
             )
         }
@@ -76,25 +78,26 @@ class ClusterProvider {
             val localNode = ClusterHelper.getLocalNode()
             ClusterHelper.updateNode(localNode.copy(state = NodeState.OFFLINE, head = false))
             EventsService.publish(
-                EventSerializer.encode(
-                    NodeStateChangeEvent(
-                        localNode.copy(state = NodeState.OFFLINE),
-                        localNode.state,
-                        NodeState.OFFLINE,
-                    )
-                ),
+                nodeStateChangeEvent {
+                    this.node = localNode.toDefinition()
+                    this.oldState = localNode.state.toNodeStates()
+                    this.newState = NodeState.OFFLINE.toNodeStates()
+                },
                 true,
             )
-            EventsService.publish(
-                EventSerializer.encode(
-                    ChoseNewHeadEvent(
-                        ClusterHelper.getAllNodes()
-                            .filter { it.state == NodeState.ONLINE }
-                            .minByOrNull { it.bootTimestamp } ?: return
-                    )
-                ),
-                true,
+            logger.error(
+                "HeadNode features have not yet been implemented! (This is not a real problem right now, just reminder for the dev to implement it)"
             )
+            //            EventsService.publish(
+            //                EventSerializer.encode(
+            //                    ChoseNewHeadEvent(
+            //                        ClusterHelper.getAllNodes()
+            //                            .filter { it.state == NodeState.ONLINE }
+            //                            .minByOrNull { it.bootTimestamp } ?: return
+            //                    )
+            //                ),
+            //                true,
+            //            )
         }
     }
 

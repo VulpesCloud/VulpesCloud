@@ -1,6 +1,6 @@
 package de.vulpescloud.node.cluster.event
 
-import de.vulpescloud.api.events.cluster.NodeStateChangeEvent
+import build.buf.gen.vulpescloud.events.v1.NodeStateChangeEvent
 import de.vulpescloud.node.event.EventsService
 import kotlinx.coroutines.Job
 import org.slf4j.LoggerFactory
@@ -14,7 +14,7 @@ object NodeStateChangeEventListener {
         job =
             EventsService.subscribe<NodeStateChangeEvent> {
                 logger.info(
-                    "Node <aqua>${it.event.node.name}</aqua> is now <light_purple>${it.event.newState}</light_purple>"
+                    "Node <aqua>${it.node.name}</aqua> is now <light_purple>${it.newState}</light_purple>"
                 )
             }
     }

@@ -12,7 +12,7 @@ import org.bukkit.event.player.PlayerQuitEvent
 
 class PlayerJoinEventListener : Listener {
 
-    val bridgeAPI = BridgeAPI.getCoroutineAPI()
+    val bridgeAPI = BridgeAPI.createCoroutineAPI()
 
     @EventHandler
     fun onPlayerJoinEvent(event: PlayerJoinEvent) {

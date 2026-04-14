@@ -1,10 +1,9 @@
 package de.vulpescloud.node.cluster
 
+import build.buf.gen.vulpescloud.events.v1.nodeStateChangeEvent
 import com.github.benmanes.caffeine.cache.Caffeine
 import de.vulpescloud.api.cluster.ClusterNode
 import de.vulpescloud.api.cluster.NodeState
-import de.vulpescloud.api.events.EventSerializer
-import de.vulpescloud.api.events.cluster.NodeStateChangeEvent
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.event.EventsService
 import java.util.concurrent.TimeUnit
@@ -28,7 +27,11 @@ object ClusterHelper {
         cache.put(newNode.name, newNode)
 
         EventsService.publish(
-            EventSerializer.encode(NodeStateChangeEvent(node, node.state, state)),
+            nodeStateChangeEvent {
+                this.node = node.toDefinition()
+                this.oldState = node.state.toNodeStates()
+                this.newState = state.toNodeStates()
+            },
             true,
         )
     }

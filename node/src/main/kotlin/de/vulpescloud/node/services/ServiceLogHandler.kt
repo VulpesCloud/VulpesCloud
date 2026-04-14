@@ -1,6 +1,7 @@
 package de.vulpescloud.node.services
 
-import de.vulpescloud.api.events.services.ServiceLogEvent
+import build.buf.gen.vulpescloud.events.v1.ServiceLogEvent
+import de.vulpescloud.api.services.Service
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.event.EventsService
 import java.util.concurrent.ConcurrentHashMap
@@ -16,13 +17,12 @@ object ServiceLogHandler {
 
     fun subscribe() {
         subscribeJob =
-            EventsService.subscribe<ServiceLogEvent> { evt ->
-                val event = evt.event
+            EventsService.subscribe<ServiceLogEvent> { event ->
                 addLog("${event.service.task.name}-${event.service.orderedId}", event.message)
                 if (
                     servicesToLog.contains("${event.service.task.name}-${event.service.orderedId}")
                 ) {
-                    logLine(event.service.name(), event.message)
+                    logLine(Service.fromDefinition(event.service).name(), event.message)
                 }
             }
     }

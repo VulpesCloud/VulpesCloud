@@ -1,7 +1,6 @@
 package de.vulpescloud.node.services.impl.local
 
-import de.vulpescloud.api.events.EventSerializer
-import de.vulpescloud.api.events.services.ServiceLogEvent
+import build.buf.gen.vulpescloud.events.v1.serviceLogEvent
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
@@ -13,11 +12,11 @@ import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 import java.nio.file.Path
 import kotlin.io.path.exists
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
-import kotlin.time.Duration.Companion.seconds
 
 class LocalService(override val service: Service) : AbstractService {
 
@@ -52,13 +51,16 @@ class LocalService(override val service: Service) : AbstractService {
                         runBlocking {
 
                             /**
-                             * I am done with this. The Event system is so bad. I hate it.
-                             * For some reason broadcasting the event breaks so much.
-                             *  - TheCGuy
+                             * I am done with this. The Event system is so bad. I hate it. For some
+                             * reason broadcasting the event breaks so much.
+                             * - TheCGuy
                              */
                             EventsService.publish(
-                                EventSerializer.encode(ServiceLogEvent(service, line.trim())),
-                                //true,
+                                serviceLogEvent {
+                                    this.service = this@LocalService.service.toDefinition()
+                                    this.message = line
+                                }
+                                // true,
                             )
                         }
                     }

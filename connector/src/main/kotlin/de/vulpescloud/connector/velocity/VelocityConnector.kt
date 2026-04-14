@@ -1,5 +1,6 @@
 package de.vulpescloud.connector.velocity
 
+import build.buf.gen.vulpescloud.events.v1.serviceStateChangedEvent
 import build.buf.gen.vulpescloud.services.v1.UpdatePlayerCountRequest
 import build.buf.gen.vulpescloud.virtualconfig.v1.createVirtualConfigRequest
 import com.velocitypowered.api.event.EventManager
@@ -10,7 +11,6 @@ import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.proxy.ProxyServer
-import de.vulpescloud.api.events.services.ServiceStateChangeEvent
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.bridge.BridgeAPI
 import de.vulpescloud.connector.velocity.commands.CloudCommand
@@ -21,11 +21,11 @@ import de.vulpescloud.wrapper.Wrapper
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIVelocityConfig
 import jakarta.inject.Inject
+import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.bstats.velocity.Metrics
 import org.slf4j.Logger
-import java.util.concurrent.TimeUnit
 
 @Plugin(id = "vulpescloud-connector", name = "VulpesCloud-Connector", authors = ["TheCGuy"])
 @Suppress("unused")
@@ -39,7 +39,7 @@ constructor(
 ) {
     private lateinit var metrics: Metrics
     private val pluginID = 27325
-    private val bridgeAPI = BridgeAPI.getFutureAPI()
+    private val bridgeAPI = BridgeAPI.createFutureAPI()
     private lateinit var velocityServerRegistrationHandler: VelocityServerRegistrationHandler
 
     @Subscribe
@@ -54,8 +54,8 @@ constructor(
         eventManager.register(this, PlayerChooseInitialServerEventListener(bridgeAPI, proxyServer))
 
         runBlocking {
-            BridgeAPI.getCoroutineAPI()
-                .getVirtualConfigAPI()
+            bridgeAPI
+                .getCoroutineVirtualConfigAPI()
                 .stub
                 .createVirtualConfig(
                     createVirtualConfigRequest {
@@ -85,13 +85,17 @@ constructor(
             return
         }
 
-        HubCommand(proxyServer).command.register()
+        HubCommand(proxyServer, bridgeAPI).command.register()
         CloudCommand()
 
         bridgeAPI
             .getEventAPI()
             .publish(
-                ServiceStateChangeEvent(localService, localService.state, ServiceStates.RUNNING),
+                serviceStateChangedEvent {
+                    this.service = localService.toDefinition()
+                    this.oldState = localService.state.toServiceState()
+                    this.newState = ServiceStates.RUNNING.toServiceState()
+                },
                 true,
             )
     }
@@ -99,7 +103,7 @@ constructor(
     @Subscribe
     fun onProxyShutdownEvent(event: ProxyShutdownEvent) {
         metrics.shutdown()
-        velocityServerRegistrationHandler.shutdown()
+        bridgeAPI.getEventAPI().shutdown()
     }
 
     @Subscribe

@@ -10,13 +10,14 @@ import dev.jorel.commandapi.kotlindsl.commandTree
 import dev.jorel.commandapi.kotlindsl.literalArgument
 import dev.jorel.commandapi.kotlindsl.playerExecutor
 import dev.jorel.commandapi.kotlindsl.stringArgument
+import java.util.concurrent.CompletableFuture
 import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.text.minimessage.MiniMessage
-import java.util.concurrent.CompletableFuture
 
 class CloudCommand {
 
     private val miniMessage = MiniMessage.miniMessage()
+    private val bridgeAPI = BridgeAPI.createCoroutineAPI()
 
     val command =
         commandTree("cloud") {
@@ -26,8 +27,7 @@ class CloudCommand {
                     withPermission("vulpescloud.commands.cloud.services.list")
                     playerExecutor { sender, _ ->
                         runBlocking {
-                            val services =
-                                BridgeAPI.getCoroutineAPI().getServicesAPI().getAllServices()
+                            val services = bridgeAPI.getServicesAPI().getAllServices()
 
                             sender.sendMessage(
                                 miniMessage.deserialize(
@@ -55,10 +55,9 @@ class CloudCommand {
                             ArgumentSuggestions.stringCollectionAsync {
                                 CompletableFuture.supplyAsync {
                                     runBlocking {
-                                        BridgeAPI.getCoroutineAPI()
-                                            .getServicesAPI()
-                                            .getAllServices()
-                                            .map { "${it.task.name}-${it.orderedId}" }
+                                        bridgeAPI.getServicesAPI().getAllServices().map {
+                                            "${it.task.name}-${it.orderedId}"
+                                        }
                                     }
                                 }
                             }
@@ -74,9 +73,7 @@ class CloudCommand {
                                             ))
                                             as String
                                     val service =
-                                        BridgeAPI.getCoroutineAPI()
-                                            .getServicesAPI()
-                                            .getServiceByName(serviceName)
+                                        bridgeAPI.getServicesAPI().getServiceByName(serviceName)
 
                                     if (service == null) {
                                         sender.sendMessage(

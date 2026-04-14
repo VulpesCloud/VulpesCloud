@@ -50,7 +50,7 @@ data class NodeSnapshot(
 
     companion object {
         fun fromDefinition(definition: NodeSnapshot): de.vulpescloud.api.cluster.NodeSnapshot {
-            return de.vulpescloud.api.cluster.NodeSnapshot(
+            return NodeSnapshot(
                 definition.name,
                 UUID.fromString(definition.uuid),
                 when (definition.state) {
@@ -61,7 +61,7 @@ data class NodeSnapshot(
                     else -> NodeState.OFFLINE
                 },
                 definition.usedMemory,
-                definition.cpuUsage.toDouble(),
+                definition.cpuUsage,
                 definition.onlinePlayers,
                 definition.timestamp,
             )
