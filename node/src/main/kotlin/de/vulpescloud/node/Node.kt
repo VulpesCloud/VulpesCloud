@@ -46,9 +46,9 @@ import io.grpc.BindableService
 import io.grpc.ChannelCredentials
 import java.time.Duration
 import kotlin.io.path.Path
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
-import kotlin.time.Duration.Companion.milliseconds
 
 class Node {
     private val logger = LoggerFactory.getLogger("Node")
@@ -75,7 +75,14 @@ class Node {
     val nodeServices = mutableListOf<AbstractService>()
     val virtualConfigProvider = VirtualConfigProvider()
     val clusterProvider = ClusterProvider()
-    val moduleProvider = ModuleProvider(Path("modules"))
+    val moduleProvider =
+        ModuleProvider(
+            Path("modules"),
+            System.getProperty(
+                "vulpescloud.modules.url",
+                "https://github.com/VulpesCloud/VulpesCloud-meta/raw/refs/heads/main/modules.json",
+            ),
+        )
     val virtualConfigServiceImpl = VirtualConfigServiceImpl()
     val serverSoftwareProvider = ServerSoftwareProvider()
 
