@@ -17,6 +17,7 @@ import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.concurrent.TimeUnit
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.channels.ProducerScope
@@ -46,7 +47,7 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
 
     @RequiresPermission("events.subscribe")
     override fun subscribe(request: SubscribeRequest): Flow<GrpcEvent> = callbackFlow {
-        subscribers.getOrPut(request.eventId, ::mutableListOf).add(this)
+        subscribers.getOrPut(request.eventId, ::CopyOnWriteArrayList).add(this)
 
         awaitClose { subscribers[request.eventId]?.remove(this) }
     }
