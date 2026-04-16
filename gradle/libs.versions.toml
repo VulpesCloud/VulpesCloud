@@ -6,7 +6,7 @@ kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-coroutines = "1.10.2"
 
 # google deps
-guava = "33.5.0-jre"
+guava = "33.6.0-jre"
 
 # utils
 annotations = "26.1.0"
