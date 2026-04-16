@@ -4,6 +4,8 @@ import de.vulpescloud.launcher.VulpesLauncher
 import de.vulpescloud.node.cluster.ClusterHelper
 import java.net.URI
 import java.nio.file.Path
+import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 import java.util.jar.JarFile
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,8 +14,8 @@ import org.slf4j.LoggerFactory
 
 class ModuleProvider(val moduleFolder: Path, val modulesJsonURL: String) {
 
-    private val loadedModules = mutableListOf<LoadedModule>()
-    private val classLoaders = mutableMapOf<String, ModuleClassLoader>()
+    private val loadedModules = CopyOnWriteArrayList<LoadedModule>()
+    private val classLoaders = ConcurrentHashMap<String, ModuleClassLoader>()
 
     private val logger = LoggerFactory.getLogger("ModuleProvider")
     private val json = Json {
