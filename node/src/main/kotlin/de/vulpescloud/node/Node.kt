@@ -256,6 +256,9 @@ class Node {
             moduleProvider.startAllModules()
 
             clusterProvider.startupDone()
+
+            moduleProvider.checkAllLoadedModulesForUpdates()
+
             val time =
                 System.currentTimeMillis() - (System.getProperty("startup").toLongOrNull() ?: 0)
             logger.info("Startup Done! Took {}ms", time)
