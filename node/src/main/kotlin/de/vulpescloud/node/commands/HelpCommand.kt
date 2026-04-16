@@ -38,12 +38,12 @@ class HelpCommand(private val commandProvider: CommandProvider) {
     @Command("help|? <command>")
     fun sendSpecificHelp(source: CommandSource, @Argument("command") command: CommandInfo?) {
         if (command != null) {
-            source.sendMessage("Aliases: &m${command.joinNameToAliases(", ")}")
-            source.sendMessage("Description: &m${command.description}")
+            source.sendMessage("Aliases: <yellow>${command.joinNameToAliases("<gray>,</gray> ")}</yellow>")
+            source.sendMessage("Description: <yellow>${command.description}</yellow>")
             source.sendMessage("Usages:")
-            command.usage.forEach { source.sendMessage(" > &m$it") }
+            command.usage.forEach { source.sendMessage(" > <yellow>$it</yellow>") }
         } else {
-            source.sendMessage("&cInvalid command!")
+            source.sendMessage("<red>Invalid command!</red>")
         }
     }
 }
