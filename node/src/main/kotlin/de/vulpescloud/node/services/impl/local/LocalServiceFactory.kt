@@ -1,10 +1,10 @@
 package de.vulpescloud.node.services.impl.local
 
+import build.buf.gen.vulpescloud.events.v1.serviceStateChangedEvent
+import build.buf.gen.vulpescloud.services.v1.ServiceState
 import com.electronwill.nightconfig.core.file.FileConfig
 import com.electronwill.nightconfig.toml.TomlFormat
 import com.electronwill.nightconfig.yaml.YamlFormat
-import de.vulpescloud.api.events.EventSerializer
-import de.vulpescloud.api.events.services.ServicePreparedEvent
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
@@ -212,11 +212,15 @@ class LocalServiceFactory : AbstractServiceFactory() {
         MongoUtils.updateService(localService.service)
 
         EventsService.publish(
-            EventSerializer.encode(ServicePreparedEvent(localService.service)),
+            serviceStateChangedEvent {
+                this.service = localService.service.toDefinition()
+                this.oldState = ServiceState.SERVICE_STATE_UNSPECIFIED
+                this.newState = ServiceState.SERVICE_STATE_PREPARED
+            },
             true,
         )
 
-        servicePrepareSyncHooks.forEach { hook -> hook(localService)}
+        servicePrepareSyncHooks.forEach { hook -> hook(localService) }
 
         return localService
     }

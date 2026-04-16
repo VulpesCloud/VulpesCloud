@@ -1,19 +1,13 @@
 package de.vulpescloud.connector.velocity
 
+import build.buf.gen.vulpescloud.events.v1.ServiceStateChangedEvent
+import build.buf.gen.vulpescloud.node.v1.SoftwareType
 import com.velocitypowered.api.proxy.ProxyServer
 import com.velocitypowered.api.proxy.server.ServerInfo
-import de.vulpescloud.api.events.services.ServiceStateChangeEvent
-import de.vulpescloud.api.serversoftware.SoftwareType
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.bridge.BridgeAPI
 import java.net.InetSocketAddress
 import java.util.concurrent.TimeUnit
-import kotlin.time.Duration.Companion.minutes
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
 @Suppress("unused")
@@ -21,10 +15,7 @@ class VelocityServerRegistrationHandler(
     private val proxyServer: ProxyServer,
     bridgeAPI: BridgeAPI.BridgeFutureAPI,
 ) {
-
-    private val serviceStateChangeEventJob: Job
     private val logger = LoggerFactory.getLogger(VelocityServerRegistrationHandler::class.java)
-    private val tempJob: Job
 
     init {
         for (server in servers()) {
@@ -32,45 +23,28 @@ class VelocityServerRegistrationHandler(
         }
 
         bridgeAPI.getServicesAPI().getAllServices().get(5, TimeUnit.SECONDS).forEach {
-            if (it.task.software.type != SoftwareType.PROXY) {
+            if (it.task.software.type != de.vulpescloud.api.serversoftware.SoftwareType.PROXY) {
                 this.registerServer("${it.task.name}-${it.orderedId}", it.hostname, it.port)
             }
         }
 
-        serviceStateChangeEventJob =
-            bridgeAPI.getEventAPI().subscribe<ServiceStateChangeEvent> { ev ->
-                val event = ev.event
-                if (
-                    event.newState == ServiceStates.RUNNING &&
-                        event.service.task.software.type != SoftwareType.PROXY
-                ) {
-                    registerServer(
-                        "${event.service.task.name}-${event.service.orderedId}",
-                        event.service.hostname,
-                        event.service.port,
-                    )
-                } else if (
-                    event.newState == ServiceStates.STOPPED &&
-                        event.service.task.software.type != SoftwareType.PROXY
-                ) {
-                    unregisterServer("${event.service.task.name}-${event.service.orderedId}")
-                }
+        bridgeAPI.getEventAPI().subscribe<ServiceStateChangedEvent> { event ->
+            if (
+                event.newState == ServiceStates.RUNNING.toServiceState() &&
+                    event.service.task.serverSoftware.type != SoftwareType.SOFTWARE_TYPE_PROXY
+            ) {
+                registerServer(
+                    "${event.service.task.name}-${event.service.orderedId}",
+                    event.service.hostname,
+                    event.service.port,
+                )
+            } else if (
+                event.newState == ServiceStates.STOPPED.toServiceState() &&
+                    event.service.task.serverSoftware.type != SoftwareType.SOFTWARE_TYPE_PROXY
+            ) {
+                unregisterServer("${event.service.task.name}-${event.service.orderedId}")
             }
-
-        tempJob =
-            CoroutineScope(Dispatchers.IO).launch {
-                while (true) {
-                    logger.info(
-                        "Temp-Debug: job-active: ${serviceStateChangeEventJob.isActive}, job-completed: ${serviceStateChangeEventJob.isCompleted}, job-cancelled: ${serviceStateChangeEventJob.isCancelled}"
-                    )
-
-                    delay(30.minutes)
-                }
-            }
-    }
-
-    fun shutdown() {
-        serviceStateChangeEventJob.cancel()
+        }
     }
 
     private fun registerServer(name: String, address: String, port: Int) {

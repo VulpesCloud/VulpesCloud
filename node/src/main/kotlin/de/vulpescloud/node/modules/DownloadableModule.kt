@@ -1,5 +1,8 @@
 package de.vulpescloud.node.modules
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class DownloadableModule(
     val name: String,
     val version: String,

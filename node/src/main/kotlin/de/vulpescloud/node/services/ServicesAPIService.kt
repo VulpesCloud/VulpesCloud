@@ -1,7 +1,7 @@
 package de.vulpescloud.node.services
 
+import build.buf.gen.vulpescloud.events.v1.ServiceLogEvent
 import build.buf.gen.vulpescloud.services.v1.*
-import de.vulpescloud.api.events.services.ServiceLogEvent
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
@@ -363,8 +363,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         return callbackFlow {
             val serviceName = "${request.service.task.name}-${request.service.orderedId}"
             val subscriptionJob =
-                EventsService.subscribe<ServiceLogEvent> { evt ->
-                    val event = evt.event
+                EventsService.subscribe<ServiceLogEvent> { event ->
                     val eventServiceName = "${event.service.task.name}-${event.service.orderedId}"
                     if (eventServiceName == serviceName) {
                         trySend(streamServiceLogsResponse { line = event.message })

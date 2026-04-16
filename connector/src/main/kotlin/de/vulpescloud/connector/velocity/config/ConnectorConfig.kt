@@ -8,7 +8,8 @@ import kotlinx.serialization.Serializable
 data class ConnectorConfig(
     val hubCommandConfig: HubCommandConfig = HubCommandConfig(),
     val cloudCommandConfig: CloudCommandConfig = CloudCommandConfig(),
-    val disconnectNoAvailableServerMessage: String = "<red>There is no available server for you to connect to!</red>",
+    val disconnectNoAvailableServerMessage: String =
+        "<red>There is no available server for you to connect to!</red>",
     val prefix: String = "<gray>[<gradient:#EE660A:#D9BC40>VulpesCloud</gradient>]</gray> ",
 )
 
@@ -37,8 +38,10 @@ fun String.replaceCommonServicePlaceholders(service: Service): String {
         .replace("%taskName%", service.task.name)
 }
 
+private val bridgeAPI = BridgeAPI.createCoroutineAPI()
+
 suspend fun getConfig(): ConnectorConfig {
-    return BridgeAPI.getCoroutineAPI()
+    return bridgeAPI
         .getVirtualConfigAPI()
         .getCustomConfigObject("vc_connector", ConnectorConfig.serializer(), false)
         ?: throw IllegalStateException("ConnectorConfig not found!")
