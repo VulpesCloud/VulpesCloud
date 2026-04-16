@@ -55,6 +55,11 @@ object NodeShutdown {
             Node.instance.clusterProvider.remoteNodes.forEach { it.channel?.shutdownNow() }
             Node.instance.clusterProvider.shutdown()
 
+            Node.instance.moduleProvider.apply {
+                disableAllModules()
+                unloadAllModules()
+            }
+
             logger.info("Shutting down gRPC server...")
             Node.instance.grpcServer.stop()
 
