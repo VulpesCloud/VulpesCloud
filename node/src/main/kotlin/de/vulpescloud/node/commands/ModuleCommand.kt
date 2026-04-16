@@ -162,4 +162,82 @@ class ModuleCommand {
             }
         }
     }
+
+    @Command("module info installed <name>")
+    fun installedModuleInfo(
+        source: CommandSource,
+        @Argument("name", suggestions = "loadedModules") name: String,
+    ) {
+        val module = moduleProvider.getModule(name)
+        if (module == null) {
+            source.sendMessage("<red>Module <yellow>$name <red>not found.")
+            return
+        }
+        val moduleInfo = module.moduleInfo
+        source.sendMessage("Module <light_purple>${moduleInfo.name}</light_purple> Stats: ")
+        source.sendMessage(
+            "<dark_gray>- <white>Version:</white> <yellow>${moduleInfo.version}</yellow>"
+        )
+        source.sendMessage(
+            "<dark_gray>- <white>State:</white> <yellow>${moduleInfo.state}</yellow>"
+        )
+        source.sendMessage(
+            "<dark_gray>- <white>Authors:</white> <yellow>${moduleInfo.authors.joinToString()}</yellow>"
+        )
+        source.sendMessage(
+            "<dark_gray>- <white>Description:</white> <yellow>${moduleInfo.description}</yellow>"
+        )
+        source.sendMessage(
+            "<dark_gray>- <white>Website:</white> <yellow>${moduleInfo.website}</yellow>"
+        )
+        source.sendMessage(
+            "<dark_gray>- <white>Platforms:</white> <yellow>${moduleInfo.platforms.joinToString()}</yellow>"
+        )
+        source.sendMessage(
+            "<dark_gray>- <white>Update Command:</white> <yellow>'module update ${moduleInfo.name}'</yellow>"
+        )
+    }
+
+    @Command("module info downloadable <name>")
+    fun downloadableModuleInfo(
+        source: CommandSource,
+        @Argument("name", suggestions = "downloadableModules") name: String,
+        @Flag("detailed") detailed: Boolean,
+    ) {
+        val module = moduleProvider.getDownloadableModule(name)
+        if (module == null) {
+            source.sendMessage("<red>Module <yellow>$name <red>not found.")
+            return
+        }
+
+        source.sendMessage("Module <light_purple>${module.name}</light_purple> Stats: ")
+        source.sendMessage(
+            "<dark_gray>- <white>Version:</white> <yellow>${module.version}</yellow>"
+        )
+        source.sendMessage(
+            "<dark_gray>- <white>Description:</white> <yellow>${module.description}</yellow>"
+        )
+        source.sendMessage(
+            "<dark_gray>- <white>Authors:</white> <yellow>${module.authors.joinToString()}</yellow>"
+        )
+        source.sendMessage(
+            "<dark_gray>- <white>Website:</white> <yellow>${module.website}</yellow>"
+        )
+        source.sendMessage(
+            "<dark_gray>- <white>Support URL:</white> <yellow>${module.supportURL}</yellow>"
+        )
+        source.sendMessage(
+            "<dark_gray>- <white>Install/Update Command:</white> <yellow>'module update ${module.name}'</yellow>"
+        )
+        if (detailed) {
+            source.sendMessage(
+                "<dark_gray>- <white>InstallURL:</white> <yellow>${module.installURL}</yellow>"
+            )
+        }
+    }
+
+    @Command("module checkForUpdates")
+    fun checkForModuleUpdates() {
+        moduleProvider.checkAllLoadedModulesForUpdates()
+    }
 }
