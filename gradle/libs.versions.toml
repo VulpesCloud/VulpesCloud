@@ -1,6 +1,6 @@
 [versions]
 # kotlin
-stdlib = "2.3.20"
+stdlib = "2.3.21"
 kotlinx-serialization = "1.11.0"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
 kotlinx-coroutines = "1.10.2"
@@ -16,7 +16,7 @@ bcrypt = "0.10.2"
 protobuf = "4.34.1"
 grpc = "1.78.0"
 grpc-kotlin = "1.5.0"
-protospecs-grpc = "1.5.0.2.20260414175246.6a4bbab8e9d4"
+protospecs-grpc = "1.5.0.3.20260414175246.6a4bbab8e9d4"
 perfmark = "0.27.0"
 
 javaJWT = "4.5.1"
