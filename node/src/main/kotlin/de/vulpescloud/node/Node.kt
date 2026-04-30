@@ -5,6 +5,7 @@ import com.github.dockerjava.core.DockerClientConfig
 import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import com.github.dockerjava.transport.DockerHttpClient
+import de.vulpescloud.api.players.OnlinePlayer
 import de.vulpescloud.node.auth.AuthServiceImpl
 import de.vulpescloud.node.cluster.ClusterAPIServiceImpl
 import de.vulpescloud.node.cluster.ClusterProvider
@@ -45,6 +46,7 @@ import de.vulpescloud.node.virtualconfig.VirtualConfigServiceImpl
 import io.grpc.BindableService
 import io.grpc.ChannelCredentials
 import java.time.Duration
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.Path
 import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.*
@@ -73,6 +75,8 @@ class Node {
     val localGrpcClient = LocalGrpcClient()
     val serviceFactoryProvider = ServiceFactoryProvider()
     val nodeServices = mutableListOf<AbstractService>()
+    val nodeProxyPlayers: MutableMap<String, MutableList<OnlinePlayer>> = ConcurrentHashMap()   // ProxyName<Player>
+    val nodeServerPlayers: MutableMap<String, MutableList<OnlinePlayer>> = ConcurrentHashMap()  // ServerName<Player>
     val virtualConfigProvider = VirtualConfigProvider()
     val clusterProvider = ClusterProvider()
     val moduleProvider =
