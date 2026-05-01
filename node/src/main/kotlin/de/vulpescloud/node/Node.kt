@@ -24,6 +24,7 @@ import de.vulpescloud.node.grpc.LoggingServerInterceptor
 import de.vulpescloud.node.grpc.security.AuthInterceptor
 import de.vulpescloud.node.grpc.security.PermissionInterceptor
 import de.vulpescloud.node.modules.ModuleProvider
+import de.vulpescloud.node.players.PlayerServiceImpl
 import de.vulpescloud.node.secret.SecretFactory
 import de.vulpescloud.node.serversoftware.ServerSoftwareProvider
 import de.vulpescloud.node.serversoftware.impl.FoliaDownloader
@@ -176,6 +177,7 @@ class Node {
                         configProvider.config.auth.jwtSecret,
                         configProvider.config.auth.jwtRefreshSecret,
                     ),
+                    PlayerServiceImpl()
                 )
             )
 
