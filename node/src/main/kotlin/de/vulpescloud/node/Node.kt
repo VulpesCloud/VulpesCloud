@@ -147,6 +147,7 @@ class Node {
                     register(AuthCommand())
                     register(ModuleCommand())
                     register(SoftwareCommand())
+                    register(PlayersCommand())
                 }
             } catch (e: Exception) {
                 logger.error("Failed to initialize commands: ${e.stackTraceToString()}")
