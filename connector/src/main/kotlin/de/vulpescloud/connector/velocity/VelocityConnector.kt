@@ -29,10 +29,16 @@ import dev.jorel.commandapi.CommandAPIVelocityConfig
 import jakarta.inject.Inject
 import java.util.concurrent.TimeUnit
 import kotlin.jvm.optionals.getOrNull
+import kotlin.time.Duration.Companion.milliseconds
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.bstats.velocity.Metrics
 import org.slf4j.Logger
+import kotlin.time.Duration.Companion.seconds
 
 @Plugin(id = "vulpescloud-connector", name = "VulpesCloud-Connector", authors = ["TheCGuy"])
 @Suppress("unused")
@@ -178,12 +184,19 @@ constructor(
 
     @Subscribe
     fun onServerConnectedEvent(event: ServerConnectedEvent) {
-        runBlocking {
+        CoroutineScope(Dispatchers.IO).launch {
+            delay(0.5.seconds)
             val player =
                 bridgeAPI
                     .getPlayerAPI()
                     .getOnlinePlayerByUUID(event.player.uniqueId.toString())
-                    .get()!!
+                    .get()
+
+            if (player == null) {
+                logger.error("Unable to find player for UUID ${event.player.uniqueId}!")
+                logger.error("Player is null!")
+                return@launch
+            }
 
             bridgeAPI
                 .getEventAPI()
