@@ -131,7 +131,7 @@ class MongoDBDatabase(
             collection.updateOne(
                 Filters.eq("key", key),
                 Updates.setOnInsert("key", key).let {
-                    Updates.combine(it, Updates.setOnInsert("value", value.toString()))
+                    Updates.combine(it, Updates.setOnInsert("value", value))
                 },
                 UpdateOptions().upsert(true),
             )
