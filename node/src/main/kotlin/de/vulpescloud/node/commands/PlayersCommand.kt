@@ -13,7 +13,7 @@ import org.incendo.cloud.annotations.Flag
 @Command("players")
 @Alias(["player"])
 class PlayersCommand {
-    private val playerAPI = Node.instance.localGrpcClient.playerAPI
+    private val playerAPI by lazy { Node.instance.localGrpcClient.playerAPI }
 
     @Command("player|players registered list")
     fun listRegisteredPlayers(source: CommandSource, @Flag("v") verbose: Boolean) {
