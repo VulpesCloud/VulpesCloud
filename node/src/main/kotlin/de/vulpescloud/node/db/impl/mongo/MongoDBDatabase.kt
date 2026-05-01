@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonElement
+import org.bson.BsonDocument
 import org.slf4j.LoggerFactory
 
 class MongoDBDatabase(
@@ -131,7 +132,10 @@ class MongoDBDatabase(
             collection.updateOne(
                 Filters.eq("key", key),
                 Updates.setOnInsert("key", key).let {
-                    Updates.combine(it, Updates.setOnInsert("value", value))
+                    Updates.combine(
+                        it,
+                        Updates.setOnInsert("value", BsonDocument.parse(value.toString())),
+                    )
                 },
                 UpdateOptions().upsert(true),
             )
