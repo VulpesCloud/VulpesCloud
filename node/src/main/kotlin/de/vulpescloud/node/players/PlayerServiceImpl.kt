@@ -7,6 +7,7 @@ import build.buf.gen.vulpescloud.players.v1.GetAllOnlinePlayersResponse
 import build.buf.gen.vulpescloud.players.v1.GetOfflinePlayersRequest
 import build.buf.gen.vulpescloud.players.v1.GetOfflinePlayersResponse
 import build.buf.gen.vulpescloud.players.v1.PlayersServiceGrpcKt
+import build.buf.gen.vulpescloud.players.v1.getAllOnlinePlayerOfNodeRequest
 import build.buf.gen.vulpescloud.players.v1.getOfflinePlayersResponse
 import com.github.benmanes.caffeine.cache.Caffeine
 import de.vulpescloud.api.players.OfflinePlayer
@@ -41,7 +42,13 @@ class PlayerServiceImpl : PlayersServiceGrpcKt.PlayersServiceCoroutineImplBase()
                             .withInterceptors(AuthClientInterceptor(Node.instance.secret))
                     }
 
-                onlinePlayers.addAll(stub.getAllOnlinePlayers(request).onlinePlayersList)
+                onlinePlayers.addAll(
+                    stub
+                        .getAllOnlinePlayerOfNode(
+                            getAllOnlinePlayerOfNodeRequest { this.name = it.endpoint.name }
+                        )
+                        .playersList
+                )
             }
 
         return GetAllOnlinePlayersResponse.newBuilder().addAllOnlinePlayers(onlinePlayers).build()
