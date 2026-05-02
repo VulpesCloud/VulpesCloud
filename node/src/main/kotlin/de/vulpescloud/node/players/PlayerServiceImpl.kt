@@ -33,6 +33,14 @@ class PlayerServiceImpl : PlayersServiceGrpcKt.PlayersServiceCoroutineImplBase()
         request: GetAllOnlinePlayersRequest
     ): GetAllOnlinePlayersResponse {
         val onlinePlayers = mutableListOf<build.buf.gen.vulpescloud.players.v1.OnlinePlayer>()
+        onlinePlayers.addAll(
+            getAllOnlinePlayerOfNode(
+                    getAllOnlinePlayerOfNodeRequest {
+                        this.name = Node.instance.configProvider.config.nodeName
+                    }
+                )
+                .playersList
+        )
         Node.instance.clusterProvider.remoteNodes
             .filter { it.getNode().isRunning() }
             .forEach {

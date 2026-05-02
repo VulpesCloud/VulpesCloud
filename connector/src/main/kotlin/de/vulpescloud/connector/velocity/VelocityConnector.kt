@@ -184,13 +184,6 @@ constructor(
     @Subscribe
     fun onServerConnectedEvent(event: ServerConnectedEvent) {
         CoroutineScope(Dispatchers.IO).launch {
-            logger.info(
-                "DBG: ${bridgeAPI.getPlayerAPI().getAllOnlinePlayers().get().joinToString { it.name + " (${it.uuid})" }}"
-            )
-            delay(1.seconds)
-            logger.info(
-                "DBG: ${bridgeAPI.getPlayerAPI().getAllOnlinePlayers().get().joinToString { it.name + " (${it.uuid})" }}"
-            )
             val player =
                 bridgeAPI
                     .getPlayerAPI()
@@ -223,9 +216,6 @@ constructor(
                     },
                     true,
                 )
-            logger.info(
-                "DBG: ${bridgeAPI.getPlayerAPI().getAllOnlinePlayers().get().joinToString { it.name + " (${it.uuid})" }}"
-            )
         }
     }
 }
