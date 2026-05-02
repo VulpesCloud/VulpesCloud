@@ -29,7 +29,7 @@ import dev.jorel.commandapi.CommandAPIVelocityConfig
 import jakarta.inject.Inject
 import java.util.concurrent.TimeUnit
 import kotlin.jvm.optionals.getOrNull
-import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -38,7 +38,6 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.bstats.velocity.Metrics
 import org.slf4j.Logger
-import kotlin.time.Duration.Companion.seconds
 
 @Plugin(id = "vulpescloud-connector", name = "VulpesCloud-Connector", authors = ["TheCGuy"])
 @Suppress("unused")
@@ -185,7 +184,13 @@ constructor(
     @Subscribe
     fun onServerConnectedEvent(event: ServerConnectedEvent) {
         CoroutineScope(Dispatchers.IO).launch {
-            delay(0.5.seconds)
+            logger.info(
+                "DBG: ${bridgeAPI.getPlayerAPI().getAllOnlinePlayers().get().joinToString { it.name + " (${it.uuid})" }}"
+            )
+            delay(1.seconds)
+            logger.info(
+                "DBG: ${bridgeAPI.getPlayerAPI().getAllOnlinePlayers().get().joinToString { it.name + " (${it.uuid})" }}"
+            )
             val player =
                 bridgeAPI
                     .getPlayerAPI()
@@ -195,6 +200,9 @@ constructor(
             if (player == null) {
                 logger.error("Unable to find player for UUID ${event.player.uniqueId}!")
                 logger.error("Player is null!")
+                logger.info(
+                    "DBG: ${bridgeAPI.getPlayerAPI().getAllOnlinePlayers().get().joinToString { it.name + " (${it.uuid})" }}"
+                )
                 return@launch
             }
 
@@ -215,6 +223,9 @@ constructor(
                     },
                     true,
                 )
+            logger.info(
+                "DBG: ${bridgeAPI.getPlayerAPI().getAllOnlinePlayers().get().joinToString { it.name + " (${it.uuid})" }}"
+            )
         }
     }
 }
