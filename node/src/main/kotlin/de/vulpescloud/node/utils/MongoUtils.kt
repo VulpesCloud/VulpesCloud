@@ -54,14 +54,12 @@ object MongoUtils {
     }
 
     suspend fun nothingOrInsertVirtualConfig(config: VirtualConfig) {
-        if (virtualConfigsDatabase.get(config.name) == null) {
-            virtualConfigsDatabase.insert(
-                config.name,
-                Json.encodeToJsonElement(
-                    de.vulpescloud.api.virtualconfig.VirtualConfig.fromDefinition(config)
-                ),
-            )
-        }
+        virtualConfigsDatabase.insertIgnore(
+            config.name,
+            Json.encodeToJsonElement(
+                de.vulpescloud.api.virtualconfig.VirtualConfig.fromDefinition(config)
+            ),
+        )
     }
 
     suspend fun deleteVirtualConfig(config: VirtualConfig) {

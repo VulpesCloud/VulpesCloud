@@ -1,12 +1,18 @@
 package de.vulpescloud.connector.velocity
 
+import build.buf.gen.vulpescloud.events.v1.playerJoinEvent
+import build.buf.gen.vulpescloud.events.v1.playerQuitEvent
+import build.buf.gen.vulpescloud.events.v1.playerSwitchServerEvent
 import build.buf.gen.vulpescloud.events.v1.serviceStateChangedEvent
+import build.buf.gen.vulpescloud.players.v1.offlinePlayer
+import build.buf.gen.vulpescloud.players.v1.onlinePlayer
 import build.buf.gen.vulpescloud.services.v1.UpdatePlayerCountRequest
 import build.buf.gen.vulpescloud.virtualconfig.v1.createVirtualConfigRequest
 import com.velocitypowered.api.event.EventManager
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.connection.DisconnectEvent
 import com.velocitypowered.api.event.connection.LoginEvent
+import com.velocitypowered.api.event.player.ServerConnectedEvent
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.plugin.Plugin
@@ -22,6 +28,12 @@ import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIVelocityConfig
 import jakarta.inject.Inject
 import java.util.concurrent.TimeUnit
+import kotlin.jvm.optionals.getOrNull
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.bstats.velocity.Metrics
@@ -116,6 +128,20 @@ constructor(
                     .setService(service.toDefinition())
                     .build()
             )
+            bridgeAPI
+                .getEventAPI()
+                .publish(
+                    playerJoinEvent {
+                        this.player = onlinePlayer {
+                            this.name = event.player.username
+                            this.uuid = event.player.uniqueId.toString()
+                            this.proxyServiceName = service.name()
+                            this.serverServiceName = ""
+                        }
+                        this.timestamp = System.currentTimeMillis()
+                    },
+                    true,
+                )
         }
     }
 
@@ -129,6 +155,67 @@ constructor(
                     .setService(service.toDefinition())
                     .build()
             )
+            val player =
+                bridgeAPI
+                    .getPlayerAPI()
+                    .getRegisteredPlayerByUUID(event.player.uniqueId.toString())
+                    .get()!!
+
+            bridgeAPI
+                .getEventAPI()
+                .publish(
+                    playerQuitEvent {
+                        this.player = offlinePlayer {
+                            this.name = event.player.username
+                            this.uuid = event.player.uniqueId.toString()
+                            this.firstSeen = player.firstSeen
+                            this.lastSeen = System.currentTimeMillis()
+                        }
+                        this.lastProxyName =
+                            bridgeAPI.getServicesAPI().getLocalService().get()!!.name()
+                        this.lastServerName = ""
+                        this.timestamp = System.currentTimeMillis()
+                    },
+                    true,
+                )
+        }
+    }
+
+    @Subscribe
+    fun onServerConnectedEvent(event: ServerConnectedEvent) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val player =
+                bridgeAPI
+                    .getPlayerAPI()
+                    .getOnlinePlayerByUUID(event.player.uniqueId.toString())
+                    .get()
+
+            if (player == null) {
+                logger.error("Unable to find player for UUID ${event.player.uniqueId}!")
+                logger.error("Player is null!")
+                logger.info(
+                    "DBG: ${bridgeAPI.getPlayerAPI().getAllOnlinePlayers().get().joinToString { it.name + " (${it.uuid})" }}"
+                )
+                return@launch
+            }
+
+            bridgeAPI
+                .getEventAPI()
+                .publish(
+                    playerSwitchServerEvent {
+                        this.player = onlinePlayer {
+                            this.name = player.name
+                            this.uuid = player.uuid
+                            this.proxyServiceName =
+                                bridgeAPI.getServicesAPI().getLocalService().get()!!.name()
+                            this.serverServiceName = event.server.serverInfo.name
+                        }
+                        this.oldServer = event.previousServer.getOrNull()?.serverInfo?.name ?: ""
+                        this.newServer = event.server.serverInfo.name
+                        this.timestamp = System.currentTimeMillis()
+                    },
+                    true,
+                )
         }
     }
 }

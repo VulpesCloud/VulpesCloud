@@ -5,4 +5,6 @@ object PropertyUtils {
     fun isMoreDBLogging() = System.getProperty("vc.db.logging", "false").toBoolean()
 
     fun isDBTiming() = System.getProperty("vc.db.timing", "false").toBoolean()
+
+    fun isLoggingPlayerEvents() = System.getProperty("vc.player.events", "false").toBoolean()
 }

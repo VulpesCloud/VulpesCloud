@@ -2,6 +2,8 @@ package de.vulpescloud.node.db.impl.mongo
 
 import com.mongodb.client.model.Filters
 import com.mongodb.client.model.ReplaceOptions
+import com.mongodb.client.model.UpdateOptions
+import com.mongodb.client.model.Updates
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
 import de.vulpescloud.node.db.Database
 import de.vulpescloud.node.utils.PropertyUtils
@@ -12,6 +14,7 @@ import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.JsonElement
+import org.bson.BsonDocument
 import org.slf4j.LoggerFactory
 
 class MongoDBDatabase(
@@ -118,6 +121,28 @@ class MongoDBDatabase(
                 logger.info("MongoDB[$collectionName]> find($filter) took ${duration}ms")
             }
             result
+        }
+    }
+
+    override suspend fun insertIgnore(key: String, value: JsonElement) {
+        if (PropertyUtils.isMoreDBLogging())
+            logger.info("MongoDB[$collectionName]> InsertIgnoring $key -> $value")
+        withContext(Dispatchers.IO) {
+            val start = System.nanoTime()
+            collection.updateOne(
+                Filters.eq("key", key),
+                Updates.setOnInsert("key", key).let {
+                    Updates.combine(
+                        it,
+                        Updates.setOnInsert("value", BsonDocument.parse(value.toString())),
+                    )
+                },
+                UpdateOptions().upsert(true),
+            )
+            val duration = (System.nanoTime() - start) / 1_000_000.0
+            if (PropertyUtils.isDBTiming()) {
+                logger.info("MongoDB[$collectionName]> insertIgnore($key) took ${duration}ms")
+            }
         }
     }
 }
