@@ -19,7 +19,7 @@ grpc-kotlin = "1.5.0"
 protospecs-grpc = "1.5.0.3.20260429180527.4b21970346e4"
 perfmark = "0.27.0"
 
-javaJWT = "4.5.1"
+javaJWT = "4.5.2"
 
 # ok
 okhttp = "5.3.2"
@@ -47,7 +47,7 @@ gson = "2.14.0"
 json = "20250517"
 
 # console
-jline = "3.30.9"
+jline = "3.30.12"
 cloud = "2.0.0"
 
 # platforms
