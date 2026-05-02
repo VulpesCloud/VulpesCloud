@@ -120,6 +120,19 @@ object PlayerSwitchServerEventListener {
                         .getOrPut(newServerName, ::CopyOnWriteArrayList)
                         .add(event.player.toAPI())
                 }
+
+                if (
+                    Node.instance.nodeServices.any {
+                        it.service.name() == event.player.proxyServiceName
+                    }
+                ) {
+                    Node.instance.nodeProxyPlayers
+                        .getOrPut(event.player.proxyServiceName, ::CopyOnWriteArrayList)
+                        .apply {
+                            removeIf { it.uuid == event.player.uuid }
+                            add(event.player.toAPI())
+                        }
+                }
             }
     }
 
