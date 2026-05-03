@@ -68,7 +68,7 @@ shadow = "9.4.1"
 bouncy-castle = "1.70"
 
 # caffeine
-caffeine = "3.2.3"
+caffeine = "3.2.4"
 
 [plugins]
 shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
