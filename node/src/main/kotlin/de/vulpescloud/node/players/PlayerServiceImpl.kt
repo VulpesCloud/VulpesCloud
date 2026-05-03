@@ -14,6 +14,7 @@ import de.vulpescloud.api.players.OfflinePlayer
 import de.vulpescloud.api.players.OnlinePlayer
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
+import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import java.util.concurrent.TimeUnit
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
@@ -29,16 +30,17 @@ class PlayerServiceImpl : PlayersServiceGrpcKt.PlayersServiceCoroutineImplBase()
             .build<String, PlayersServiceGrpcKt.PlayersServiceCoroutineStub>()
     private val logger = LoggerFactory.getLogger(PlayerServiceImpl::class.java)
 
+    @RequiresPermission("players.getAllOnline")
     override suspend fun getAllOnlinePlayers(
         request: GetAllOnlinePlayersRequest
     ): GetAllOnlinePlayersResponse {
         val onlinePlayers = mutableListOf<build.buf.gen.vulpescloud.players.v1.OnlinePlayer>()
         onlinePlayers.addAll(
             getAllOnlinePlayerOfNode(
-                    getAllOnlinePlayerOfNodeRequest {
-                        this.name = Node.instance.configProvider.config.nodeName
-                    }
-                )
+                getAllOnlinePlayerOfNodeRequest {
+                    this.name = Node.instance.configProvider.config.nodeName
+                }
+            )
                 .playersList
         )
         Node.instance.clusterProvider.remoteNodes
@@ -62,6 +64,7 @@ class PlayerServiceImpl : PlayersServiceGrpcKt.PlayersServiceCoroutineImplBase()
         return GetAllOnlinePlayersResponse.newBuilder().addAllOnlinePlayers(onlinePlayers).build()
     }
 
+    @RequiresPermission("players.getAllOnlineOfNode")
     override suspend fun getAllOnlinePlayerOfNode(
         request: GetAllOnlinePlayerOfNodeRequest
     ): GetAllOnlinePlayerOfNodeResponse {
@@ -98,6 +101,7 @@ class PlayerServiceImpl : PlayersServiceGrpcKt.PlayersServiceCoroutineImplBase()
         return GetAllOnlinePlayerOfNodeResponse.newBuilder().build()
     }
 
+    @RequiresPermission("players.getAllOffline")
     override suspend fun getAllOfflinePlayers(
         request: GetOfflinePlayersRequest
     ): GetOfflinePlayersResponse {
