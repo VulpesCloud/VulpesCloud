@@ -1,6 +1,7 @@
 package de.vulpescloud.bridge
 
 import de.vulpescloud.bridge.impl.event.EventAPI
+import de.vulpescloud.bridge.impl.metrics.CoroutineMetricsImpl
 import de.vulpescloud.bridge.impl.player.PlayerCoroutineAPIImpl
 import de.vulpescloud.bridge.impl.player.PlayerFutureAPIImpl
 import de.vulpescloud.bridge.impl.service.ServiceCoroutineAPI
@@ -18,6 +19,7 @@ interface BridgeAPI {
         private val eventAPI = EventAPI()
         private val virtualConfigAPI = VirtualConfigCoroutineAPIImpl()
         private val playerAPI = PlayerCoroutineAPIImpl()
+        private val metricsAPI = CoroutineMetricsImpl()
 
         fun getTasksAPI() = tasksAPI
 
@@ -28,6 +30,8 @@ interface BridgeAPI {
         fun getVirtualConfigAPI() = virtualConfigAPI
 
         fun getPlayerAPI() = playerAPI
+
+        fun getMetricsAPI() = metricsAPI
     }
 
     class BridgeFutureAPI {

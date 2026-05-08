@@ -13,7 +13,7 @@ import io.grpc.ManagedChannelBuilder
 
 class LocalGrpcClient {
 
-    private lateinit var channel: Channel
+    lateinit var channel: Channel
     lateinit var serviceAPI: ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub
     lateinit var tasksAPI: TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub
     lateinit var eventsAPI: EventServiceGrpcKt.EventServiceCoroutineStub
