@@ -272,6 +272,8 @@ class Node {
 
             ServiceScheduler.start()
 
+            serverSoftwareProvider.triggerReCache()
+
             // Runtime.getRuntime().addShutdownHook(Thread { NodeShutdown.shutdown() })
         }
 

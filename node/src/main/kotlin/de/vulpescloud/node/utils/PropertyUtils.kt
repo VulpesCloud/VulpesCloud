@@ -7,4 +7,8 @@ object PropertyUtils {
     fun isDBTiming() = System.getProperty("vc.db.timing", "false").toBoolean()
 
     fun isLoggingPlayerEvents() = System.getProperty("vc.player.events", "false").toBoolean()
+
+    fun isMoreSoftwareLogging() = System.getProperty("vc.software.logging", "false").toBoolean()
+
+    fun isSoftwareTiming() = System.getProperty("vc.software.timing", "false").toBoolean()
 }

@@ -1,5 +1,7 @@
 package de.vulpescloud.node.serversoftware
 
+import de.vulpescloud.node.NodeCoroutineScope
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 
 class ServerSoftwareProvider {
@@ -24,5 +26,13 @@ class ServerSoftwareProvider {
 
     fun lock() {
         allowDownloaderAdding = false
+    }
+
+    fun triggerReCache() {
+        downloaders.values.forEach {
+            NodeCoroutineScope.launch {
+                it.getAvailableVersions(true)
+            }
+        }
     }
 }

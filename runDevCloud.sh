@@ -3,12 +3,18 @@
 JAVA_FLAGS=()
 
 for arg in "$@"; do
-  if [ "$arg" == "--debugLogging" ]; then
+  if [ "$arg" == "--dbLogging" ]; then
     JAVA_FLAGS+=("-Dvc.db.logging=true")
   fi
   if [ "$arg" == "--dbTiming" ]; then
     JAVA_FLAGS+=("-Dvc.db.timing=true")
   fi
+  if [ "$arg" == "--softwareLogging" ]; then
+      JAVA_FLAGS+=("-Dvc.software.logging=true")
+  fi
+  if [ "$arg" == "--softwareTiming" ]; then
+        JAVA_FLAGS+=("-Dvc.software.timing=true")
+    fi
 done
 
 rm -rf build/meta-repo/*

@@ -1,5 +1,6 @@
 package de.vulpescloud.node.commands
 
+import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.serversoftware.impl.FoliaDownloader
@@ -10,6 +11,7 @@ import de.vulpescloud.node.terminal.COLOR.VULPES_ORANGE
 import kotlinx.coroutines.launch
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.suggestion.Suggestions
+import org.incendo.cloud.processors.confirmation.annotation.Confirmation
 import java.util.stream.Stream
 
 @Suppress("UNUSED")
@@ -51,5 +53,13 @@ class SoftwareCommand {
                 )
             }
         }
+    }
+
+    @Confirmation
+    @Command("software reCache")
+    fun reCache(source: CommandSource) {
+        source.sendMessage("Re-caching software versions...")
+        Node.instance.serverSoftwareProvider.triggerReCache()
+        source.sendMessage("Re-caching software versions in background...")
     }
 }
