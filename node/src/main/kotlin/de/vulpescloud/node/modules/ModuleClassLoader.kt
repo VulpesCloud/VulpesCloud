@@ -22,7 +22,13 @@ class ModuleClassLoader(
             "ch.qos.logback.",
             "de.vulpescloud.",
             "io.grpc.",
-            "io.netty."
+            "io.netty.",
+            "org.apache.arrow.",
+            "com.influxdb.",
+            "com.google.protobuf.",
+            "com.google.common.",
+            "org.apache.arrow.flatbuf.",
+            "io.grpc.netty.",
         )
 
     override fun loadClass(name: String, resolve: Boolean): Class<*> {
