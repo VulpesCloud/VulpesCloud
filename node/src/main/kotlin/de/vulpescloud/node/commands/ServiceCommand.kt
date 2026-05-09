@@ -6,6 +6,7 @@ import build.buf.gen.vulpescloud.services.v1.ServiceDefinition
 import build.buf.gen.vulpescloud.services.v1.StartServiceRequest
 import build.buf.gen.vulpescloud.services.v1.StopServiceRequest
 import build.buf.gen.vulpescloud.services.v1.getAllServicesRequest
+import build.buf.gen.vulpescloud.services.v1.getLatestServiceSnapshotRequest
 import com.github.benmanes.caffeine.cache.Caffeine
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceStates
@@ -16,6 +17,8 @@ import de.vulpescloud.node.command.annotation.Alias
 import de.vulpescloud.node.services.ServiceLogHandler
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotation.specifier.Greedy
@@ -95,6 +98,34 @@ class ServiceCommand {
             NodeCoroutineScope.launch {
                 Node.instance.localGrpcClient.serviceAPI.stopService(
                     StopServiceRequest.newBuilder().setService(it.toDefinition()).build()
+                )
+            }
+        }
+    }
+
+    @Command("services|ser <service> snapshot")
+    fun getSnapshot(source: CommandSource, @Argument("service") service: List<Service>) {
+        service.forEach {
+            NodeCoroutineScope.launch {
+                source.sendMessage(
+                    "Retrieving snapshot for service &f${it.task.name}-${it.orderedId}..."
+                )
+                val snapshot =
+                    Node.instance.localGrpcClient.serviceAPI
+                        .getLatestServiceSnapshot(
+                            getLatestServiceSnapshotRequest { this.service = it.toDefinition() }
+                        )
+                        .snapshot
+                source.sendMessage(
+                    "&7Snapshot for &e${it.task.name}-${it.orderedId}:\n" +
+                        "&7Timestamp: &e${snapshot.snapshotTime}\n" +
+                        "&7Players: &e${snapshot.playerCount}\n" +
+                        "&7System CPU Usage: &e${snapshot.systemCpuUsage}\n" +
+                        "&7Process CPU Usage: &e${snapshot.cpuUsage}\n" +
+                        "&7Max Heap Memory: &e${snapshot.maxHeapMemory}\n" +
+                        "&7Heap Memory Usage: &e${snapshot.heapUsageMemory}\n" +
+                        "&7Non Heap Memory Usage: &e${snapshot.noHeapUsageMemory}\n" +
+                        "&7Uptime: &e${snapshot.uptimeMillis.toDuration(DurationUnit.MILLISECONDS)}"
                 )
             }
         }

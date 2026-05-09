@@ -10,6 +10,7 @@ import de.vulpescloud.node.event.EventsService
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import de.vulpescloud.node.utils.MongoUtils
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -372,5 +373,89 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
 
             awaitClose { subscriptionJob.cancel() }
         }
+    }
+
+    override suspend fun updateServiceSnapshot(
+        request: UpdateServiceSnapshotRequest
+    ): UpdateServiceSnapshotResponse {
+        if (
+            Node.instance.nodeServices.none { it.service.uuid.toString() == request.snapshot.uuid }
+        ) {
+            if (Node.instance.configProvider.config.nodeName == request.snapshot.node) {
+                logger.error(
+                    "Unable to update snapshot of service as it is not registered on this node!"
+                )
+                return UpdateServiceSnapshotResponse.newBuilder().build()
+            }
+            val correctNode =
+                Node.instance.clusterProvider.remoteNodes.find {
+                    it.endpoint.name == request.snapshot.node
+                }
+            if (correctNode == null) {
+                logger.error(
+                    "Unable to update snapshot of service as the responsible node was not found!"
+                )
+                return UpdateServiceSnapshotResponse.newBuilder().build()
+            }
+
+            logger.warn(
+                "Got request to update snapshot of service ${request.snapshot.uuid} but service is on Node ${request.snapshot.node}, redirecting!"
+            )
+
+            val stub =
+                ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(correctNode.channel!!)
+                    .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+            return stub.updateServiceSnapshot(request)
+        }
+
+        Node.instance.nodeServiceSnapshots.removeIf { it.uuid == request.snapshot.uuid }
+        Node.instance.nodeServiceSnapshots.add(request.snapshot)
+
+        updateSnapshotHooks.forEach { it(request.snapshot) }
+
+        return UpdateServiceSnapshotResponse.newBuilder().setSnapshot(request.snapshot).build()
+    }
+
+    @RequiresPermission("services.getSnapshot")
+    override suspend fun getLatestServiceSnapshot(
+        request: GetLatestServiceSnapshotRequest
+    ): GetLatestServiceSnapshotResponse {
+        if (
+            Node.instance.nodeServices.none { it.service.uuid.toString() == request.service.uuid }
+        ) {
+            if (Node.instance.configProvider.config.nodeName == request.service.node) {
+                logger.error(
+                    "Unable to get latest snapshot of service as it is not registered on this node!"
+                )
+                return GetLatestServiceSnapshotResponse.newBuilder().build()
+            }
+            val correctNode =
+                Node.instance.clusterProvider.remoteNodes.find {
+                    it.endpoint.name == request.service.node
+                }
+            if (correctNode == null) {
+                logger.error(
+                    "Unable to get latest snapshot of service as the responsible node was not found!"
+                )
+                return GetLatestServiceSnapshotResponse.newBuilder().build()
+            }
+            logger.warn(
+                "Got request to get latest snapshot of service ${request.service.uuid} but service is on Node ${request.service.node}, redirecting!"
+            )
+            val stub =
+                ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(correctNode.channel!!)
+                    .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+            return stub.getLatestServiceSnapshot(request)
+        }
+        return GetLatestServiceSnapshotResponse.newBuilder()
+            .setSnapshot(
+                Node.instance.nodeServiceSnapshots.find { it.uuid == request.service.uuid }
+            )
+            .build()
+    }
+
+    companion object {
+        val updateSnapshotHooks: MutableSet<suspend (snapshot: ServiceSnapshot) -> Unit> =
+            ConcurrentHashMap.newKeySet()
     }
 }

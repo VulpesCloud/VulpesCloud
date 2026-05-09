@@ -1,5 +1,6 @@
 package de.vulpescloud.node
 
+import build.buf.gen.vulpescloud.services.v1.ServiceSnapshot
 import com.github.dockerjava.core.DefaultDockerClientConfig
 import com.github.dockerjava.core.DockerClientConfig
 import com.github.dockerjava.core.DockerClientImpl
@@ -42,7 +43,6 @@ import de.vulpescloud.node.setup.setups.FirstSetup
 import de.vulpescloud.node.tasks.TasksAPIService
 import de.vulpescloud.node.templates.TemplateStorageProvider
 import de.vulpescloud.node.terminal.Terminal
-import de.vulpescloud.node.utils.AddressUtils
 import de.vulpescloud.node.virtualconfig.VirtualConfigProvider
 import de.vulpescloud.node.virtualconfig.VirtualConfigServiceImpl
 import io.grpc.BindableService
@@ -76,9 +76,12 @@ class Node {
     val templateStorageProvider = TemplateStorageProvider()
     val localGrpcClient = LocalGrpcClient()
     val serviceFactoryProvider = ServiceFactoryProvider()
-    val nodeServices = mutableListOf<AbstractService>()
-    val nodeProxyPlayers: MutableMap<String, MutableList<OnlinePlayer>> = ConcurrentHashMap()   // ProxyName<Player>
-    val nodeServerPlayers: MutableMap<String, MutableList<OnlinePlayer>> = ConcurrentHashMap()  // ServerName<Player>
+    val nodeServices: MutableSet<AbstractService> = ConcurrentHashMap.newKeySet()
+    val nodeServiceSnapshots: MutableSet<ServiceSnapshot> = ConcurrentHashMap.newKeySet()
+    val nodeProxyPlayers: MutableMap<String, MutableList<OnlinePlayer>> =
+        ConcurrentHashMap() // ProxyName<Player>
+    val nodeServerPlayers: MutableMap<String, MutableList<OnlinePlayer>> =
+        ConcurrentHashMap() // ServerName<Player>
     val virtualConfigProvider = VirtualConfigProvider()
     val clusterProvider = ClusterProvider()
     val moduleProvider =
@@ -178,7 +181,7 @@ class Node {
                         configProvider.config.auth.jwtSecret,
                         configProvider.config.auth.jwtRefreshSecret,
                     ),
-                    PlayerServiceImpl()
+                    PlayerServiceImpl(),
                 )
             )
 
