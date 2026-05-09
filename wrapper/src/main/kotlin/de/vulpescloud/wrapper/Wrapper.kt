@@ -13,7 +13,6 @@ import java.net.URLClassLoader
 import java.util.*
 import java.util.jar.JarFile
 import kotlin.io.path.Path
-import kotlin.system.exitProcess
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.*
 
@@ -130,8 +129,5 @@ class Wrapper(args: Array<String>) {
                 delay(5.seconds)
             }
         }
-
-        thread.join()
-        exitProcess(0)
     }
 }
