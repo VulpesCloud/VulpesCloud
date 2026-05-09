@@ -33,7 +33,7 @@ class LocalService(override val service: Service) : AbstractService {
     private val logger =
         LoggerFactory.getLogger("LocalService-${service.task.name}-${service.orderedId}")
 
-    private var process: Process? = null
+    var process: Process? = null
     private var processTracking: Thread? = null
 
     override fun start() {
