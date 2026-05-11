@@ -10,6 +10,7 @@ import de.vulpescloud.node.event.EventsService
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import de.vulpescloud.node.utils.MongoUtils
+import de.vulpescloud.node.utils.PropertyUtils.isLoggingRedirects
 import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -104,21 +105,27 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
 
         val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
         if (abstractService == null) {
-            logger.warn(
-                "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
-            )
+            if (isLoggingRedirects()) {
+                logger.warn(
+                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
+                )
+            }
             val correctNode =
                 Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == service.node }
             if (correctNode?.endpoint?.name == ClusterHelper.getLocalNode().name) {
-                logger.error(
-                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                    )
+                }
             }
 
             if (correctNode == null) {
-                logger.error(
-                    "Unable to start Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to start Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
+                    )
+                }
                 return StartServiceResponse.newBuilder()
                     .setSuccess(false)
                     .setError("node.notFound")
@@ -126,9 +133,11 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             }
 
             if (correctNode.channel == null) {
-                logger.error(
-                    "Unable to start Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to start Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
+                    )
+                }
                 return StartServiceResponse.newBuilder()
                     .setSuccess(false)
                     .setError("node.channel.null")
@@ -155,21 +164,27 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
 
         val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
         if (abstractService == null) {
-            logger.warn(
-                "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
-            )
+            if (isLoggingRedirects()) {
+                logger.warn(
+                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
+                )
+            }
             val correctNode =
                 Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == service.node }
             if (correctNode?.endpoint?.name == ClusterHelper.getLocalNode().name) {
-                logger.error(
-                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                    )
+                }
             }
 
             if (correctNode == null) {
-                logger.error(
-                    "Unable to stop Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to stop Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
+                    )
+                }
                 return StopServiceResponse.newBuilder()
                     .setSuccess(false)
                     .setError("node.notFound")
@@ -177,9 +192,11 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             }
 
             if (correctNode.channel == null) {
-                logger.error(
-                    "Unable to stop Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to stop Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
+                    )
+                }
                 return StopServiceResponse.newBuilder()
                     .setSuccess(false)
                     .setError("node.channel.null")
@@ -204,21 +221,27 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
 
         val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
         if (abstractService == null) {
-            logger.warn(
-                "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
-            )
+            if (isLoggingRedirects()) {
+                logger.warn(
+                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
+                )
+            }
             val correctNode =
                 Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == service.node }
             if (correctNode?.endpoint?.name == ClusterHelper.getLocalNode().name) {
-                logger.error(
-                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                    )
+                }
             }
 
             if (correctNode == null) {
-                logger.error(
-                    "Unable to restart Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to restart Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
+                    )
+                }
                 return RestartServiceResponse.newBuilder()
                     .setSuccess(false)
                     .setError("node.notFound")
@@ -226,9 +249,11 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             }
 
             if (correctNode.channel == null) {
-                logger.error(
-                    "Unable to restart Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to restart Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
+                    )
+                }
                 return RestartServiceResponse.newBuilder()
                     .setSuccess(false)
                     .setError("node.channel.null")
@@ -253,21 +278,27 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
 
         val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
         if (abstractService == null) {
-            logger.warn(
-                "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
-            )
+            if (isLoggingRedirects()) {
+                logger.warn(
+                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
+                )
+            }
             val correctNode =
                 Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == service.node }
             if (correctNode?.endpoint?.name == ClusterHelper.getLocalNode().name) {
-                logger.error(
-                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                    )
+                }
             }
 
             if (correctNode == null) {
-                logger.error(
-                    "Unable to delete Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to delete Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
+                    )
+                }
                 return DeleteServiceResponse.newBuilder()
                     .setSuccess(false)
                     .setError("node.notFound")
@@ -275,9 +306,11 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             }
 
             if (correctNode.channel == null) {
-                logger.error(
-                    "Unable to delete Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to delete Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
+                    )
+                }
                 return DeleteServiceResponse.newBuilder()
                     .setSuccess(false)
                     .setError("node.channel.null")
@@ -301,28 +334,36 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
 
         val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
         if (abstractService == null) {
-            logger.warn(
-                "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
-            )
+            if (isLoggingRedirects()) {
+                logger.warn(
+                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
+                )
+            }
             val correctNode =
                 Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == service.node }
             if (correctNode?.endpoint?.name == ClusterHelper.getLocalNode().name) {
-                logger.error(
-                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                    )
+                }
             }
 
             if (correctNode == null) {
-                logger.error(
-                    "Unable to send command to Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to send command to Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
+                    )
+                }
                 return SendCommandResponse.newBuilder().setSuccess(false).build()
             }
 
             if (correctNode.channel == null) {
-                logger.error(
-                    "Unable to send command to Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to send command to Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
+                    )
+                }
                 return SendCommandResponse.newBuilder().setSuccess(false).build()
             }
 
@@ -382,9 +423,11 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             Node.instance.nodeServices.none { it.service.uuid.toString() == request.snapshot.uuid }
         ) {
             if (Node.instance.configProvider.config.nodeName == request.snapshot.node) {
-                logger.error(
-                    "Unable to update snapshot of service as it is not registered on this node!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to update snapshot of service as it is not registered on this node!"
+                    )
+                }
                 return UpdateServiceSnapshotResponse.newBuilder().build()
             }
             val correctNode =
@@ -392,15 +435,19 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
                     it.endpoint.name == request.snapshot.node
                 }
             if (correctNode == null) {
-                logger.error(
-                    "Unable to update snapshot of service as the responsible node was not found!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to update snapshot of service as the responsible node was not found!"
+                    )
+                }
                 return UpdateServiceSnapshotResponse.newBuilder().build()
             }
 
-            logger.warn(
-                "Got request to update snapshot of service ${request.snapshot.uuid} but service is on Node ${request.snapshot.node}, redirecting!"
-            )
+            if (isLoggingRedirects()) {
+                logger.warn(
+                    "Got request to update snapshot of service ${request.snapshot.uuid} but service is on Node ${request.snapshot.node}, redirecting!"
+                )
+            }
 
             val stub =
                 ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(correctNode.channel!!)
@@ -424,9 +471,11 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             Node.instance.nodeServices.none { it.service.uuid.toString() == request.service.uuid }
         ) {
             if (Node.instance.configProvider.config.nodeName == request.service.node) {
-                logger.error(
-                    "Unable to get latest snapshot of service as it is not registered on this node!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to get latest snapshot of service as it is not registered on this node!"
+                    )
+                }
                 return GetLatestServiceSnapshotResponse.newBuilder().build()
             }
             val correctNode =
@@ -434,14 +483,18 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
                     it.endpoint.name == request.service.node
                 }
             if (correctNode == null) {
-                logger.error(
-                    "Unable to get latest snapshot of service as the responsible node was not found!"
-                )
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to get latest snapshot of service as the responsible node was not found!"
+                    )
+                }
                 return GetLatestServiceSnapshotResponse.newBuilder().build()
             }
-            logger.warn(
-                "Got request to get latest snapshot of service ${request.service.uuid} but service is on Node ${request.service.node}, redirecting!"
-            )
+            if (isLoggingRedirects()) {
+                logger.warn(
+                    "Got request to get latest snapshot of service ${request.service.uuid} but service is on Node ${request.service.node}, redirecting!"
+                )
+            }
             val stub =
                 ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(correctNode.channel!!)
                     .withInterceptors(AuthClientInterceptor(Node.instance.secret))

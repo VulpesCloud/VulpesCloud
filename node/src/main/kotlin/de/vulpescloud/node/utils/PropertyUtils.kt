@@ -11,4 +11,6 @@ object PropertyUtils {
     fun isMoreSoftwareLogging() = System.getProperty("vc.software.logging", "false").toBoolean()
 
     fun isSoftwareTiming() = System.getProperty("vc.software.timing", "false").toBoolean()
+
+    fun isLoggingRedirects() = System.getProperty("vc.redirect.logging", "false").toBoolean()
 }
