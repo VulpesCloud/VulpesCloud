@@ -3,7 +3,7 @@
 stdlib = "2.3.21"
 kotlinx-serialization = "1.11.0"
 kotlinx-datetime = "0.7.1-0.6.x-compat"
-kotlinx-coroutines = "1.10.2"
+kotlinx-coroutines = "1.11.0"
 
 # google deps
 guava = "33.6.0-jre"
