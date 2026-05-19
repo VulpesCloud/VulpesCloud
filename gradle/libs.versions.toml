@@ -2,7 +2,7 @@
 # kotlin
 stdlib = "2.3.21"
 kotlinx-serialization = "1.11.0"
-kotlinx-datetime = "0.7.1-0.6.x-compat"
+kotlinx-datetime = "0.8.0-0.6.x-compat"
 kotlinx-coroutines = "1.11.0"
 
 # google deps
