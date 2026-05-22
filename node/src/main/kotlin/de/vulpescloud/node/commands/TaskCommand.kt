@@ -108,20 +108,22 @@ class TaskCommand {
     ) {
         NodeCoroutineScope.launch {
             tasks.forEach { task ->
-                if (node == Node.instance.configProvider.config.nodeName || node == null) {
+                val nodeName: String = node ?: task.preferredNode
+
+                if (nodeName == Node.instance.configProvider.config.nodeName) {
                     Node.instance.localGrpcClient.tasksAPI.prepareServiceOnTask(
                         PrepareServiceOnTaskRequest.newBuilder()
                             .setTask(task.toDefinition())
                             .setAmount(amount ?: 1)
                             .setMemory(memory?.toLong() ?: task.maxMemory)
-                            .setNodeName(node ?: Node.instance.configProvider.config.nodeName)
+                            .setNodeName(nodeName)
                             .setStart(startService)
                             .setStartId(startOrderedId ?: 1)
                             .build()
                     )
                 } else {
                     Node.instance.clusterProvider.remoteNodes
-                        .find { it.endpoint.name == node }
+                        .find { it.endpoint.name == nodeName }
                         ?.let {
                             if (it.channel == null) {
                                 source.sendMessage("Node ${it.endpoint.name} is not online!")
@@ -131,16 +133,17 @@ class TaskCommand {
                                 source.sendMessage("Node ${it.endpoint.name} is not online!")
                                 return@launch
                             }
-                            TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub(it.channel!!).prepareServiceOnTask(
-                                PrepareServiceOnTaskRequest.newBuilder()
-                                    .setTask(task.toDefinition())
-                                    .setAmount(amount ?: 1)
-                                    .setMemory(memory?.toLong() ?: task.maxMemory)
-                                    .setNodeName(node)
-                                    .setStart(startService)
-                                    .setStartId(startOrderedId ?: 1)
-                                    .build()
-                            )
+                            TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub(it.channel!!)
+                                .prepareServiceOnTask(
+                                    PrepareServiceOnTaskRequest.newBuilder()
+                                        .setTask(task.toDefinition())
+                                        .setAmount(amount ?: 1)
+                                        .setMemory(memory?.toLong() ?: task.maxMemory)
+                                        .setNodeName(nodeName)
+                                        .setStart(startService)
+                                        .setStartId(startOrderedId ?: 1)
+                                        .build()
+                                )
                         }
                 }
             }
