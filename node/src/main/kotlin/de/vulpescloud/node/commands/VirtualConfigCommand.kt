@@ -88,7 +88,7 @@ class VirtualConfigCommand {
             Node.instance.virtualConfigProvider.getCustomConfig(config.name, force).let {
                 if (it == null) {
                     source.sendMessage(
-                        "Unexpected NullPointerException while trying to get the config!"
+                        "Unexpected NullPointerException while trying to get the config! Try with --force"
                     )
                     return@let
                 }

@@ -43,7 +43,7 @@ object PaperDownloader : ServerSoftwareDownloader {
             .build()
 
         val downloadFileName = downloadUrl.path.substringAfterLast('/')
-        logger.info("Downloading $downloadFileName ...")
+
 
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw Exception("Unexpected code $response")
@@ -51,9 +51,9 @@ object PaperDownloader : ServerSoftwareDownloader {
             val file = File("local/versions/$downloadFileName")
 
             if (file.exists()) {
-                logger.info("$downloadFileName already exists, skipping download.")
                 return@use
             }
+            logger.info("Downloading $downloadFileName ...")
 
             val fileBytes = response.body.bytes()
 

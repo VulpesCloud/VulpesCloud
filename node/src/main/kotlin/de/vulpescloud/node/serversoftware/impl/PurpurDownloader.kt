@@ -46,7 +46,6 @@ object PurpurDownloader : ServerSoftwareDownloader {
 
         val downloadFileName =
             "purpur-$version-${downloadUrl.path.split("/")[4].replace(" ", "")}.jar"
-        logger.info("Downloading $downloadFileName ...")
 
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw Exception("Unexpected code $response")
@@ -54,9 +53,9 @@ object PurpurDownloader : ServerSoftwareDownloader {
             val file = File("local/versions/$downloadFileName")
 
             if (file.exists()) {
-                logger.info("$downloadFileName already exists, skipping download.")
                 return@use
             }
+            logger.info("Downloading $downloadFileName ...")
 
             val fileBytes = response.body.bytes()
 
