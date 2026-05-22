@@ -2,6 +2,7 @@ package de.vulpescloud.node.terminal
 
 import de.vulpescloud.node.CloudVersion
 import de.vulpescloud.node.Node
+import java.nio.charset.StandardCharsets
 import net.kyori.adventure.text.minimessage.MiniMessage
 import net.kyori.adventure.text.serializer.ansi.ANSIComponentSerializer
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer
@@ -12,7 +13,6 @@ import org.jline.reader.impl.LineReaderImpl
 import org.jline.terminal.Terminal
 import org.jline.terminal.TerminalBuilder
 import org.jline.utils.InfoCmp
-import java.nio.charset.StandardCharsets
 
 class Terminal {
 
@@ -26,16 +26,17 @@ class Terminal {
 
     private fun getDefaultPrompt(): String {
         val nodeName = Node.instance.configProvider.config.nodeName
-        val versionPart = if (CloudVersion.getGitBranch() == "stable") {
-            "v3"
-        } else {
-            "dev-${CloudVersion.getGitCommit()}"
-        }
+        val versionPart =
+            if (CloudVersion.getGitBranch() == "stable") {
+                "v3"
+            } else {
+                "dev-${CloudVersion.getGitCommit()}"
+            }
         return "&f$nodeName&8@<color:#ff700a>$versionPart</color> &8» &7"
     }
 
     fun changePrompt(prompt: String) {
-        if (prompt == "" || prompt == "default")  {
+        if (prompt == "" || prompt == "default") {
             this.prompt = getDefaultPrompt()
         } else {
             this.prompt = prompt
@@ -91,15 +92,20 @@ class Terminal {
 
     fun print(line: String) {
         if (Node.instance.setupProvider.currentSetup == null) {
+            if (lineReader.isReading) {
+                lineReader.callWidget(LineReader.CLEAR)
+                terminal.writer().flush()
+            }
+
             terminal.puts(InfoCmp.Capability.carriage_return)
             terminal
                 .writer()
                 .println(replaceColors(line) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
             terminal.flush()
-            if (terminalContent.size > 250) {
-                terminalContent.removeFirst()
-            }
+
+            if (terminalContent.size > 250) terminalContent.removeFirst()
             terminalContent.add(line)
+
             update()
         }
     }

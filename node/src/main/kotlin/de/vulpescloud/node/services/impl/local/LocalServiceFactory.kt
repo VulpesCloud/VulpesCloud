@@ -167,7 +167,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
 
         processBuilder.environment()["bootstrapFile"] = "server.jar"
         processBuilder.environment()["grpc_hostname"] =
-            "127.0.0.1" // Node.instance.configProvider.config.grpcHost
+            Node.instance.configProvider.config.grpcHost
         processBuilder.environment()["grpc_port"] =
             Node.instance.configProvider.config.grpcPort.toString()
         processBuilder.environment()["serviceUUID"] = service.uuid.toString()

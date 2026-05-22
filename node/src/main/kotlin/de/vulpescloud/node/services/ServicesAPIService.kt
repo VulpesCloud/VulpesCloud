@@ -3,7 +3,6 @@ package de.vulpescloud.node.services
 import build.buf.gen.vulpescloud.events.v1.ServiceLogEvent
 import build.buf.gen.vulpescloud.services.v1.*
 import de.vulpescloud.api.services.Service
-import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.cluster.ClusterHelper
 import de.vulpescloud.node.event.EventsService
@@ -18,6 +17,7 @@ import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 
+@Suppress("LoggingSimilarMessage", "DuplicatedCode")
 class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImplBase() {
 
     private val logger = LoggerFactory.getLogger("ServicesAPIService")
@@ -60,44 +60,6 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
 
         return GetByUuidResponse.newBuilder().setService(service.toDefinition()).build()
     }
-
-    @RequiresPermission("services.prepare")
-    override suspend fun prepareServiceByTask(
-        request: PrepareServiceByTaskRequest
-    ): PrepareServiceByTaskResponse {
-        val task = Task.fromDefinition(request.task)
-
-        val serviceFactory =
-            Node.instance.serviceFactoryProvider.findServiceFactory(task.serviceFactoryName)
-                ?: throw IllegalArgumentException(
-                    "Unable to find ServiceFactory ${task.serviceFactoryName}"
-                )
-        val service = serviceFactory.prepareService(task)
-
-        return PrepareServiceByTaskResponse.newBuilder()
-            .setService(service.service.toDefinition())
-            .build()
-    }
-
-    //    override suspend fun prepareServiceByService(
-    //        request: PrepareServiceByServiceRequest
-    //    ): PrepareServiceByServiceResponse {
-    //        val service = Service.fromDefinition(request.service)
-    //
-    //        val serviceFactory =
-    //
-    // Node.instance.serviceFactoryProvider.findServiceFactory(service.task.serviceFactoryName)
-    //        if (serviceFactory == null) {
-    //            throw IllegalArgumentException(
-    //                "Unable to find ServiceFactory ${service.task.serviceFactoryName}"
-    //            )
-    //        }
-    //        val abstractService = serviceFactory.prepareService(service)
-    //
-    //        return PrepareServiceByServiceResponse.newBuilder()
-    //            .setService(abstractService.service.toDefinition())
-    //            .build()
-    //    }
 
     @RequiresPermission("services.start")
     override suspend fun startService(request: StartServiceRequest): StartServiceResponse {

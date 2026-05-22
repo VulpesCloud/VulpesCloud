@@ -18,4 +18,5 @@ data class NodeConfig(
     val auth: AuthConfig = AuthConfig("changeme", "changeme2", true),
     val databaseType: String = "sqlite",
     val testing: TestingConfig = TestingConfig(),
+    val serviceStartDelayMillis: Int = 1000,
 )

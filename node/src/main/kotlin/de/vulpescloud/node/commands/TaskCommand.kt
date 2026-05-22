@@ -1,8 +1,8 @@
 package de.vulpescloud.node.commands
 
-import build.buf.gen.vulpescloud.services.v1.prepareServiceByTaskRequest
-import build.buf.gen.vulpescloud.services.v1.startServiceRequest
+import build.buf.gen.vulpescloud.tasks.v1.PrepareServiceOnTaskRequest
 import build.buf.gen.vulpescloud.tasks.v1.TaskDefinition
+import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.tasks.v1.deleteTaskRequest
 import build.buf.gen.vulpescloud.tasks.v1.getAllTasksRequest
 import build.buf.gen.vulpescloud.tasks.v1.updateTaskRequest
@@ -36,8 +36,9 @@ class TaskCommand {
 
     @Parser(suggestions = "tasks")
     fun taskParser(input: CommandInput): List<Task> {
-        val pattern = Regex.escape(input.readString()).replace("\\*", ".*")
-        val regex = Regex("^$pattern$")
+        val raw = input.readString()
+        val pattern = raw.split("*").joinToString(".*") { Regex.escape(it) }
+        val regex = Regex("^$pattern$", RegexOption.IGNORE_CASE)
 
         return TaskCache.getTasks()
             .filter { regex.matches(it.name) }
@@ -100,22 +101,47 @@ class TaskCommand {
         source: CommandSource,
         @Argument("tasks") tasks: List<Task>,
         @Flag("start") startService: Boolean,
+        @Flag("amount") amount: Int?,
+        @Flag("node") node: String?,
+        @Flag("memory") memory: Int?,
+        @Flag("startOrderedId") startOrderedId: Int?,
     ) {
         NodeCoroutineScope.launch {
             tasks.forEach { task ->
-                val resp =
-                    Node.instance.localGrpcClient.serviceAPI.prepareServiceByTask(
-                        prepareServiceByTaskRequest { this.task = task.toDefinition() }
+                if (node == Node.instance.configProvider.config.nodeName || node == null) {
+                    Node.instance.localGrpcClient.tasksAPI.prepareServiceOnTask(
+                        PrepareServiceOnTaskRequest.newBuilder()
+                            .setTask(task.toDefinition())
+                            .setAmount(amount ?: 1)
+                            .setMemory(memory?.toLong() ?: task.maxMemory)
+                            .setNodeName(node ?: Node.instance.configProvider.config.nodeName)
+                            .setStart(startService)
+                            .setStartId(startOrderedId ?: 1)
+                            .build()
                     )
-                source.sendMessage("Prepared service for task &m${task.name}&8.")
-                if (startService) {
-                    Node.instance.localGrpcClient.serviceAPI.startService(
-                        startServiceRequest { this.service = resp.service }
-                    )
-
-                    source.sendMessage(
-                        "Started service &m${task.name}-${resp.service.orderedId}&8."
-                    )
+                } else {
+                    Node.instance.clusterProvider.remoteNodes
+                        .find { it.endpoint.name == node }
+                        ?.let {
+                            if (it.channel == null) {
+                                source.sendMessage("Node ${it.endpoint.name} is not online!")
+                                return@launch
+                            }
+                            if (!it.getNode().isRunning()) {
+                                source.sendMessage("Node ${it.endpoint.name} is not online!")
+                                return@launch
+                            }
+                            TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub(it.channel!!).prepareServiceOnTask(
+                                PrepareServiceOnTaskRequest.newBuilder()
+                                    .setTask(task.toDefinition())
+                                    .setAmount(amount ?: 1)
+                                    .setMemory(memory?.toLong() ?: task.maxMemory)
+                                    .setNodeName(node)
+                                    .setStart(startService)
+                                    .setStartId(startOrderedId ?: 1)
+                                    .build()
+                            )
+                        }
                 }
             }
         }

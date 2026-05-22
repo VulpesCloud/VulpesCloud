@@ -39,12 +39,13 @@ class ServiceCommand {
 
     @Parser(suggestions = "service")
     fun serviceParser(input: CommandInput): List<Service> {
-        val pattern = Regex.escape(input.readString()).replace("\\*", ".*")
-        val regex = Regex("^$pattern$")
+        val raw = input.readString()
+        val pattern = raw.split("*").joinToString(".*") { Regex.escape(it) }
+        val regex = Regex("^$pattern$", RegexOption.IGNORE_CASE)
 
         return ServiceCache.getTasks()
-            .filter { regex.matches(Service.fromDefinition(it).name()) }
             .map { Service.fromDefinition(it) }
+            .filter { regex.matches(it.name()) }
     }
 
     @Command("services|ser list")
