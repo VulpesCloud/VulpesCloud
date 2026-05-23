@@ -12,6 +12,7 @@ import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.annotation.Alias
+import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import de.vulpescloud.node.setup.setups.TaskSetup
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
@@ -134,6 +135,7 @@ class TaskCommand {
                                 return@launch
                             }
                             TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub(it.channel!!)
+                                .withInterceptors(AuthClientInterceptor(Node.instance.secret))
                                 .prepareServiceOnTask(
                                     PrepareServiceOnTaskRequest.newBuilder()
                                         .setTask(task.toDefinition())
