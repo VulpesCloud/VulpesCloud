@@ -47,7 +47,7 @@ gson = "2.14.0"
 json = "20250517"
 
 # console
-jline = "3.30.13"
+jline = "4.1.1"
 cloud = "2.0.0"
 
 # platforms
