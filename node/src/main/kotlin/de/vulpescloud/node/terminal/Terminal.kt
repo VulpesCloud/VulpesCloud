@@ -92,42 +92,20 @@ class Terminal {
 
     fun print(line: String) {
         if (Node.instance.setupProvider.currentSetup == null) {
-            if (lineReader.isReading) {
-                lineReader.callWidget(LineReader.CLEAR)
-                terminal.writer().flush()
-            }
-
-            terminal.puts(InfoCmp.Capability.carriage_return)
-            terminal
-                .writer()
-                .println(replaceColors(line) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
-            terminal.flush()
-
             if (terminalContent.size > 250) terminalContent.removeFirst()
             terminalContent.add(line)
-
-            update()
+            lineReader.printAbove(replaceColors(line) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
         }
     }
 
     fun printSetup(line: String) {
         if (Node.instance.setupProvider.currentSetup != null) {
-            terminal.puts(InfoCmp.Capability.carriage_return)
-            terminal
-                .writer()
-                .println(replaceColors(line) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
-            terminal.flush()
-            update()
+            lineReader.printAbove(replaceColors(line) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
         }
     }
 
     fun printNoCheck(line: String) {
-        terminal.puts(InfoCmp.Capability.carriage_return)
-        terminal
-            .writer()
-            .println(replaceColors(line) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
-        terminal.flush()
-        update()
+        lineReader.printAbove(replaceColors(line) + Ansi.ansi().a(Ansi.Attribute.RESET).toString())
     }
 
     fun close() {

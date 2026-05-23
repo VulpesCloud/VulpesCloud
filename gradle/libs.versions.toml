@@ -47,7 +47,7 @@ gson = "2.14.0"
 json = "20250517"
 
 # console
-jline = "4.1.2"
+jline = "3.30.13"
 cloud = "2.0.0"
 
 # platforms
@@ -164,6 +164,7 @@ caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version
 
 [bundles]
 proto = [
+    "grpc-core",
     "protobuf-kotlin",
     "grpc-stub",
     "grpc-kotlin-stub",
