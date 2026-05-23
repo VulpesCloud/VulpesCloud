@@ -18,7 +18,7 @@ object ServiceStateChangeEventListener {
         job =
             EventsService.subscribe<ServiceStateChangedEvent> {
                 logger.info(
-                    "Service <aqua>${it.service.task.name}-${it.service.orderedId}</aqua> is now <light_purple>${it.newState}</light_purple>"
+                    "Service <aqua>${it.service.task.name}-${it.service.orderedId}</aqua> is now <light_purple>${it.newState}</light_purple> on Node <yellow>${it.service.node}</yellow>"
                 )
 
                 if (it.newState == ServiceStates.RUNNING.toServiceState()) {

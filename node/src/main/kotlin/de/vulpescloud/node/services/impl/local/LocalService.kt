@@ -1,6 +1,7 @@
 package de.vulpescloud.node.services.impl.local
 
 import build.buf.gen.vulpescloud.events.v1.serviceLogEvent
+import build.buf.gen.vulpescloud.events.v1.serviceStateChangedEvent
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
@@ -76,6 +77,14 @@ class LocalService(override val service: Service) : AbstractService {
                 NodeCoroutineScope.launch { MongoUtils.deleteService(service) }
                 Node.instance.nodeServices.removeIf { it.service.uuid == service.uuid }
 
+                EventsService.publish(
+                    serviceStateChangedEvent {
+                        this.service = this@LocalService.service.toDefinition()
+                        this.oldState = ServiceStates.RUNNING.toServiceState()
+                        this.newState = ServiceStates.STOPPED.toServiceState()
+                    },
+                    true
+                )
                 logger.info("Service ${service.task.name}-${service.orderedId} stopped!")
 
                 if (!service.task.staticServices) {
