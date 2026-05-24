@@ -9,7 +9,6 @@ import build.buf.gen.vulpescloud.tasks.v1.updateTaskRequest
 import com.github.benmanes.caffeine.cache.Caffeine
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.ConsoleCommandSource
 import de.vulpescloud.node.command.annotation.Alias
@@ -17,7 +16,6 @@ import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import de.vulpescloud.node.setup.setups.TaskSetup
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
@@ -60,7 +58,7 @@ class TaskCommand {
     @Permission("tasks.getAll")
     @Command("task|tasks list")
     fun listTasks(source: CommandSource) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             val tasks =
                 Node.instance.localGrpcClient.tasksAPI
                     .getAllTasks(getAllTasksRequest {})
@@ -116,7 +114,7 @@ class TaskCommand {
         @Flag("memory") memory: Int?,
         @Flag("startOrderedId") startOrderedId: Int?,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             tasks.forEach { task ->
                 val nodeName: String = node ?: task.preferredNode
 
@@ -137,11 +135,11 @@ class TaskCommand {
                         ?.let {
                             if (it.channel == null) {
                                 source.sendMessage("Node ${it.endpoint.name} is not online!")
-                                return@launch
+                                return@runBlocking
                             }
                             if (!it.getNode().isRunning()) {
                                 source.sendMessage("Node ${it.endpoint.name} is not online!")
-                                return@launch
+                                return@runBlocking
                             }
                             TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub(it.channel!!)
                                 .withInterceptors(AuthClientInterceptor(Node.instance.secret))
@@ -165,7 +163,7 @@ class TaskCommand {
     @Confirmation
     @Command("task|tasks task <tasks> delete")
     fun deleteTask(source: CommandSource, @Argument("tasks") tasks: List<Task>) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             tasks.forEach { task ->
                 val resp =
                     Node.instance.localGrpcClient.tasksAPI.deleteTask(
@@ -183,7 +181,7 @@ class TaskCommand {
         @Argument("tasks") tasks: List<Task>,
         @Argument("memory") memory: Int,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             tasks.forEach { task ->
                 source.sendMessage("Setting max memory for task &m${task.name} to &e$memory MB")
                 val newTask = task.copy(maxMemory = memory.toLong())
@@ -201,7 +199,7 @@ class TaskCommand {
         @Argument("tasks") tasks: List<Task>,
         @Argument("maintenance") maintenance: Boolean,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             tasks.forEach { task ->
                 source.sendMessage("Setting maintenance for task &m${task.name} to &e$maintenance")
                 val newTask = task.copy(maintenance = maintenance)
@@ -219,7 +217,7 @@ class TaskCommand {
         @Argument("tasks") tasks: List<Task>,
         @Argument("static") static: Boolean,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             tasks.forEach { task ->
                 source.sendMessage("Setting staticServices for task &m${task.name} to &e$static")
                 val newTask = task.copy(staticServices = static)
@@ -237,7 +235,7 @@ class TaskCommand {
         @Argument("tasks") tasks: List<Task>,
         @Argument("fallback") fallback: Boolean,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             tasks.forEach { task ->
                 source.sendMessage("Setting fallback for task &m${task.name} to &e$fallback")
                 val newTask = task.copy(fallback = fallback)
@@ -255,7 +253,7 @@ class TaskCommand {
         @Argument("tasks") tasks: List<Task>,
         @Argument("node") node: String,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             tasks.forEach { task ->
                 source.sendMessage("Setting preferredNode for task &m${task.name} to &e$node")
                 val newTask = task.copy(preferredNode = node)
@@ -273,7 +271,7 @@ class TaskCommand {
         @Argument("tasks") tasks: List<Task>,
         @Argument("count") count: Int,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             tasks.forEach { task ->
                 source.sendMessage("Setting minServiceCount for task &m${task.name} to &e$count")
                 val newTask = task.copy(minOnlineServices = count)

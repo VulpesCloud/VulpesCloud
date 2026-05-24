@@ -3,9 +3,7 @@ package de.vulpescloud.node.commands
 import build.buf.gen.vulpescloud.virtualconfig.v1.getAllRequest
 import de.vulpescloud.api.virtualconfig.VirtualConfig
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
@@ -60,7 +58,7 @@ class VirtualConfigCommand {
     @Permission("virtualconfig.list")
     @Command("virtualconfigs list")
     fun listVirtualConfigs(source: CommandSource, @Flag("local") local: Boolean) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             if (local) {
                 source.sendMessage("Listing local virtual configs...")
                 Node.instance.virtualConfigProvider.apply {
@@ -87,7 +85,7 @@ class VirtualConfigCommand {
         @Flag("force") force: Boolean,
         @Argument("config") config: VirtualConfig,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             Node.instance.virtualConfigProvider.getCustomConfig(config.name, force).let {
                 if (it == null) {
                     source.sendMessage(
@@ -110,7 +108,7 @@ class VirtualConfigCommand {
         source: CommandSource,
         @Argument("config") config: VirtualConfig,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             Node.instance.virtualConfigProvider.updateDatabaseFromLocalConfig(config.name)
             source.sendMessage(
                 "Successfully updated the database from the local config file for virtual config ${config.name}!"
@@ -124,7 +122,7 @@ class VirtualConfigCommand {
         source: CommandSource,
         @Argument("config") config: VirtualConfig,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             Node.instance.virtualConfigProvider.updateLocalConfigFromDatabase(config.name)
             source.sendMessage(
                 "Successfully updated the local config file from the database for virtual config ${config.name}!"

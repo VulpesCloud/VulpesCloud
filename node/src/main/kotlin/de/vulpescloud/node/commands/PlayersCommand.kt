@@ -3,10 +3,9 @@ package de.vulpescloud.node.commands
 import build.buf.gen.vulpescloud.players.v1.getAllOnlinePlayersRequest
 import build.buf.gen.vulpescloud.players.v1.getOfflinePlayersRequest
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.annotation.Alias
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Flag
 import org.incendo.cloud.annotations.Permission
@@ -19,7 +18,7 @@ class PlayersCommand {
     @Permission("players.getAllOffline")
     @Command("player|players registered list")
     fun listRegisteredPlayers(source: CommandSource, @Flag("v") verbose: Boolean) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             val registeredPlayers =
                 playerAPI.getAllOfflinePlayers(getOfflinePlayersRequest {}).offlinePlayersList
             source.sendMessage(
@@ -38,7 +37,7 @@ class PlayersCommand {
     @Permission("players.getAllOnline")
     @Command("player|players online list")
     fun listOnlinePlayers(source: CommandSource, @Flag("v") verbose: Boolean) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             val onlinePlayers =
                 playerAPI.getAllOnlinePlayers(getAllOnlinePlayersRequest {}).onlinePlayersList
 

@@ -12,7 +12,6 @@ import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
 import kotlinx.coroutines.future.future
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
@@ -82,7 +81,7 @@ class AuthCommand {
         @Argument("name") name: String,
         @Argument("password") password: String,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             MongoUtils.createUser(name, password)
             source.sendMessage("<green>Created user <yellow>$name<green>.")
         }
@@ -95,7 +94,7 @@ class AuthCommand {
         @Argument("name") name: String,
         @Argument("password") password: String,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             MongoUtils.updateUserPassword(name, password)
             source.sendMessage("<green>Updated password for <yellow>$name<green>.")
         }
@@ -108,11 +107,11 @@ class AuthCommand {
         @Argument("name") name: String,
         @Argument("player") player: OfflinePlayer,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             val user = MongoUtils.getUserByName(name)
             if (user == null) {
                 source.sendMessage("<red>User <yellow>$name <red>not found.")
-                return@launch
+                return@runBlocking
             }
             MongoUtils.updateUser(
                 name,
@@ -132,7 +131,7 @@ class AuthCommand {
         @Argument("name") name: String,
         @Argument("permission") permission: String,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             MongoUtils.addPermissionToUser(name, permission)
             source.sendMessage(
                 "<green>Added permission <gold>$permission <green>to user <yellow>$name<green>."
@@ -147,7 +146,7 @@ class AuthCommand {
         @Argument("name") name: String,
         @Argument("permission") permission: String,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             MongoUtils.removePermissionFromUser(name, permission)
             source.sendMessage(
                 "<red>Removed permission <gold>$permission <red>from user <yellow>$name<red>."
@@ -162,7 +161,7 @@ class AuthCommand {
         @Argument("name") name: String,
         @Argument("group") group: String,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             MongoUtils.addUserToGroup(name, group)
             source.sendMessage(
                 "<green>Added user <yellow>$name <green>to group <gold>$group<green>."
@@ -177,7 +176,7 @@ class AuthCommand {
         @Argument("name") name: String,
         @Argument("group") group: String,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             MongoUtils.removeUserFromGroup(name, group)
             source.sendMessage("<red>Removed user <yellow>$name <red>from group <gold>$group<red>.")
         }
@@ -186,11 +185,11 @@ class AuthCommand {
     @Permission("auth.user.list")
     @Command("auth user list")
     fun listUsers(source: CommandSource) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             val users = MongoUtils.getAllUsers()
             if (users.isEmpty()) {
                 source.sendMessage("<red>No users found.")
-                return@launch
+                return@runBlocking
             }
             source.sendMessage("<green>Registered users (<yellow>${users.size}<green>):")
             users.forEach {
@@ -208,7 +207,7 @@ class AuthCommand {
         @Argument("name") name: String,
         @Argument("password") password: String,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             val valid = MongoUtils.checkUserPassword(name, password)
             if (valid) source.sendMessage("<green>Password for <yellow>$name <green>is valid.")
             else source.sendMessage("<red>Invalid password for <yellow>$name<red>.")
@@ -222,7 +221,7 @@ class AuthCommand {
         @Argument("name") name: String,
         @Argument("permission") permission: String,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             val hasPerm = PermissionHelper.hasPermission(name, permission)
             if (hasPerm)
                 source.sendMessage(
@@ -238,11 +237,11 @@ class AuthCommand {
     @Permission("auth.user.listPermissions")
     @Command("auth user list permissions <name>")
     fun listUserPermissions(source: CommandSource, @Argument("name") name: String) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             val user = MongoUtils.getUserByName(name)
             if (user == null) {
                 source.sendMessage("<red>User <yellow>$name <red>not found.")
-                return@launch
+                return@runBlocking
             }
             val permissions = PermissionHelper.getAllPermissionsOfUser(name)
             if (permissions.isEmpty()) {
@@ -257,11 +256,11 @@ class AuthCommand {
     @Permission("auth.user.info")
     @Command("auth user info <name>")
     fun getUserInfo(source: CommandSource, @Argument("name") name: String) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             val user = MongoUtils.getUserByName(name)
             if (user == null) {
                 source.sendMessage("<red>User <yellow>$name <red>not found.")
-                return@launch
+                return@runBlocking
             }
             source.sendMessage("<green>User info for <yellow>$name<green>:")
             source.sendMessage("<dark_gray>- <gold>Name: <yellow>${user.name}")
@@ -281,7 +280,7 @@ class AuthCommand {
     @Command("auth group create <name>")
     @Permission("auth.group.create")
     fun createGroup(source: CommandSource, @Argument("name") name: String) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             MongoUtils.createGroup(name)
             source.sendMessage("<green>Created group <gold>$name<green>.")
         }
@@ -294,7 +293,7 @@ class AuthCommand {
         @Argument("name") name: String,
         @Argument("permission") permission: String,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             MongoUtils.addPermissionToGroup(name, permission)
             source.sendMessage(
                 "<green>Added permission <gold>$permission <green>to group <yellow>$name<green>."
@@ -309,7 +308,7 @@ class AuthCommand {
         @Argument("name") name: String,
         @Argument("permission") permission: String,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             MongoUtils.removePermissionFromGroup(name, permission)
             source.sendMessage(
                 "<red>Removed permission <gold>$permission <red>from group <yellow>$name<red>."
@@ -320,11 +319,11 @@ class AuthCommand {
     @Command("auth group list")
     @Permission("auth.group.list")
     fun listGroups(source: CommandSource) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             val groups = MongoUtils.getAllGroups()
             if (groups.isEmpty()) {
                 source.sendMessage("<red>No groups found.")
-                return@launch
+                return@runBlocking
             }
             source.sendMessage("<green>Registered groups (<yellow>${groups.size}<green>):")
             groups.forEach {
@@ -338,11 +337,11 @@ class AuthCommand {
     @Command("auth group list permissions <name>")
     @Permission("auth.group.listPermissions")
     fun listGroupPermissions(source: CommandSource, @Argument("name") name: String) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             val group = MongoUtils.getGroupByName(name)
             if (group == null) {
                 source.sendMessage("<red>Group <gold>$name <red>not found.")
-                return@launch
+                return@runBlocking
             }
             if (group.permissions.isEmpty()) {
                 source.sendMessage("<gold>$name <dark_gray>has no permissions.")

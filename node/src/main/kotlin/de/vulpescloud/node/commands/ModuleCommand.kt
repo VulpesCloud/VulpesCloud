@@ -1,12 +1,10 @@
 package de.vulpescloud.node.commands
 
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.ConsoleCommandSource
 import java.util.stream.Stream
 import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import org.incendo.cloud.annotations.Argument
@@ -35,7 +33,7 @@ class ModuleCommand {
             source.sendMessage("<red>This command can only be executed from the node console.")
             return
         }
-        NodeCoroutineScope.launch {
+        runBlocking {
             val module = moduleProvider.loadModule(name)
             if (module != null) {
                 source.sendMessage("<green>Module <yellow>$name <green>was loaded successfully.")
@@ -186,7 +184,7 @@ class ModuleCommand {
             source.sendMessage("<red>This command can only be executed from the node console.")
             return
         }
-        NodeCoroutineScope.launch {
+        runBlocking {
             val success = moduleProvider.restartModule(name)
             if (success) {
                 source.sendMessage("<green>Module <yellow>$name <green>was reloaded successfully.")

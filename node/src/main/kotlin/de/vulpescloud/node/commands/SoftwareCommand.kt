@@ -1,14 +1,13 @@
 package de.vulpescloud.node.commands
 
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.serversoftware.impl.FoliaDownloader
 import de.vulpescloud.node.serversoftware.impl.PaperDownloader
 import de.vulpescloud.node.serversoftware.impl.PurpurDownloader
 import de.vulpescloud.node.serversoftware.impl.VelocityDownloader
 import de.vulpescloud.node.terminal.COLOR.VULPES_ORANGE
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Permission
 import org.incendo.cloud.annotations.suggestion.Suggestions
@@ -37,7 +36,7 @@ class SoftwareCommand {
     @Command("software list")
     fun listSoftwares(source: CommandSource) {
         source.sendMessage("Available Server Softwares:")
-        NodeCoroutineScope.launch {
+        runBlocking {
             val maxDisplayNameLength = downloaders.maxOf { it.displayName.length }
             val allVersions =
                 downloaders.flatMap { downloader ->

@@ -11,7 +11,6 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.ConsoleCommandSource
 import de.vulpescloud.node.command.annotation.Alias
@@ -20,7 +19,6 @@ import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotations.Argument
@@ -53,7 +51,7 @@ class ServiceCommand {
     @Permission("services.getAll")
     @Command("services|ser list")
     fun listServices(source: CommandSource) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             source.sendMessage("Listing all services...")
             Node.instance.localGrpcClient.serviceAPI
                 .getAllServices(GetAllServicesRequest.newBuilder().build())
@@ -89,7 +87,7 @@ class ServiceCommand {
                 source.sendMessage("Service is already running!")
                 return
             }
-            NodeCoroutineScope.launch {
+            runBlocking {
                 source.sendMessage("Starting service &f${it.task.name}-${it.orderedId}...")
                 Node.instance.localGrpcClient.serviceAPI.startService(
                     StartServiceRequest.newBuilder().setService(it.toDefinition()).build()
@@ -102,7 +100,7 @@ class ServiceCommand {
     @Command("services|ser <service> stop")
     fun stopService(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
-            NodeCoroutineScope.launch {
+            runBlocking {
                 Node.instance.localGrpcClient.serviceAPI.stopService(
                     StopServiceRequest.newBuilder().setService(it.toDefinition()).build()
                 )
@@ -114,7 +112,7 @@ class ServiceCommand {
     @Command("services|ser <service> snapshot")
     fun getSnapshot(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
-            NodeCoroutineScope.launch {
+            runBlocking {
                 source.sendMessage(
                     "Retrieving snapshot for service &f${it.task.name}-${it.orderedId}..."
                 )
@@ -143,7 +141,7 @@ class ServiceCommand {
     @Command("services|ser <service> delete")
     fun deleteService(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
-            NodeCoroutineScope.launch {
+            runBlocking {
                 Node.instance.localGrpcClient.serviceAPI.deleteService(
                     DeleteServiceRequest.newBuilder().setService(it.toDefinition()).build()
                 )
@@ -155,7 +153,7 @@ class ServiceCommand {
     @Confirmation
     @Command("services|ser stopAll")
     fun stopAllService(source: CommandSource) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             source.sendMessage("Stopping all services...")
             Node.instance.localGrpcClient.serviceAPI
                 .getAllServices(GetAllServicesRequest.newBuilder().build())
@@ -172,7 +170,7 @@ class ServiceCommand {
     @Confirmation
     @Command("services|ser deleteAll")
     fun deleteAllServices(source: CommandSource) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             source.sendMessage("Deleting all services...")
             Node.instance.localGrpcClient.serviceAPI
                 .getAllServices(GetAllServicesRequest.newBuilder().build())
@@ -192,7 +190,7 @@ class ServiceCommand {
         @Argument("service") service: List<Service>,
         @Greedy @Argument("command") command: String,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             service.forEach {
                 val resp =
                     Node.instance.localGrpcClient.serviceAPI.sendCommand(

@@ -3,11 +3,10 @@ package de.vulpescloud.node.commands
 import build.buf.gen.vulpescloud.tasks.v1.getByNameRequest
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.ConsoleCommandSource
 import de.vulpescloud.node.virtualconfig.VirtualConfigDebugHelper
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
 
@@ -45,7 +44,7 @@ class DebugCommand {
     //
     //    @Command("debug create task default")
     //    fun createDefaultTask(source: CommandSource) {
-    //        NodeCoroutineScope.launch {
+    //        runBlocking {
     //            source.sendMessage("Creating default task")
     //            Node.instance.localGrpcClient.tasksAPI.createTask(
     //                CreateTaskRequest.newBuilder()
@@ -87,7 +86,7 @@ class DebugCommand {
     //
     //    @Command("debug create task defaultproxy")
     //    fun createDefaultTaskProxy(source: CommandSource) {
-    //        NodeCoroutineScope.launch {
+    //        runBlocking {
     //            source.sendMessage("Creating default task proxy")
     //            Node.instance.localGrpcClient.tasksAPI.createTask(
     //                CreateTaskRequest.newBuilder()
@@ -130,7 +129,7 @@ class DebugCommand {
     //
     //    @Command("debug start service default")
     //    fun startServiceOnDefaultTask(source: CommandSource) {
-    //        NodeCoroutineScope.launch {
+    //        runBlocking {
     //            source.sendMessage("Starting service on default task")
     //            Node.instance.localGrpcClient.serviceAPI
     //                .prepareServiceByTask(
@@ -179,7 +178,7 @@ class DebugCommand {
     //
     //    @Command("debug start service defaultproxy")
     //    fun startServiceOnDefaultTaskProxy(source: CommandSource) {
-    //        NodeCoroutineScope.launch {
+    //        runBlocking {
     //            source.sendMessage("Starting service on default proxy task")
     //            Node.instance.localGrpcClient.serviceAPI
     //                .prepareServiceByTask(
@@ -228,7 +227,7 @@ class DebugCommand {
     //
     //    @Command("debug cmd")
     //    fun cmdCmd(source: CommandSource) {
-    //        NodeCoroutineScope.launch {
+    //        runBlocking {
     //            source.sendMessage("making command exec on proxy 1")
     //            DockerService(
     //                    Node.instance.nodeServices
@@ -246,7 +245,7 @@ class DebugCommand {
             source.sendMessage("<red>This command can only be executed from the node console.")
             return
         }
-        NodeCoroutineScope.launch {
+        runBlocking {
             source.sendMessage("Creating config")
             VirtualConfigDebugHelper.createDebugConfig()
             source.sendMessage("Successfully created config")
@@ -259,7 +258,7 @@ class DebugCommand {
             source.sendMessage("<red>This command can only be executed from the node console.")
             return
         }
-        NodeCoroutineScope.launch {
+        runBlocking {
             source.sendMessage("Updating config")
             VirtualConfigDebugHelper.updateDebugConfig()
             source.sendMessage("Successfully updated config")
@@ -275,7 +274,7 @@ class DebugCommand {
             source.sendMessage("<red>This command can only be executed from the node console.")
             return
         }
-        NodeCoroutineScope.launch {
+        runBlocking {
             source.sendMessage("Finding next available service orderedId...")
             val id = Node.instance.serviceFactoryProvider
                 .findServiceFactory("local")!!
@@ -294,7 +293,7 @@ class DebugCommand {
 
     //    @Command("debug database main insert")
     //    fun debugInsertData(source: CommandSource) {
-    //        NodeCoroutineScope.launch {
+    //        runBlocking {
     //            source.sendMessage("Inserting data into database")
     //            Node.instance
     //                .getDatabaseProvider()
@@ -306,7 +305,7 @@ class DebugCommand {
     //
     //    @Command("debug database main delete")
     //    fun debugDeleteData(source: CommandSource) {
-    //        NodeCoroutineScope.launch {
+    //        runBlocking {
     //            source.sendMessage("Deleting data from database")
     //            Node.instance
     //                .getDatabaseProvider()
@@ -318,7 +317,7 @@ class DebugCommand {
     //
     //    @Command("debug database main get")
     //    fun debugGetData(source: CommandSource) {
-    //        NodeCoroutineScope.launch {
+    //        runBlocking {
     //            source.sendMessage("Getting data from database")
     //            val jsonElement =
     //                Node.instance

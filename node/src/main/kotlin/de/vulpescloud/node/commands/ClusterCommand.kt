@@ -5,9 +5,7 @@ import build.buf.gen.vulpescloud.node.v1.getNodeSnapshotRequest
 import build.buf.gen.vulpescloud.node.v1.snapshotOrNull
 import de.vulpescloud.api.cluster.ClusterNode
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
@@ -57,7 +55,7 @@ class ClusterCommand {
     @Permission("cluster.getAll")
     @Command("cluster nodes")
     fun listNodes(source: CommandSource) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             source.sendMessage("Listing all nodes...")
             try {
                 Node.Companion.instance.localGrpcClient.clusterAPI
@@ -77,7 +75,7 @@ class ClusterCommand {
             } catch (exception: Exception) {
                 source.sendMessage("An error occurred while trying to get the nodes!")
                 exception.printStackTrace()
-                return@launch
+                return@runBlocking
             }
         }
     }
@@ -85,7 +83,7 @@ class ClusterCommand {
     @Permission("cluster.getSnapshot")
     @Command("cluster node <node> getSnapshot")
     fun getNodeSnapshot(source: CommandSource, @Argument("node") node: List<ClusterNode>) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             node.forEach {
                 source.sendMessage("Fetching snapshot for node ${it.name}...")
                 val remoteNode = Node.Companion.instance.clusterProvider.remoteNodes.find { n -> n.endpoint.name == it.name }
