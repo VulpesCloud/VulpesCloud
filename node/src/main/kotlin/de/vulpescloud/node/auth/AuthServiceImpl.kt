@@ -5,6 +5,7 @@ import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.grpc.security.PermissionHelper
+import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import de.vulpescloud.node.utils.MongoUtils
 import java.util.*
 
@@ -141,5 +142,49 @@ class AuthServiceImpl(private val jwtSecret: String, private val jwtRefreshSecre
         } catch (_: Exception) {
             IsTokenValidResponse.newBuilder().setValid(false).build()
         }
+    }
+
+    override suspend fun getUserByName(request: GetUserByNameRequest): GetUserByNameResponse {
+        val user =
+            MongoUtils.getUserByName(request.username)
+                ?: return GetUserByNameResponse.newBuilder()
+                    .setError(UserError.USER_ERROR_NOT_FOUND)
+                    .build()
+
+        return GetUserByNameResponse.newBuilder()
+            .setUser(
+                protoUser {
+                    this.name = user.name
+                    this.groups.addAll(user.groups)
+                    this.permissions.addAll(user.permissions)
+                    this.extraData.putAll(user.extraData)
+                }
+            )
+            .build()
+    }
+
+    @RequiresPermission("auth.getUserByExtraData")
+    override suspend fun getUserByExtraData(
+        request: GetUserByExtraDataRequest
+    ): GetUserByExtraDataResponse {
+        val users = MongoUtils.getAllUsers()
+        val user = users.find {
+            it.extraData.contains(request.key) && it.extraData[request.key] == request.value
+        }
+        if (user == null) {
+            return GetUserByExtraDataResponse.newBuilder()
+                .setError(UserError.USER_ERROR_NOT_FOUND)
+                .build()
+        }
+        return GetUserByExtraDataResponse.newBuilder()
+            .setUser(
+                protoUser {
+                    this.name = user.name
+                    this.groups.addAll(user.groups)
+                    this.permissions.addAll(user.permissions)
+                    this.extraData.putAll(user.extraData)
+                }
+            )
+            .build()
     }
 }

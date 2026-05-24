@@ -127,6 +127,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 updatePaperGlobalConfig(localService)
 
                 arguments.add("--separateClassLoader")
+                arguments.add("--nogui")
             }
             "Purpur" -> {
                 PurpurDownloader.apply {
@@ -166,8 +167,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 .redirectErrorStream(true)
 
         processBuilder.environment()["bootstrapFile"] = "server.jar"
-        processBuilder.environment()["grpc_hostname"] =
-            Node.instance.configProvider.config.grpcHost
+        processBuilder.environment()["grpc_hostname"] = Node.instance.configProvider.config.grpcHost
         processBuilder.environment()["grpc_port"] =
             Node.instance.configProvider.config.grpcPort.toString()
         processBuilder.environment()["serviceUUID"] = service.uuid.toString()

@@ -7,6 +7,7 @@ import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
+import de.vulpescloud.node.grpc.GrpcContextKeys
 import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import de.vulpescloud.node.services.AbstractService
 import de.vulpescloud.node.utils.MongoUtils
@@ -84,6 +85,7 @@ class TasksAPIService : TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineImplBase()
         return UpdateTaskResponse.newBuilder().setTask(request.task).build()
     }
 
+    @RequiresPermission("tasks.prepareServiceOnTask")
     override suspend fun prepareServiceOnTask(
         request: PrepareServiceOnTaskRequest
     ): PrepareServiceOnTaskResponse {

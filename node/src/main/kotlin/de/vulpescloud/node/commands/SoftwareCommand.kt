@@ -10,6 +10,7 @@ import de.vulpescloud.node.serversoftware.impl.VelocityDownloader
 import de.vulpescloud.node.terminal.COLOR.VULPES_ORANGE
 import kotlinx.coroutines.launch
 import org.incendo.cloud.annotations.Command
+import org.incendo.cloud.annotations.Permission
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.processors.confirmation.annotation.Confirmation
 import java.util.stream.Stream
@@ -32,6 +33,7 @@ class SoftwareCommand {
         return downloaders.stream().map { it.id }
     }
 
+    @Permission("software.list")
     @Command("software list")
     fun listSoftwares(source: CommandSource) {
         source.sendMessage("Available Server Softwares:")
@@ -55,6 +57,7 @@ class SoftwareCommand {
         }
     }
 
+    @Permission("software.reCache")
     @Confirmation
     @Command("software reCache")
     fun reCache(source: CommandSource) {

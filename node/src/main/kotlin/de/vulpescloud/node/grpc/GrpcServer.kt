@@ -45,6 +45,8 @@ class GrpcServer(
                                 var def = svc.bindService()
                                 val serviceName =
                                     def.serviceDescriptor.name // e.g. "vulpescloud.ServiceManager"
+                                logger.info("Registering service $serviceName")
+                                logger.info("Methods: ${def.serviceDescriptor.methods.joinToString()}")
                                 GrpcServiceRegistry.register(serviceName, svc)
 
                                 interceptors.forEach { def = ServerInterceptors.intercept(def, it) }

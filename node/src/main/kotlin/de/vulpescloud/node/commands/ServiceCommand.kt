@@ -13,6 +13,7 @@ import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
+import de.vulpescloud.node.command.ConsoleCommandSource
 import de.vulpescloud.node.command.annotation.Alias
 import de.vulpescloud.node.services.ServiceLogHandler
 import java.util.concurrent.TimeUnit
@@ -24,6 +25,7 @@ import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
+import org.incendo.cloud.annotations.Permission
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
@@ -48,6 +50,7 @@ class ServiceCommand {
             .filter { regex.matches(it.name()) }
     }
 
+    @Permission("services.getAll")
     @Command("services|ser list")
     fun listServices(source: CommandSource) {
         NodeCoroutineScope.launch {
@@ -63,6 +66,7 @@ class ServiceCommand {
         }
     }
 
+    @Permission("services.get")
     @Command("services|service <service> info")
     fun infoService(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
@@ -77,6 +81,7 @@ class ServiceCommand {
         }
     }
 
+    @Permission("services.start")
     @Command("services|ser <service> start")
     fun startService(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
@@ -93,6 +98,7 @@ class ServiceCommand {
         }
     }
 
+    @Permission("services.stop")
     @Command("services|ser <service> stop")
     fun stopService(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
@@ -104,6 +110,7 @@ class ServiceCommand {
         }
     }
 
+    @Permission("services.getSnapshot")
     @Command("services|ser <service> snapshot")
     fun getSnapshot(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
@@ -132,6 +139,7 @@ class ServiceCommand {
         }
     }
 
+    @Permission("services.delete")
     @Command("services|ser <service> delete")
     fun deleteService(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
@@ -143,6 +151,7 @@ class ServiceCommand {
         }
     }
 
+    @Permission("services.stopAll")
     @Confirmation
     @Command("services|ser stopAll")
     fun stopAllService(source: CommandSource) {
@@ -159,6 +168,7 @@ class ServiceCommand {
         }
     }
 
+    @Permission("services.deleteAll")
     @Confirmation
     @Command("services|ser deleteAll")
     fun deleteAllServices(source: CommandSource) {
@@ -175,6 +185,7 @@ class ServiceCommand {
         }
     }
 
+    @Permission("services.sendCommand")
     @Command("services|ser <service> command <command>")
     fun sendCommand(
         source: CommandSource,
@@ -204,7 +215,11 @@ class ServiceCommand {
     }
 
     @Command("services|ser <service> screen")
-    fun toggleScreen(@Argument("service") service: List<Service>) {
+    fun toggleScreen(source: CommandSource, @Argument("service") service: List<Service>) {
+        if (source !is ConsoleCommandSource) {
+            source.sendMessage("<red>This command can only be executed from the node console.")
+            return
+        }
         service.forEach {
             ServiceLogHandler.toggleServiceLogging("${it.task.name}-${it.orderedId}")
         }

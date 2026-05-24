@@ -9,12 +9,14 @@ import de.vulpescloud.node.command.annotation.Alias
 import kotlinx.coroutines.launch
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Flag
+import org.incendo.cloud.annotations.Permission
 
 @Command("players")
 @Alias(["player"])
 class PlayersCommand {
     private val playerAPI by lazy { Node.instance.localGrpcClient.playerAPI }
 
+    @Permission("players.getAllOffline")
     @Command("player|players registered list")
     fun listRegisteredPlayers(source: CommandSource, @Flag("v") verbose: Boolean) {
         NodeCoroutineScope.launch {
@@ -33,6 +35,7 @@ class PlayersCommand {
         }
     }
 
+    @Permission("players.getAllOnline")
     @Command("player|players online list")
     fun listOnlinePlayers(source: CommandSource, @Flag("v") verbose: Boolean) {
         NodeCoroutineScope.launch {

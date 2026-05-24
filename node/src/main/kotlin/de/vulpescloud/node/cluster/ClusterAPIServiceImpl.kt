@@ -1,13 +1,25 @@
 package de.vulpescloud.node.cluster
 
+import build.buf.gen.vulpescloud.auth.v1.getUserByExtraDataRequest
 import build.buf.gen.vulpescloud.node.v1.*
 import de.vulpescloud.api.cluster.ClusterNode
 import de.vulpescloud.api.cluster.NodeSnapshot
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
+import de.vulpescloud.node.grpc.security.model.UserModel
+import de.vulpescloud.node.utils.MongoUtils
+import java.util.concurrent.CompletionException
+import java.util.concurrent.ExecutionException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
+import org.incendo.cloud.exception.InvalidSyntaxException
+import org.incendo.cloud.suggestion.Suggestion
+import org.slf4j.LoggerFactory
 
 class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineImplBase() {
+    private val logger = LoggerFactory.getLogger(ClusterAPIServiceImpl::class.java)
     private val nodesDatabase by lazy {
         Node.instance.getDatabaseProvider().getOrCreateDatabase("nodes")
     }
@@ -48,5 +60,68 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
                     ?: return GetNodeSnapshotResponse.newBuilder().build(),
             )
         return GetNodeSnapshotResponse.newBuilder().setSnapshot(snapshot.toDefinition()).build()
+    }
+
+    @RequiresPermission("cluster.executeCommand")
+    override suspend fun executeCommand(request: ExecuteCommandRequest): ExecuteCommandResponse {
+        return withContext(Dispatchers.IO) {
+            // TODO: Add hook for Metrics Module to track commands
+            // TODO: Add support for UserCommandSource
+            val source = CommandSource.player(getPlayer(request.playerSource.playerUuid)!!)
+
+            runCatching {
+                    Node.instance.commandProvider
+                        .execute(source, request.command)
+                        .exceptionally { throw it }
+                        .get()
+                }
+                .onFailure { e ->
+                    when (e) {
+                        is CompletionException,
+                        is InvalidSyntaxException -> source.sendMessage(e.message.orEmpty())
+                        is ExecutionException -> source.sendMessage(e.cause?.message.orEmpty())
+                        else -> {
+                            logger.error(
+                                "An error occurred while executing command from ${request.playerSource.playerName}",
+                                e,
+                            )
+                            source.sendMessage(
+                                "An error occurred while executing command. Check Node-Logs for details."
+                            )
+                        }
+                    }
+                }
+
+            ExecuteCommandResponse.newBuilder().addAllOutput(source.messages).build()
+        }
+    }
+
+    @RequiresPermission("cluster.tabComplete")
+    override suspend fun tabComplete(request: TabCompleteRequest): TabCompleteResponse {
+        val source = CommandSource.player(getPlayer(request.playerSource.playerUuid)!!)
+        val suggestions =
+            Node.instance.commandProvider.commandManager
+                .suggestionFactory()
+                .suggest(source, request.command)
+                .join()
+                .list()
+                .stream()
+                .map(Suggestion::suggestion)
+                .toList()
+        return TabCompleteResponse.newBuilder().addAllSuggestions(suggestions).build()
+    }
+
+    private suspend fun getPlayer(uuid: String): UserModel? {
+        return MongoUtils.getUserByName(
+            Node.instance.localGrpcClient.authAPI
+                .getUserByExtraData(
+                    getUserByExtraDataRequest {
+                        this.key = "minecraft-uuid"
+                        this.value = uuid
+                    }
+                )
+                .user
+                .name
+        )
     }
 }

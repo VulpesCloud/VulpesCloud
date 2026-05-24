@@ -102,6 +102,10 @@ object MongoUtils {
         usersDatabase.upsert(name, Json.encodeToJsonElement(UserModel(name, hashedPassword)))
     }
 
+    suspend fun updateUser(name: String, user: UserModel) {
+        usersDatabase.upsert(name, Json.encodeToJsonElement(user))
+    }
+
     suspend fun addPermissionToUser(username: String, permission: String) {
         val user = getUserByName(username) ?: return
         val updatedPermissions =

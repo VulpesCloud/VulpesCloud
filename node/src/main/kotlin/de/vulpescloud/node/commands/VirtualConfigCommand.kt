@@ -10,6 +10,7 @@ import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Flag
+import org.incendo.cloud.annotations.Permission
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
@@ -56,6 +57,7 @@ class VirtualConfigCommand {
             .get(5, TimeUnit.SECONDS)
     }
 
+    @Permission("virtualconfig.list")
     @Command("virtualconfigs list")
     fun listVirtualConfigs(source: CommandSource, @Flag("local") local: Boolean) {
         NodeCoroutineScope.launch {
@@ -78,6 +80,7 @@ class VirtualConfigCommand {
         }
     }
 
+    @Permission("virtualconfig.get")
     @Command("virtualconfigs config <config> show")
     fun showVirtualConfig(
         source: CommandSource,
@@ -101,6 +104,7 @@ class VirtualConfigCommand {
         }
     }
 
+    @Permission("virtualconfig.updateFromLocal")
     @Command("virtualconfigs config <config> updateFromLocal")
     fun updateVirtualConfigFromLocal(
         source: CommandSource,
@@ -114,6 +118,7 @@ class VirtualConfigCommand {
         }
     }
 
+    @Permission("virtualconfig.updateFromDatabase")
     @Command("virtualconfigs config <config> updateFromDatabase")
     fun updateVirtualConfigFromDatabase(
         source: CommandSource,

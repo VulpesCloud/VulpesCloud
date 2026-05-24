@@ -11,6 +11,7 @@ import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
+import de.vulpescloud.node.command.ConsoleCommandSource
 import de.vulpescloud.node.command.annotation.Alias
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import de.vulpescloud.node.setup.setups.TaskSetup
@@ -21,6 +22,7 @@ import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Flag
+import org.incendo.cloud.annotations.Permission
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
@@ -48,9 +50,14 @@ class TaskCommand {
 
     @Command("task|tasks setup")
     fun setupTask(source: CommandSource) {
+        if (source !is ConsoleCommandSource) {
+            source.sendMessage("<red>This command can only be executed from the node console.")
+            return
+        }
         Node.instance.setupProvider.startSetup(TaskSetup())
     }
 
+    @Permission("tasks.getAll")
     @Command("task|tasks list")
     fun listTasks(source: CommandSource) {
         NodeCoroutineScope.launch {
@@ -72,6 +79,7 @@ class TaskCommand {
         }
     }
 
+    @Permission("tasks.get")
     @Command("task|tasks task <tasks> info")
     fun infoTask(source: CommandSource, @Argument("tasks") tasks: List<Task>) {
         tasks.forEach {
@@ -97,6 +105,7 @@ class TaskCommand {
         }
     }
 
+    @Permission("tasks.prepareServiceOnTask")
     @Command("task|tasks task <tasks> prepare")
     fun prepareService(
         source: CommandSource,
@@ -152,6 +161,7 @@ class TaskCommand {
         }
     }
 
+    @Permission("tasks.delete")
     @Confirmation
     @Command("task|tasks task <tasks> delete")
     fun deleteTask(source: CommandSource, @Argument("tasks") tasks: List<Task>) {
@@ -166,6 +176,7 @@ class TaskCommand {
         }
     }
 
+    @Permission("tasks.update")
     @Command("task|tasks task <tasks> set maxMemory <memory>")
     fun setMaxMemory(
         source: CommandSource,
@@ -183,6 +194,7 @@ class TaskCommand {
         }
     }
 
+    @Permission("tasks.update")
     @Command("task|tasks task <tasks> set maintenance <maintenance>")
     fun setMaintenance(
         source: CommandSource,
@@ -200,6 +212,7 @@ class TaskCommand {
         }
     }
 
+    @Permission("tasks.update")
     @Command("task|tasks task <tasks> set staticServices <static>")
     fun setStatic(
         source: CommandSource,
@@ -217,6 +230,7 @@ class TaskCommand {
         }
     }
 
+    @Permission("tasks.update")
     @Command("task|tasks task <tasks> set fallback <fallback>")
     fun setFallback(
         source: CommandSource,
@@ -234,6 +248,7 @@ class TaskCommand {
         }
     }
 
+    @Permission("tasks.update")
     @Command("task|tasks task <tasks> set preferredNode <node>")
     fun setPreferredNode(
         source: CommandSource,
@@ -251,6 +266,7 @@ class TaskCommand {
         }
     }
 
+    @Permission("tasks.update")
     @Command("task|tasks task <tasks> set minServiceCount <count>")
     fun setMinServiceCount(
         source: CommandSource,

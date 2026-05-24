@@ -3,6 +3,7 @@ package de.vulpescloud.node.commands
 import de.vulpescloud.launcher.VulpesLauncher
 import de.vulpescloud.node.CloudVersion
 import de.vulpescloud.node.command.CommandSource
+import de.vulpescloud.node.command.ConsoleCommandSource
 import org.incendo.cloud.annotations.Command
 import java.lang.management.ManagementFactory
 
@@ -12,6 +13,10 @@ class InfoCommand {
 
     @Command("info|i")
     fun displayInfo(source: CommandSource) {
+        if (source !is ConsoleCommandSource) {
+            source.sendMessage("<red>This command can only be executed from the node console.")
+            return
+        }
         source.sendMessage("Operating System&8: &f${System.getProperty("os.name")}")
         source.sendMessage("Used Memory of the Node process&8: &f${usedMemory()}")
         source.sendMessage(

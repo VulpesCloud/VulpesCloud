@@ -5,6 +5,7 @@ import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
+import de.vulpescloud.node.command.ConsoleCommandSource
 import de.vulpescloud.node.virtualconfig.VirtualConfigDebugHelper
 import kotlinx.coroutines.launch
 import org.incendo.cloud.annotations.Argument
@@ -241,6 +242,10 @@ class DebugCommand {
 
     @Command("debug vconf create")
     fun createVConf(source: CommandSource) {
+        if (source !is ConsoleCommandSource) {
+            source.sendMessage("<red>This command can only be executed from the node console.")
+            return
+        }
         NodeCoroutineScope.launch {
             source.sendMessage("Creating config")
             VirtualConfigDebugHelper.createDebugConfig()
@@ -250,6 +255,10 @@ class DebugCommand {
 
     @Command("debug vconf update")
     fun updateVConf(source: CommandSource) {
+        if (source !is ConsoleCommandSource) {
+            source.sendMessage("<red>This command can only be executed from the node console.")
+            return
+        }
         NodeCoroutineScope.launch {
             source.sendMessage("Updating config")
             VirtualConfigDebugHelper.updateDebugConfig()
@@ -262,6 +271,10 @@ class DebugCommand {
         source: CommandSource,
         @Argument("startId") startId: Int,
     ) {
+        if (source !is ConsoleCommandSource) {
+            source.sendMessage("<red>This command can only be executed from the node console.")
+            return
+        }
         NodeCoroutineScope.launch {
             source.sendMessage("Finding next available service orderedId...")
             val id = Node.instance.serviceFactoryProvider

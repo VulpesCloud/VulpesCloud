@@ -29,10 +29,8 @@ import dev.jorel.commandapi.CommandAPIVelocityConfig
 import jakarta.inject.Inject
 import java.util.concurrent.TimeUnit
 import kotlin.jvm.optionals.getOrNull
-import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
@@ -98,7 +96,11 @@ constructor(
         }
 
         HubCommand(proxyServer, bridgeAPI).command.register()
-        CloudCommand()
+        val cloudCommandMeta = proxyServer.commandManager.metaBuilder("cloud").plugin(this).build()
+        proxyServer.commandManager.register(
+            cloudCommandMeta,
+            CloudCommand(BridgeAPI.createCoroutineAPI()),
+        )
 
         bridgeAPI
             .getEventAPI()

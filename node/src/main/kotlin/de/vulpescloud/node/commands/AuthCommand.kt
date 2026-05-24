@@ -1,5 +1,9 @@
 package de.vulpescloud.node.commands
 
+import build.buf.gen.vulpescloud.players.v1.getOfflinePlayersRequest
+import de.vulpescloud.api.players.OfflinePlayer
+import de.vulpescloud.api.players.toAPI
+import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.grpc.security.PermissionHelper
@@ -7,11 +11,15 @@ import de.vulpescloud.node.utils.MongoUtils
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
+import kotlinx.coroutines.future.future
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
+import org.incendo.cloud.annotations.Permission
+import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
+import org.incendo.cloud.context.CommandInput
 
 @Suppress("UNUSED")
 class AuthCommand {
@@ -38,8 +46,36 @@ class AuthCommand {
             .get(5, TimeUnit.SECONDS)
     }
 
+    // ---------- Offline Player suggestions
+    @Suggestions("offlinePlayers")
+    fun offlinePlayerSuggestions(): Stream<String> {
+        return NodeCoroutineScope.future {
+                Node.instance.localGrpcClient.playerAPI
+                    .getAllOfflinePlayers(getOfflinePlayersRequest {})
+                    .offlinePlayersList
+                    .stream()
+                    .map { it.toAPI().name }
+            }
+            .exceptionally { Stream.empty() }
+            .get(5, TimeUnit.SECONDS)
+    }
+
+    @Parser(suggestions = "offlinePlayers")
+    fun offlinePlayerParser(input: CommandInput): OfflinePlayer {
+        return NodeCoroutineScope.future {
+                Node.instance.localGrpcClient.playerAPI
+                    .getAllOfflinePlayers(getOfflinePlayersRequest {})
+                    .offlinePlayersList
+                    .find { it.name.equals(input.readString()) }!!
+                    .toAPI()
+            }
+            .exceptionally { throw NullPointerException("Player not found!") }
+            .get(5, TimeUnit.SECONDS)
+    }
+
     // ---------- Users ----------
 
+    @Permission("auth.user.create")
     @Command("auth user create <name> <password>")
     fun createUser(
         source: CommandSource,
@@ -52,6 +88,7 @@ class AuthCommand {
         }
     }
 
+    @Permission("auth.user.setPassword")
     @Command("auth user set password <name> <password>")
     fun setPassword(
         source: CommandSource,
@@ -64,6 +101,31 @@ class AuthCommand {
         }
     }
 
+    @Permission("auth.user.setMinecraftPlayer")
+    @Command("auth user set minecraftPlayer <name> <player>")
+    fun setMinecraftPlayer(
+        source: CommandSource,
+        @Argument("name") name: String,
+        @Argument("player") player: OfflinePlayer,
+    ) {
+        NodeCoroutineScope.launch {
+            val user = MongoUtils.getUserByName(name)
+            if (user == null) {
+                source.sendMessage("<red>User <yellow>$name <red>not found.")
+                return@launch
+            }
+            MongoUtils.updateUser(
+                name,
+                user.copy(
+                    extraData =
+                        user.extraData.toMutableMap().also { it["minecraft-uuid"] = player.uuid }
+                ),
+            )
+            source.sendMessage("<green>Updated minecraft player for <yellow>$name<green>.")
+        }
+    }
+
+    @Permission("auth.user.addPermission")
     @Command("auth user add permission <name> <permission>")
     fun addUserPermission(
         source: CommandSource,
@@ -78,6 +140,7 @@ class AuthCommand {
         }
     }
 
+    @Permission("auth.user.removePermission")
     @Command("auth user remove permission <name> <permission>")
     fun removeUserPermission(
         source: CommandSource,
@@ -92,6 +155,7 @@ class AuthCommand {
         }
     }
 
+    @Permission("auth.user.addGroup")
     @Command("auth user add group <name> <group>")
     fun addUserToGroup(
         source: CommandSource,
@@ -106,6 +170,7 @@ class AuthCommand {
         }
     }
 
+    @Permission("auth.user.removeGroup")
     @Command("auth user remove group <name> <group>")
     fun removeUserFromGroup(
         source: CommandSource,
@@ -118,6 +183,7 @@ class AuthCommand {
         }
     }
 
+    @Permission("auth.user.list")
     @Command("auth user list")
     fun listUsers(source: CommandSource) {
         NodeCoroutineScope.launch {
@@ -135,6 +201,7 @@ class AuthCommand {
         }
     }
 
+    @Permission("auth.user.checkPassword")
     @Command("auth user check password <name> <password>")
     fun checkUserPassword(
         source: CommandSource,
@@ -148,6 +215,7 @@ class AuthCommand {
         }
     }
 
+    @Permission("auth.user.checkPermission")
     @Command("auth user check permission <name> <permission>")
     fun checkUserPermission(
         source: CommandSource,
@@ -167,6 +235,7 @@ class AuthCommand {
         }
     }
 
+    @Permission("auth.user.listPermissions")
     @Command("auth user list permissions <name>")
     fun listUserPermissions(source: CommandSource, @Argument("name") name: String) {
         NodeCoroutineScope.launch {
@@ -185,9 +254,32 @@ class AuthCommand {
         }
     }
 
+    @Permission("auth.user.info")
+    @Command("auth user info <name>")
+    fun getUserInfo(source: CommandSource, @Argument("name") name: String) {
+        NodeCoroutineScope.launch {
+            val user = MongoUtils.getUserByName(name)
+            if (user == null) {
+                source.sendMessage("<red>User <yellow>$name <red>not found.")
+                return@launch
+            }
+            source.sendMessage("<green>User info for <yellow>$name<green>:")
+            source.sendMessage("<dark_gray>- <gold>Name: <yellow>${user.name}")
+            source.sendMessage("<dark_gray>- <gold>Groups:")
+            user.groups.forEach { group -> source.sendMessage("<dark_gray>- <gold>$group") }
+            source.sendMessage("<dark_gray>- <gold>Permissions:")
+            user.permissions.forEach { perm -> source.sendMessage("<dark_gray>- <gold>$perm") }
+            source.sendMessage("<dark_gray>- <gold>Extra Data:")
+            user.extraData.forEach { (key, value) ->
+                source.sendMessage("<dark_gray>- <gold>$key: <yellow>$value")
+            }
+        }
+    }
+
     // ---------- Groups ----------
 
     @Command("auth group create <name>")
+    @Permission("auth.group.create")
     fun createGroup(source: CommandSource, @Argument("name") name: String) {
         NodeCoroutineScope.launch {
             MongoUtils.createGroup(name)
@@ -196,6 +288,7 @@ class AuthCommand {
     }
 
     @Command("auth group add permission <name> <permission>")
+    @Permission("auth.group.addPermission")
     fun addGroupPermission(
         source: CommandSource,
         @Argument("name") name: String,
@@ -210,6 +303,7 @@ class AuthCommand {
     }
 
     @Command("auth group remove permission <name> <permission>")
+    @Permission("auth.group.removePermission")
     fun removeGroupPermission(
         source: CommandSource,
         @Argument("name") name: String,
@@ -224,6 +318,7 @@ class AuthCommand {
     }
 
     @Command("auth group list")
+    @Permission("auth.group.list")
     fun listGroups(source: CommandSource) {
         NodeCoroutineScope.launch {
             val groups = MongoUtils.getAllGroups()
@@ -241,6 +336,7 @@ class AuthCommand {
     }
 
     @Command("auth group list permissions <name>")
+    @Permission("auth.group.listPermissions")
     fun listGroupPermissions(source: CommandSource, @Argument("name") name: String) {
         NodeCoroutineScope.launch {
             val group = MongoUtils.getGroupByName(name)

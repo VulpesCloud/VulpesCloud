@@ -11,6 +11,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
+import org.incendo.cloud.annotations.Permission
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
@@ -53,6 +54,7 @@ class ClusterCommand {
             .get(5, TimeUnit.SECONDS)
     }
 
+    @Permission("cluster.getAll")
     @Command("cluster nodes")
     fun listNodes(source: CommandSource) {
         NodeCoroutineScope.launch {
@@ -80,6 +82,7 @@ class ClusterCommand {
         }
     }
 
+    @Permission("cluster.getSnapshot")
     @Command("cluster node <node> getSnapshot")
     fun getNodeSnapshot(source: CommandSource, @Argument("node") node: List<ClusterNode>) {
         NodeCoroutineScope.launch {
