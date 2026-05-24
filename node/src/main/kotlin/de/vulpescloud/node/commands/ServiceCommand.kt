@@ -58,7 +58,7 @@ class ServiceCommand {
                 .servicesList
                 .forEach {
                     source.sendMessage(
-                        "Service: &f${it.task.name}-${it.orderedId} &8- &7${it.state.name} &8- &7${it.port}"
+                        "Service: <white>${it.task.name}-${it.orderedId} <dark_gray>- <gray>${it.state.name} <dark_gray>- <gray>${it.port}"
                     )
                 }
         }
@@ -69,12 +69,12 @@ class ServiceCommand {
     fun infoService(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
             source.sendMessage(
-                "&7Name: &e${it.name()} \n" +
-                    "&7UUID: &e${it.uuid} \n" +
-                    "&7Port: &e${it.port} \n" +
-                    "&7Node: &e${it.node} \n" +
-                    "&7PlayerCount: &e${it.playerCount} \n" +
-                    "&8State: &e${it.state}"
+                "<gray>Name: <yellow>${it.name()} \n" +
+                    "<gray>UUID: <yellow>${it.uuid} \n" +
+                    "<gray>Port: <yellow>${it.port} \n" +
+                    "<gray>Node: <yellow>${it.node} \n" +
+                    "<gray>PlayerCount: <yellow>${it.playerCount} \n" +
+                    "<dark_gray>State: <yellow>${it.state}"
             )
         }
     }
@@ -88,7 +88,7 @@ class ServiceCommand {
                 return
             }
             runBlocking {
-                source.sendMessage("Starting service &f${it.task.name}-${it.orderedId}...")
+                source.sendMessage("Starting service <white>${it.task.name}-${it.orderedId}...")
                 Node.instance.localGrpcClient.serviceAPI.startService(
                     StartServiceRequest.newBuilder().setService(it.toDefinition()).build()
                 )
@@ -114,7 +114,7 @@ class ServiceCommand {
         service.forEach {
             runBlocking {
                 source.sendMessage(
-                    "Retrieving snapshot for service &f${it.task.name}-${it.orderedId}..."
+                    "Retrieving snapshot for service <white>${it.task.name}-${it.orderedId}..."
                 )
                 val snapshot =
                     Node.instance.localGrpcClient.serviceAPI
@@ -123,15 +123,15 @@ class ServiceCommand {
                         )
                         .snapshot
                 source.sendMessage(
-                    "&7Snapshot for &e${it.task.name}-${it.orderedId}:\n" +
-                        "&7Timestamp: &e${snapshot.snapshotTime}\n" +
-                        "&7Players: &e${snapshot.playerCount}\n" +
-                        "&7System CPU Usage: &e${snapshot.systemCpuUsage}\n" +
-                        "&7Process CPU Usage: &e${snapshot.cpuUsage}\n" +
-                        "&7Max Heap Memory: &e${snapshot.maxHeapMemory}\n" +
-                        "&7Heap Memory Usage: &e${snapshot.heapUsageMemory}\n" +
-                        "&7Non Heap Memory Usage: &e${snapshot.noHeapUsageMemory}\n" +
-                        "&7Uptime: &e${snapshot.uptimeMillis.toDuration(DurationUnit.MILLISECONDS)}"
+                    "<gray>Snapshot for <yellow>${it.task.name}-${it.orderedId}:\n" +
+                        "<gray>Timestamp: <yellow>${snapshot.snapshotTime}\n" +
+                        "<gray>Players: <yellow>${snapshot.playerCount}\n" +
+                        "<gray>System CPU Usage: <yellow>${snapshot.systemCpuUsage}\n" +
+                        "<gray>Process CPU Usage: <yellow>${snapshot.cpuUsage}\n" +
+                        "<gray>Max Heap Memory: <yellow>${snapshot.maxHeapMemory}\n" +
+                        "<gray>Heap Memory Usage: <yellow>${snapshot.heapUsageMemory}\n" +
+                        "<gray>Non Heap Memory Usage: <yellow>${snapshot.noHeapUsageMemory}\n" +
+                        "<gray>Uptime: <yellow>${snapshot.uptimeMillis.toDuration(DurationUnit.MILLISECONDS)}"
                 )
             }
         }
@@ -201,11 +201,11 @@ class ServiceCommand {
                     )
                 if (resp.success) {
                     source.sendMessage(
-                        "Sent command to service &f${it.task.name}-${it.orderedId}&8."
+                        "Sent command to service <white>${it.task.name}-${it.orderedId}<dark_gray>."
                     )
                 } else {
                     source.sendMessage(
-                        "Failed to send command to service &f${it.task.name}-${it.orderedId}&8."
+                        "Failed to send command to service <white>${it.task.name}-${it.orderedId}<dark_gray>."
                     )
                 }
             }

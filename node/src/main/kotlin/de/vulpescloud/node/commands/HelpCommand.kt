@@ -31,7 +31,7 @@ class HelpCommand(private val commandProvider: CommandProvider) {
     @Command("help|?")
     fun sendGeneralHelp(source: CommandSource) {
         commandProvider.commands()!!.forEach {
-            source.sendMessage("&f${it.joinNameToAliases(", ")} &8- &7${it.description}&8.")
+            source.sendMessage("<white>${it.joinNameToAliases(", ")} <dark_gray>- <gray>${it.description}<dark_gray>.")
         }
     }
 

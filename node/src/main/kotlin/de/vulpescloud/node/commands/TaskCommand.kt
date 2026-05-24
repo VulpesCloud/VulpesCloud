@@ -71,7 +71,7 @@ class TaskCommand {
             tasks.forEach {
                 val name = it.name.padEnd(maxNameLength)
                 source.sendMessage(
-                    " &8- &m$name &7Maintenance: &e${it.maintenance}&8, &7MaxPlayers: &e${it.maxPlayers}&8, &7MaxMemory: &e${it.maxMemory}MB&8, &7Static: &e${it.staticServices}&8, &7Fallback: &e${it.fallback}&8, &7StartPort: &e${it.startPort}&8, &7Version: &e${it.software.name}-${it.software.version}"
+                    " <dark_gray>- <white>$name <gray>Maintenance: <yellow>${it.maintenance}<dark_gray>, <gray>MaxPlayers: <yellow>${it.maxPlayers}<dark_gray>, <gray>MaxMemory: <yellow>${it.maxMemory}MB<dark_gray>, <gray>Static: <yellow>${it.staticServices}<dark_gray>, <gray>Fallback: <yellow>${it.fallback}<dark_gray>, <gray>StartPort: <yellow>${it.startPort}<dark_gray>, <gray>Version: <yellow>${it.software.name}-${it.software.version}"
                 )
             }
         }
@@ -82,23 +82,23 @@ class TaskCommand {
     fun infoTask(source: CommandSource, @Argument("tasks") tasks: List<Task>) {
         tasks.forEach {
             source.sendMessage(
-                "&7Name: &e${it.name} \n" +
-                    "&7MaxPlayers: &e${it.maxPlayers} \n" +
-                    "&7MaxMemory: &e${it.maxMemory}MB \n" +
-                    "&7Static: &e${it.staticServices} \n" +
-                    "&7Fallback: &e${it.fallback} \n" +
-                    "&7StartPort: &e${it.startPort} \n" +
-                    "&7Version: &e${it.software.name}-${it.software.version} \n" +
-                    "&7StaticServices: &e${it.staticServices} \n" +
-                    "&7Maintenance: &e${it.maintenance} \n" +
-                    "&7PreferredNode: &e${it.preferredNode} \n" +
-                    "&7ServiceFactory: &e${it.serviceFactoryName} \n" +
-                    "&7CopyTemplatesToStatic: &e${it.copyTemplatesToStatic} \n" +
-                    "&7MinOnlineServices: &e${it.minOnlineServices} \n" +
-                    "&7MaxOnlineServices: &e${it.maxOnlineServices} \n" +
-                    "&7JvmArgs: &e${it.jvmArgs.joinToString(", ")} \n" +
-                    "&7EnvVars: &e${it.envVars.joinToString(", ")} \n" +
-                    "&7Attributes: &e${it.attributes}"
+                "<gray>Name: <yellow>${it.name} \n" +
+                    "<gray>MaxPlayers: <yellow>${it.maxPlayers} \n" +
+                    "<gray>MaxMemory: <yellow>${it.maxMemory}MB \n" +
+                    "<gray>Static: <yellow>${it.staticServices} \n" +
+                    "<gray>Fallback: <yellow>${it.fallback} \n" +
+                    "<gray>StartPort: <yellow>${it.startPort} \n" +
+                    "<gray>Version: <yellow>${it.software.name}-${it.software.version} \n" +
+                    "<gray>StaticServices: <yellow>${it.staticServices} \n" +
+                    "<gray>Maintenance: <yellow>${it.maintenance} \n" +
+                    "<gray>PreferredNode: <yellow>${it.preferredNode} \n" +
+                    "<gray>ServiceFactory: <yellow>${it.serviceFactoryName} \n" +
+                    "<gray>CopyTemplatesToStatic: <yellow>${it.copyTemplatesToStatic} \n" +
+                    "<gray>MinOnlineServices: <yellow>${it.minOnlineServices} \n" +
+                    "<gray>MaxOnlineServices: <yellow>${it.maxOnlineServices} \n" +
+                    "<gray>JvmArgs: <yellow>${it.jvmArgs.joinToString(", ")} \n" +
+                    "<gray>EnvVars: <yellow>${it.envVars.joinToString(", ")} \n" +
+                    "<gray>Attributes: <yellow>${it.attributes}"
             )
         }
     }
@@ -169,7 +169,7 @@ class TaskCommand {
                     Node.instance.localGrpcClient.tasksAPI.deleteTask(
                         deleteTaskRequest { this.task = task.toDefinition() }
                     )
-                source.sendMessage("Deleted task &m${task.name}&8.")
+                source.sendMessage("Deleted task <white>${task.name}<dark_gray>.")
             }
         }
     }
@@ -183,7 +183,7 @@ class TaskCommand {
     ) {
         runBlocking {
             tasks.forEach { task ->
-                source.sendMessage("Setting max memory for task &m${task.name} to &e$memory MB")
+                source.sendMessage("Setting max memory for task <white>${task.name} to <yellow>$memory MB")
                 val newTask = task.copy(maxMemory = memory.toLong())
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
@@ -201,7 +201,7 @@ class TaskCommand {
     ) {
         runBlocking {
             tasks.forEach { task ->
-                source.sendMessage("Setting maintenance for task &m${task.name} to &e$maintenance")
+                source.sendMessage("Setting maintenance for task <white>${task.name} to <yellow>$maintenance")
                 val newTask = task.copy(maintenance = maintenance)
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
@@ -219,7 +219,7 @@ class TaskCommand {
     ) {
         runBlocking {
             tasks.forEach { task ->
-                source.sendMessage("Setting staticServices for task &m${task.name} to &e$static")
+                source.sendMessage("Setting staticServices for task <white>${task.name} to <yellow>$static")
                 val newTask = task.copy(staticServices = static)
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
@@ -237,7 +237,7 @@ class TaskCommand {
     ) {
         runBlocking {
             tasks.forEach { task ->
-                source.sendMessage("Setting fallback for task &m${task.name} to &e$fallback")
+                source.sendMessage("Setting fallback for task <white>${task.name} to <yellow>$fallback")
                 val newTask = task.copy(fallback = fallback)
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
@@ -255,7 +255,7 @@ class TaskCommand {
     ) {
         runBlocking {
             tasks.forEach { task ->
-                source.sendMessage("Setting preferredNode for task &m${task.name} to &e$node")
+                source.sendMessage("Setting preferredNode for task <white>${task.name} to <yellow>$node")
                 val newTask = task.copy(preferredNode = node)
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
@@ -273,7 +273,7 @@ class TaskCommand {
     ) {
         runBlocking {
             tasks.forEach { task ->
-                source.sendMessage("Setting minServiceCount for task &m${task.name} to &e$count")
+                source.sendMessage("Setting minServiceCount for task <white>${task.name} to <yellow>$count")
                 val newTask = task.copy(minOnlineServices = count)
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
