@@ -14,6 +14,7 @@ import de.vulpescloud.node.Node
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.ConsoleCommandSource
 import de.vulpescloud.node.command.annotation.Alias
+import de.vulpescloud.node.command.annotation.SpecificCommandSource
 import de.vulpescloud.node.services.ServiceLogHandler
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
@@ -212,12 +213,9 @@ class ServiceCommand {
         }
     }
 
+    @SpecificCommandSource(ConsoleCommandSource::class)
     @Command("services|ser <service> screen")
     fun toggleScreen(source: CommandSource, @Argument("service") service: List<Service>) {
-        if (source !is ConsoleCommandSource) {
-            source.sendMessage("<red>This command can only be executed from the node console.")
-            return
-        }
         service.forEach {
             ServiceLogHandler.toggleServiceLogging("${it.task.name}-${it.orderedId}")
         }

@@ -3,6 +3,7 @@ package de.vulpescloud.node.commands
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.ConsoleCommandSource
+import de.vulpescloud.node.command.annotation.SpecificCommandSource
 import java.util.stream.Stream
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.runBlocking
@@ -13,6 +14,7 @@ import org.incendo.cloud.annotations.Flag
 import org.incendo.cloud.annotations.suggestion.Suggestions
 
 @Suppress("UNUSED")
+@SpecificCommandSource(ConsoleCommandSource::class)
 class ModuleCommand {
 
     private val moduleProvider = Node.instance.moduleProvider
@@ -29,10 +31,6 @@ class ModuleCommand {
 
     @Command("module load <name>")
     fun loadModule(source: CommandSource, @Argument("name") name: String) {
-        if (source !is ConsoleCommandSource) {
-            source.sendMessage("<red>This command can only be executed from the node console.")
-            return
-        }
         runBlocking {
             val module = moduleProvider.loadModule(name)
             if (module != null) {
@@ -50,10 +48,6 @@ class ModuleCommand {
         source: CommandSource,
         @Argument("name", suggestions = "loadedModules") name: String,
     ) {
-        if (source !is ConsoleCommandSource) {
-            source.sendMessage("<red>This command can only be executed from the node console.")
-            return
-        }
         val success = moduleProvider.enableModule(name)
         if (success) {
             source.sendMessage("<green>Module <yellow>$name <green>was started successfully.")
@@ -69,10 +63,6 @@ class ModuleCommand {
         source: CommandSource,
         @Argument("name", suggestions = "loadedModules") name: String,
     ) {
-        if (source !is ConsoleCommandSource) {
-            source.sendMessage("<red>This command can only be executed from the node console.")
-            return
-        }
         val success = moduleProvider.disableModule(name)
         if (success) {
             source.sendMessage("<green>Module <yellow>$name <green>was stopped successfully.")
@@ -86,10 +76,6 @@ class ModuleCommand {
         source: CommandSource,
         @Argument("name", suggestions = "loadedModules") name: String,
     ) {
-        if (source !is ConsoleCommandSource) {
-            source.sendMessage("<red>This command can only be executed from the node console.")
-            return
-        }
         val success = moduleProvider.unloadModule(name)
         if (success) {
             source.sendMessage("<green>Module <yellow>$name <green>was unloaded successfully.")
@@ -100,10 +86,6 @@ class ModuleCommand {
 
     @Command("module list")
     fun listModules(source: CommandSource) {
-        if (source !is ConsoleCommandSource) {
-            source.sendMessage("<red>This command can only be executed from the node console.")
-            return
-        }
         val modules = moduleProvider.getAllModules()
         if (modules.isEmpty()) {
             source.sendMessage("<red>No modules are currently loaded.")
@@ -121,10 +103,6 @@ class ModuleCommand {
 
     @Command("module list downloadable")
     fun listDownloadableModules(source: CommandSource) {
-        if (source !is ConsoleCommandSource) {
-            source.sendMessage("<red>This command can only be executed from the node console.")
-            return
-        }
         try {
             runBlocking {
                 withTimeout(5.seconds) {
@@ -154,10 +132,6 @@ class ModuleCommand {
         @Argument("name", suggestions = "downloadableModules") name: String,
         @Flag("force") force: Boolean,
     ) {
-        if (source !is ConsoleCommandSource) {
-            source.sendMessage("<red>This command can only be executed from the node console.")
-            return
-        }
         try {
             val module = moduleProvider.getDownloadableModule(name)
             if (module == null) {
@@ -180,10 +154,6 @@ class ModuleCommand {
         source: CommandSource,
         @Argument("name", suggestions = "loadedModules") name: String,
     ) {
-        if (source !is ConsoleCommandSource) {
-            source.sendMessage("<red>This command can only be executed from the node console.")
-            return
-        }
         runBlocking {
             val success = moduleProvider.restartModule(name)
             if (success) {
@@ -199,10 +169,6 @@ class ModuleCommand {
         source: CommandSource,
         @Argument("name", suggestions = "loadedModules") name: String,
     ) {
-        if (source !is ConsoleCommandSource) {
-            source.sendMessage("<red>This command can only be executed from the node console.")
-            return
-        }
         val module = moduleProvider.getModule(name)
         if (module == null) {
             source.sendMessage("<red>Module <yellow>$name <red>not found.")
@@ -239,10 +205,6 @@ class ModuleCommand {
         @Argument("name", suggestions = "downloadableModules") name: String,
         @Flag("detailed") detailed: Boolean,
     ) {
-        if (source !is ConsoleCommandSource) {
-            source.sendMessage("<red>This command can only be executed from the node console.")
-            return
-        }
         val module = moduleProvider.getDownloadableModule(name)
         if (module == null) {
             source.sendMessage("<red>Module <yellow>$name <red>not found.")
@@ -277,10 +239,6 @@ class ModuleCommand {
 
     @Command("module checkForUpdates")
     fun checkForModuleUpdates(source: CommandSource) {
-        if (source !is ConsoleCommandSource) {
-            source.sendMessage("<red>This command can only be executed from the node console.")
-            return
-        }
         moduleProvider.checkAllLoadedModulesForUpdates()
     }
 }

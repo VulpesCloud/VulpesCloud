@@ -1,14 +1,12 @@
 package de.vulpescloud.node.command
 
 import de.vulpescloud.node.grpc.security.model.UserModel
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.ConcurrentLinkedQueue
 
 class InternalPlayerCommandSource(val user: UserModel) : CommandSource {
-    val messages: MutableSet<String> = ConcurrentHashMap.newKeySet()
+    val messages = ConcurrentLinkedQueue<String>()
 
     override fun sendMessage(message: String) {
         messages.add(message)
     }
-
-
 }

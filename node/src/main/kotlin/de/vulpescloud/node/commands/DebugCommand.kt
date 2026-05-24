@@ -5,11 +5,13 @@ import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.ConsoleCommandSource
+import de.vulpescloud.node.command.annotation.SpecificCommandSource
 import de.vulpescloud.node.virtualconfig.VirtualConfigDebugHelper
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
 
+@SpecificCommandSource(ConsoleCommandSource::class)
 class DebugCommand {
 
     //    private val debugProxyTask =
@@ -241,10 +243,6 @@ class DebugCommand {
 
     @Command("debug vconf create")
     fun createVConf(source: CommandSource) {
-        if (source !is ConsoleCommandSource) {
-            source.sendMessage("<red>This command can only be executed from the node console.")
-            return
-        }
         runBlocking {
             source.sendMessage("Creating config")
             VirtualConfigDebugHelper.createDebugConfig()
@@ -254,10 +252,6 @@ class DebugCommand {
 
     @Command("debug vconf update")
     fun updateVConf(source: CommandSource) {
-        if (source !is ConsoleCommandSource) {
-            source.sendMessage("<red>This command can only be executed from the node console.")
-            return
-        }
         runBlocking {
             source.sendMessage("Updating config")
             VirtualConfigDebugHelper.updateDebugConfig()
@@ -270,10 +264,6 @@ class DebugCommand {
         source: CommandSource,
         @Argument("startId") startId: Int,
     ) {
-        if (source !is ConsoleCommandSource) {
-            source.sendMessage("<red>This command can only be executed from the node console.")
-            return
-        }
         runBlocking {
             source.sendMessage("Finding next available service orderedId...")
             val id = Node.instance.serviceFactoryProvider

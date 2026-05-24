@@ -7,6 +7,7 @@ import build.buf.gen.vulpescloud.node.v1.tabCompleteRequest
 import com.velocitypowered.api.command.SimpleCommand
 import com.velocitypowered.api.proxy.Player
 import de.vulpescloud.bridge.BridgeAPI
+import de.vulpescloud.connector.velocity.config.getConfig
 import de.vulpescloud.wrapper.Wrapper
 import java.util.concurrent.CompletableFuture
 import kotlinx.coroutines.CoroutineScope
@@ -30,6 +31,7 @@ class CloudCommand(val bridgeAPI: BridgeAPI.BridgeCoroutineAPI) : SimpleCommand 
         }
 
         runBlocking {
+            val config = getConfig()
             Wrapper.instance.grpcClient.clusterAPI
                 .executeCommand(
                     executeCommandRequest {
@@ -46,8 +48,7 @@ class CloudCommand(val bridgeAPI: BridgeAPI.BridgeCoroutineAPI) : SimpleCommand 
                 )
                 .outputList
                 .forEach {
-                    println("CMD: $it")
-                    invocation.source().sendMessage(miniMessage.deserialize(it))
+                    invocation.source().sendMessage(miniMessage.deserialize("${config.prefix} $it"))
                 }
         }
     }

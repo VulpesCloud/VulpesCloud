@@ -12,6 +12,7 @@ import de.vulpescloud.node.Node
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.command.ConsoleCommandSource
 import de.vulpescloud.node.command.annotation.Alias
+import de.vulpescloud.node.command.annotation.SpecificCommandSource
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import de.vulpescloud.node.setup.setups.TaskSetup
 import java.util.concurrent.TimeUnit
@@ -47,11 +48,8 @@ class TaskCommand {
     }
 
     @Command("task|tasks setup")
+    @SpecificCommandSource(ConsoleCommandSource::class)
     fun setupTask(source: CommandSource) {
-        if (source !is ConsoleCommandSource) {
-            source.sendMessage("<red>This command can only be executed from the node console.")
-            return
-        }
         Node.instance.setupProvider.startSetup(TaskSetup())
     }
 

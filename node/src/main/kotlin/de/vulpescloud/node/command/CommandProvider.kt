@@ -4,6 +4,7 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import com.google.common.collect.Iterables
 import de.vulpescloud.node.command.annotation.Alias
 import de.vulpescloud.node.command.annotation.Description
+import de.vulpescloud.node.command.annotation.SpecificCommandSource
 import org.incendo.cloud.Command
 import org.incendo.cloud.CommandManager
 import org.incendo.cloud.annotations.AnnotationParser
@@ -11,6 +12,7 @@ import org.incendo.cloud.annotations.BuilderModifier
 import org.incendo.cloud.execution.CommandResult
 import org.incendo.cloud.key.CloudKey
 import org.incendo.cloud.meta.CommandMeta
+import org.incendo.cloud.permission.PredicatePermission
 import org.incendo.cloud.processors.cache.CaffeineCache
 import org.incendo.cloud.processors.confirmation.ConfirmationConfiguration
 import org.incendo.cloud.processors.confirmation.ConfirmationManager
@@ -19,6 +21,7 @@ import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.CompletableFuture
+import kotlin.reflect.KClass
 
 class CommandProvider {
 
@@ -26,6 +29,9 @@ class CommandProvider {
         CloudKey.of("vulpescloud:alias", Array<String>::class.java)
     private val descriptionKey: CloudKey<String> =
         CloudKey.of("vulpescloud:description", String::class.java)
+    private val specificCommandSourceKey: CloudKey<KClass<*>> =
+        CloudKey.of("vulpescloud:specificCommandSource", KClass::class.java)
+
     private var registeredCommands: MutableList<CommandInfo>? = mutableListOf()
     private var annotationParser: AnnotationParser<CommandSource>? = null
 
@@ -38,9 +44,9 @@ class CommandProvider {
 
         this.annotationParser!!.registerBuilderModifier(
             Alias::class.java,
-            BuilderModifier<Alias, CommandSource?> registerBuilderModifier@{
+            BuilderModifier registerBuilderModifier@{
                 alias: Alias,
-                builder: Command.Builder<CommandSource?> ->
+                builder: Command.Builder<CommandSource> ->
                 if (alias.alias.isNotEmpty()) {
                     return@registerBuilderModifier builder.meta(this.aliasKey!!, alias.alias)
                 }
@@ -50,11 +56,11 @@ class CommandProvider {
 
         this.annotationParser!!.registerBuilderModifier(
             Description::class.java,
-            BuilderModifier<Description, CommandSource?> registerBuilderModifier@{
+            BuilderModifier registerBuilderModifier@{
                 description: Description,
-                builder: Command.Builder<CommandSource?> ->
+                builder: Command.Builder<CommandSource> ->
                 if (description.description.trim { it <= ' ' }.isNotEmpty()) {
-                    return@registerBuilderModifier builder.meta<String>(
+                    return@registerBuilderModifier builder.meta(
                         this.descriptionKey,
                         if (description.translatable) {
                             "Currently no Translator"
@@ -67,6 +73,18 @@ class CommandProvider {
                 builder
             },
         )
+
+        this.annotationParser!!.registerBuilderModifier(
+            SpecificCommandSource::class.java
+        ) { annotation, builder ->
+            builder.permission(
+                PredicatePermission.of { sender ->
+                    annotation.value.java.isInstance(sender)
+                }
+            ).meta(this.specificCommandSourceKey, annotation.value)
+        }
+
+
 
         ConfirmationBuilderModifier.install(this.annotationParser!!)
         val confirmationManager =
