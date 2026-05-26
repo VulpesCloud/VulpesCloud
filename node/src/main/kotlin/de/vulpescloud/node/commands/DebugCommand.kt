@@ -244,18 +244,18 @@ class DebugCommand {
     @Command("debug vconf create")
     fun createVConf(source: CommandSource) {
         runBlocking {
-            source.sendMessage("Creating config")
+            source.sendMessage("<gray>Creating config...</gray>")
             VirtualConfigDebugHelper.createDebugConfig()
-            source.sendMessage("Successfully created config")
+            source.sendMessage("<green>Successfully created config!</green>")
         }
     }
 
     @Command("debug vconf update")
     fun updateVConf(source: CommandSource) {
         runBlocking {
-            source.sendMessage("Updating config")
+            source.sendMessage("<gray>Updating config...</gray>")
             VirtualConfigDebugHelper.updateDebugConfig()
-            source.sendMessage("Successfully updated config")
+            source.sendMessage("<green>Successfully updated config!</green>")
         }
     }
 
@@ -265,7 +265,7 @@ class DebugCommand {
         @Argument("startId") startId: Int,
     ) {
         runBlocking {
-            source.sendMessage("Finding next available service orderedId...")
+            source.sendMessage("<gray>Finding next available service orderedId...</gray>")
             val id = Node.instance.serviceFactoryProvider
                 .findServiceFactory("local")!!
                 .findNextAvailableOrderedId(
@@ -277,7 +277,7 @@ class DebugCommand {
                     startId,
                 )
 
-            source.sendMessage("Next available service orderedId: $id")
+            source.sendMessage("<gray>Next available service orderedId<dark_gray>:</dark_gray> <gold>$id</gold>")
         }
     }
 

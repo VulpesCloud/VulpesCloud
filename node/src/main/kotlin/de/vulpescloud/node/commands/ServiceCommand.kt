@@ -53,13 +53,13 @@ class ServiceCommand {
     @Command("services|ser list")
     fun listServices(source: CommandSource) {
         runBlocking {
-            source.sendMessage("Listing all services...")
+            source.sendMessage("<gray>Listing all services...</gray>")
             Node.instance.localGrpcClient.serviceAPI
                 .getAllServices(GetAllServicesRequest.newBuilder().build())
                 .servicesList
                 .forEach {
                     source.sendMessage(
-                        "Service: <white>${it.task.name}-${it.orderedId} <dark_gray>- <gray>${it.state.name} <dark_gray>- <gray>${it.port}"
+                        " <dark_gray>»</dark_gray> <white>${it.task.name}-${it.orderedId}</white> <dark_gray>| <gray>State:</gray> <white>${it.state.name}</white> <dark_gray>| <gray>Port:</gray> <white>${it.port}</white>"
                     )
                 }
         }
@@ -70,12 +70,12 @@ class ServiceCommand {
     fun infoService(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
             source.sendMessage(
-                "<gray>Name: <yellow>${it.name()} \n" +
-                    "<gray>UUID: <yellow>${it.uuid} \n" +
-                    "<gray>Port: <yellow>${it.port} \n" +
-                    "<gray>Node: <yellow>${it.node} \n" +
-                    "<gray>PlayerCount: <yellow>${it.playerCount} \n" +
-                    "<dark_gray>State: <yellow>${it.state}"
+                "<gold>---------</gold> <white>${it.name()}</white> <gold>---------</gold>\n" +
+                        "<gray>UUID<dark_gray>:</dark_gray> <white>${it.uuid}</white>\n" +
+                        "<gray>Port<dark_gray>:</dark_gray> <white>${it.port}</white>\n" +
+                        "<gray>Node<dark_gray>:</dark_gray> <white>${it.node}</white>\n" +
+                        "<gray>Players<dark_gray>:</dark_gray> <white>${it.playerCount}</white>\n" +
+                        "<gray>State<dark_gray>:</dark_gray> <white>${it.state}</white>"
             )
         }
     }
@@ -85,11 +85,11 @@ class ServiceCommand {
     fun startService(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
             if (it.state == ServiceStates.STARTING || it.state == ServiceStates.RUNNING) {
-                source.sendMessage("Service is already running!")
+                source.sendMessage("<red>Service is already running!</red>")
                 return
             }
             runBlocking {
-                source.sendMessage("Starting service <white>${it.task.name}-${it.orderedId}...")
+                source.sendMessage("<gray>Starting service</gray> <white>${it.task.name}-${it.orderedId}</white><gray>...</gray>")
                 Node.instance.localGrpcClient.serviceAPI.startService(
                     StartServiceRequest.newBuilder().setService(it.toDefinition()).build()
                 )
@@ -115,7 +115,7 @@ class ServiceCommand {
         service.forEach {
             runBlocking {
                 source.sendMessage(
-                    "Retrieving snapshot for service <white>${it.task.name}-${it.orderedId}..."
+                    "<gray>Retrieving snapshot for service</gray> <white>${it.task.name}-${it.orderedId}</white><gray>...</gray>"
                 )
                 val snapshot =
                     Node.instance.localGrpcClient.serviceAPI
@@ -124,15 +124,15 @@ class ServiceCommand {
                         )
                         .snapshot
                 source.sendMessage(
-                    "<gray>Snapshot for <yellow>${it.task.name}-${it.orderedId}:\n" +
-                        "<gray>Timestamp: <yellow>${snapshot.snapshotTime}\n" +
-                        "<gray>Players: <yellow>${snapshot.playerCount}\n" +
-                        "<gray>System CPU Usage: <yellow>${snapshot.systemCpuUsage}\n" +
-                        "<gray>Process CPU Usage: <yellow>${snapshot.cpuUsage}\n" +
-                        "<gray>Max Heap Memory: <yellow>${snapshot.maxHeapMemory}\n" +
-                        "<gray>Heap Memory Usage: <yellow>${snapshot.heapUsageMemory}\n" +
-                        "<gray>Non Heap Memory Usage: <yellow>${snapshot.noHeapUsageMemory}\n" +
-                        "<gray>Uptime: <yellow>${snapshot.uptimeMillis.toDuration(DurationUnit.MILLISECONDS)}"
+                    "<gold>---------</gold> <white>${it.task.name}-${it.orderedId}</white> <gold>---------</gold>\n" +
+                        "<gray>Timestamp<dark_gray>:</dark_gray> <white>${snapshot.snapshotTime}</white>\n" +
+                        "<gray>Players<dark_gray>:</dark_gray> <white>${snapshot.playerCount}</white>\n" +
+                        "<gray>System CPU<dark_gray>:</dark_gray> <white>${snapshot.systemCpuUsage}%</white>\n" +
+                        "<gray>Process CPU<dark_gray>:</dark_gray> <white>${snapshot.cpuUsage}%</white>\n" +
+                        "<gray>Max Memory<dark_gray>:</dark_gray> <white>${snapshot.maxHeapMemory}mb</white>\n" +
+                        "<gray>Heap Usage<dark_gray>:</dark_gray> <white>${snapshot.heapUsageMemory}mb</white>\n" +
+                        "<gray>Non-Heap Usage<dark_gray>:</dark_gray> <white>${snapshot.noHeapUsageMemory}mb</white>\n" +
+                        "<gray>Uptime<dark_gray>:</dark_gray> <white>${snapshot.uptimeMillis.toDuration(DurationUnit.MILLISECONDS)}</white>"
                 )
             }
         }
@@ -155,7 +155,7 @@ class ServiceCommand {
     @Command("services|ser stopAll")
     fun stopAllService(source: CommandSource) {
         runBlocking {
-            source.sendMessage("Stopping all services...")
+            source.sendMessage("<gray>Stopping all services...</gray>")
             Node.instance.localGrpcClient.serviceAPI
                 .getAllServices(GetAllServicesRequest.newBuilder().build())
                 .servicesList
@@ -172,7 +172,7 @@ class ServiceCommand {
     @Command("services|ser deleteAll")
     fun deleteAllServices(source: CommandSource) {
         runBlocking {
-            source.sendMessage("Deleting all services...")
+            source.sendMessage("<gray>Deleting all services...</gray>")
             Node.instance.localGrpcClient.serviceAPI
                 .getAllServices(GetAllServicesRequest.newBuilder().build())
                 .servicesList
@@ -202,11 +202,11 @@ class ServiceCommand {
                     )
                 if (resp.success) {
                     source.sendMessage(
-                        "Sent command to service <white>${it.task.name}-${it.orderedId}<dark_gray>."
+                        "<gray>Sent command to service</gray> <white>${it.task.name}-${it.orderedId}</white><dark_gray>.</dark_gray>"
                     )
                 } else {
                     source.sendMessage(
-                        "Failed to send command to service <white>${it.task.name}-${it.orderedId}<dark_gray>."
+                        "<red>Failed to send command to service</red> <white>${it.task.name}-${it.orderedId}</white><dark_gray>.</dark_gray>"
                     )
                 }
             }

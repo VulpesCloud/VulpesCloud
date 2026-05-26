@@ -60,20 +60,20 @@ class VirtualConfigCommand {
     fun listVirtualConfigs(source: CommandSource, @Flag("local") local: Boolean) {
         runBlocking {
             if (local) {
-                source.sendMessage("Listing local virtual configs...")
+                source.sendMessage("<gray>Listing local virtual configs...</gray>")
                 Node.instance.virtualConfigProvider.apply {
                     tempConfigsPath
                         .toFile()
                         .listFiles()
                         ?.filter { it.extension == "json" }
-                        ?.forEach { file -> source.sendMessage(" - ${file.nameWithoutExtension}") }
+                        ?.forEach { file -> source.sendMessage(" <dark_gray>»</dark_gray> <white>${file.nameWithoutExtension}</white>") }
                 }
             } else {
-                source.sendMessage("Listing remote virtual configs...")
+                source.sendMessage("<gray>Listing remote virtual configs...</gray>")
                 Node.instance.localGrpcClient.virtualConfigAPI
                     .getAll(getAllRequest {})
                     .configsList
-                    .forEach { source.sendMessage(" - ${it.name}") }
+                    .forEach { source.sendMessage(" <dark_gray>»</dark_gray> <white>${it.name}</white>") }
             }
         }
     }
@@ -89,15 +89,15 @@ class VirtualConfigCommand {
             Node.instance.virtualConfigProvider.getCustomConfig(config.name, force).let {
                 if (it == null) {
                     source.sendMessage(
-                        "Unexpected NullPointerException while trying to get the config! Try with --force"
+                        "<red>Unexpected NullPointerException while trying to get the config! Try with --force</red>"
                     )
                     return@let
                 }
 
-                source.sendMessage("Name: ${it.name}")
-                source.sendMessage("Created at: ${formatUnixTimestamp(it.createdAt)}")
-                source.sendMessage("Updated at: ${formatUnixTimestamp(it.lastUpdatedAt)}")
-                source.sendMessage("Raw Json: ${it.config.toString(4)}")
+                source.sendMessage("<gold>---------</gold> <white>${it.name}</white> <gold>---------</gold>")
+                source.sendMessage("<gray>Created at<dark_gray>:</dark_gray> <white>${formatUnixTimestamp(it.createdAt)}</white>")
+                source.sendMessage("<gray>Updated at<dark_gray>:</dark_gray> <white>${formatUnixTimestamp(it.lastUpdatedAt)}</white>")
+                source.sendMessage("<gray>Raw Json<dark_gray>:</dark_gray> <white>${it.config.toString(4)}</white>")
             }
         }
     }
@@ -111,7 +111,7 @@ class VirtualConfigCommand {
         runBlocking {
             Node.instance.virtualConfigProvider.updateDatabaseFromLocalConfig(config.name)
             source.sendMessage(
-                "Successfully updated the database from the local config file for virtual config ${config.name}!"
+                "<green>Successfully updated the database from the local config file for virtual config</green> <white>${config.name}</white><green>!</green>"
             )
         }
     }
@@ -125,7 +125,7 @@ class VirtualConfigCommand {
         runBlocking {
             Node.instance.virtualConfigProvider.updateLocalConfigFromDatabase(config.name)
             source.sendMessage(
-                "Successfully updated the local config file from the database for virtual config ${config.name}!"
+                "<green>Successfully updated the local config file from the database for virtual config</green> <white>${config.name}</white><green>!</green>"
             )
         }
     }

@@ -22,12 +22,12 @@ class PlayersCommand {
             val registeredPlayers =
                 playerAPI.getAllOfflinePlayers(getOfflinePlayersRequest {}).offlinePlayersList
             source.sendMessage(
-                "A total of <orange>${registeredPlayers.size}</orange> players are registered!"
+                "<gray>A total of</gray> <gold>${registeredPlayers.size}</gold> <gray>players are registered!</gray>"
             )
             if (verbose) {
                 registeredPlayers.forEach { player ->
                     source.sendMessage(
-                        " - <yellow>${player.name}</yellow> (<yellow>${player.uuid}</yellow>) lastSeen: <yellow>${player.lastSeen}</yellow> firstSeen: <yellow>${player.firstSeen}</yellow>"
+                        " <dark_gray>»</dark_gray> <white>${player.name}</white> <dark_gray>(</dark_gray><gray>${player.uuid}</gray><dark_gray>)</dark_gray> <gray>lastSeen:</gray> <white>${player.lastSeen}</white> <gray>firstSeen:</gray> <white>${player.firstSeen}</white>"
                     )
                 }
             }
@@ -42,12 +42,12 @@ class PlayersCommand {
                 playerAPI.getAllOnlinePlayers(getAllOnlinePlayersRequest {}).onlinePlayersList
 
             source.sendMessage(
-                "A total of <orange>${onlinePlayers.size}</orange> players are online!"
+                "<gray>A total of</gray> <gold>${onlinePlayers.size}</gold> <gray>players are online!</gray>"
             )
             if (verbose) {
                 onlinePlayers.forEach { player ->
                     source.sendMessage(
-                        " - <yellow>${player.name}</yellow> (<yellow>${player.uuid}</yellow>) Proxy: <yellow>${player.proxyServiceName}</yellow> Server: <yellow>${player.serverServiceName}</yellow>"
+                        " <dark_gray>»</dark_gray> <white>${player.name}</white> <dark_gray>(</dark_gray><gray>${player.uuid}</gray><dark_gray>)</dark_gray> <gray>Proxy:</gray> <white>${player.proxyServiceName}</white> <gray>Server:</gray> <white>${player.serverServiceName}</white>"
                     )
                 }
             }

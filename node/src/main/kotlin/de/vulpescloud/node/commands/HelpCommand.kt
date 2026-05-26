@@ -31,17 +31,17 @@ class HelpCommand(private val commandProvider: CommandProvider) {
     @Command("help|?")
     fun sendGeneralHelp(source: CommandSource) {
         commandProvider.commands()!!.forEach {
-            source.sendMessage("<white>${it.joinNameToAliases(", ")} <dark_gray>- <gray>${it.description}<dark_gray>.")
+            source.sendMessage(" <dark_gray>»</dark_gray> <white>${it.joinNameToAliases(", ")}</white> <dark_gray>-</dark_gray> <gray>${it.description}</gray>")
         }
     }
 
     @Command("help|? <command>")
     fun sendSpecificHelp(source: CommandSource, @Argument("command") command: CommandInfo?) {
         if (command != null) {
-            source.sendMessage("Aliases: <yellow>${command.joinNameToAliases("<gray>,</gray> ")}</yellow>")
-            source.sendMessage("Description: <yellow>${command.description}</yellow>")
-            source.sendMessage("Usages:")
-            command.usage.forEach { source.sendMessage(" > <yellow>$it</yellow>") }
+            source.sendMessage("<gray>Aliases<dark_gray>:</dark_gray> <white>${command.joinNameToAliases(", ")}</white>")
+            source.sendMessage("<gray>Description<dark_gray>:</dark_gray> <white>${command.description}</white>")
+            source.sendMessage("<gray>Usages<dark_gray>:</dark_gray>")
+            command.usage.forEach { source.sendMessage(" <dark_gray>»</dark_gray> <white>$it</white>") }
         } else {
             source.sendMessage("<red>Invalid command!</red>")
         }

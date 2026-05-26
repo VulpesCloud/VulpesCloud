@@ -35,7 +35,7 @@ class SoftwareCommand {
     @Permission("software.list")
     @Command("software list")
     fun listSoftwares(source: CommandSource) {
-        source.sendMessage("Available Server Softwares:")
+        source.sendMessage("<gray>Available server softwares:</gray>")
         runBlocking {
             val maxDisplayNameLength = downloaders.maxOf { it.displayName.length }
             val allVersions =
@@ -46,11 +46,11 @@ class SoftwareCommand {
 
             allVersions.forEach { (downloader, software) ->
                 source.sendMessage(
-                    "<gray> - <color:$VULPES_ORANGE>${downloader.displayName.padEnd(maxDisplayNameLength)}</color> Version: <yellow>${
+                    " <dark_gray>»</dark_gray> <gold>${downloader.displayName.padEnd(maxDisplayNameLength)}</gold> <gray>Version:</gray> <white>${
                         software.version.padEnd(
                             maxVersionLength
                         )
-                    }</yellow> Type: ${software.type}</gray>"
+                    }</white> <gray>Type:</gray> <white>${software.type}</white>"
                 )
             }
         }
@@ -60,8 +60,8 @@ class SoftwareCommand {
     @Confirmation
     @Command("software reCache")
     fun reCache(source: CommandSource) {
-        source.sendMessage("Re-caching software versions...")
+        source.sendMessage("<gray>Re-caching software versions...</gray>")
         Node.instance.serverSoftwareProvider.triggerReCache()
-        source.sendMessage("Re-caching software versions in background...")
+        source.sendMessage("<gray>Re-caching software versions in background...</gray>")
     }
 }

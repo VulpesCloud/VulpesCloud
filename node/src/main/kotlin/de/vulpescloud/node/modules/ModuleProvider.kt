@@ -73,7 +73,7 @@ class ModuleProvider(val moduleFolder: Path, val modulesJsonURL: String) {
                 // TODO: Module Load Event
                 vulpesModule.onLoad()
                 logger.info(
-                    "Module <light_purple>${moduleInfo.name}</light_purple> has been loaded successfully!"
+                    "Module <light_purple>${moduleInfo.name}</light_purple> has been loaded <green>successfully</green>!"
                 )
                 return loadedModule
             }
@@ -101,7 +101,7 @@ class ModuleProvider(val moduleFolder: Path, val modulesJsonURL: String) {
                 loadedModules.remove(module)
 
                 logger.info(
-                    "Module <light_purple>${module.moduleInfo.name}</light_purple> has been unloaded successfully!"
+                    "Module <light_purple>${module.moduleInfo.name}</light_purple> has been unloaded <green>successfully</green>!"
                 )
 
                 return true
@@ -128,7 +128,7 @@ class ModuleProvider(val moduleFolder: Path, val modulesJsonURL: String) {
                 module.module.onEnable()
                 module.moduleInfo.state = ModuleStates.ENABLED
                 logger.info(
-                    "Module <light_purple>${module.moduleInfo.name}</light_purple> has been enabled successfully!"
+                    "Module <light_purple>${module.moduleInfo.name}</light_purple> has been enabled <green>successfully</green>!"
                 )
                 return true
             }
@@ -153,7 +153,7 @@ class ModuleProvider(val moduleFolder: Path, val modulesJsonURL: String) {
                 module.module.onDisable()
                 module.moduleInfo.state = ModuleStates.LOADED
                 logger.info(
-                    "Module <light_purple>${module.moduleInfo.name}</light_purple> has been disabled successfully!"
+                    "Module <light_purple>${module.moduleInfo.name}</light_purple> has been disabled <green>successfully</green>!"
                 )
                 return true
             }

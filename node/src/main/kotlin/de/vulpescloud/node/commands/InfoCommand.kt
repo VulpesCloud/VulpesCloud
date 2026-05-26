@@ -15,18 +15,18 @@ class InfoCommand {
 
     @Command("info|i")
     fun displayInfo(source: CommandSource) {
-        source.sendMessage("Operating System<dark_gray>: <white>${System.getProperty("os.name")}")
-        source.sendMessage("Used Memory of the Node process<dark_gray>: <white>${usedMemory()}")
+        source.sendMessage("<gray>Operating System<dark_gray>:</dark_gray> <white>${System.getProperty("os.name")}</white>")
+        source.sendMessage("<gray>Memory Usage<dark_gray>:</dark_gray> <white>${usedMemory()}</white>")
         source.sendMessage(
-            "Java<dark_gray>: <white>${runtimeMXBean.vmVendor} ${runtimeMXBean.specVersion} <dark_gray>[<white> ${runtimeMXBean.vmName} ${runtimeMXBean.vmVersion} <dark_gray>]"
+            "<gray>Java<dark_gray>:</dark_gray> <white>${runtimeMXBean.vmVendor} ${runtimeMXBean.specVersion}</white> <dark_gray>[</dark_gray> <white>${runtimeMXBean.vmName} ${runtimeMXBean.vmVersion}</white> <dark_gray>]</dark_gray>"
         )
-        source.sendMessage("-----------------------------------------------------")
-        source.sendMessage("Update Branch<dark_gray>: <white>${VulpesLauncher.config.autoUpdatesBranch()}")
-        source.sendMessage("AutoUpdates Enabled<dark_gray>: <white>${VulpesLauncher.config.autoUpdatesEnabled()}")
-        source.sendMessage("Version<dark_gray>: <white>${CloudVersion.getFullVersion()}")
-        source.sendMessage("------------------------------------------------------")
+        source.sendMessage("<gold>-----------------------------------------------------</gold>")
+        source.sendMessage("<gray>Update Branch<dark_gray>:</dark_gray> <white>${VulpesLauncher.config.autoUpdatesBranch()}</white>")
+        source.sendMessage("<gray>Auto-Updates<dark_gray>:</dark_gray> <white>${VulpesLauncher.config.autoUpdatesEnabled()}</white>")
+        source.sendMessage("<gray>Version<dark_gray>:</dark_gray> <white>${CloudVersion.getFullVersion()}</white>")
+        source.sendMessage("<gold>------------------------------------------------------</gold>")
         source.sendMessage(
-            "Uptime<dark_gray>: <white>${(System.currentTimeMillis() - System.getProperty("startup").toLong()) / 1000 } seconds"
+            "<gray>Uptime<dark_gray>:</dark_gray> <white>${(System.currentTimeMillis() - System.getProperty("startup").toLong()) / 1000}s</white>"
         )
     }
 

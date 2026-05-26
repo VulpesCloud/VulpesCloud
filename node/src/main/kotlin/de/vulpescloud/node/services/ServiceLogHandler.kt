@@ -53,17 +53,17 @@ object ServiceLogHandler {
     fun toggleServiceLogging(serviceName: String) {
         if (servicesToLog.contains(serviceName)) {
             servicesToLog.remove(serviceName)
-            logger.info("Logging for service $serviceName disabled.")
+            logger.info("<gray>Logging for service</gray> <white>$serviceName</white> <red>disabled</red><dark_gray>.</dark_gray>")
         } else {
             servicesToLog.add(serviceName)
             getLogs(serviceName).forEach { logLine(serviceName, it) }
-            logger.info("Logging for service $serviceName enabled.")
+            logger.info("<gray>Logging for service</gray> <white>$serviceName</white> <green>enabled</green><dark_gray>.</dark_gray>")
         }
     }
 
     private fun logLine(serviceName: String, line: String) {
         if (Node.instance.configProvider.config.testing.newServiceLoggingStyle) {
-            println("[$serviceName] $line")
+            println("<dark_gray>[</dark_gray><white>$serviceName</white><dark_gray>]</dark_gray> <gray>$line</gray>")
         } else {
             logger.info("[$serviceName] $line")
         }

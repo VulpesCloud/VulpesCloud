@@ -34,10 +34,10 @@ class ModuleCommand {
         runBlocking {
             val module = moduleProvider.loadModule(name)
             if (module != null) {
-                source.sendMessage("<green>Module <yellow>$name <green>was loaded successfully.")
+                source.sendMessage("<green>Module</green> <white>$name</white> <green>was loaded successfully.</green>")
             } else {
                 source.sendMessage(
-                    "<red>Failed to load module <yellow>$name<red>. Check logs for details."
+                    "<red>Failed to load module</red> <white>$name</white><red>. Check logs for details.</red>"
                 )
             }
         }
@@ -50,10 +50,10 @@ class ModuleCommand {
     ) {
         val success = moduleProvider.enableModule(name)
         if (success) {
-            source.sendMessage("<green>Module <yellow>$name <green>was started successfully.")
+            source.sendMessage("<green>Module</green> <white>$name</white> <green>was started successfully.</green>")
         } else {
             source.sendMessage(
-                "<red>Failed to start module <yellow>$name<red>. Is it already running or not loaded?"
+                "<red>Failed to start module</red> <white>$name</white><red>. Is it already running or not loaded?</red>"
             )
         }
     }
@@ -65,9 +65,9 @@ class ModuleCommand {
     ) {
         val success = moduleProvider.disableModule(name)
         if (success) {
-            source.sendMessage("<green>Module <yellow>$name <green>was stopped successfully.")
+            source.sendMessage("<green>Module</green> <white>$name</white> <green>was stopped successfully.</green>")
         } else {
-            source.sendMessage("<red>Failed to stop module <yellow>$name<red>. Is it even running?")
+            source.sendMessage("<red>Failed to stop module</red> <white>$name</white><red>. Is it even running?</red>")
         }
     }
 
@@ -78,9 +78,9 @@ class ModuleCommand {
     ) {
         val success = moduleProvider.unloadModule(name)
         if (success) {
-            source.sendMessage("<green>Module <yellow>$name <green>was unloaded successfully.")
+            source.sendMessage("<green>Module</green> <white>$name</white> <green>was unloaded successfully.</green>")
         } else {
-            source.sendMessage("<red>Failed to unload module <yellow>$name<red>.")
+            source.sendMessage("<red>Failed to unload module</red> <white>$name</white><red>.</red>")
         }
     }
 
@@ -92,11 +92,11 @@ class ModuleCommand {
             return
         }
 
-        source.sendMessage("<green>Loaded modules (<yellow>${modules.size}<green>):")
+        source.sendMessage("<gray>Loaded modules (<gold>${modules.size}</gold>):</gray>")
         modules.forEach {
             val statusColor = if (it.moduleInfo.state.name == "ENABLED") "<green>" else "<red>"
             source.sendMessage(
-                "<dark_gray>- <yellow>${it.moduleInfo.name} <dark_gray>(Version: <gold>${it.moduleInfo.version}<dark_gray>) Status: $statusColor${it.moduleInfo.state}"
+                " <dark_gray>»</dark_gray> <white>${it.moduleInfo.name}</white> <dark_gray>| <gray>Version:</gray> <white>${it.moduleInfo.version}</white> <dark_gray>| <gray>Status:</gray> $statusColor${it.moduleInfo.state}"
             )
         }
     }
@@ -112,11 +112,11 @@ class ModuleCommand {
                         return@withTimeout
                     }
                     source.sendMessage(
-                        "<green>Available downloadable modules (<yellow>${downloadableModules.size}<green>):"
+                        "<gray>Available downloadable modules (<gold>${downloadableModules.size}</gold>):</gray>"
                     )
                     downloadableModules.forEach {
                         source.sendMessage(
-                            "<dark_gray>- <yellow>${it.name} <dark_gray>(Version: <gold>${it.version}<dark_gray>) Description: ${it.description} Authors: ${it.authors.joinToString()} Website: ${it.website} Support: ${it.supportURL}"
+                            " <dark_gray>»</dark_gray> <white>${it.name}</white> <dark_gray>| <gray>Version:</gray> <white>${it.version}</white> <dark_gray>| <gray>Description:</gray> <white>${it.description}</white>"
                         )
                     }
                 }
@@ -135,7 +135,7 @@ class ModuleCommand {
         try {
             val module = moduleProvider.getDownloadableModule(name)
             if (module == null) {
-                source.sendMessage("<red>Module <yellow>$name <red>not found.")
+                source.sendMessage("<red>Module</red> <white>$name</white> <red>not found.</red>")
                 return
             }
 
@@ -157,9 +157,9 @@ class ModuleCommand {
         runBlocking {
             val success = moduleProvider.restartModule(name)
             if (success) {
-                source.sendMessage("<green>Module <yellow>$name <green>was reloaded successfully.")
+                source.sendMessage("<green>Module</green> <white>$name</white> <green>was reloaded successfully.</green>")
             } else {
-                source.sendMessage("<red>Failed to reload module <yellow>$name<red>.")
+                source.sendMessage("<red>Failed to reload module</red> <white>$name</white><red>.</red>")
             }
         }
     }
@@ -171,31 +171,19 @@ class ModuleCommand {
     ) {
         val module = moduleProvider.getModule(name)
         if (module == null) {
-            source.sendMessage("<red>Module <yellow>$name <red>not found.")
+            source.sendMessage("<red>Module</red> <white>$name</white> <red>not found.</red>")
             return
         }
         val moduleInfo = module.moduleInfo
-        source.sendMessage("Module <light_purple>${moduleInfo.name}</light_purple> Stats: ")
+        source.sendMessage("<gold>---------</gold> <white>${moduleInfo.name}</white> <gold>---------</gold>")
+        source.sendMessage("<gray>Version<dark_gray>:</dark_gray> <white>${moduleInfo.version}</white>")
+        source.sendMessage("<gray>State<dark_gray>:</dark_gray> <white>${moduleInfo.state}</white>")
+        source.sendMessage("<gray>Authors<dark_gray>:</dark_gray> <white>${moduleInfo.authors.joinToString()}</white>")
+        source.sendMessage("<gray>Description<dark_gray>:</dark_gray> <white>${moduleInfo.description}</white>")
+        source.sendMessage("<gray>Website<dark_gray>:</dark_gray> <white>${moduleInfo.website}</white>")
+        source.sendMessage("<gray>Platforms<dark_gray>:</dark_gray> <white>${moduleInfo.platforms.joinToString()}</white>")
         source.sendMessage(
-            "<dark_gray>- <white>Version:</white> <yellow>${moduleInfo.version}</yellow>"
-        )
-        source.sendMessage(
-            "<dark_gray>- <white>State:</white> <yellow>${moduleInfo.state}</yellow>"
-        )
-        source.sendMessage(
-            "<dark_gray>- <white>Authors:</white> <yellow>${moduleInfo.authors.joinToString()}</yellow>"
-        )
-        source.sendMessage(
-            "<dark_gray>- <white>Description:</white> <yellow>${moduleInfo.description}</yellow>"
-        )
-        source.sendMessage(
-            "<dark_gray>- <white>Website:</white> <yellow>${moduleInfo.website}</yellow>"
-        )
-        source.sendMessage(
-            "<dark_gray>- <white>Platforms:</white> <yellow>${moduleInfo.platforms.joinToString()}</yellow>"
-        )
-        source.sendMessage(
-            "<dark_gray>- <white>Update Command:</white> <yellow>'module update ${moduleInfo.name}'</yellow>"
+            "<gray>Update Command<dark_gray>:</dark_gray> <white>'module update ${moduleInfo.name}'</white>"
         )
     }
 
@@ -207,32 +195,22 @@ class ModuleCommand {
     ) {
         val module = moduleProvider.getDownloadableModule(name)
         if (module == null) {
-            source.sendMessage("<red>Module <yellow>$name <red>not found.")
+            source.sendMessage("<red>Module</red> <white>$name</white> <red>not found.</red>")
             return
         }
 
-        source.sendMessage("Module <light_purple>${module.name}</light_purple> Stats: ")
+        source.sendMessage("<gold>---------</gold> <white>${module.name}</white> <gold>---------</gold>")
+        source.sendMessage("<gray>Version<dark_gray>:</dark_gray> <white>${module.version}</white>")
+        source.sendMessage("<gray>Description<dark_gray>:</dark_gray> <white>${module.description}</white>")
+        source.sendMessage("<gray>Authors<dark_gray>:</dark_gray> <white>${module.authors.joinToString()}</white>")
+        source.sendMessage("<gray>Website<dark_gray>:</dark_gray> <white>${module.website}</white>")
+        source.sendMessage("<gray>Support URL<dark_gray>:</dark_gray> <white>${module.supportURL}</white>")
         source.sendMessage(
-            "<dark_gray>- <white>Version:</white> <yellow>${module.version}</yellow>"
-        )
-        source.sendMessage(
-            "<dark_gray>- <white>Description:</white> <yellow>${module.description}</yellow>"
-        )
-        source.sendMessage(
-            "<dark_gray>- <white>Authors:</white> <yellow>${module.authors.joinToString()}</yellow>"
-        )
-        source.sendMessage(
-            "<dark_gray>- <white>Website:</white> <yellow>${module.website}</yellow>"
-        )
-        source.sendMessage(
-            "<dark_gray>- <white>Support URL:</white> <yellow>${module.supportURL}</yellow>"
-        )
-        source.sendMessage(
-            "<dark_gray>- <white>Install/Update Command:</white> <yellow>'module update ${module.name}'</yellow>"
+            "<gray>Install/Update Command<dark_gray>:</dark_gray> <white>'module update ${module.name}'</white>"
         )
         if (detailed) {
             source.sendMessage(
-                "<dark_gray>- <white>InstallURL:</white> <yellow>${module.installURL}</yellow>"
+                "<gray>Install URL<dark_gray>:</dark_gray> <white>${module.installURL}</white>"
             )
         }
     }

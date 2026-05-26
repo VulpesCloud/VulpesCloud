@@ -83,7 +83,7 @@ class AuthCommand {
     ) {
         runBlocking {
             MongoUtils.createUser(name, password)
-            source.sendMessage("<green>Created user <yellow>$name<green>.")
+            source.sendMessage("<green>Created user</green> <white>$name</white><green>.</green>")
         }
     }
 
@@ -96,7 +96,7 @@ class AuthCommand {
     ) {
         runBlocking {
             MongoUtils.updateUserPassword(name, password)
-            source.sendMessage("<green>Updated password for <yellow>$name<green>.")
+            source.sendMessage("<green>Updated password for</green> <white>$name</white><green>.</green>")
         }
     }
 
@@ -110,7 +110,7 @@ class AuthCommand {
         runBlocking {
             val user = MongoUtils.getUserByName(name)
             if (user == null) {
-                source.sendMessage("<red>User <yellow>$name <red>not found.")
+                source.sendMessage("<red>User</red> <white>$name</white> <red>not found.</red>")
                 return@runBlocking
             }
             MongoUtils.updateUser(
@@ -120,7 +120,7 @@ class AuthCommand {
                         user.extraData.toMutableMap().also { it["minecraft-uuid"] = player.uuid }
                 ),
             )
-            source.sendMessage("<green>Updated minecraft player for <yellow>$name<green>.")
+            source.sendMessage("<green>Updated minecraft player for</green> <white>$name</white><green>.</green>")
         }
     }
 
@@ -134,7 +134,7 @@ class AuthCommand {
         runBlocking {
             MongoUtils.addPermissionToUser(name, permission)
             source.sendMessage(
-                "<green>Added permission <gold>$permission <green>to user <yellow>$name<green>."
+                "<green>Added permission</green> <gold>$permission</gold> <green>to user</green> <white>$name</white><green>.</green>"
             )
         }
     }
@@ -149,7 +149,7 @@ class AuthCommand {
         runBlocking {
             MongoUtils.removePermissionFromUser(name, permission)
             source.sendMessage(
-                "<red>Removed permission <gold>$permission <red>from user <yellow>$name<red>."
+                "<red>Removed permission</red> <gold>$permission</gold> <red>from user</red> <white>$name</white><red>.</red>"
             )
         }
     }
@@ -164,7 +164,7 @@ class AuthCommand {
         runBlocking {
             MongoUtils.addUserToGroup(name, group)
             source.sendMessage(
-                "<green>Added user <yellow>$name <green>to group <gold>$group<green>."
+                "<green>Added user</green> <white>$name</white> <green>to group</green> <gold>$group</gold><green>.</green>"
             )
         }
     }
@@ -178,7 +178,7 @@ class AuthCommand {
     ) {
         runBlocking {
             MongoUtils.removeUserFromGroup(name, group)
-            source.sendMessage("<red>Removed user <yellow>$name <red>from group <gold>$group<red>.")
+            source.sendMessage("<red>Removed user</red> <white>$name</white> <red>from group</red> <gold>$group</gold><red>.</red>")
         }
     }
 
@@ -188,13 +188,13 @@ class AuthCommand {
         runBlocking {
             val users = MongoUtils.getAllUsers()
             if (users.isEmpty()) {
-                source.sendMessage("<red>No users found.")
+                source.sendMessage("<red>No users found.</red>")
                 return@runBlocking
             }
-            source.sendMessage("<green>Registered users (<yellow>${users.size}<green>):")
+            source.sendMessage("<gray>Registered users (<gold>${users.size}</gold>):</gray>")
             users.forEach {
                 source.sendMessage(
-                    "<dark_gray>- <yellow>${it.name} <dark_gray>(<gold>${it.groups.size}<dark_gray> groups, <gold>${it.permissions.size}<dark_gray> perms)"
+                    " <dark_gray>»</dark_gray> <white>${it.name}</white> <dark_gray>| <gray>Groups:</gray> <gold>${it.groups.size}</gold> <dark_gray>| <gray>Permissions:</gray> <gold>${it.permissions.size}</gold>"
                 )
             }
         }
@@ -209,8 +209,8 @@ class AuthCommand {
     ) {
         runBlocking {
             val valid = MongoUtils.checkUserPassword(name, password)
-            if (valid) source.sendMessage("<green>Password for <yellow>$name <green>is valid.")
-            else source.sendMessage("<red>Invalid password for <yellow>$name<red>.")
+            if (valid) source.sendMessage("<green>Password for</green> <white>$name</white> <green>is valid.</green>")
+            else source.sendMessage("<red>Invalid password for</red> <white>$name</white><red>.</red>")
         }
     }
 
@@ -225,11 +225,11 @@ class AuthCommand {
             val hasPerm = PermissionHelper.hasPermission(name, permission)
             if (hasPerm)
                 source.sendMessage(
-                    "<green>User <yellow>$name <green>has permission <gold>$permission<green>."
+                    "<green>User</green> <white>$name</white> <green>has permission</green> <gold>$permission</gold><green>.</green>"
                 )
             else
                 source.sendMessage(
-                    "<red>User <yellow>$name <red>does NOT have permission <gold>$permission<red>."
+                    "<red>User</red> <white>$name</white> <red>does NOT have permission</red> <gold>$permission</gold><red>.</red>"
                 )
         }
     }
@@ -240,15 +240,15 @@ class AuthCommand {
         runBlocking {
             val user = MongoUtils.getUserByName(name)
             if (user == null) {
-                source.sendMessage("<red>User <yellow>$name <red>not found.")
+                source.sendMessage("<red>User</red> <white>$name</white> <red>not found.</red>")
                 return@runBlocking
             }
             val permissions = PermissionHelper.getAllPermissionsOfUser(name)
             if (permissions.isEmpty()) {
-                source.sendMessage("<yellow>$name <dark_gray>has no permissions.")
+                source.sendMessage("<white>$name</white> <gray>has no permissions.</gray>")
             } else {
-                source.sendMessage("<green>Permissions for <yellow>$name<green>:")
-                permissions.forEach { perm -> source.sendMessage("<dark_gray>- <gold>$perm") }
+                source.sendMessage("<gray>Permissions for</gray> <white>$name</white><dark_gray>:</dark_gray>")
+                permissions.forEach { perm -> source.sendMessage(" <dark_gray>»</dark_gray> <gold>$perm</gold>") }
             }
         }
     }
@@ -259,18 +259,17 @@ class AuthCommand {
         runBlocking {
             val user = MongoUtils.getUserByName(name)
             if (user == null) {
-                source.sendMessage("<red>User <yellow>$name <red>not found.")
+                source.sendMessage("<red>User</red> <white>$name</white> <red>not found.</red>")
                 return@runBlocking
             }
-            source.sendMessage("<green>User info for <yellow>$name<green>:")
-            source.sendMessage("<dark_gray>- <gold>Name: <yellow>${user.name}")
-            source.sendMessage("<dark_gray>- <gold>Groups:")
-            user.groups.forEach { group -> source.sendMessage("<dark_gray>- <gold>$group") }
-            source.sendMessage("<dark_gray>- <gold>Permissions:")
-            user.permissions.forEach { perm -> source.sendMessage("<dark_gray>- <gold>$perm") }
-            source.sendMessage("<dark_gray>- <gold>Extra Data:")
+            source.sendMessage("<gold>---------</gold> <white>${user.name}</white> <gold>---------</gold>")
+            source.sendMessage("<gray>Groups<dark_gray>:</dark_gray>")
+            user.groups.forEach { group -> source.sendMessage(" <dark_gray>»</dark_gray> <gold>$group</gold>") }
+            source.sendMessage("<gray>Permissions<dark_gray>:</dark_gray>")
+            user.permissions.forEach { perm -> source.sendMessage(" <dark_gray>»</dark_gray> <gold>$perm</gold>") }
+            source.sendMessage("<gray>Extra Data<dark_gray>:</dark_gray>")
             user.extraData.forEach { (key, value) ->
-                source.sendMessage("<dark_gray>- <gold>$key: <yellow>$value")
+                source.sendMessage(" <dark_gray>»</dark_gray> <gray>$key<dark_gray>:</dark_gray> <white>$value</white>")
             }
         }
     }
@@ -282,7 +281,7 @@ class AuthCommand {
     fun createGroup(source: CommandSource, @Argument("name") name: String) {
         runBlocking {
             MongoUtils.createGroup(name)
-            source.sendMessage("<green>Created group <gold>$name<green>.")
+            source.sendMessage("<green>Created group</green> <gold>$name</gold><green>.</green>")
         }
     }
 
@@ -296,7 +295,7 @@ class AuthCommand {
         runBlocking {
             MongoUtils.addPermissionToGroup(name, permission)
             source.sendMessage(
-                "<green>Added permission <gold>$permission <green>to group <yellow>$name<green>."
+                "<green>Added permission</green> <gold>$permission</gold> <green>to group</green> <white>$name</white><green>.</green>"
             )
         }
     }
@@ -311,7 +310,7 @@ class AuthCommand {
         runBlocking {
             MongoUtils.removePermissionFromGroup(name, permission)
             source.sendMessage(
-                "<red>Removed permission <gold>$permission <red>from group <yellow>$name<red>."
+                "<red>Removed permission</red> <gold>$permission</gold> <red>from group</red> <white>$name</white><red>.</red>"
             )
         }
     }
@@ -322,13 +321,13 @@ class AuthCommand {
         runBlocking {
             val groups = MongoUtils.getAllGroups()
             if (groups.isEmpty()) {
-                source.sendMessage("<red>No groups found.")
+                source.sendMessage("<red>No groups found.</red>")
                 return@runBlocking
             }
-            source.sendMessage("<green>Registered groups (<yellow>${groups.size}<green>):")
+            source.sendMessage("<gray>Registered groups (<gold>${groups.size}</gold>):</gray>")
             groups.forEach {
                 source.sendMessage(
-                    "<dark_gray>- <gold>${it.name} <dark_gray>(<yellow>${it.permissions.size}<dark_gray> perms)"
+                    " <dark_gray>»</dark_gray> <gold>${it.name}</gold> <dark_gray>| <gray>Permissions:</gray> <gold>${it.permissions.size}</gold>"
                 )
             }
         }
@@ -340,14 +339,14 @@ class AuthCommand {
         runBlocking {
             val group = MongoUtils.getGroupByName(name)
             if (group == null) {
-                source.sendMessage("<red>Group <gold>$name <red>not found.")
+                source.sendMessage("<red>Group</red> <gold>$name</gold> <red>not found.</red>")
                 return@runBlocking
             }
             if (group.permissions.isEmpty()) {
-                source.sendMessage("<gold>$name <dark_gray>has no permissions.")
+                source.sendMessage("<gold>$name</gold> <gray>has no permissions.</gray>")
             } else {
-                source.sendMessage("<green>Permissions for group <gold>$name<green>:")
-                group.permissions.forEach { perm -> source.sendMessage("<dark_gray>- <gold>$perm") }
+                source.sendMessage("<gray>Permissions for group</gray> <gold>$name</gold><dark_gray>:</dark_gray>")
+                group.permissions.forEach { perm -> source.sendMessage(" <dark_gray>»</dark_gray> <gold>$perm</gold>") }
             }
         }
     }

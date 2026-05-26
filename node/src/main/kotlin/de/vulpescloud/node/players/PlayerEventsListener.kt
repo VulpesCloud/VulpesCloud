@@ -27,7 +27,7 @@ object PlayerJoinEventListener {
                 val proxyName = event.player.proxyServiceName
                 if (isLoggingPlayerEvents()) {
                     logger.info(
-                        "Player <aqua>${event.player.name}</aqua> joined the Network on proxy <light_purple>$proxyName</light_purple>"
+                        "Player <aqua>${event.player.name}</aqua> <gray>joined the network on proxy</gray> <white>$proxyName</white>"
                     )
                 }
                 if (Node.instance.nodeServices.any { it.service.name() == proxyName }) {
@@ -39,7 +39,7 @@ object PlayerJoinEventListener {
                 if (offlinePlayerDatabase.get(event.player.uuid) == null) {
                     if (isLoggingPlayerEvents()) {
                         logger.info(
-                            "Player <aqua>${event.player.name}</aqua> joined the Network for the first time!"
+                            "Player <aqua>${event.player.name}</aqua> <gray>joined the network for the first time!</gray>"
                         )
                     }
                     offlinePlayerDatabase.insertIgnore(
@@ -75,7 +75,7 @@ object PlayerQuitEventListener {
             EventsService.subscribe<PlayerQuitEvent> { event ->
                 val proxyName = event.lastProxyName
                 if (isLoggingPlayerEvents()) {
-                    logger.info("Player <aqua>${event.player.name}</aqua> left the Network!")
+                    logger.info("Player <aqua>${event.player.name}</aqua> <gray>left the network!</gray>")
                 }
                 if (Node.instance.nodeServices.any { it.service.name() == proxyName }) {
                     Node.instance.nodeProxyPlayers
@@ -107,7 +107,7 @@ object PlayerSwitchServerEventListener {
                 val newServerName = event.newServer
                 if (isLoggingPlayerEvents()) {
                     logger.info(
-                        "Player <aqua>${event.player.name}</aqua> switched servers from <light_purple>$oldServerName</light_purple> to <light_purple>$newServerName</light_purple>!"
+                        "Player <aqua>${event.player.name}</aqua> <gray>switched servers from</gray> <white>$oldServerName</white> <gray>to</gray> <white>$newServerName</white><gray>!</gray>"
                     )
                 }
                 if (Node.instance.nodeServices.any { it.service.name() == oldServerName }) {

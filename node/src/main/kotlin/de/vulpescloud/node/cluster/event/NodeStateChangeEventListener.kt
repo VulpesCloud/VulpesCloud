@@ -14,7 +14,7 @@ object NodeStateChangeEventListener {
         job =
             EventsService.subscribe<NodeStateChangeEvent> {
                 logger.info(
-                    "Node <aqua>${it.node.name}</aqua> is now <light_purple>${it.newState}</light_purple>"
+                    "Node <aqua>${it.node.name}</aqua> <gray>changed state to</gray> <white>${it.newState}</white>"
                 )
             }
     }
