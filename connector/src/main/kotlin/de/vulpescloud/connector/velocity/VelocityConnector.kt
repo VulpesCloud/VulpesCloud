@@ -23,6 +23,7 @@ import de.vulpescloud.connector.velocity.commands.CloudCommand
 import de.vulpescloud.connector.velocity.commands.HubCommand
 import de.vulpescloud.connector.velocity.config.ConnectorConfig
 import de.vulpescloud.connector.velocity.events.PlayerChooseInitialServerEventListener
+import de.vulpescloud.connector.velocity.events.VelocityPlayerActionEventListener
 import de.vulpescloud.wrapper.Wrapper
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIVelocityConfig
@@ -60,6 +61,7 @@ constructor(
 
         velocityServerRegistrationHandler =
             VelocityServerRegistrationHandler(proxyServer, bridgeAPI)
+        VelocityPlayerActionEventListener(proxyServer, BridgeAPI.createCoroutineAPI())
 
         eventManager.register(this, PlayerChooseInitialServerEventListener(bridgeAPI, proxyServer))
 
