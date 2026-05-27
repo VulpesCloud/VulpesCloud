@@ -3,6 +3,7 @@ package de.vulpescloud.node.grpc
 import build.buf.gen.vulpescloud.auth.v1.AuthServiceGrpcKt
 import build.buf.gen.vulpescloud.events.v1.EventServiceGrpcKt
 import build.buf.gen.vulpescloud.node.v1.ClusterAPIServiceGrpcKt
+import build.buf.gen.vulpescloud.players.v1.PlayerActionsServiceGrpcKt
 import build.buf.gen.vulpescloud.players.v1.PlayersServiceGrpcKt
 import build.buf.gen.vulpescloud.services.v1.ServiceAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpcKt
@@ -22,6 +23,7 @@ class LocalGrpcClient {
     lateinit var clusterAPI: ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineStub
     lateinit var playerAPI: PlayersServiceGrpcKt.PlayersServiceCoroutineStub
     lateinit var authAPI: AuthServiceGrpcKt.AuthServiceCoroutineStub
+    lateinit var playerActionsAPI: PlayerActionsServiceGrpcKt.PlayerActionsServiceCoroutineStub
 
     fun connect(
         host: String = "127.0.0.1",
@@ -55,6 +57,9 @@ class LocalGrpcClient {
                 .withInterceptors(AuthClientInterceptor(secret))
         authAPI =
             AuthServiceGrpcKt.AuthServiceCoroutineStub(channel)
+                .withInterceptors(AuthClientInterceptor(secret))
+        playerActionsAPI =
+            PlayerActionsServiceGrpcKt.PlayerActionsServiceCoroutineStub(channel)
                 .withInterceptors(AuthClientInterceptor(secret))
     }
 }
