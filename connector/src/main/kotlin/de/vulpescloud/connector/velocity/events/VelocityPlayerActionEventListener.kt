@@ -52,6 +52,7 @@ class VelocityPlayerActionEventListener(
                             .getPlayer(event.player.name)
                             .get()
                             .createConnectionRequest(proxyServer.getServer(targetServer).get())
+                            .connectWithIndication()
                     }
                     PlayerActions.UNRECOGNIZED -> logger.error("Player Action is unrecognized!")
                     PlayerActions.UNSPECIFIED -> logger.error("Player Action is unspecified!")
