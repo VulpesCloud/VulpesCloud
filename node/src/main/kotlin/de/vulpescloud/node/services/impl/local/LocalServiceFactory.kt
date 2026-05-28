@@ -103,6 +103,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 acceptEULA(localService)
                 setServerProperties(localService)
                 updatePaperGlobalConfig(localService)
+                arguments.add("--nogui")
             }
             "Folia" -> {
                 FoliaDownloader.apply {
@@ -115,6 +116,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 updatePaperGlobalConfig(localService)
 
                 arguments.add("--separateClassLoader")
+                arguments.add("--nogui")
             }
             "Paper" -> {
                 PaperDownloader.apply {
@@ -140,6 +142,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 updatePaperGlobalConfig(localService)
 
                 arguments.add("--separateClassLoader")
+                arguments.add("--nogui")
             }
             "Velocity" -> {
                 VelocityDownloader.apply {
