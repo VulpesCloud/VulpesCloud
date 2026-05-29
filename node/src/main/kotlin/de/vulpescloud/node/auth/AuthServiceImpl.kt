@@ -144,6 +144,7 @@ class AuthServiceImpl(private val jwtSecret: String, private val jwtRefreshSecre
         }
     }
 
+    @RequiresPermission("auth.getUserByName")
     override suspend fun getUserByName(request: GetUserByNameRequest): GetUserByNameResponse {
         val user =
             MongoUtils.getUserByName(request.username)
