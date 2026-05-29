@@ -96,7 +96,132 @@ class AuthCommand {
     ) {
         runBlocking {
             MongoUtils.updateUserPassword(name, password)
-            source.sendMessage("<green>Updated password for</green> <white>$name</white><green>.</green>")
+            source.sendMessage(
+                "<green>Updated password for</green> <white>$name</white><green>.</green>"
+            )
+        }
+    }
+
+    @Command("auth user set extraData <name> <key> <value>")
+    @Permission("auth.user.setExtraData")
+    fun setExtraData(
+        source: CommandSource,
+        @Argument("name") name: String,
+        @Argument("key") key: String,
+        @Argument("value") value: String,
+    ) {
+        runBlocking {
+            if (MongoUtils.getUserByName(name) == null) {
+                source.sendMessage("<red>User</red> <white>$name</white> <red>not found.</red>")
+                return@runBlocking
+            }
+            MongoUtils.updateUser(
+                name,
+                MongoUtils.getUserByName(name)!!.copy(
+                    extraData =
+                        MongoUtils.getUserByName(name)!!.extraData.toMutableMap().also {
+                            it[key] = value
+                        }
+                ),
+            )
+            source.sendMessage(
+                "<green>Updated extraData for</green> <white>$name</white><green>.</green>"
+            )
+        }
+    }
+
+    @Command("auth user get extraData <name> <key>")
+    @Permission("auth.user.getExtraData")
+    fun getExtraData(
+        source: CommandSource,
+        @Argument("name") name: String,
+        @Argument("key") key: String,
+    ) {
+        runBlocking {
+            val user = MongoUtils.getUserByName(name)
+            if (user == null) {
+                source.sendMessage("<red>User</red> <white>$name</white> <red>not found.</red>")
+                return@runBlocking
+            }
+            if (user.extraData.containsKey(key)) {
+                source.sendMessage(
+                    "<green>ExtraData for</green> <white>$name</white> <green>has key</green> <gold>$key</gold> <green>with value</green> <white>${user.extraData[key]}</white><green>.</green>"
+                )
+            } else {
+                source.sendMessage(
+                    "<red>ExtraData for</red> <white>$name</white> <red>does NOT have key</red> <gold>$key</gold><red>.</red>"
+                )
+            }
+        }
+    }
+
+    @Command("auth user remove extraData <name> <key>")
+    @Permission("auth.user.removeExtraData")
+    fun removeExtraData(
+        source: CommandSource,
+        @Argument("name") name: String,
+        @Argument("key") key: String,
+    ) {
+        runBlocking {
+            val user = MongoUtils.getUserByName(name)
+            if (user == null) {
+                source.sendMessage("<red>User</red> <white>$name</white> <red>not found.</red>")
+                return@runBlocking
+            }
+            if (user.extraData.containsKey(key)) {
+                MongoUtils.updateUser(
+                    name,
+                    MongoUtils.getUserByName(name)!!.copy(
+                        extraData =
+                            MongoUtils.getUserByName(name)!!.extraData.toMutableMap().also {
+                                it.remove(key)
+                            }
+                    ),
+                )
+            }
+        }
+    }
+
+    @Permission("auth.user.setAvatarURL")
+    @Command("auth user set avatarURL <name> <url>")
+    fun setAvatarURL(
+        source: CommandSource,
+        @Argument("name") name: String,
+        @Argument("url") url: String,
+    ) {
+        runBlocking {
+            val user = MongoUtils.getUserByName(name)
+            if (user == null) {
+                source.sendMessage("<red>User</red> <white>$name</white> <red>not found.</red>")
+                return@runBlocking
+            }
+            MongoUtils.updateUser(
+                name,
+                user.copy(extraData = user.extraData.toMutableMap().also { it["avatarURL"] = url }),
+            )
+        }
+    }
+
+    @Permission("auth.user.setDisplayName")
+    @Command("auth user set displayName <name> <displayName>")
+    fun setDisplayName(
+        source: CommandSource,
+        @Argument("name") name: String,
+        @Argument("displayName") displayName: String,
+    ) {
+        runBlocking {
+            val user = MongoUtils.getUserByName(name)
+            if (user == null) {
+                source.sendMessage("<red>User</red> <white>$name</white> <red>not found.</red>")
+                return@runBlocking
+            }
+            MongoUtils.updateUser(
+                name,
+                user.copy(
+                    extraData =
+                        user.extraData.toMutableMap().also { it["displayName"] = displayName }
+                ),
+            )
         }
     }
 
@@ -120,7 +245,9 @@ class AuthCommand {
                         user.extraData.toMutableMap().also { it["minecraft-uuid"] = player.uuid }
                 ),
             )
-            source.sendMessage("<green>Updated minecraft player for</green> <white>$name</white><green>.</green>")
+            source.sendMessage(
+                "<green>Updated minecraft player for</green> <white>$name</white><green>.</green>"
+            )
         }
     }
 
@@ -178,7 +305,9 @@ class AuthCommand {
     ) {
         runBlocking {
             MongoUtils.removeUserFromGroup(name, group)
-            source.sendMessage("<red>Removed user</red> <white>$name</white> <red>from group</red> <gold>$group</gold><red>.</red>")
+            source.sendMessage(
+                "<red>Removed user</red> <white>$name</white> <red>from group</red> <gold>$group</gold><red>.</red>"
+            )
         }
     }
 
@@ -209,8 +338,14 @@ class AuthCommand {
     ) {
         runBlocking {
             val valid = MongoUtils.checkUserPassword(name, password)
-            if (valid) source.sendMessage("<green>Password for</green> <white>$name</white> <green>is valid.</green>")
-            else source.sendMessage("<red>Invalid password for</red> <white>$name</white><red>.</red>")
+            if (valid)
+                source.sendMessage(
+                    "<green>Password for</green> <white>$name</white> <green>is valid.</green>"
+                )
+            else
+                source.sendMessage(
+                    "<red>Invalid password for</red> <white>$name</white><red>.</red>"
+                )
         }
     }
 
@@ -247,8 +382,12 @@ class AuthCommand {
             if (permissions.isEmpty()) {
                 source.sendMessage("<white>$name</white> <gray>has no permissions.</gray>")
             } else {
-                source.sendMessage("<gray>Permissions for</gray> <white>$name</white><dark_gray>:</dark_gray>")
-                permissions.forEach { perm -> source.sendMessage(" <dark_gray>»</dark_gray> <gold>$perm</gold>") }
+                source.sendMessage(
+                    "<gray>Permissions for</gray> <white>$name</white><dark_gray>:</dark_gray>"
+                )
+                permissions.forEach { perm ->
+                    source.sendMessage(" <dark_gray>»</dark_gray> <gold>$perm</gold>")
+                }
             }
         }
     }
@@ -262,14 +401,22 @@ class AuthCommand {
                 source.sendMessage("<red>User</red> <white>$name</white> <red>not found.</red>")
                 return@runBlocking
             }
-            source.sendMessage("<gold>---------</gold> <white>${user.name}</white> <gold>---------</gold>")
+            source.sendMessage(
+                "<gold>---------</gold> <white>${user.name}</white> <gold>---------</gold>"
+            )
             source.sendMessage("<gray>Groups<dark_gray>:</dark_gray>")
-            user.groups.forEach { group -> source.sendMessage(" <dark_gray>»</dark_gray> <gold>$group</gold>") }
+            user.groups.forEach { group ->
+                source.sendMessage(" <dark_gray>»</dark_gray> <gold>$group</gold>")
+            }
             source.sendMessage("<gray>Permissions<dark_gray>:</dark_gray>")
-            user.permissions.forEach { perm -> source.sendMessage(" <dark_gray>»</dark_gray> <gold>$perm</gold>") }
+            user.permissions.forEach { perm ->
+                source.sendMessage(" <dark_gray>»</dark_gray> <gold>$perm</gold>")
+            }
             source.sendMessage("<gray>Extra Data<dark_gray>:</dark_gray>")
             user.extraData.forEach { (key, value) ->
-                source.sendMessage(" <dark_gray>»</dark_gray> <gray>$key<dark_gray>:</dark_gray> <white>$value</white>")
+                source.sendMessage(
+                    " <dark_gray>»</dark_gray> <gray>$key<dark_gray>:</dark_gray> <white>$value</white>"
+                )
             }
         }
     }
@@ -345,8 +492,12 @@ class AuthCommand {
             if (group.permissions.isEmpty()) {
                 source.sendMessage("<gold>$name</gold> <gray>has no permissions.</gray>")
             } else {
-                source.sendMessage("<gray>Permissions for group</gray> <gold>$name</gold><dark_gray>:</dark_gray>")
-                group.permissions.forEach { perm -> source.sendMessage(" <dark_gray>»</dark_gray> <gold>$perm</gold>") }
+                source.sendMessage(
+                    "<gray>Permissions for group</gray> <gold>$name</gold><dark_gray>:</dark_gray>"
+                )
+                group.permissions.forEach { perm ->
+                    source.sendMessage(" <dark_gray>»</dark_gray> <gold>$perm</gold>")
+                }
             }
         }
     }
