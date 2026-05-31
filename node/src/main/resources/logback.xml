@@ -34,7 +34,7 @@
     <variable name="cloud.log.level" value="DEBUG"/>
 
     <property name="LINE_PATTERN"
-              value="%gray([%boldWhite(%d{dd.MM HH:mm:ss.SSS}%gray(]))) %gray(%levelColor(%-5level)) %gray(:) %msg"/>
+              value="%gray([%boldWhite(%d{dd.MM HH:mm:ss.SSS}%gray(]))) %gray(%levelColor(%-5level)) %gray(:)&lt;reset&gt; %msg"/>
 
     <appender name="ConsoleAppender" class="ConsoleAppender">
         <filter class="ThresholdFilter">

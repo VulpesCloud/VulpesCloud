@@ -1,31 +1,42 @@
 package de.vulpescloud.connector.velocity
 
+import build.buf.gen.vulpescloud.events.v1.playerJoinEvent
+import build.buf.gen.vulpescloud.events.v1.playerQuitEvent
+import build.buf.gen.vulpescloud.events.v1.playerSwitchServerEvent
+import build.buf.gen.vulpescloud.events.v1.serviceStateChangedEvent
+import build.buf.gen.vulpescloud.players.v1.offlinePlayer
+import build.buf.gen.vulpescloud.players.v1.onlinePlayer
 import build.buf.gen.vulpescloud.services.v1.UpdatePlayerCountRequest
 import build.buf.gen.vulpescloud.virtualconfig.v1.createVirtualConfigRequest
 import com.velocitypowered.api.event.EventManager
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.connection.DisconnectEvent
 import com.velocitypowered.api.event.connection.LoginEvent
+import com.velocitypowered.api.event.player.ServerConnectedEvent
 import com.velocitypowered.api.event.proxy.ProxyInitializeEvent
 import com.velocitypowered.api.event.proxy.ProxyShutdownEvent
 import com.velocitypowered.api.plugin.Plugin
 import com.velocitypowered.api.proxy.ProxyServer
-import de.vulpescloud.api.events.services.ServiceStateChangeEvent
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.bridge.BridgeAPI
 import de.vulpescloud.connector.velocity.commands.CloudCommand
 import de.vulpescloud.connector.velocity.commands.HubCommand
 import de.vulpescloud.connector.velocity.config.ConnectorConfig
 import de.vulpescloud.connector.velocity.events.PlayerChooseInitialServerEventListener
+import de.vulpescloud.connector.velocity.events.VelocityPlayerActionEventListener
 import de.vulpescloud.wrapper.Wrapper
 import dev.jorel.commandapi.CommandAPI
 import dev.jorel.commandapi.CommandAPIVelocityConfig
 import jakarta.inject.Inject
+import java.util.concurrent.TimeUnit
+import kotlin.jvm.optionals.getOrNull
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.bstats.velocity.Metrics
 import org.slf4j.Logger
-import java.util.concurrent.TimeUnit
 
 @Plugin(id = "vulpescloud-connector", name = "VulpesCloud-Connector", authors = ["TheCGuy"])
 @Suppress("unused")
@@ -39,7 +50,7 @@ constructor(
 ) {
     private lateinit var metrics: Metrics
     private val pluginID = 27325
-    private val bridgeAPI = BridgeAPI.getFutureAPI()
+    private val bridgeAPI = BridgeAPI.createFutureAPI()
     private lateinit var velocityServerRegistrationHandler: VelocityServerRegistrationHandler
 
     @Subscribe
@@ -50,12 +61,13 @@ constructor(
 
         velocityServerRegistrationHandler =
             VelocityServerRegistrationHandler(proxyServer, bridgeAPI)
+        VelocityPlayerActionEventListener(proxyServer, BridgeAPI.createCoroutineAPI())
 
         eventManager.register(this, PlayerChooseInitialServerEventListener(bridgeAPI, proxyServer))
 
         runBlocking {
-            BridgeAPI.getCoroutineAPI()
-                .getVirtualConfigAPI()
+            bridgeAPI
+                .getCoroutineVirtualConfigAPI()
                 .stub
                 .createVirtualConfig(
                     createVirtualConfigRequest {
@@ -85,13 +97,21 @@ constructor(
             return
         }
 
-        HubCommand(proxyServer)
-        CloudCommand()
+        HubCommand(proxyServer, bridgeAPI).command.register()
+        val cloudCommandMeta = proxyServer.commandManager.metaBuilder("cloud").plugin(this).build()
+        proxyServer.commandManager.register(
+            cloudCommandMeta,
+            CloudCommand(BridgeAPI.createCoroutineAPI()),
+        )
 
         bridgeAPI
             .getEventAPI()
             .publish(
-                ServiceStateChangeEvent(localService, localService.state, ServiceStates.RUNNING),
+                serviceStateChangedEvent {
+                    this.service = localService.toDefinition()
+                    this.oldState = localService.state.toServiceState()
+                    this.newState = ServiceStates.RUNNING.toServiceState()
+                },
                 true,
             )
     }
@@ -99,7 +119,7 @@ constructor(
     @Subscribe
     fun onProxyShutdownEvent(event: ProxyShutdownEvent) {
         metrics.shutdown()
-        velocityServerRegistrationHandler.shutdown()
+        bridgeAPI.getEventAPI().shutdown()
     }
 
     @Subscribe
@@ -112,6 +132,20 @@ constructor(
                     .setService(service.toDefinition())
                     .build()
             )
+            bridgeAPI
+                .getEventAPI()
+                .publish(
+                    playerJoinEvent {
+                        this.player = onlinePlayer {
+                            this.name = event.player.username
+                            this.uuid = event.player.uniqueId.toString()
+                            this.proxyServiceName = service.name()
+                            this.serverServiceName = ""
+                        }
+                        this.timestamp = System.currentTimeMillis()
+                    },
+                    true,
+                )
         }
     }
 
@@ -125,6 +159,67 @@ constructor(
                     .setService(service.toDefinition())
                     .build()
             )
+            val player =
+                bridgeAPI
+                    .getPlayerAPI()
+                    .getRegisteredPlayerByUUID(event.player.uniqueId.toString())
+                    .get()!!
+
+            bridgeAPI
+                .getEventAPI()
+                .publish(
+                    playerQuitEvent {
+                        this.player = offlinePlayer {
+                            this.name = event.player.username
+                            this.uuid = event.player.uniqueId.toString()
+                            this.firstSeen = player.firstSeen
+                            this.lastSeen = System.currentTimeMillis()
+                        }
+                        this.lastProxyName =
+                            bridgeAPI.getServicesAPI().getLocalService().get()!!.name()
+                        this.lastServerName = ""
+                        this.timestamp = System.currentTimeMillis()
+                    },
+                    true,
+                )
+        }
+    }
+
+    @Subscribe
+    fun onServerConnectedEvent(event: ServerConnectedEvent) {
+        CoroutineScope(Dispatchers.IO).launch {
+            val player =
+                bridgeAPI
+                    .getPlayerAPI()
+                    .getOnlinePlayerByUUID(event.player.uniqueId.toString())
+                    .get()
+
+            if (player == null) {
+                logger.error("Unable to find player for UUID ${event.player.uniqueId}!")
+                logger.error("Player is null!")
+                logger.info(
+                    "DBG: ${bridgeAPI.getPlayerAPI().getAllOnlinePlayers().get().joinToString { it.name + " (${it.uuid})" }}"
+                )
+                return@launch
+            }
+
+            bridgeAPI
+                .getEventAPI()
+                .publish(
+                    playerSwitchServerEvent {
+                        this.player = onlinePlayer {
+                            this.name = player.name
+                            this.uuid = player.uuid
+                            this.proxyServiceName =
+                                bridgeAPI.getServicesAPI().getLocalService().get()!!.name()
+                            this.serverServiceName = event.server.serverInfo.name
+                        }
+                        this.oldServer = event.previousServer.getOrNull()?.serverInfo?.name ?: ""
+                        this.newServer = event.server.serverInfo.name
+                        this.timestamp = System.currentTimeMillis()
+                    },
+                    true,
+                )
         }
     }
 }

@@ -1,8 +1,10 @@
 package de.vulpescloud.node.serversoftware.impl
 
+import com.github.benmanes.caffeine.cache.Caffeine
 import de.vulpescloud.api.serversoftware.ServerSoftware
 import de.vulpescloud.api.serversoftware.SoftwareType
 import de.vulpescloud.node.serversoftware.ServerSoftwareDownloader
+import de.vulpescloud.node.utils.PropertyUtils
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONObject
@@ -11,6 +13,7 @@ import java.io.File
 import java.io.FileOutputStream
 import java.net.URI
 import java.nio.file.Path
+import java.util.concurrent.TimeUnit
 import kotlin.io.path.Path
 
 object PaperDownloader : ServerSoftwareDownloader {
@@ -19,6 +22,15 @@ object PaperDownloader : ServerSoftwareDownloader {
 
     private const val BASE_API_URL = "https://fill.papermc.io/v3"
     private val logger = LoggerFactory.getLogger("PaperDownloader")
+
+    private val availableVersionsCache = Caffeine.newBuilder()
+        .build<String, List<ServerSoftware>>()
+
+    private val downloadUrlCache = Caffeine.newBuilder()
+        .build<String, URI>()
+
+    private val latestVersionCache = Caffeine.newBuilder()
+        .build<String, ServerSoftware>()
 
     override suspend fun downloadSoftware(version: String) {
         val start = System.currentTimeMillis()
@@ -31,7 +43,7 @@ object PaperDownloader : ServerSoftwareDownloader {
             .build()
 
         val downloadFileName = downloadUrl.path.substringAfterLast('/')
-        logger.info("Downloading $downloadFileName ...")
+
 
         client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw Exception("Unexpected code $response")
@@ -39,9 +51,9 @@ object PaperDownloader : ServerSoftwareDownloader {
             val file = File("local/versions/$downloadFileName")
 
             if (file.exists()) {
-                logger.info("$downloadFileName already exists, skipping download.")
                 return@use
             }
+            logger.info("Downloading $downloadFileName ...")
 
             val fileBytes = response.body.bytes()
 
@@ -64,6 +76,10 @@ object PaperDownloader : ServerSoftwareDownloader {
     }
 
     override suspend fun getDownloadUrl(version: String): URI {
+        if (PropertyUtils.isMoreSoftwareLogging()) logger.info("PaperDownloader> Getting download URL for version $version")
+        val cached = downloadUrlCache.getIfPresent(version)
+        if (cached != null) return cached
+
         val apiUrl = "$BASE_API_URL/projects/paper/versions/$version/builds/latest"
 
         val client = OkHttpClient()
@@ -73,7 +89,8 @@ object PaperDownloader : ServerSoftwareDownloader {
             .header("User-Agent", "VulpesCloud-Node/1.0")
             .build()
 
-        client.newCall(request).execute().use { response ->
+        val start = System.nanoTime()
+        val result = client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw Exception("Unexpected code $response")
 
             val responseBody = response.body.string()
@@ -84,11 +101,120 @@ object PaperDownloader : ServerSoftwareDownloader {
                 .getJSONObject("downloads")
                 .getJSONObject("server:default")
                 .getString("url")
-            return URI(downloadUrl)
+            URI(downloadUrl)
         }
+        val duration = (System.nanoTime() - start) / 1_000_000.0
+        if (PropertyUtils.isSoftwareTiming()) {
+            logger.info("PaperDownloader> getDownloadUrl($version) took ${duration}ms")
+        }
+
+        downloadUrlCache.put(version, result)
+        return result
     }
 
-    override suspend fun getAvailableVersions(): List<ServerSoftware> {
+    override suspend fun getAvailableVersions(refreshList: Boolean): List<ServerSoftware> {
+        if (PropertyUtils.isMoreSoftwareLogging()) logger.info("PaperDownloader> Getting available versions (refreshList=$refreshList)")
+        if (refreshList) {
+            availableVersionsCache.invalidate("all")
+        }
+
+        val cached = availableVersionsCache.getIfPresent("all")
+        if (cached != null) return cached
+
+        val start = System.nanoTime()
+        val result = pullAvailableVersions()
+        val duration = (System.nanoTime() - start) / 1_000_000.0
+        if (PropertyUtils.isSoftwareTiming()) {
+            logger.info("PaperDownloader> getAvailableVersions() took ${duration}ms")
+        }
+        availableVersionsCache.put("all", result)
+        return result
+    }
+
+    override suspend fun getLatestVersion(version: String?): ServerSoftware {
+        if (PropertyUtils.isMoreSoftwareLogging()) logger.info("PaperDownloader> Getting latest version for ${version ?: "latest"}")
+        val cacheKey = version ?: "latest"
+        val cached = latestVersionCache.getIfPresent(cacheKey)
+        if (cached != null) return cached
+
+        val apiUrl = "$BASE_API_URL/projects/paper/versions"
+        val allVersions = getAvailableVersions()
+
+        val client = OkHttpClient()
+
+        val request = Request.Builder()
+            .url(apiUrl)
+            .header("User-Agent", "VulpesCloud-Node/1.0")
+            .build()
+
+        val start = System.nanoTime()
+        val result = if (version == null) {
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) throw Exception("Unexpected code $response")
+
+                val responseBody = response.body.string()
+
+                val jResponse = JSONObject(responseBody)
+
+                val versions = jResponse.getJSONArray("versions")
+
+                if (versions.length() == 0) throw Exception("No versions found")
+
+                val latestVersion = versions.getJSONObject(0).getJSONObject("version")
+
+                val downloadUrl = getDownloadUrl(latestVersion.getString("id"))
+
+                val build = downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
+
+                ServerSoftware(
+                    name = "Paper",
+                    version = latestVersion.getString("id"),
+                    build = build ?: 1,
+                    url = downloadUrl.toString(),
+                    pluginDir = "plugins",
+                    type = SoftwareType.SERVER
+                )
+            }
+        } else {
+            val matchingVersion = allVersions.find { it.version == version }
+            if (matchingVersion == null) throw Exception("No version found for Paper with version $version")
+
+            client.newCall(request).execute().use { response ->
+                if (!response.isSuccessful) throw Exception("Unexpected code $response")
+
+                val responseBody = response.body.string()
+
+                val jResponse = JSONObject(responseBody)
+
+                val versions = jResponse.getJSONArray("versions")
+
+                if (versions.length() == 0) throw Exception("No versions found")
+
+                val downloadUrl = getDownloadUrl(version)
+
+                val build = downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
+
+                ServerSoftware(
+                    name = "Paper",
+                    version = version,
+                    build = build ?: 1,
+                    url = downloadUrl.toString(),
+                    pluginDir = "plugins",
+                    type = SoftwareType.SERVER
+                )
+            }
+        }
+        val duration = (System.nanoTime() - start) / 1_000_000.0
+        if (PropertyUtils.isSoftwareTiming()) {
+            logger.info("PaperDownloader> getLatestVersion(${version ?: "latest"}) took ${duration}ms")
+        }
+
+        latestVersionCache.put(cacheKey, result)
+        return result
+    }
+
+    private suspend fun pullAvailableVersions(): List<ServerSoftware> {
+        if (PropertyUtils.isMoreSoftwareLogging()) logger.info("PaperDownloader> Pulling available versions from API")
         val apiUrl = "$BASE_API_URL/projects/paper/versions"
 
         val client = OkHttpClient()
@@ -98,7 +224,8 @@ object PaperDownloader : ServerSoftwareDownloader {
             .header("User-Agent", "VulpesCloud-Node/1.0")
             .build()
 
-        client.newCall(request).execute().use { response ->
+        val start = System.nanoTime()
+        val result = client.newCall(request).execute().use { response ->
             if (!response.isSuccessful) throw Exception("Unexpected code $response")
 
             val responseBody = response.body.string()
@@ -128,76 +255,12 @@ object PaperDownloader : ServerSoftwareDownloader {
                 softwareList.add(software)
             }
 
-            return softwareList
+            softwareList
         }
-    }
-
-    override suspend fun getLatestVersion(version: String?): ServerSoftware {
-        val apiUrl = "$BASE_API_URL/projects/paper/versions"
-        val allVersions = getAvailableVersions()
-
-        val client = OkHttpClient()
-
-        val request = Request.Builder()
-            .url(apiUrl)
-            .header("User-Agent", "VulpesCloud-Node/1.0")
-            .build()
-
-        if (version == null) {
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) throw Exception("Unexpected code $response")
-
-                val responseBody = response.body.string()
-
-                val jResponse = JSONObject(responseBody)
-
-                val versions = jResponse.getJSONArray("versions")
-
-                if (versions.length() == 0) throw Exception("No versions found")
-
-                val latestVersion = versions.getJSONObject(0).getJSONObject("version")
-
-                val downloadUrl = getDownloadUrl(latestVersion.getString("id"))
-
-                val build = downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
-
-                return ServerSoftware(
-                    name = "Paper",
-                    version = latestVersion.getString("id"),
-                    build = build ?: 1,
-                    url = downloadUrl.toString(),
-                    pluginDir = "plugins",
-                    type = SoftwareType.SERVER
-                )
-            }
-        } else {
-            val matchingVersion = allVersions.find { it.version == version }
-            if (matchingVersion == null) throw Exception("No version found for Paper with version $version")
-
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) throw Exception("Unexpected code $response")
-
-                val responseBody = response.body.string()
-
-                val jResponse = JSONObject(responseBody)
-
-                val versions = jResponse.getJSONArray("versions")
-
-                if (versions.length() == 0) throw Exception("No versions found")
-
-                val downloadUrl = getDownloadUrl(version)
-
-                val build = downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
-
-                return ServerSoftware(
-                    name = "Paper",
-                    version = version,
-                    build = build ?: 1,
-                    url = downloadUrl.toString(),
-                    pluginDir = "plugins",
-                    type = SoftwareType.SERVER
-                )
-            }
+        val duration = (System.nanoTime() - start) / 1_000_000.0
+        if (PropertyUtils.isSoftwareTiming()) {
+            logger.info("PaperDownloader> pullAvailableVersions() took ${duration}ms")
         }
+        return result
     }
 }

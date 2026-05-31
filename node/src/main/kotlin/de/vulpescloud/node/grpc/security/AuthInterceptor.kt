@@ -60,6 +60,7 @@ class AuthInterceptor(private val internalToken: String, jwtSecret: String) : Se
                 .withValue(GrpcContextKeys.USERNAME, "internal")
                 .withValue(GrpcContextKeys.ROLE, "system")
                 .withValue(GrpcContextKeys.PERMISSIONS, listOf("internal.*"))
+                .withValue(GrpcContextKeys.COMMUNICATION_TYPE, "internal")
 
         return Contexts.interceptCall(ctx, call, headers, next)
     }
@@ -86,6 +87,7 @@ class AuthInterceptor(private val internalToken: String, jwtSecret: String) : Se
                 .withValue(GrpcContextKeys.USERNAME, username)
                 .withValue(GrpcContextKeys.ROLE, role)
                 .withValue(GrpcContextKeys.PERMISSIONS, permissions)
+                .withValue(GrpcContextKeys.COMMUNICATION_TYPE, "external")
 
         return Contexts.interceptCall(ctx, call, headers, next)
     }

@@ -9,7 +9,7 @@ interface ServerSoftwareDownloader {
 
     suspend fun getDownloadUrl(version: String): URI
 
-    suspend fun getAvailableVersions(): List<ServerSoftware>
+    suspend fun getAvailableVersions(refreshList: Boolean = false): List<ServerSoftware>
 
     suspend fun getLatestVersion(version: String? = null): ServerSoftware
 

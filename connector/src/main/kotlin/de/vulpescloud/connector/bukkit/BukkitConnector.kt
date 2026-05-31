@@ -1,17 +1,17 @@
 package de.vulpescloud.connector.bukkit
 
-import de.vulpescloud.api.events.services.ServiceStateChangeEvent
-import de.vulpescloud.api.services.ServiceStates
+import build.buf.gen.vulpescloud.events.v1.serviceStateChangedEvent
+import build.buf.gen.vulpescloud.services.v1.ServiceState
 import de.vulpescloud.bridge.BridgeAPI
 import de.vulpescloud.wrapper.Wrapper
+import java.util.concurrent.TimeUnit
 import org.bstats.bukkit.Metrics
 import org.bukkit.Bukkit
 import org.bukkit.plugin.java.JavaPlugin
-import java.util.concurrent.TimeUnit
 
 class BukkitConnector : JavaPlugin() {
 
-    private val bridgeAPI = BridgeAPI.getFutureAPI()
+    private val bridgeAPI = BridgeAPI.createFutureAPI()
     private val pluginID = 27324
     private lateinit var metrics: Metrics
 
@@ -47,7 +47,12 @@ class BukkitConnector : JavaPlugin() {
         bridgeAPI
             .getEventAPI()
             .publish(
-                ServiceStateChangeEvent(localService, localService.state, ServiceStates.RUNNING)
+                serviceStateChangedEvent {
+                    this.service = localService.toDefinition()
+                    this.oldState = localService.state.toServiceState()
+                    this.newState = ServiceState.SERVICE_STATE_RUNNING
+                },
+                true,
             )
     }
 

@@ -3,13 +3,12 @@ package de.vulpescloud.node.commands
 import build.buf.gen.vulpescloud.virtualconfig.v1.getAllRequest
 import de.vulpescloud.api.virtualconfig.VirtualConfig
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Flag
+import org.incendo.cloud.annotations.Permission
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
@@ -56,73 +55,77 @@ class VirtualConfigCommand {
             .get(5, TimeUnit.SECONDS)
     }
 
+    @Permission("virtualconfig.list")
     @Command("virtualconfigs list")
     fun listVirtualConfigs(source: CommandSource, @Flag("local") local: Boolean) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             if (local) {
-                source.sendMessage("Listing local virtual configs...")
+                source.sendMessage("<gray>Listing local virtual configs...</gray>")
                 Node.instance.virtualConfigProvider.apply {
                     tempConfigsPath
                         .toFile()
                         .listFiles()
                         ?.filter { it.extension == "json" }
-                        ?.forEach { file -> source.sendMessage(" - ${file.nameWithoutExtension}") }
+                        ?.forEach { file -> source.sendMessage(" <dark_gray>»</dark_gray> <white>${file.nameWithoutExtension}</white>") }
                 }
             } else {
-                source.sendMessage("Listing remote virtual configs...")
+                source.sendMessage("<gray>Listing remote virtual configs...</gray>")
                 Node.instance.localGrpcClient.virtualConfigAPI
                     .getAll(getAllRequest {})
                     .configsList
-                    .forEach { source.sendMessage(" - ${it.name}") }
+                    .forEach { source.sendMessage(" <dark_gray>»</dark_gray> <white>${it.name}</white>") }
             }
         }
     }
 
+    @Permission("virtualconfig.get")
     @Command("virtualconfigs config <config> show")
     fun showVirtualConfig(
         source: CommandSource,
         @Flag("force") force: Boolean,
         @Argument("config") config: VirtualConfig,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             Node.instance.virtualConfigProvider.getCustomConfig(config.name, force).let {
                 if (it == null) {
                     source.sendMessage(
-                        "Unexpected NullPointerException while trying to get the config!"
+                        "<red>Unexpected NullPointerException while trying to get the config! Try with --force</red>"
                     )
                     return@let
                 }
 
-                source.sendMessage("Name: ${it.name}")
-                source.sendMessage("Created at: ${formatUnixTimestamp(it.createdAt)}")
-                source.sendMessage("Updated at: ${formatUnixTimestamp(it.lastUpdatedAt)}")
-                source.sendMessage("Raw Json: ${it.config.toString(4)}")
+                source.sendMessage("<gold>---------</gold> <white>${it.name}</white> <gold>---------</gold>")
+                source.sendMessage("<gray>Created at<dark_gray>:</dark_gray> <white>${formatUnixTimestamp(it.createdAt)}</white>")
+                source.sendMessage("<gray>Updated at<dark_gray>:</dark_gray> <white>${formatUnixTimestamp(it.lastUpdatedAt)}</white>")
+                source.sendMessage("<gray>Raw Json<dark_gray>:</dark_gray> <white>${it.config.toString(4)}</white>")
             }
         }
     }
 
+    @Permission("virtualconfig.updateFromLocal")
     @Command("virtualconfigs config <config> updateFromLocal")
     fun updateVirtualConfigFromLocal(
         source: CommandSource,
         @Argument("config") config: VirtualConfig,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             Node.instance.virtualConfigProvider.updateDatabaseFromLocalConfig(config.name)
             source.sendMessage(
-                "Successfully updated the database from the local config file for virtual config ${config.name}!"
+                "<green>Successfully updated the database from the local config file for virtual config</green> <white>${config.name}</white><green>!</green>"
             )
         }
     }
 
+    @Permission("virtualconfig.updateFromDatabase")
     @Command("virtualconfigs config <config> updateFromDatabase")
     fun updateVirtualConfigFromDatabase(
         source: CommandSource,
         @Argument("config") config: VirtualConfig,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             Node.instance.virtualConfigProvider.updateLocalConfigFromDatabase(config.name)
             source.sendMessage(
-                "Successfully updated the local config file from the database for virtual config ${config.name}!"
+                "<green>Successfully updated the local config file from the database for virtual config</green> <white>${config.name}</white><green>!</green>"
             )
         }
     }

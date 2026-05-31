@@ -5,12 +5,11 @@ import build.buf.gen.vulpescloud.node.v1.getNodeSnapshotRequest
 import build.buf.gen.vulpescloud.node.v1.snapshotOrNull
 import de.vulpescloud.api.cluster.ClusterNode
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
+import org.incendo.cloud.annotations.Permission
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
@@ -53,10 +52,11 @@ class ClusterCommand {
             .get(5, TimeUnit.SECONDS)
     }
 
+    @Permission("cluster.getAll")
     @Command("cluster nodes")
     fun listNodes(source: CommandSource) {
-        NodeCoroutineScope.launch {
-            source.sendMessage("Listing all nodes...")
+        runBlocking {
+            source.sendMessage("<gray>Listing all nodes...</gray>")
             try {
                 Node.Companion.instance.localGrpcClient.clusterAPI
                     .getAllNodes(getAllNodesRequest {})
@@ -69,36 +69,37 @@ class ClusterCommand {
                                 ?.getState(true)
 
                         source.sendMessage(
-                            " - ${node.name} State: ${node.state} Connection State: $state Head: ${node.head}"
+                            " <dark_gray>»</dark_gray> <white>${node.name}</white> <dark_gray>| <gray>State:</gray> <white>${node.state}</white> <dark_gray>| <gray>Connection:</gray> <white>$state</white> <dark_gray>| <gray>Head:</gray> <white>${node.head}</white>"
                         )
                     }
             } catch (exception: Exception) {
-                source.sendMessage("An error occurred while trying to get the nodes!")
+                source.sendMessage("<red>An error occurred while trying to get the nodes!</red>")
                 exception.printStackTrace()
-                return@launch
+                return@runBlocking
             }
         }
     }
 
+    @Permission("cluster.getSnapshot")
     @Command("cluster node <node> getSnapshot")
     fun getNodeSnapshot(source: CommandSource, @Argument("node") node: List<ClusterNode>) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             node.forEach {
-                source.sendMessage("Fetching snapshot for node ${it.name}...")
+                source.sendMessage("<gray>Fetching snapshot for node</gray> <white>${it.name}</white><gray>...</gray>")
                 val remoteNode = Node.Companion.instance.clusterProvider.remoteNodes.find { n -> n.endpoint.name == it.name }
                 Node.Companion.instance.localGrpcClient.clusterAPI
                     .getNodeSnapshot(getNodeSnapshotRequest { this.name = it.name })
                     .snapshotOrNull
                     ?.let { snapshot ->
-                        source.sendMessage("--------- ${snapshot.name} ---------")
-                        source.sendMessage("Cpu Usage: ${snapshot.cpuUsage}%")
-                        source.sendMessage("Memory Usage: ${snapshot.usedMemory}mb")
-                        source.sendMessage("State: ${snapshot.state}")
-                        source.sendMessage("Online Players: ${snapshot.onlinePlayers}")
-                        source.sendMessage("Connection State: ${remoteNode?.channel?.getState(true)}")
-                        source.sendMessage("Head: ${it.head}")
+                        source.sendMessage("<gold>---------</gold> <white>${snapshot.name}</white> <gold>---------</gold>")
+                        source.sendMessage("<gray>CPU Usage<dark_gray>:</dark_gray> <white>${snapshot.cpuUsage}%</white>")
+                        source.sendMessage("<gray>Memory Usage<dark_gray>:</dark_gray> <white>${snapshot.usedMemory}mb</white>")
+                        source.sendMessage("<gray>State<dark_gray>:</dark_gray> <white>${snapshot.state}</white>")
+                        source.sendMessage("<gray>Online Players<dark_gray>:</dark_gray> <white>${snapshot.onlinePlayers}</white>")
+                        source.sendMessage("<gray>Connection State<dark_gray>:</dark_gray> <white>${remoteNode?.channel?.getState(true)}</white>")
+                        source.sendMessage("<gray>Head<dark_gray>:</dark_gray> <white>${it.head}</white>")
                         return@let
-                    } ?: source.sendMessage("Failed to fetch snapshot for node ${it.name}!")
+                    } ?: source.sendMessage("<red>Failed to fetch snapshot for node ${it.name}!</red>")
             }
         }
     }

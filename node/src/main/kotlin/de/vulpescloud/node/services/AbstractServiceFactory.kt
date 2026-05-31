@@ -25,7 +25,7 @@ abstract class AbstractServiceFactory {
                 0,
                 Timestamp.newBuilder().build(),
                 ServiceStates.UNKNOWN,
-                Node.instance.configProvider.config.serviceBindAdress
+                Node.instance.configProvider.config.serviceBindAdress,
             )
         )
     }
@@ -42,6 +42,16 @@ abstract class AbstractServiceFactory {
         val existingIds = services.map { it.orderedId }.toSet()
 
         return (1..Int.MAX_VALUE).first { id -> id !in existingIds }
+    }
+
+    suspend fun findNextAvailableOrderedId(task: Task, startOrderedId: Int): Int {
+        val services =
+            Node.instance.localGrpcClient.serviceAPI
+                .getAllServices(GetAllServicesRequest.newBuilder().build())
+                .servicesList
+                .filter { it.task.name == task.name }
+        val existingIds = services.map { it.orderedId }.toSet()
+        return (startOrderedId..Int.MAX_VALUE).first { id -> id !in existingIds }
     }
 
     suspend fun detectServicePort(task: Task): Int {

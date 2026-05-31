@@ -54,7 +54,7 @@ object MongoUtils {
     }
 
     suspend fun nothingOrInsertVirtualConfig(config: VirtualConfig) {
-        virtualConfigsDatabase.insert(
+        virtualConfigsDatabase.insertIgnore(
             config.name,
             Json.encodeToJsonElement(
                 de.vulpescloud.api.virtualconfig.VirtualConfig.fromDefinition(config)
@@ -100,6 +100,10 @@ object MongoUtils {
     suspend fun updateUserPassword(name: String, password: String) {
         val hashedPassword = BCrypt.withDefaults().hashToString(12, password.toCharArray())
         usersDatabase.upsert(name, Json.encodeToJsonElement(UserModel(name, hashedPassword)))
+    }
+
+    suspend fun updateUser(name: String, user: UserModel) {
+        usersDatabase.upsert(name, Json.encodeToJsonElement(user))
     }
 
     suspend fun addPermissionToUser(username: String, permission: String) {

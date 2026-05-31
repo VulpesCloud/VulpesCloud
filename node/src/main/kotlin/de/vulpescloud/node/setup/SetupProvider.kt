@@ -62,12 +62,12 @@ class SetupProvider(private val terminal: Terminal) {
             }
 
             terminal.clear()
-            terminal.changePrompt("&f> ")
+            terminal.changePrompt("<white>> </white>")
             terminal.printSetup(setup.header)
             terminal.printSetup("")
             printCurrentQuestion()
         } catch (e: Exception) {
-            logger.error("Failed to start setup", e)
+            logger.error("<red>Failed to start setup</red>", e)
         }
     }
 
@@ -77,7 +77,7 @@ class SetupProvider(private val terminal: Terminal) {
         val questionSetupAnswer = currentQuestion.setupQuestion.answer.java.getDeclaredConstructor().newInstance()
         val answers = questionSetupAnswer.suggest()
         val suffix =
-            if (answers.isNotEmpty()) "&ePossible answers: " + answers.joinToString() else ""
+            if (answers.isNotEmpty()) "<yellow>Possible answers<dark_gray>:</dark_gray> <white>" + answers.joinToString() + "</white></yellow>" else ""
         if (suffix.isEmpty()) {
             terminal.printSetup(currentQuestion.setupQuestion.translationKey)
         } else {
@@ -102,7 +102,7 @@ class SetupProvider(private val terminal: Terminal) {
 
         terminal.changePrompt("")
 
-        logger.info("Setup &2Finished")
+        logger.info("<gray>Setup</gray> <green>finished</green><dark_gray>.</dark_gray>")
     }
 
     fun cancelSetup() {
@@ -118,7 +118,7 @@ class SetupProvider(private val terminal: Terminal) {
 
         terminal.changePrompt("")
 
-        logger.info("Setup &cCancelled")
+        logger.info("<gray>Setup</gray> <red>cancelled</red><dark_gray>.</dark_gray>")
     }
 
     suspend fun input(input: String) {
@@ -148,8 +148,8 @@ class SetupProvider(private val terminal: Terminal) {
             terminal.terminal.puts(InfoCmp.Capability.carriage_return)
             terminal.terminal.puts(InfoCmp.Capability.clr_eol)
             terminal.terminal.puts(InfoCmp.Capability.cursor_normal)
-            terminal.changePrompt("&f> ")
-            terminal.terminal.writer().print(terminal.replaceColors("&f> "))
+            terminal.changePrompt("<white>> </white>")
+            terminal.terminal.writer().print(terminal.replaceColors("<white>> </white>"))
             terminal.terminal.flush()
         }
 
@@ -165,7 +165,7 @@ class SetupProvider(private val terminal: Terminal) {
         }
 
         if (answers.isNotEmpty() && !answers.contains(input) && q.setupQuestion.forceAnswer) {
-            terminal.printSetup("&cInvalid input, please try again!")
+            terminal.printSetup("<red>Invalid input, please try again!</red>")
             failAndLock()
             unlockAfterDelay()
             return
@@ -174,14 +174,14 @@ class SetupProvider(private val terminal: Terminal) {
         val invoke = try {
             q.method.invoke(this.currentSetup!!.setup, input)
         } catch (_: Exception) {
-            terminal.printSetup("&cInvalid input, please try again!")
+            terminal.printSetup("<red>Invalid input, please try again!</red>")
             failAndLock()
             unlockAfterDelay()
             return
         }
 
         if (invoke is Boolean && !invoke) {
-            terminal.printSetup("&cInvalid input, please try again!")
+            terminal.printSetup("<red>Invalid input, please try again!</red>")
             failAndLock()
             unlockAfterDelay()
             return
@@ -199,7 +199,7 @@ class SetupProvider(private val terminal: Terminal) {
             terminal.terminal.puts(InfoCmp.Capability.clr_eol)
         }
 
-        terminal.printSetup("${q.setupQuestion.translationKey} &7> &f$input")
+        terminal.printSetup("<gray>${q.setupQuestion.translationKey}</gray> <dark_gray>»</dark_gray> <white>$input</white>")
         terminal.terminal.flush()
 
         val setup = this.currentSetup ?: return

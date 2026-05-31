@@ -1,24 +1,27 @@
 package de.vulpescloud.node.commands
 
-import build.buf.gen.vulpescloud.services.v1.prepareServiceByTaskRequest
-import build.buf.gen.vulpescloud.services.v1.startServiceRequest
+import build.buf.gen.vulpescloud.tasks.v1.PrepareServiceOnTaskRequest
+import build.buf.gen.vulpescloud.tasks.v1.TaskDefinition
+import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.tasks.v1.deleteTaskRequest
 import build.buf.gen.vulpescloud.tasks.v1.getAllTasksRequest
 import build.buf.gen.vulpescloud.tasks.v1.updateTaskRequest
+import com.github.benmanes.caffeine.cache.Caffeine
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
-import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
+import de.vulpescloud.node.command.ConsoleCommandSource
 import de.vulpescloud.node.command.annotation.Alias
+import de.vulpescloud.node.command.annotation.SpecificCommandSource
+import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import de.vulpescloud.node.setup.setups.TaskSetup
-import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Flag
+import org.incendo.cloud.annotations.Permission
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
@@ -30,46 +33,30 @@ class TaskCommand {
 
     @Suggestions("tasks")
     fun taskSuggestions(): Stream<String> {
-        return CompletableFuture.supplyAsync {
-                runBlocking {
-                    Node.instance.localGrpcClient.tasksAPI
-                        .getAllTasks(getAllTasksRequest {})
-                        .tasksList
-                        .map { it.name }
-                }
-            }
-            .thenApply { it.stream() }
-            .exceptionally { Stream.empty() }
-            .get(5, TimeUnit.SECONDS)
+        return TaskCache.getTasks().map { it.name }.stream()
     }
 
     @Parser(suggestions = "tasks")
     fun taskParser(input: CommandInput): List<Task> {
-        return CompletableFuture.supplyAsync {
-                runBlocking {
-                    val regexPattern = input.readString().replace("*", ".*")
-                    val regex = Regex(regexPattern)
+        val raw = input.readString()
+        val pattern = raw.split("*").joinToString(".*") { Regex.escape(it) }
+        val regex = Regex("^$pattern$", RegexOption.IGNORE_CASE)
 
-                    Node.instance.localGrpcClient.tasksAPI
-                        .getAllTasks(getAllTasksRequest {})
-                        .tasksList
-                        .filter { regex.matches(it.name) }
-                        .map { Task.fromDefinition(it) }
-                }
-            }
-            .thenApply { it }
-            .exceptionally { throw it }
-            .get(5, TimeUnit.SECONDS)
+        return TaskCache.getTasks()
+            .filter { regex.matches(it.name) }
+            .map { Task.fromDefinition(it) }
     }
 
     @Command("task|tasks setup")
+    @SpecificCommandSource(ConsoleCommandSource::class)
     fun setupTask(source: CommandSource) {
         Node.instance.setupProvider.startSetup(TaskSetup())
     }
 
+    @Permission("tasks.getAll")
     @Command("task|tasks list")
     fun listTasks(source: CommandSource) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             val tasks =
                 Node.instance.localGrpcClient.tasksAPI
                     .getAllTasks(getAllTasksRequest {})
@@ -78,90 +65,122 @@ class TaskCommand {
 
             val maxNameLength = tasks.maxOfOrNull { it.name.length } ?: 0
 
-            source.sendMessage("The following ${tasks.size} task(s) are registered:")
+            source.sendMessage("<gray>The following</gray> <gold>${tasks.size}</gold> <gray>task(s) are registered:</gray>")
             tasks.forEach {
                 val name = it.name.padEnd(maxNameLength)
                 source.sendMessage(
-                    " &8- &m$name &7Maintenance: &e${it.maintenance}&8, &7MaxPlayers: &e${it.maxPlayers}&8, &7MaxMemory: &e${it.maxMemory}MB&8, &7Static: &e${it.staticServices}&8, &7Fallback: &eNOT IMPLEMENTED&8, &7StartPort: &e${it.startPort}&8, &7Version: &e${it.software.name}-${it.software.version}"
+                    " <dark_gray>»</dark_gray> <white>$name</white> <dark_gray>| <gray>Maintenance:</gray> <white>${it.maintenance}</white> <dark_gray>| <gray>MaxPlayers:</gray> <white>${it.maxPlayers}</white> <dark_gray>| <gray>MaxMemory:</gray> <white>${it.maxMemory}MB</white> <dark_gray>| <gray>Static:</gray> <white>${it.staticServices}</white> <dark_gray>| <gray>Fallback:</gray> <white>${it.fallback}</white> <dark_gray>| <gray>StartPort:</gray> <white>${it.startPort}</white> <dark_gray>| <gray>Version:</gray> <white>${it.software.name}-${it.software.version}</white>"
                 )
             }
         }
     }
 
+    @Permission("tasks.get")
     @Command("task|tasks task <tasks> info")
     fun infoTask(source: CommandSource, @Argument("tasks") tasks: List<Task>) {
         tasks.forEach {
             source.sendMessage(
-                "&7Name: &e${it.name} \n" +
-                    "&7MaxPlayers: &e${it.maxPlayers} \n" +
-                    "&7MaxMemory: &e${it.maxMemory}MB \n" +
-                    "&7Static: &e${it.staticServices} \n" +
-                    "&7Fallback: &e${it.fallback} \n" +
-                    "&7StartPort: &e${it.startPort} \n" +
-                    "&7Version: &e${it.software.name}-${it.software.version}" +
-                    "&7StaticServices: &e${it.staticServices} \n" +
-                    "&7Maintenance: &e${it.maintenance}" +
-                    "&7PreferredNode: &e${it.preferredNode}" +
-                    "&7ServiceFactory: &e${it.serviceFactoryName}" +
-                    "&7CopyTemplatesToStatic: &e${it.copyTemplatesToStatic}" +
-                    "&7MinOnlineServices: &e${it.minOnlineServices} \n" +
-                    "&7MaxOnlineServices: &e${it.maxOnlineServices} \n" +
-                    "&7JvmArgs: &e${it.jvmArgs.joinToString(", ")} \n" +
-                    "&7EnvVars: &e${it.envVars.joinToString(", ")}" +
-                    "&7Attributes: &e${it.attributes?.toString() ?: "None"}"
+                "<gold>---------</gold> <white>${it.name}</white> <gold>---------</gold>\n" +
+                        "<gray>MaxPlayers<dark_gray>:</dark_gray> <white>${it.maxPlayers}</white> \n" +
+                        "<gray>MaxMemory<dark_gray>:</dark_gray> <white>${it.maxMemory}MB</white> \n" +
+                        "<gray>Static<dark_gray>:</dark_gray> <white>${it.staticServices}</white> \n" +
+                        "<gray>Fallback<dark_gray>:</dark_gray> <white>${it.fallback}</white> \n" +
+                        "<gray>StartPort<dark_gray>:</dark_gray> <white>${it.startPort}</white> \n" +
+                        "<gray>Version<dark_gray>:</dark_gray> <white>${it.software.name}-${it.software.version}</white> \n" +
+                        "<gray>Maintenance<dark_gray>:</dark_gray> <white>${it.maintenance}</white> \n" +
+                        "<gray>PreferredNode<dark_gray>:</dark_gray> <white>${it.preferredNode}</white> \n" +
+                        "<gray>ServiceFactory<dark_gray>:</dark_gray> <white>${it.serviceFactoryName}</white> \n" +
+                        "<gray>CopyTemplates<dark_gray>:</dark_gray> <white>${it.copyTemplatesToStatic}</white> \n" +
+                        "<gray>MinOnline<dark_gray>:</dark_gray> <white>${it.minOnlineServices}</white> \n" +
+                        "<gray>MaxOnline<dark_gray>:</dark_gray> <white>${it.maxOnlineServices}</white> \n" +
+                        "<gray>JvmArgs<dark_gray>:</dark_gray> <white>${it.jvmArgs.joinToString(", ")}</white> \n" +
+                        "<gray>EnvVars<dark_gray>:</dark_gray> <white>${it.envVars.joinToString(", ")}</white> \n" +
+                        "<gray>Attributes<dark_gray>:</dark_gray> <white>${it.attributes}</white>"
             )
         }
     }
 
+    @Permission("tasks.prepareServiceOnTask")
     @Command("task|tasks task <tasks> prepare")
     fun prepareService(
         source: CommandSource,
         @Argument("tasks") tasks: List<Task>,
         @Flag("start") startService: Boolean,
+        @Flag("amount") amount: Int?,
+        @Flag("node") node: String?,
+        @Flag("memory") memory: Int?,
+        @Flag("startOrderedId") startOrderedId: Int?,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             tasks.forEach { task ->
-                val resp =
-                    Node.instance.localGrpcClient.serviceAPI.prepareServiceByTask(
-                        prepareServiceByTaskRequest { this.task = task.toDefinition() }
-                    )
-                source.sendMessage("Prepared service for task &m${task.name}&8.")
-                if (startService) {
-                    Node.instance.localGrpcClient.serviceAPI.startService(
-                        startServiceRequest { this.service = resp.service }
-                    )
+                val nodeName: String = node ?: task.preferredNode
 
-                    source.sendMessage(
-                        "Started service &m${task.name}-${resp.service.orderedId}&8."
+                if (nodeName == Node.instance.configProvider.config.nodeName) {
+                    Node.instance.localGrpcClient.tasksAPI.prepareServiceOnTask(
+                        PrepareServiceOnTaskRequest.newBuilder()
+                            .setTask(task.toDefinition())
+                            .setAmount(amount ?: 1)
+                            .setMemory(memory?.toLong() ?: task.maxMemory)
+                            .setNodeName(nodeName)
+                            .setStart(startService)
+                            .setStartId(startOrderedId ?: 1)
+                            .build()
                     )
+                } else {
+                    Node.instance.clusterProvider.remoteNodes
+                        .find { it.endpoint.name == nodeName }
+                        ?.let {
+                            if (it.channel == null) {
+                                source.sendMessage("<red>Node ${it.endpoint.name} is not online!</red>")
+                                return@runBlocking
+                            }
+                            if (!it.getNode().isRunning()) {
+                                source.sendMessage("<red>Node ${it.endpoint.name} is not online!</red>")
+                                return@runBlocking
+                            }
+                            TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub(it.channel!!)
+                                .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+                                .prepareServiceOnTask(
+                                    PrepareServiceOnTaskRequest.newBuilder()
+                                        .setTask(task.toDefinition())
+                                        .setAmount(amount ?: 1)
+                                        .setMemory(memory?.toLong() ?: task.maxMemory)
+                                        .setNodeName(nodeName)
+                                        .setStart(startService)
+                                        .setStartId(startOrderedId ?: 1)
+                                        .build()
+                                )
+                        }
                 }
             }
         }
     }
 
+    @Permission("tasks.delete")
     @Confirmation
     @Command("task|tasks task <tasks> delete")
     fun deleteTask(source: CommandSource, @Argument("tasks") tasks: List<Task>) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             tasks.forEach { task ->
                 val resp =
                     Node.instance.localGrpcClient.tasksAPI.deleteTask(
                         deleteTaskRequest { this.task = task.toDefinition() }
                     )
-                source.sendMessage("Deleted task &m${task.name}&8.")
+                source.sendMessage("<gray>Deleted task</gray> <white>${task.name}</white><dark_gray>.</dark_gray>")
             }
         }
     }
 
+    @Permission("tasks.update")
     @Command("task|tasks task <tasks> set maxMemory <memory>")
     fun setMaxMemory(
         source: CommandSource,
         @Argument("tasks") tasks: List<Task>,
         @Argument("memory") memory: Int,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             tasks.forEach { task ->
-                source.sendMessage("Setting max memory for task &m${task.name} to &e$memory MB")
+                source.sendMessage("<gray>Setting max memory for task</gray> <white>${task.name}</white> <gray>to</gray> <gold>$memory MB</gold>")
                 val newTask = task.copy(maxMemory = memory.toLong())
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
@@ -170,15 +189,16 @@ class TaskCommand {
         }
     }
 
+    @Permission("tasks.update")
     @Command("task|tasks task <tasks> set maintenance <maintenance>")
     fun setMaintenance(
         source: CommandSource,
         @Argument("tasks") tasks: List<Task>,
         @Argument("maintenance") maintenance: Boolean,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             tasks.forEach { task ->
-                source.sendMessage("Setting maintenance for task &m${task.name} to &e$maintenance")
+                source.sendMessage("<gray>Setting maintenance for task</gray> <white>${task.name}</white> <gray>to</gray> <white>$maintenance</white>")
                 val newTask = task.copy(maintenance = maintenance)
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
@@ -187,15 +207,16 @@ class TaskCommand {
         }
     }
 
+    @Permission("tasks.update")
     @Command("task|tasks task <tasks> set staticServices <static>")
     fun setStatic(
         source: CommandSource,
         @Argument("tasks") tasks: List<Task>,
         @Argument("static") static: Boolean,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             tasks.forEach { task ->
-                source.sendMessage("Setting staticServices for task &m${task.name} to &e$static")
+                source.sendMessage("<gray>Setting staticServices for task</gray> <white>${task.name}</white> <gray>to</gray> <white>$static</white>")
                 val newTask = task.copy(staticServices = static)
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
@@ -204,15 +225,16 @@ class TaskCommand {
         }
     }
 
+    @Permission("tasks.update")
     @Command("task|tasks task <tasks> set fallback <fallback>")
     fun setFallback(
         source: CommandSource,
         @Argument("tasks") tasks: List<Task>,
         @Argument("fallback") fallback: Boolean,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             tasks.forEach { task ->
-                source.sendMessage("Setting fallback for task &m${task.name} to &e$fallback")
+                source.sendMessage("<gray>Setting fallback for task</gray> <white>${task.name}</white> <gray>to</gray> <white>$fallback</white>")
                 val newTask = task.copy(fallback = fallback)
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
@@ -221,19 +243,53 @@ class TaskCommand {
         }
     }
 
+    @Permission("tasks.update")
     @Command("task|tasks task <tasks> set preferredNode <node>")
     fun setPreferredNode(
         source: CommandSource,
         @Argument("tasks") tasks: List<Task>,
         @Argument("node") node: String,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             tasks.forEach { task ->
-                source.sendMessage("Setting preferredNode for task &m${task.name} to &e$node")
+                source.sendMessage("<gray>Setting preferredNode for task</gray> <white>${task.name}</white> <gray>to</gray> <white>$node</white>")
                 val newTask = task.copy(preferredNode = node)
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
                 )
+            }
+        }
+    }
+
+    @Permission("tasks.update")
+    @Command("task|tasks task <tasks> set minServiceCount <count>")
+    fun setMinServiceCount(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("count") count: Int,
+    ) {
+        runBlocking {
+            tasks.forEach { task ->
+                source.sendMessage("<gray>Setting minServiceCount for task</gray> <white>${task.name}</white> <gray>to</gray> <gold>$count</gold>")
+                val newTask = task.copy(minOnlineServices = count)
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+}
+
+object TaskCache {
+    private val cache =
+        Caffeine.newBuilder()
+            .expireAfterWrite(15, TimeUnit.SECONDS)
+            .build<String, List<TaskDefinition>>()
+
+    fun getTasks(): List<TaskDefinition> {
+        return cache.get("tasks") {
+            runBlocking {
+                Node.instance.localGrpcClient.tasksAPI.getAllTasks(getAllTasksRequest {}).tasksList
             }
         }
     }

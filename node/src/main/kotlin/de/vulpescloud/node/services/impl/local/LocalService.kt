@@ -1,7 +1,7 @@
 package de.vulpescloud.node.services.impl.local
 
-import de.vulpescloud.api.events.EventSerializer
-import de.vulpescloud.api.events.services.ServiceLogEvent
+import build.buf.gen.vulpescloud.events.v1.serviceLogEvent
+import build.buf.gen.vulpescloud.events.v1.serviceStateChangedEvent
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
@@ -13,6 +13,7 @@ import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 import java.nio.file.Path
 import kotlin.io.path.exists
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -33,7 +34,7 @@ class LocalService(override val service: Service) : AbstractService {
     private val logger =
         LoggerFactory.getLogger("LocalService-${service.task.name}-${service.orderedId}")
 
-    private var process: Process? = null
+    var process: Process? = null
     private var processTracking: Thread? = null
 
     override fun start() {
@@ -50,7 +51,11 @@ class LocalService(override val service: Service) : AbstractService {
                     reader.forEachLine { line ->
                         runBlocking {
                             EventsService.publish(
-                                EventSerializer.encode(ServiceLogEvent(service, line.trim()))
+                                serviceLogEvent {
+                                    this.service = this@LocalService.service.toDefinition()
+                                    this.message = line
+                                },
+                                true,
                             )
                         }
                     }
@@ -72,6 +77,14 @@ class LocalService(override val service: Service) : AbstractService {
                 NodeCoroutineScope.launch { MongoUtils.deleteService(service) }
                 Node.instance.nodeServices.removeIf { it.service.uuid == service.uuid }
 
+                EventsService.publish(
+                    serviceStateChangedEvent {
+                        this.service = this@LocalService.service.toDefinition()
+                        this.oldState = ServiceStates.RUNNING.toServiceState()
+                        this.newState = ServiceStates.STOPPED.toServiceState()
+                    },
+                    true
+                )
                 logger.info("Service ${service.task.name}-${service.orderedId} stopped!")
 
                 if (!service.task.staticServices) {
@@ -96,7 +109,7 @@ class LocalService(override val service: Service) : AbstractService {
         runBlocking {
             command("stop")
 
-            delay(5000)
+            delay(5.seconds)
 
             if (process != null) {
                 process!!.destroyForcibly()
@@ -107,7 +120,7 @@ class LocalService(override val service: Service) : AbstractService {
     override fun delete() {
         command("stop")
         NodeCoroutineScope.launch {
-            delay(5000)
+            delay(5.seconds)
 
             if (process != null) {
                 process!!.destroyForcibly()
@@ -143,8 +156,6 @@ class LocalService(override val service: Service) : AbstractService {
             logger.error(
                 "Failed to send command to service ${service.task.name}-${service.orderedId}!"
             )
-            // TODO/NOTE: For some stupid reason this doesn't seem to work with Purpur servers, i
-            // don't know if its just a Purpur server not working or all Bukkit Servers
         }
     }
 
@@ -152,7 +163,7 @@ class LocalService(override val service: Service) : AbstractService {
         NodeCoroutineScope.launch {
             command("stop")
 
-            delay(5000)
+            delay(5.seconds)
 
             if (process != null) {
                 process!!.destroyForcibly()

@@ -1,10 +1,12 @@
 package de.vulpescloud.node
 
+import build.buf.gen.vulpescloud.services.v1.ServiceSnapshot
 import com.github.dockerjava.core.DefaultDockerClientConfig
 import com.github.dockerjava.core.DockerClientConfig
 import com.github.dockerjava.core.DockerClientImpl
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient
 import com.github.dockerjava.transport.DockerHttpClient
+import de.vulpescloud.api.players.OnlinePlayer
 import de.vulpescloud.node.auth.AuthServiceImpl
 import de.vulpescloud.node.cluster.ClusterAPIServiceImpl
 import de.vulpescloud.node.cluster.ClusterProvider
@@ -23,7 +25,14 @@ import de.vulpescloud.node.grpc.LoggingServerInterceptor
 import de.vulpescloud.node.grpc.security.AuthInterceptor
 import de.vulpescloud.node.grpc.security.PermissionInterceptor
 import de.vulpescloud.node.modules.ModuleProvider
+import de.vulpescloud.node.players.PlayerActionServiceImpl
+import de.vulpescloud.node.players.PlayerServiceImpl
 import de.vulpescloud.node.secret.SecretFactory
+import de.vulpescloud.node.serversoftware.ServerSoftwareProvider
+import de.vulpescloud.node.serversoftware.impl.FoliaDownloader
+import de.vulpescloud.node.serversoftware.impl.PaperDownloader
+import de.vulpescloud.node.serversoftware.impl.PurpurDownloader
+import de.vulpescloud.node.serversoftware.impl.VelocityDownloader
 import de.vulpescloud.node.services.AbstractService
 import de.vulpescloud.node.services.ServiceFactoryProvider
 import de.vulpescloud.node.services.ServiceScheduler
@@ -39,10 +48,12 @@ import de.vulpescloud.node.virtualconfig.VirtualConfigProvider
 import de.vulpescloud.node.virtualconfig.VirtualConfigServiceImpl
 import io.grpc.BindableService
 import io.grpc.ChannelCredentials
+import java.time.Duration
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.io.path.Path
+import kotlin.time.Duration.Companion.milliseconds
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
-import java.time.Duration
-import kotlin.io.path.Path
 
 class Node {
     private val logger = LoggerFactory.getLogger("Node")
@@ -61,14 +72,29 @@ class Node {
     lateinit var dockerClientConfig: DockerClientConfig
     lateinit var dockerHttpClient: DockerHttpClient
 
+    lateinit var internalEventsService: EventsService
+
     val templateStorageProvider = TemplateStorageProvider()
     val localGrpcClient = LocalGrpcClient()
     val serviceFactoryProvider = ServiceFactoryProvider()
-    val nodeServices = mutableListOf<AbstractService>()
+    val nodeServices: MutableSet<AbstractService> = ConcurrentHashMap.newKeySet()
+    val nodeServiceSnapshots: MutableSet<ServiceSnapshot> = ConcurrentHashMap.newKeySet()
+    val nodeProxyPlayers: MutableMap<String, MutableList<OnlinePlayer>> =
+        ConcurrentHashMap() // ProxyName<Player>
+    val nodeServerPlayers: MutableMap<String, MutableList<OnlinePlayer>> =
+        ConcurrentHashMap() // ServerName<Player>
     val virtualConfigProvider = VirtualConfigProvider()
     val clusterProvider = ClusterProvider()
-    val moduleProvider = ModuleProvider(Path("modules"))
+    val moduleProvider =
+        ModuleProvider(
+            Path("modules"),
+            System.getProperty(
+                "vulpescloud.modules.url",
+                "https://github.com/VulpesCloud/VulpesCloud-meta/raw/refs/heads/main/modules.json",
+            ),
+        )
     val virtualConfigServiceImpl = VirtualConfigServiceImpl()
+    val serverSoftwareProvider = ServerSoftwareProvider()
 
     private val grpcServices = mutableListOf<BindableService>()
     private var allowGrpcServiceAdding = true
@@ -103,7 +129,7 @@ class Node {
             }
 
             while (setupProvider.currentSetup?.setup is FirstSetup) {
-                delay(500)
+                delay(500.milliseconds)
             }
 
             terminal.changePrompt("")
@@ -127,6 +153,7 @@ class Node {
                     register(AuthCommand())
                     register(ModuleCommand())
                     register(SoftwareCommand())
+                    register(PlayersCommand())
                 }
             } catch (e: Exception) {
                 logger.error("Failed to initialize commands: ${e.stackTraceToString()}")
@@ -142,17 +169,21 @@ class Node {
                 setAndInitializeMainDatabaseProvider()
             }
 
+            internalEventsService = EventsService()
+
             grpcServices.addAll(
                 listOf(
                     TasksAPIService(),
                     ServicesAPIService(),
-                    EventsService(),
+                    internalEventsService,
                     virtualConfigServiceImpl,
                     ClusterAPIServiceImpl(),
                     AuthServiceImpl(
                         configProvider.config.auth.jwtSecret,
                         configProvider.config.auth.jwtRefreshSecret,
                     ),
+                    PlayerServiceImpl(),
+                    PlayerActionServiceImpl(),
                 )
             )
 
@@ -181,8 +212,8 @@ class Node {
             EventListenHelper.subscribeToEvents()
 
             clusterProvider.initClusterConfig()
-            clusterProvider.connectToOtherNodes()
             clusterProvider.init()
+            clusterProvider.connectToOtherNodes()
 
             serviceFactoryProvider.apply {
                 registerServiceFactory(DockerServiceFactory())
@@ -226,14 +257,28 @@ class Node {
                 }
             }
 
+            serverSoftwareProvider.apply {
+                registerDownloader(FoliaDownloader)
+                registerDownloader(PaperDownloader)
+                registerDownloader(PurpurDownloader)
+                registerDownloader(VelocityDownloader)
+
+                lock()
+            }
+
             moduleProvider.startAllModules()
 
             clusterProvider.startupDone()
+
+            moduleProvider.checkAllLoadedModulesForUpdates()
+
             val time =
                 System.currentTimeMillis() - (System.getProperty("startup").toLongOrNull() ?: 0)
             logger.info("Startup Done! Took {}ms", time)
 
             ServiceScheduler.start()
+
+            serverSoftwareProvider.triggerReCache()
 
             // Runtime.getRuntime().addShutdownHook(Thread { NodeShutdown.shutdown() })
         }

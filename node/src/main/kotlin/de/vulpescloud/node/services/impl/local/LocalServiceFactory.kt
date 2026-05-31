@@ -1,11 +1,14 @@
 package de.vulpescloud.node.services.impl.local
 
+import build.buf.gen.vulpescloud.events.v1.serviceStateChangedEvent
+import build.buf.gen.vulpescloud.services.v1.ServiceState
 import com.electronwill.nightconfig.core.file.FileConfig
 import com.electronwill.nightconfig.toml.TomlFormat
 import com.electronwill.nightconfig.yaml.YamlFormat
 import de.vulpescloud.api.services.Service
 import de.vulpescloud.api.services.ServiceStates
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.event.EventsService
 import de.vulpescloud.node.serversoftware.impl.*
 import de.vulpescloud.node.services.AbstractServiceFactory
 import de.vulpescloud.node.utils.MongoUtils
@@ -14,6 +17,8 @@ import java.nio.file.StandardCopyOption
 import java.util.*
 import kotlin.io.path.Path
 import kotlin.io.path.copyTo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 class LocalServiceFactory : AbstractServiceFactory() {
 
@@ -98,6 +103,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 acceptEULA(localService)
                 setServerProperties(localService)
                 updatePaperGlobalConfig(localService)
+                arguments.add("--nogui")
             }
             "Folia" -> {
                 FoliaDownloader.apply {
@@ -110,6 +116,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 updatePaperGlobalConfig(localService)
 
                 arguments.add("--separateClassLoader")
+                arguments.add("--nogui")
             }
             "Paper" -> {
                 PaperDownloader.apply {
@@ -122,6 +129,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 updatePaperGlobalConfig(localService)
 
                 arguments.add("--separateClassLoader")
+                arguments.add("--nogui")
             }
             "Purpur" -> {
                 PurpurDownloader.apply {
@@ -134,6 +142,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 updatePaperGlobalConfig(localService)
 
                 arguments.add("--separateClassLoader")
+                arguments.add("--nogui")
             }
             "Velocity" -> {
                 VelocityDownloader.apply {
@@ -145,10 +154,12 @@ class LocalServiceFactory : AbstractServiceFactory() {
             }
             "Minestom" -> {
                 if (Node.instance.configProvider.config.useModernForwarding) {
-                    Files.writeString(
-                        localService.path().resolve("forwarding.secret"),
-                        Node.instance.getVelocitySecret(),
-                    )
+                    withContext(Dispatchers.IO) {
+                        Files.writeString(
+                            localService.path().resolve("forwarding.secret"),
+                            Node.instance.getVelocitySecret(),
+                        )
+                    }
                 }
             }
         }
@@ -159,8 +170,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 .redirectErrorStream(true)
 
         processBuilder.environment()["bootstrapFile"] = "server.jar"
-        processBuilder.environment()["grpc_hostname"] =
-            "127.0.0.1" // Node.instance.configProvider.config.grpcHost
+        processBuilder.environment()["grpc_hostname"] = Node.instance.configProvider.config.grpcHost
         processBuilder.environment()["grpc_port"] =
             Node.instance.configProvider.config.grpcPort.toString()
         processBuilder.environment()["serviceUUID"] = service.uuid.toString()
@@ -170,14 +180,16 @@ class LocalServiceFactory : AbstractServiceFactory() {
         processBuilder.environment()["port"] = service.port.toString()
         processBuilder.environment()["secret"] = Node.instance.secret
 
-        Files.copy(
-            Path("launcher/dependencies/vulpescloud/vulpescloud-connector.jar"),
-            localService
-                .path()
-                .resolve(service.task.software.pluginDir)
-                .resolve("vulpescloud-connector.jar"),
-            StandardCopyOption.REPLACE_EXISTING,
-        )
+        withContext(Dispatchers.IO) {
+            Files.copy(
+                Path("launcher/dependencies/vulpescloud/vulpescloud-connector.jar"),
+                localService
+                    .path()
+                    .resolve(service.task.software.pluginDir)
+                    .resolve("vulpescloud-connector.jar"),
+                StandardCopyOption.REPLACE_EXISTING,
+            )
+        }
 
         Node.instance.moduleProvider
             .getAllModules()
@@ -201,6 +213,17 @@ class LocalServiceFactory : AbstractServiceFactory() {
         localService.processBuilder = processBuilder
 
         MongoUtils.updateService(localService.service)
+
+        EventsService.publish(
+            serviceStateChangedEvent {
+                this.service = localService.service.toDefinition()
+                this.oldState = ServiceState.SERVICE_STATE_UNSPECIFIED
+                this.newState = ServiceState.SERVICE_STATE_PREPARED
+            },
+            true,
+        )
+
+        servicePrepareSyncHooks.forEach { hook -> hook(localService) }
 
         return localService
     }
@@ -237,6 +260,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
 
     fun updatePaperGlobalConfig(service: LocalService) {
         if (Node.instance.configProvider.config.useModernForwarding) {
+            service.path().resolve("config").toFile().mkdirs()
             val globalConf =
                 FileConfig.builder(
                         service.path().resolve("config/paper-global.yml"),
@@ -280,5 +304,13 @@ class LocalServiceFactory : AbstractServiceFactory() {
 
         config.save()
         config.close()
+    }
+
+    companion object {
+        private val servicePrepareSyncHooks = mutableListOf<suspend (LocalService) -> Unit>()
+
+        fun addServicePrepareSyncHook(hook: suspend (LocalService) -> Unit) {
+            servicePrepareSyncHooks.add(hook)
+        }
     }
 }

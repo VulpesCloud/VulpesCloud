@@ -1,17 +1,26 @@
 package de.vulpescloud.node.commands
 
+import build.buf.gen.vulpescloud.players.v1.getOfflinePlayersRequest
+import de.vulpescloud.api.players.OfflinePlayer
+import de.vulpescloud.api.players.toAPI
+import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.command.CommandSource
 import de.vulpescloud.node.grpc.security.PermissionHelper
+import de.vulpescloud.node.grpc.security.model.GroupModel
+import de.vulpescloud.node.grpc.security.model.UserModel
 import de.vulpescloud.node.utils.MongoUtils
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.future.future
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
+import org.incendo.cloud.annotations.Permission
+import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
+import org.incendo.cloud.context.CommandInput
 
 @Suppress("UNUSED")
 class AuthCommand {
@@ -27,8 +36,20 @@ class AuthCommand {
             .get(5, TimeUnit.SECONDS)
     }
 
+    @Parser(suggestions = "users")
+    fun users(input: CommandInput): UserModel {
+        val userName = input.readString()
+        return runBlocking {
+            val user = MongoUtils.getUserByName(userName)
+            if (user == null) {
+                throw IllegalArgumentException("User '$userName' not found!")
+            }
+            user
+        }
+    }
+
     // ---------- Group suggestions ----------
-    @Suggestions("groups")
+    @Suggestions("groupParser")
     fun groupSuggestions(): Stream<String> {
         return CompletableFuture.supplyAsync {
                 runBlocking { MongoUtils.getAllGroups().map { it.name } }
@@ -38,221 +59,439 @@ class AuthCommand {
             .get(5, TimeUnit.SECONDS)
     }
 
+    @Parser(suggestions = "groupParser")
+    fun groupParser(input: CommandInput): GroupModel {
+        val groupName = input.readString()
+        return runBlocking {
+            val group = MongoUtils.getGroupByName(groupName)
+            if (group == null) {
+                throw IllegalArgumentException("Group '$groupName' not found!")
+            }
+            group
+        }
+    }
+
+    // ---------- Offline Player suggestions
+    @Suggestions("offlinePlayers")
+    fun offlinePlayerSuggestions(): Stream<String> {
+        return NodeCoroutineScope.future {
+                Node.instance.localGrpcClient.playerAPI
+                    .getAllOfflinePlayers(getOfflinePlayersRequest {})
+                    .offlinePlayersList
+                    .stream()
+                    .map { it.toAPI().name }
+            }
+            .exceptionally { Stream.empty() }
+            .get(5, TimeUnit.SECONDS)
+    }
+
+    @Parser(suggestions = "offlinePlayers")
+    fun offlinePlayerParser(input: CommandInput): OfflinePlayer {
+        return NodeCoroutineScope.future {
+                Node.instance.localGrpcClient.playerAPI
+                    .getAllOfflinePlayers(getOfflinePlayersRequest {})
+                    .offlinePlayersList
+                    .find { it.name.equals(input.readString()) }!!
+                    .toAPI()
+            }
+            .exceptionally { throw NullPointerException("Player not found!") }
+            .get(5, TimeUnit.SECONDS)
+    }
+
     // ---------- Users ----------
 
-    @Command("auth user create <name> <password>")
+    @Permission("auth.user.create")
+    @Command("auth create user <name> <password>")
     fun createUser(
         source: CommandSource,
         @Argument("name") name: String,
         @Argument("password") password: String,
     ) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             MongoUtils.createUser(name, password)
-            source.sendMessage("<green>Created user <yellow>$name<green>.")
+            source.sendMessage("<green>Created user</green> <white>$name</white><green>.</green>")
         }
     }
 
-    @Command("auth user set password <name> <password>")
+    @Permission("auth.user.setPassword")
+    @Command("auth user <user> set password <password>")
     fun setPassword(
         source: CommandSource,
-        @Argument("name") name: String,
+        @Argument("user") user: UserModel,
         @Argument("password") password: String,
     ) {
-        NodeCoroutineScope.launch {
-            MongoUtils.updateUserPassword(name, password)
-            source.sendMessage("<green>Updated password for <yellow>$name<green>.")
-        }
-    }
-
-    @Command("auth user add permission <name> <permission>")
-    fun addUserPermission(
-        source: CommandSource,
-        @Argument("name") name: String,
-        @Argument("permission") permission: String,
-    ) {
-        NodeCoroutineScope.launch {
-            MongoUtils.addPermissionToUser(name, permission)
+        runBlocking {
+            MongoUtils.updateUserPassword(user.name, password)
             source.sendMessage(
-                "<green>Added permission <gold>$permission <green>to user <yellow>$name<green>."
+                "<green>Updated password for</green> <white>${user.name}</white><green>.</green>"
             )
         }
     }
 
-    @Command("auth user remove permission <name> <permission>")
-    fun removeUserPermission(
+    @Command("auth user <user> set extraData <key> <value>")
+    @Permission("auth.user.setExtraData")
+    fun setExtraData(
         source: CommandSource,
-        @Argument("name") name: String,
-        @Argument("permission") permission: String,
+        @Argument("user") user: UserModel,
+        @Argument("key") key: String,
+        @Argument("value") value: String,
     ) {
-        NodeCoroutineScope.launch {
-            MongoUtils.removePermissionFromUser(name, permission)
+        runBlocking {
+            MongoUtils.updateUser(
+                user.name,
+                MongoUtils.getUserByName(user.name)!!.copy(
+                    extraData =
+                        MongoUtils.getUserByName(user.name)!!.extraData.toMutableMap().also {
+                            it[key] = value
+                        }
+                ),
+            )
             source.sendMessage(
-                "<red>Removed permission <gold>$permission <red>from user <yellow>$name<red>."
+                "<green>Updated extraData for</green> <white>${user.name}</white><green>.</green>"
             )
         }
     }
 
-    @Command("auth user add group <name> <group>")
-    fun addUserToGroup(
+    @Command("auth user <user> get extraData <key>")
+    @Permission("auth.user.getExtraData")
+    fun getExtraData(
         source: CommandSource,
-        @Argument("name") name: String,
-        @Argument("group") group: String,
+        @Argument("user") user: UserModel,
+        @Argument("key") key: String,
     ) {
-        NodeCoroutineScope.launch {
-            MongoUtils.addUserToGroup(name, group)
-            source.sendMessage(
-                "<green>Added user <yellow>$name <green>to group <gold>$group<green>."
-            )
-        }
-    }
-
-    @Command("auth user remove group <name> <group>")
-    fun removeUserFromGroup(
-        source: CommandSource,
-        @Argument("name") name: String,
-        @Argument("group") group: String,
-    ) {
-        NodeCoroutineScope.launch {
-            MongoUtils.removeUserFromGroup(name, group)
-            source.sendMessage("<red>Removed user <yellow>$name <red>from group <gold>$group<red>.")
-        }
-    }
-
-    @Command("auth user list")
-    fun listUsers(source: CommandSource) {
-        NodeCoroutineScope.launch {
-            val users = MongoUtils.getAllUsers()
-            if (users.isEmpty()) {
-                source.sendMessage("<red>No users found.")
-                return@launch
-            }
-            source.sendMessage("<green>Registered users (<yellow>${users.size}<green>):")
-            users.forEach {
+        runBlocking {
+            val userObj = MongoUtils.getUserByName(user.name)!!
+            if (userObj.extraData.containsKey(key)) {
                 source.sendMessage(
-                    "<dark_gray>- <yellow>${it.name} <dark_gray>(<gold>${it.groups.size}<dark_gray> groups, <gold>${it.permissions.size}<dark_gray> perms)"
+                    "<green>ExtraData for</green> <white>${user.name}</white> <green>has key</green> <gold>$key</gold> <green>with value</green> <white>${userObj.extraData[key]}</white><green>.</green>"
+                )
+            } else {
+                source.sendMessage(
+                    "<red>ExtraData for</red> <white>${user.name}</white> <red>does NOT have key</red> <gold>$key</gold><red>.</red>"
                 )
             }
         }
     }
 
-    @Command("auth user check password <name> <password>")
-    fun checkUserPassword(
+    @Command("auth user <user> remove extraData <key>")
+    @Permission("auth.user.removeExtraData")
+    fun removeExtraData(
         source: CommandSource,
-        @Argument("name") name: String,
-        @Argument("password") password: String,
+        @Argument("user") user: UserModel,
+        @Argument("key") key: String,
     ) {
-        NodeCoroutineScope.launch {
-            val valid = MongoUtils.checkUserPassword(name, password)
-            if (valid) source.sendMessage("<green>Password for <yellow>$name <green>is valid.")
-            else source.sendMessage("<red>Invalid password for <yellow>$name<red>.")
+        runBlocking {
+            val userObj = MongoUtils.getUserByName(user.name)!!
+            if (userObj.extraData.containsKey(key)) {
+                MongoUtils.updateUser(
+                    user.name,
+                    MongoUtils.getUserByName(user.name)!!.copy(
+                        extraData =
+                            MongoUtils.getUserByName(user.name)!!.extraData.toMutableMap().also {
+                                it.remove(key)
+                            }
+                    ),
+                )
+            }
         }
     }
 
-    @Command("auth user check permission <name> <permission>")
-    fun checkUserPermission(
+    @Permission("auth.user.setAvatarURL")
+    @Command("auth user <user> set avatarURL <url>")
+    fun setAvatarURL(
         source: CommandSource,
-        @Argument("name") name: String,
+        @Argument("user") user: UserModel,
+        @Argument("url") url: String,
+    ) {
+        runBlocking {
+            val userObj = MongoUtils.getUserByName(user.name)!!
+            MongoUtils.updateUser(
+                user.name,
+                userObj.copy(
+                    extraData = userObj.extraData.toMutableMap().also { it["avatarURL"] = url }
+                ),
+            )
+        }
+    }
+
+    @Permission("auth.user.setDisplayName")
+    @Command("auth user <user> set displayName <displayName>")
+    fun setDisplayName(
+        source: CommandSource,
+        @Argument("user") user: UserModel,
+        @Argument("displayName") displayName: String,
+    ) {
+        runBlocking {
+            val userObj = MongoUtils.getUserByName(user.name)!!
+            MongoUtils.updateUser(
+                user.name,
+                userObj.copy(
+                    extraData =
+                        userObj.extraData.toMutableMap().also { it["displayName"] = displayName }
+                ),
+            )
+        }
+    }
+
+    @Permission("auth.user.setMinecraftPlayer")
+    @Command("auth user <user> set minecraftPlayer <player>")
+    fun setMinecraftPlayer(
+        source: CommandSource,
+        @Argument("user") user: UserModel,
+        @Argument("player") player: OfflinePlayer,
+    ) {
+        runBlocking {
+            val userObj = MongoUtils.getUserByName(user.name)!!
+            MongoUtils.updateUser(
+                user.name,
+                userObj.copy(
+                    extraData =
+                        userObj.extraData.toMutableMap().also { it["minecraft-uuid"] = player.uuid }
+                ),
+            )
+            source.sendMessage(
+                "<green>Updated minecraft player for</green> <white>${user.name}</white><green>.</green>"
+            )
+        }
+    }
+
+    @Permission("auth.user.addPermission")
+    @Command("auth user <user> add permission <permission>")
+    fun addUserPermission(
+        source: CommandSource,
+        @Argument("user") user: UserModel,
         @Argument("permission") permission: String,
     ) {
-        NodeCoroutineScope.launch {
-            val hasPerm = PermissionHelper.hasPermission(name, permission)
-            if (hasPerm)
+        runBlocking {
+            MongoUtils.addPermissionToUser(user.name, permission)
+            source.sendMessage(
+                "<green>Added permission</green> <gold>$permission</gold> <green>to user</green> <white>${user.name}</white><green>.</green>"
+            )
+        }
+    }
+
+    @Permission("auth.user.removePermission")
+    @Command("auth user <user> remove permission <permission>")
+    fun removeUserPermission(
+        source: CommandSource,
+        @Argument("user") user: UserModel,
+        @Argument("permission") permission: String,
+    ) {
+        runBlocking {
+            MongoUtils.removePermissionFromUser(user.name, permission)
+            source.sendMessage(
+                "<red>Removed permission</red> <gold>$permission</gold> <red>from user</red> <white>${user.name}</white><red>.</red>"
+            )
+        }
+    }
+
+    @Permission("auth.user.addGroup")
+    @Command("auth user <user> add group <group>")
+    fun addUserToGroup(
+        source: CommandSource,
+        @Argument("user") user: UserModel,
+        @Argument("group") group: GroupModel,
+    ) {
+        runBlocking {
+            MongoUtils.addUserToGroup(user.name, group.name)
+            source.sendMessage(
+                "<green>Added user</green> <white>${user.name}</white> <green>to group</green> <gold>${group.name}</gold><green>.</green>"
+            )
+        }
+    }
+
+    @Permission("auth.user.removeGroup")
+    @Command("auth user <user> remove group <group>")
+    fun removeUserFromGroup(
+        source: CommandSource,
+        @Argument("user") user: UserModel,
+        @Argument("group") group: GroupModel,
+    ) {
+        runBlocking {
+            MongoUtils.removeUserFromGroup(user.name, group.name)
+            source.sendMessage(
+                "<red>Removed user</red> <white>${user.name}</white> <red>from group</red> <gold>${group.name}</gold><red>.</red>"
+            )
+        }
+    }
+
+    @Permission("auth.user.list")
+    @Command("auth user list")
+    fun listUsers(source: CommandSource) {
+        runBlocking {
+            val users = MongoUtils.getAllUsers()
+            if (users.isEmpty()) {
+                source.sendMessage("<red>No users found.</red>")
+                return@runBlocking
+            }
+            source.sendMessage("<gray>Registered users (<gold>${users.size}</gold>):</gray>")
+            users.forEach {
                 source.sendMessage(
-                    "<green>User <yellow>$name <green>has permission <gold>$permission<green>."
+                    " <dark_gray>»</dark_gray> <white>${it.name}</white> <dark_gray>| <gray>Groups:</gray> <gold>${it.groups.size}</gold> <dark_gray>| <gray>Permissions:</gray> <gold>${it.permissions.size}</gold>"
+                )
+            }
+        }
+    }
+
+    @Permission("auth.user.checkPassword")
+    @Command("auth user <user> check password <password>")
+    fun checkUserPassword(
+        source: CommandSource,
+        @Argument("user") user: UserModel,
+        @Argument("password") password: String,
+    ) {
+        runBlocking {
+            val valid = MongoUtils.checkUserPassword(user.name, password)
+            if (valid)
+                source.sendMessage(
+                    "<green>Password for</green> <white>${user.name}</white> <green>is valid.</green>"
                 )
             else
                 source.sendMessage(
-                    "<red>User <yellow>$name <red>does NOT have permission <gold>$permission<red>."
+                    "<red>Invalid password for</red> <white>${user.name}</white><red>.</red>"
                 )
         }
     }
 
-    @Command("auth user list permissions <name>")
-    fun listUserPermissions(source: CommandSource, @Argument("name") name: String) {
-        NodeCoroutineScope.launch {
-            val user = MongoUtils.getUserByName(name)
-            if (user == null) {
-                source.sendMessage("<red>User <yellow>$name <red>not found.")
-                return@launch
-            }
-            val permissions = PermissionHelper.getAllPermissionsOfUser(name)
+    @Permission("auth.user.checkPermission")
+    @Command("auth user <user> check permission <permission>")
+    fun checkUserPermission(
+        source: CommandSource,
+        @Argument("user") user: UserModel,
+        @Argument("permission") permission: String,
+    ) {
+        runBlocking {
+            val hasPerm = PermissionHelper.hasPermission(user.name, permission)
+            if (hasPerm)
+                source.sendMessage(
+                    "<green>User</green> <white>${user.name}</white> <green>has permission</green> <gold>$permission</gold><green>.</green>"
+                )
+            else
+                source.sendMessage(
+                    "<red>User</red> <white>${user.name}</white> <red>does NOT have permission</red> <gold>$permission</gold><red>.</red>"
+                )
+        }
+    }
+
+    @Permission("auth.user.listPermissions")
+    @Command("auth user <user> list permissions")
+    fun listUserPermissions(source: CommandSource, @Argument("user") user: UserModel) {
+        runBlocking {
+            val permissions = PermissionHelper.getAllPermissionsOfUser(user.name)
             if (permissions.isEmpty()) {
-                source.sendMessage("<yellow>$name <dark_gray>has no permissions.")
+                source.sendMessage("<white>${user.name}</white> <gray>has no permissions.</gray>")
             } else {
-                source.sendMessage("<green>Permissions for <yellow>$name<green>:")
-                permissions.forEach { perm -> source.sendMessage("<dark_gray>- <gold>$perm") }
+                source.sendMessage(
+                    "<gray>Permissions for</gray> <white>${user.name}</white><dark_gray>:</dark_gray>"
+                )
+                permissions.forEach { perm ->
+                    source.sendMessage(" <dark_gray>»</dark_gray> <gold>$perm</gold>")
+                }
+            }
+        }
+    }
+
+    @Permission("auth.user.info")
+    @Command("auth user <user> info")
+    fun getUserInfo(source: CommandSource, @Argument("user") user: UserModel) {
+        runBlocking {
+            val userObj = MongoUtils.getUserByName(user.name)!!
+            source.sendMessage(
+                "<gold>---------</gold> <white>${userObj.name}</white> <gold>---------</gold>"
+            )
+            source.sendMessage("<gray>Groups<dark_gray>:</dark_gray>")
+            userObj.groups.forEach { group ->
+                source.sendMessage(" <dark_gray>»</dark_gray> <gold>$group</gold>")
+            }
+            source.sendMessage("<gray>Permissions<dark_gray>:</dark_gray>")
+            userObj.permissions.forEach { perm ->
+                source.sendMessage(" <dark_gray>»</dark_gray> <gold>$perm</gold>")
+            }
+            source.sendMessage("<gray>Extra Data<dark_gray>:</dark_gray>")
+            userObj.extraData.forEach { (key, value) ->
+                source.sendMessage(
+                    " <dark_gray>»</dark_gray> <gray>$key<dark_gray>:</dark_gray> <white>$value</white>"
+                )
             }
         }
     }
 
     // ---------- Groups ----------
 
-    @Command("auth group create <name>")
+    @Command("auth create group <name>")
+    @Permission("auth.group.create")
     fun createGroup(source: CommandSource, @Argument("name") name: String) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             MongoUtils.createGroup(name)
-            source.sendMessage("<green>Created group <gold>$name<green>.")
+            source.sendMessage("<green>Created group</green> <gold>$name</gold><green>.</green>")
         }
     }
 
-    @Command("auth group add permission <name> <permission>")
+    @Command("auth group <group> add permission <permission>")
+    @Permission("auth.group.addPermission")
     fun addGroupPermission(
         source: CommandSource,
-        @Argument("name") name: String,
+        @Argument("group") group: GroupModel,
         @Argument("permission") permission: String,
     ) {
-        NodeCoroutineScope.launch {
-            MongoUtils.addPermissionToGroup(name, permission)
+        runBlocking {
+            MongoUtils.addPermissionToGroup(group.name, permission)
             source.sendMessage(
-                "<green>Added permission <gold>$permission <green>to group <yellow>$name<green>."
+                "<green>Added permission</green> <gold>$permission</gold> <green>to group</green> <white>${group.name}</white><green>.</green>"
             )
         }
     }
 
-    @Command("auth group remove permission <name> <permission>")
+    @Command("auth group <group> remove permission <permission>")
+    @Permission("auth.group.removePermission")
     fun removeGroupPermission(
         source: CommandSource,
-        @Argument("name") name: String,
+        @Argument("group") group: GroupModel,
         @Argument("permission") permission: String,
     ) {
-        NodeCoroutineScope.launch {
-            MongoUtils.removePermissionFromGroup(name, permission)
+        runBlocking {
+            MongoUtils.removePermissionFromGroup(group.name, permission)
             source.sendMessage(
-                "<red>Removed permission <gold>$permission <red>from group <yellow>$name<red>."
+                "<red>Removed permission</red> <gold>$permission</gold> <red>from group</red> <white>${group.name}</white><red>.</red>"
             )
         }
     }
 
     @Command("auth group list")
+    @Permission("auth.group.list")
     fun listGroups(source: CommandSource) {
-        NodeCoroutineScope.launch {
+        runBlocking {
             val groups = MongoUtils.getAllGroups()
             if (groups.isEmpty()) {
-                source.sendMessage("<red>No groups found.")
-                return@launch
+                source.sendMessage("<red>No groups found.</red>")
+                return@runBlocking
             }
-            source.sendMessage("<green>Registered groups (<yellow>${groups.size}<green>):")
+            source.sendMessage("<gray>Registered groups (<gold>${groups.size}</gold>):</gray>")
             groups.forEach {
                 source.sendMessage(
-                    "<dark_gray>- <gold>${it.name} <dark_gray>(<yellow>${it.permissions.size}<dark_gray> perms)"
+                    " <dark_gray>»</dark_gray> <gold>${it.name}</gold> <dark_gray>| <gray>Permissions:</gray> <gold>${it.permissions.size}</gold>"
                 )
             }
         }
     }
 
-    @Command("auth group list permissions <name>")
-    fun listGroupPermissions(source: CommandSource, @Argument("name") name: String) {
-        NodeCoroutineScope.launch {
-            val group = MongoUtils.getGroupByName(name)
-            if (group == null) {
-                source.sendMessage("<red>Group <gold>$name <red>not found.")
-                return@launch
-            }
-            if (group.permissions.isEmpty()) {
-                source.sendMessage("<gold>$name <dark_gray>has no permissions.")
+    @Command("auth group <group> list permissions")
+    @Permission("auth.group.listPermissions")
+    fun listGroupPermissions(
+        source: CommandSource,
+        @Argument("group") group: GroupModel,
+    ) {
+        runBlocking {
+            val groupObj = MongoUtils.getGroupByName(group.name)!!
+            if (groupObj.permissions.isEmpty()) {
+                source.sendMessage("<gold>${group.name}</gold> <gray>has no permissions.</gray>")
             } else {
-                source.sendMessage("<green>Permissions for group <gold>$name<green>:")
-                group.permissions.forEach { perm -> source.sendMessage("<dark_gray>- <gold>$perm") }
+                source.sendMessage(
+                    "<gray>Permissions for group</gray> <gold>${group.name}</gold><dark_gray>:</dark_gray>"
+                )
+                groupObj.permissions.forEach { perm ->
+                    source.sendMessage(" <dark_gray>»</dark_gray> <gold>$perm</gold>")
+                }
             }
         }
     }

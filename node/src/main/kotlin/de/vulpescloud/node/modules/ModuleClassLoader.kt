@@ -20,7 +20,15 @@ class ModuleClassLoader(
             "net.kyori.adventure.",
             "org.slf4j.",
             "ch.qos.logback.",
-            "de.vulpescloud."
+            "de.vulpescloud.",
+            "io.grpc.",
+            "io.netty.",
+            "org.apache.arrow.",
+            "com.influxdb.",
+            "com.google.protobuf.",
+            "com.google.common.",
+            "org.apache.arrow.flatbuf.",
+            "io.grpc.netty.",
         )
 
     override fun loadClass(name: String, resolve: Boolean): Class<*> {

@@ -18,4 +18,6 @@ interface Database {
 
     suspend fun getAll(): List<JsonElement>
 
+    suspend fun insertIgnore(key: String, value: JsonElement)
+
 }

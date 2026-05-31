@@ -1,10 +1,12 @@
 package de.vulpescloud.node.services
 
-import de.vulpescloud.api.events.services.ServiceLogEvent
+import build.buf.gen.vulpescloud.events.v1.ServiceLogEvent
+import de.vulpescloud.api.services.Service
+import de.vulpescloud.node.Node
 import de.vulpescloud.node.event.EventsService
+import java.util.concurrent.ConcurrentHashMap
 import kotlinx.coroutines.Job
 import org.slf4j.LoggerFactory
-import java.util.concurrent.ConcurrentHashMap
 
 object ServiceLogHandler {
     private val logBuffers = ConcurrentHashMap<String, MutableList<String>>()
@@ -15,13 +17,12 @@ object ServiceLogHandler {
 
     fun subscribe() {
         subscribeJob =
-            EventsService.subscribe<ServiceLogEvent> { evt ->
-                val event = evt.event
+            EventsService.subscribe<ServiceLogEvent> { event ->
                 addLog("${event.service.task.name}-${event.service.orderedId}", event.message)
                 if (
                     servicesToLog.contains("${event.service.task.name}-${event.service.orderedId}")
                 ) {
-                    logger.info(event.message)
+                    logLine(Service.fromDefinition(event.service).name(), event.message)
                 }
             }
     }
@@ -52,11 +53,27 @@ object ServiceLogHandler {
     fun toggleServiceLogging(serviceName: String) {
         if (servicesToLog.contains(serviceName)) {
             servicesToLog.remove(serviceName)
-            logger.info("Logging for service $serviceName disabled.")
+            logger.info(
+                "<gray>Logging for service</gray> <white>$serviceName</white> <red>disabled</red><dark_gray>.</dark_gray>"
+            )
         } else {
             servicesToLog.add(serviceName)
-            getLogs(serviceName).forEach { logger.info(it) }
-            logger.info("Logging for service $serviceName enabled.")
+            getLogs(serviceName).forEach { logLine(serviceName, it) }
+            logger.info(
+                "<gray>Logging for service</gray> <white>$serviceName</white> <green>enabled</green><dark_gray>.</dark_gray>"
+            )
+        }
+    }
+
+    private fun logLine(serviceName: String, line: String) {
+        if (Node.instance.configProvider.config.testing.newServiceLoggingStyle) {
+            println(
+                Node.instance.terminal.replaceColors(
+                    "<dark_gray>[</dark_gray><white>$serviceName</white><dark_gray>]</dark_gray> <gray>$line</gray>"
+                )
+            )
+        } else {
+            logger.info("[$serviceName] $line")
         }
     }
 }

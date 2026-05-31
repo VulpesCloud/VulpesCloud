@@ -1,7 +1,10 @@
 package de.vulpescloud.node.grpc
 
+import build.buf.gen.vulpescloud.auth.v1.AuthServiceGrpcKt
 import build.buf.gen.vulpescloud.events.v1.EventServiceGrpcKt
 import build.buf.gen.vulpescloud.node.v1.ClusterAPIServiceGrpcKt
+import build.buf.gen.vulpescloud.players.v1.PlayerActionsServiceGrpcKt
+import build.buf.gen.vulpescloud.players.v1.PlayersServiceGrpcKt
 import build.buf.gen.vulpescloud.services.v1.ServiceAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.virtualconfig.v1.VirtualConfigServiceGrpcKt
@@ -12,12 +15,15 @@ import io.grpc.ManagedChannelBuilder
 
 class LocalGrpcClient {
 
-    private lateinit var channel: Channel
+    lateinit var channel: Channel
     lateinit var serviceAPI: ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub
     lateinit var tasksAPI: TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub
     lateinit var eventsAPI: EventServiceGrpcKt.EventServiceCoroutineStub
     lateinit var virtualConfigAPI: VirtualConfigServiceGrpcKt.VirtualConfigServiceCoroutineStub
     lateinit var clusterAPI: ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineStub
+    lateinit var playerAPI: PlayersServiceGrpcKt.PlayersServiceCoroutineStub
+    lateinit var authAPI: AuthServiceGrpcKt.AuthServiceCoroutineStub
+    lateinit var playerActionsAPI: PlayerActionsServiceGrpcKt.PlayerActionsServiceCoroutineStub
 
     fun connect(
         host: String = "127.0.0.1",
@@ -45,6 +51,15 @@ class LocalGrpcClient {
                 .withInterceptors(AuthClientInterceptor(secret))
         clusterAPI =
             ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineStub(channel)
+                .withInterceptors(AuthClientInterceptor(secret))
+        playerAPI =
+            PlayersServiceGrpcKt.PlayersServiceCoroutineStub(channel)
+                .withInterceptors(AuthClientInterceptor(secret))
+        authAPI =
+            AuthServiceGrpcKt.AuthServiceCoroutineStub(channel)
+                .withInterceptors(AuthClientInterceptor(secret))
+        playerActionsAPI =
+            PlayerActionsServiceGrpcKt.PlayerActionsServiceCoroutineStub(channel)
                 .withInterceptors(AuthClientInterceptor(secret))
     }
 }

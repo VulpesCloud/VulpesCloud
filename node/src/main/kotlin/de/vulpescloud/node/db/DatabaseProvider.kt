@@ -1,6 +1,7 @@
 package de.vulpescloud.node.db
 
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.utils.PropertyUtils
 import org.slf4j.LoggerFactory
 
 interface DatabaseProvider {
@@ -21,6 +22,7 @@ interface DatabaseProvider {
 
         fun addDatabaseProvider(name: String, provider: DatabaseProvider) {
             if (allowDatabaseProviderAdding) {
+                if (PropertyUtils.isMoreDBLogging()) logger.info("Adding Database Provider $name")
                 availableDatabaseProviders[name] = provider
             } else {
                 logger.error("Cannot add Database Provider $name after startup!")
@@ -32,14 +34,17 @@ interface DatabaseProvider {
 
         fun lockDatabaseProviderAdding() {
             allowDatabaseProviderAdding = false
+            if (PropertyUtils.isMoreDBLogging()) logger.info("Locking Database Provider adding")
         }
 
         fun setAndInitializeMainDatabaseProvider() {
+            if (PropertyUtils.isMoreDBLogging()) logger.info("Setting main Database Provider")
             mainDatabaseProvider =
                 availableDatabaseProviders[Node.instance.configProvider.config.databaseType]
                     ?: throw IllegalStateException(
                         "Invalid database type: ${Node.instance.configProvider.config.databaseType}."
                     )
+            if (PropertyUtils.isMoreDBLogging()) logger.info("Initializing main Database Provider")
             mainDatabaseProvider!!.initialize()
         }
 

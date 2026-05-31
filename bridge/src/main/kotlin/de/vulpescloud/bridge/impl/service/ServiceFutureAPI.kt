@@ -64,48 +64,32 @@ class ServiceFutureAPI : ServiceAPI.ServiceFutureAPI {
             }
     }
 
-//    override fun prepareService(service: Service): CompletableFuture<Service?> {
-//        return serviceStub
-//            .prepareServiceByService(
-//                prepareServiceByServiceRequest { this.service = service.toDefinition() }
-//            )
-//            .toCompletableFuture()
-//            .thenApply { Service.fromDefinition(it.serviceOrNull ?: return@thenApply null) }
-//    }
-
-    override fun prepareService(task: Task): CompletableFuture<Service?> {
-        return serviceStub
-            .prepareServiceByTask(prepareServiceByTaskRequest { this.task = task.toDefinition() })
-            .toCompletableFuture()
-            .thenApply { Service.fromDefinition(it.serviceOrNull ?: return@thenApply null) }
-    }
-
-    override fun startService(service: Service): CompletableFuture<Service?> {
+    override fun startService(service: Service): CompletableFuture<String> {
         return serviceStub
             .startService(startServiceRequest { this.service = service.toDefinition() })
             .toCompletableFuture()
-            .thenApply { Service.fromDefinition(it.serviceOrNull ?: return@thenApply null) }
+            .thenApply { it.error }
     }
 
-    override fun stopService(service: Service): CompletableFuture<Service?> {
+    override fun stopService(service: Service): CompletableFuture<String> {
         return serviceStub
             .stopService(stopServiceRequest { this.service = service.toDefinition() })
             .toCompletableFuture()
-            .thenApply { Service.fromDefinition(it.serviceOrNull ?: return@thenApply null) }
+            .thenApply { it.error }
     }
 
-    override fun deleteService(service: Service): CompletableFuture<Service?> {
+    override fun deleteService(service: Service): CompletableFuture<String> {
         return serviceStub
             .deleteService(deleteServiceRequest { this.service = service.toDefinition() })
             .toCompletableFuture()
-            .thenApply { Service.fromDefinition(it.serviceOrNull ?: return@thenApply null) }
+            .thenApply { it.error }
     }
 
-    override fun restartService(service: Service): CompletableFuture<Service?> {
+    override fun restartService(service: Service): CompletableFuture<String> {
         return serviceStub
             .restartService(restartServiceRequest { this.service = service.toDefinition() })
             .toCompletableFuture()
-            .thenApply { Service.fromDefinition(it.serviceOrNull ?: return@thenApply null) }
+            .thenApply { it.error }
     }
 
     override fun sendCommand(service: Service, command: String): CompletableFuture<Boolean> {

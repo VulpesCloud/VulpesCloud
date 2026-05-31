@@ -24,7 +24,7 @@
 
 plugins {
     id("java")
-    kotlin("jvm") version "2.3.10"
+    kotlin("jvm") version "2.3.21"
     alias(libs.plugins.shadow)
 
 }
@@ -45,8 +45,8 @@ dependencies {
     annotationProcessor(libs.velocity)
 
     compileOnly(libs.bundles.proto)
-    implementation("org.bstats:bstats-bukkit:3.1.0")
-    implementation("org.bstats:bstats-velocity:3.1.0")
+    implementation("org.bstats:bstats-bukkit:3.2.1")
+    implementation("org.bstats:bstats-velocity:3.2.1")
 
     implementation(libs.commandapi.velocity.shade)
     implementation(libs.commandapi.kotlin.velocity)

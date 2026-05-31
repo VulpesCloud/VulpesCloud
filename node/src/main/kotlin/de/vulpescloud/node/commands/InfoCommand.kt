@@ -3,27 +3,30 @@ package de.vulpescloud.node.commands
 import de.vulpescloud.launcher.VulpesLauncher
 import de.vulpescloud.node.CloudVersion
 import de.vulpescloud.node.command.CommandSource
+import de.vulpescloud.node.command.ConsoleCommandSource
+import de.vulpescloud.node.command.annotation.SpecificCommandSource
 import org.incendo.cloud.annotations.Command
 import java.lang.management.ManagementFactory
 
+@SpecificCommandSource(ConsoleCommandSource::class)
 class InfoCommand {
 
     private val runtimeMXBean = ManagementFactory.getRuntimeMXBean()
 
     @Command("info|i")
     fun displayInfo(source: CommandSource) {
-        source.sendMessage("Operating System&8: &f${System.getProperty("os.name")}")
-        source.sendMessage("Used Memory of the Node process&8: &f${usedMemory()}")
+        source.sendMessage("<gray>Operating System<dark_gray>:</dark_gray> <white>${System.getProperty("os.name")}</white>")
+        source.sendMessage("<gray>Memory Usage<dark_gray>:</dark_gray> <white>${usedMemory()}</white>")
         source.sendMessage(
-            "Java&8: &f${runtimeMXBean.vmVendor} ${runtimeMXBean.specVersion} &8[&f ${runtimeMXBean.vmName} ${runtimeMXBean.vmVersion} &8]"
+            "<gray>Java<dark_gray>:</dark_gray> <white>${runtimeMXBean.vmVendor} ${runtimeMXBean.specVersion}</white> <dark_gray>[</dark_gray> <white>${runtimeMXBean.vmName} ${runtimeMXBean.vmVersion}</white> <dark_gray>]</dark_gray>"
         )
-        source.sendMessage("-----------------------------------------------------")
-        source.sendMessage("Update Branch&8: &f${VulpesLauncher.config.autoUpdatesBranch()}")
-        source.sendMessage("AutoUpdates Enabled&8: &f${VulpesLauncher.config.autoUpdatesEnabled()}")
-        source.sendMessage("Version&8: &f${CloudVersion.getFullVersion()}")
-        source.sendMessage("------------------------------------------------------")
+        source.sendMessage("<gold>-----------------------------------------------------</gold>")
+        source.sendMessage("<gray>Update Branch<dark_gray>:</dark_gray> <white>${VulpesLauncher.config.autoUpdatesBranch()}</white>")
+        source.sendMessage("<gray>Auto-Updates<dark_gray>:</dark_gray> <white>${VulpesLauncher.config.autoUpdatesEnabled()}</white>")
+        source.sendMessage("<gray>Version<dark_gray>:</dark_gray> <white>${CloudVersion.getFullVersion()}</white>")
+        source.sendMessage("<gold>------------------------------------------------------</gold>")
         source.sendMessage(
-            "Uptime&8: &f${(System.currentTimeMillis() - System.getProperty("startup").toLong()) / 1000 } seconds"
+            "<gray>Uptime<dark_gray>:</dark_gray> <white>${(System.currentTimeMillis() - System.getProperty("startup").toLong()) / 1000}s</white>"
         )
     }
 

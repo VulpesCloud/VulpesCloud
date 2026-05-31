@@ -2,13 +2,15 @@ package de.vulpescloud.connector.velocity.commands
 
 import com.velocitypowered.api.proxy.ProxyServer
 import de.vulpescloud.bridge.BridgeAPI
+import de.vulpescloud.connector.velocity.config.getConfig
 import dev.jorel.commandapi.CommandTree
 import dev.jorel.commandapi.executors.PlayerCommandExecutor
+import java.util.concurrent.TimeUnit
+import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.slf4j.LoggerFactory
-import java.util.concurrent.TimeUnit
 
-class HubCommand(proxyServer: ProxyServer) {
+class HubCommand(proxyServer: ProxyServer, bridgeAPI: BridgeAPI.BridgeFutureAPI) {
 
     private val logger = LoggerFactory.getLogger("HubCommand")
     private val miniMessage = MiniMessage.miniMessage()
@@ -19,7 +21,7 @@ class HubCommand(proxyServer: ProxyServer) {
             .executesPlayer(
                 PlayerCommandExecutor { sender, _ ->
                     val fallbackServer =
-                        BridgeAPI.getFutureAPI()
+                        bridgeAPI
                             .getServicesAPI()
                             .getAllServices()
                             .get(5, TimeUnit.SECONDS)
@@ -27,6 +29,13 @@ class HubCommand(proxyServer: ProxyServer) {
 
                     if (fallbackServer.isEmpty()) {
                         logger.error("No fallback server found!")
+                        runBlocking {
+                            sender.sendMessage(
+                                miniMessage.deserialize(
+                                    getConfig().disconnectNoAvailableServerMessage
+                                )
+                            )
+                        }
                         return@PlayerCommandExecutor
                     }
 

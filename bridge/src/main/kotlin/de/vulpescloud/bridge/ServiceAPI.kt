@@ -19,17 +19,13 @@ interface ServiceAPI {
 
         suspend fun getServicesByTask(task: Task): List<Service>
 
-        // suspend fun prepareService(service: Service): Service?
+        suspend fun startService(service: Service): String
 
-        suspend fun prepareService(task: Task): Service?
+        suspend fun stopService(service: Service): String
 
-        suspend fun startService(service: Service): Service?
+        suspend fun deleteService(service: Service): String
 
-        suspend fun stopService(service: Service): Service?
-
-        suspend fun deleteService(service: Service): Service?
-
-        suspend fun restartService(service: Service): Service?
+        suspend fun restartService(service: Service): String
 
         suspend fun sendCommand(service: Service, command: String): Boolean
 
@@ -48,17 +44,13 @@ interface ServiceAPI {
 
         fun getServicesByTask(task: Task): CompletableFuture<List<Service>>
 
-        // fun prepareService(service: Service): CompletableFuture<Service?>
+        fun startService(service: Service): CompletableFuture<String>
 
-        fun prepareService(task: Task): CompletableFuture<Service?>
+        fun stopService(service: Service): CompletableFuture<String>
 
-        fun startService(service: Service): CompletableFuture<Service?>
+        fun deleteService(service: Service): CompletableFuture<String>
 
-        fun stopService(service: Service): CompletableFuture<Service?>
-
-        fun deleteService(service: Service): CompletableFuture<Service?>
-
-        fun restartService(service: Service): CompletableFuture<Service?>
+        fun restartService(service: Service): CompletableFuture<String>
 
         fun sendCommand(service: Service, command: String): CompletableFuture<Boolean>
 

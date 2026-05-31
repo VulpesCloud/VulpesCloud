@@ -1,14 +1,20 @@
 package de.vulpescloud.wrapper
 
+import build.buf.gen.vulpescloud.services.v1.getByUuidRequest
+import build.buf.gen.vulpescloud.services.v1.serviceSnapshot
+import build.buf.gen.vulpescloud.services.v1.updateServiceSnapshotRequest
+import com.sun.management.OperatingSystemMXBean
 import de.vulpescloud.wrapper.Premain.preClassCall
 import de.vulpescloud.wrapper.grpc.GrpcClient
 import io.grpc.LoadBalancerRegistry
 import io.grpc.internal.PickFirstLoadBalancerProvider
-import kotlinx.coroutines.DelicateCoroutinesApi
+import java.lang.management.ManagementFactory
 import java.net.URLClassLoader
 import java.util.*
 import java.util.jar.JarFile
 import kotlin.io.path.Path
+import kotlin.time.Duration.Companion.seconds
+import kotlinx.coroutines.*
 
 @OptIn(DelicateCoroutinesApi::class)
 class Wrapper(args: Array<String>) {
@@ -24,11 +30,51 @@ class Wrapper(args: Array<String>) {
         val SERVICE_NAME = System.getenv("serviceName") ?: ""
         val SERVICE_UUID =
             UUID.fromString(System.getenv("serviceUUID") ?: "00000000-0000-0000-0000-000000000000")
+
+        val osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean::class.java)
+        val memoryBean = ManagementFactory.getMemoryMXBean()
+
+        var startTime: Long = 0
     }
 
     val grpcClient = GrpcClient()
 
+    suspend fun triggerSnapshotUpdate() {
+        runCatching {
+                val service =
+                    grpcClient.serviceAPI
+                        .getByUuid(getByUuidRequest { uuid = SERVICE_UUID.toString() })
+                        .service!!
+                val uptime = System.currentTimeMillis() - startTime
+                val snapshot = serviceSnapshot {
+                    this.uuid = service.uuid.toString()
+                    this.task = service.task
+                    this.node = service.node
+                    this.playerCount = service.playerCount
+                    this.startTime = service.startTime
+                    this.state = service.state
+                    this.metadata.putAll(service.metadataMap)
+                    this.hostname = service.hostname
+                    this.port = service.port
+                    this.orderedId = service.orderedId
+                    this.pid = ProcessHandle.current().pid()
+                    this.cpuUsage = osBean.processCpuLoad
+                    this.systemCpuUsage = osBean.cpuLoad
+                    this.maxHeapMemory = memoryBean.heapMemoryUsage.max
+                    this.heapUsageMemory = memoryBean.heapMemoryUsage.used
+                    this.noHeapUsageMemory = memoryBean.nonHeapMemoryUsage.used
+                    this.uptimeMillis = uptime
+                }
+
+                grpcClient.serviceAPI.updateServiceSnapshot(
+                    updateServiceSnapshotRequest { this.snapshot = snapshot }
+                )
+            }
+            .onFailure { println("VC-Wrapper: Failed to update snapshot: ${it.message}") }
+    }
+
     init {
+        startTime = System.currentTimeMillis()
         instance = this
 
         LoadBalancerRegistry.getDefaultRegistry().register(PickFirstLoadBalancerProvider())
@@ -75,5 +121,13 @@ class Wrapper(args: Array<String>) {
             exception.printStackTrace()
         }
         thread.start()
+
+        val scope = CoroutineScope(Dispatchers.IO)
+        scope.launch {
+            while (true) {
+                triggerSnapshotUpdate()
+                delay(5.seconds)
+            }
+        }
     }
 }
