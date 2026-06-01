@@ -39,7 +39,7 @@ reactor = "3.8.5"
 
 # logging
 slf4j = "2.1.0-alpha1"
-logback = "1.5.32"
+logback = "1.5.34"
 adventure = "5.1.1"
 
 # configuration
@@ -62,7 +62,7 @@ snakeyml = "2.6"
 commandapi = "11.2.0"
 
 # shadowJar
-shadow = "9.4.1"
+shadow = "9.4.2"
 
 # bouncy castle
 bouncy-castle = "1.70"
