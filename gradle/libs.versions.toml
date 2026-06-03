@@ -51,7 +51,7 @@ jline = "3.30.13"
 cloud = "2.0.0"
 
 # platforms
-paper = "1.17-R0.1-SNAPSHOT"
+paper = "26.1.2.build.69-stable"
 velocity = "3.4.0"
 
 # config
