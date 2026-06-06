@@ -55,7 +55,7 @@ paper = "1.17-R0.1-SNAPSHOT"
 velocity = "3.4.0"
 
 # config
-night-config = "3.8.4"
+night-config = "3.9.0"
 snakeyml = "2.6"
 
 # command api
