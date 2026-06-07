@@ -45,7 +45,8 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
         val node =
             json.decodeFromJsonElement(
                 ClusterNode.serializer(),
-                nodesDatabase.get(request.name) ?: return GetNodeByNameResponse.newBuilder().build(),
+                nodesDatabase.get(request.name)
+                    ?: return GetNodeByNameResponse.newBuilder().build(),
             )
 
         return GetNodeByNameResponse.newBuilder().setNode(node.toDefinition()).build()
@@ -109,6 +110,10 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
                 .map(Suggestion::suggestion)
                 .toList()
         return TabCompleteResponse.newBuilder().addAllSuggestions(suggestions).build()
+    }
+
+    override suspend fun ping(request: PingRequest): PingResponse {
+        return PingResponse.newBuilder().build()
     }
 
     private suspend fun getPlayer(uuid: String): UserModel? {

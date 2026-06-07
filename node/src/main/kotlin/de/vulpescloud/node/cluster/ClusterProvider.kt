@@ -45,6 +45,11 @@ class ClusterProvider {
             NodeShutdown.shutdown()
         }
         sameNodeAlreadyOnline = false
+        if (localNode.locked) {
+            logger.error("Node is locked! Stopping in 15 seconds...")
+            delay(15.seconds)
+            NodeShutdown.shutdown()
+        }
 
         if (head == null) {
             val localNode =
@@ -85,19 +90,6 @@ class ClusterProvider {
                 },
                 true,
             )
-            logger.error(
-                "HeadNode features have not yet been implemented! (This is not a real problem right now, just reminder for the dev to implement it)"
-            )
-            //            EventsService.publish(
-            //                EventSerializer.encode(
-            //                    ChoseNewHeadEvent(
-            //                        ClusterHelper.getAllNodes()
-            //                            .filter { it.state == NodeState.ONLINE }
-            //                            .minByOrNull { it.bootTimestamp } ?: return
-            //                    )
-            //                ),
-            //                true,
-            //            )
         }
     }
 
@@ -105,6 +97,7 @@ class ClusterProvider {
         ClusterHelper.updateNodeState(NodeState.ONLINE)
 
         NodeSnapshotUpdater.start()
+        // todo NodePingJob
     }
 
     suspend fun initClusterConfig() {

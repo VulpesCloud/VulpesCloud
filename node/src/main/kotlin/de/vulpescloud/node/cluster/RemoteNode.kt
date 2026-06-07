@@ -2,7 +2,6 @@ package de.vulpescloud.node.cluster
 
 import build.buf.gen.vulpescloud.node.v1.ClusterAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.node.v1.getNodeSnapshotRequest
-import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpcKt
 import de.vulpescloud.api.cluster.ClusterNode
 import de.vulpescloud.api.cluster.NodeEndpointDetails
 import de.vulpescloud.node.Node

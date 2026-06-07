@@ -19,6 +19,7 @@ data class ClusterNode(
     val maxMemory: Int,
     val head: Boolean,
     val bootTimestamp: Long,
+    val locked: Boolean,
 ) {
 
     fun isRunning(): Boolean {
@@ -34,43 +35,12 @@ data class ClusterNode(
             this.maxMemory = this@ClusterNode.maxMemory
             this.head = this@ClusterNode.head
             this.bootTimestamp = this@ClusterNode.bootTimestamp
-            this.state =
-                when (this@ClusterNode.state) {
-                    NodeState.ONLINE -> NodeStates.NODE_STATES_ONLINE
-                    NodeState.BOOTING -> NodeStates.NODE_STATES_BOOTING
-                    NodeState.OFFLINE -> NodeStates.NODE_STATES_OFFLINE_UNSPECIFIED
-                    NodeState.DRAINING -> NodeStates.NODE_STATES_DRAINING
-                }
-        }
-    }
-
-    fun toDocument(): BsonDocument {
-        return BsonDocument().apply {
-            append("name", BsonString(name))
-            append("uuid", BsonString(uuid.toString()))
-            append("grpcAddress", BsonString(grpcAddress))
-            append("grpcPort", BsonString(grpcPort.toString()))
-            append("maxMemory", BsonString(maxMemory.toString()))
-            append("head", BsonString(head.toString()))
-            append("bootTimestamp", BsonString(bootTimestamp.toString()))
-            append("state", BsonString(state.name))
+            this.state = this@ClusterNode.state.toNodeStates()
+            this.locked = this@ClusterNode.locked
         }
     }
 
     companion object {
-        fun fromDocument(document: BsonDocument): ClusterNode {
-            return ClusterNode(
-                document.getString("name").value,
-                UUID.fromString(document.getString("uuid").value),
-                document.getString("grpcAddress").value,
-                document.getString("grpcPort").value.toInt(),
-                NodeState.valueOf(document.getString("state").value),
-                document.getString("maxMemory").value.toInt(),
-                document.getString("head").value.toBoolean(),
-                document.getString("bootTimestamp").value.toLong(),
-            )
-        }
-
         fun fromDefinition(definition: Node): ClusterNode {
             return ClusterNode(
                 definition.name,
@@ -87,6 +57,7 @@ data class ClusterNode(
                 definition.maxMemory,
                 definition.head,
                 definition.bootTimestamp,
+                definition.locked,
             )
         }
     }

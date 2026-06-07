@@ -7,7 +7,8 @@ enum class NodeState {
     OFFLINE,
     BOOTING,
     ONLINE,
-    DRAINING;
+    DRAINING,
+    UNKNOWN;
 
     fun toNodeStates(): NodeStates {
         return when (this) {
@@ -15,6 +16,7 @@ enum class NodeState {
             BOOTING -> NodeStates.NODE_STATES_BOOTING
             ONLINE -> NodeStates.NODE_STATES_ONLINE
             DRAINING -> NodeStates.NODE_STATES_DRAINING
+            UNKNOWN -> NodeStates.NODE_STATES_UNKNOWN
         }
     }
 }

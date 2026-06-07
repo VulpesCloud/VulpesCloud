@@ -9,6 +9,7 @@ import de.vulpescloud.node.event.EventsService
 import java.util.concurrent.TimeUnit
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
+import org.slf4j.LoggerFactory
 
 object ClusterHelper {
 
@@ -19,9 +20,14 @@ object ClusterHelper {
 
     private val cache =
         Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build<String, ClusterNode>()
+    private val logger = LoggerFactory.getLogger(ClusterHelper::class.java)
 
     suspend fun updateNodeState(state: NodeState) {
         val node = getLocalNode()
+        if (node.locked) {
+            logger.warn("Cannot update Node State whilst locked!")
+        }
+
         val newNode = node.copy(state = state)
         nodesDatabase.upsert(newNode.name, json.encodeToJsonElement(newNode))
         cache.put(newNode.name, newNode)
@@ -59,6 +65,7 @@ object ClusterHelper {
                 Node.instance.configProvider.config.maxMemory,
                 false,
                 System.currentTimeMillis(),
+                false,
             )
         nodesDatabase.upsert(node.name, json.encodeToJsonElement(node))
         cache.put(node.name, node)
@@ -79,7 +86,7 @@ object ClusterHelper {
     }
 
     suspend fun getHeadNode(): ClusterNode? {
-        return getAllNodes().find { it.state == NodeState.ONLINE && it.head }
+        return getAllNodes().find { it.state == NodeState.ONLINE && it.head && !it.locked }
     }
 
     suspend fun getNode(name: String): ClusterNode? {
