@@ -1,13 +1,17 @@
 package de.vulpescloud.node.commands
 
+import build.buf.gen.vulpescloud.events.v1.nodeLockEvent
 import build.buf.gen.vulpescloud.node.v1.ClusterAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.node.v1.getAllNodesRequest
 import build.buf.gen.vulpescloud.node.v1.getNodeSnapshotRequest
 import build.buf.gen.vulpescloud.node.v1.pingRequest
 import build.buf.gen.vulpescloud.node.v1.snapshotOrNull
 import de.vulpescloud.api.cluster.ClusterNode
+import de.vulpescloud.api.cluster.NodeState
 import de.vulpescloud.node.Node
+import de.vulpescloud.node.cluster.ClusterHelper
 import de.vulpescloud.node.command.CommandSource
+import de.vulpescloud.node.event.EventsService
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
@@ -22,6 +26,7 @@ import org.incendo.cloud.annotations.Permission
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
+import org.incendo.cloud.processors.confirmation.annotation.Confirmation
 
 class ClusterCommand {
 
@@ -120,6 +125,66 @@ class ClusterCommand {
                     .onFailure {
                         source.sendMessage("<red>Failed to ping node due to: ${it.message}!</red>")
                     }
+            }
+        }
+    }
+
+    @Permission("cluster.node.lock")
+    @Command("cluster node <node> lock")
+    @Confirmation
+    fun lockNode(source: CommandSource, @Argument("node") node: List<ClusterNode>) {
+        runBlocking {
+            node.forEach { clusterNode ->
+                if (clusterNode.name == Node.instance.configProvider.config.nodeName) {
+                    source.sendMessage("<red>A node cannot lock itself!</red>")
+                    return@forEach
+                }
+
+                if (clusterNode.locked) {
+                    source.sendMessage("<red>Node is already locked!</red>")
+                    return@forEach
+                }
+
+                ClusterHelper.updateNode(clusterNode.copy(locked = true, state = NodeState.UNKNOWN))
+                EventsService.publish(
+                    nodeLockEvent {
+                        this.node =
+                            clusterNode
+                                .copy(locked = true, state = NodeState.UNKNOWN)
+                                .toDefinition()
+                    }
+                )
+                source.sendMessage("<gray>Locked node</gray> <white>${clusterNode.name}</white>")
+            }
+        }
+    }
+
+    @Permission("cluster.node.unlock")
+    @Command("cluster node <node> unlock")
+    @Confirmation
+    fun unlockNode(source: CommandSource, @Argument("node") node: List<ClusterNode>) {
+        runBlocking {
+            node.forEach { clusterNode ->
+                if (clusterNode.name == Node.instance.configProvider.config.nodeName) {
+                    source.sendMessage("<red>A node cannot unlock itself!</red>")
+                    return@forEach
+                }
+                if (!clusterNode.locked) {
+                    source.sendMessage("<red>Node is not locked!</red>")
+                    return@forEach
+                }
+                ClusterHelper.updateNode(
+                    clusterNode.copy(locked = false, state = NodeState.UNKNOWN)
+                )
+                EventsService.publish(
+                    nodeLockEvent {
+                        this.node =
+                            clusterNode
+                                .copy(locked = false, state = NodeState.UNKNOWN)
+                                .toDefinition()
+                    }
+                )
+                source.sendMessage("<gray>Unlocked node</gray> <white>${clusterNode.name}</white>")
             }
         }
     }

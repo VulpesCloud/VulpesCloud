@@ -1,6 +1,8 @@
 package de.vulpescloud.node.event
 
+import de.vulpescloud.node.cluster.event.NodeLockEventListener
 import de.vulpescloud.node.cluster.event.NodeStateChangeEventListener
+import de.vulpescloud.node.cluster.event.NodeUnlockEventListener
 import de.vulpescloud.node.players.PlayerJoinEventListener
 import de.vulpescloud.node.players.PlayerQuitEventListener
 import de.vulpescloud.node.players.PlayerSwitchServerEventListener
@@ -17,6 +19,9 @@ object EventListenHelper {
         PlayerQuitEventListener.subscribe()
         PlayerJoinEventListener.subscribe()
         PlayerSwitchServerEventListener.subscribe()
+
+        NodeLockEventListener.subscribe()
+        NodeUnlockEventListener.subscribe()
     }
 
     fun unsubscribeFromEvents() {
@@ -26,5 +31,8 @@ object EventListenHelper {
         PlayerQuitEventListener.unsubscribe()
         PlayerJoinEventListener.unsubscribe()
         PlayerSwitchServerEventListener.unsubscribe()
+
+        NodeLockEventListener.unsubscribe()
+        NodeUnlockEventListener.unsubscribe()
     }
 }
