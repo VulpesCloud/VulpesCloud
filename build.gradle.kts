@@ -27,12 +27,12 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("vulpescloud.parent-build-logic")
-    kotlin("jvm") version "2.3.21"
+    kotlin("jvm") version "2.4.0"
     id("org.jetbrains.dokka") version "2.2.0"
     id("signing")
     id("maven-publish")
     alias(libs.plugins.shadow)
-    kotlin("plugin.serialization") version "2.3.21"
+    kotlin("plugin.serialization") version "2.4.0"
 }
 
 group = "de.vulpescloud"

@@ -25,7 +25,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
  */
 
 plugins {
-    kotlin("jvm") version "2.3.21"
+    kotlin("jvm") version "2.4.0"
     alias(libs.plugins.shadow)
 }
 
