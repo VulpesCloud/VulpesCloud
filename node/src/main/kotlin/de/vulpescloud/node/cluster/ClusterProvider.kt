@@ -98,6 +98,7 @@ class ClusterProvider {
             try {
                 val clusterConfig = getClusterConfig()
                 logger.info("Authenticating with HeadNode ${head.name} (${head.uuid}, ${head.state}, ${head.head})...")
+                logger.warn("DBG CLUSTER CONFIG: $clusterConfig")
                 val endpoint = clusterConfig.nodes.first { it.name == head.name }
                 val tempChannel =
                     ManagedChannelBuilder.forAddress(endpoint.host, endpoint.port)
