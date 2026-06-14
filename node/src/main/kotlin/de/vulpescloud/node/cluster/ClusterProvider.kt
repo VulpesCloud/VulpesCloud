@@ -97,6 +97,7 @@ class ClusterProvider {
         } else {
             try {
                 val clusterConfig = getClusterConfig()
+                logger.info("Authenticating with HeadNode ${head.name} (${head.uuid}, ${head.state}, ${head.head})...")
                 val endpoint = clusterConfig.nodes.first { it.name == head.name }
                 val tempChannel =
                     ManagedChannelBuilder.forAddress(endpoint.host, endpoint.port)
