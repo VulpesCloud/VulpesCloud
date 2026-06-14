@@ -33,7 +33,11 @@ object HeartbeatJob {
                                         .withInterceptors(
                                             AuthClientInterceptor(Node.instance.secret)
                                         )
-                                stub.heartbeat(heartbeatRequest {})
+                                stub.heartbeat(
+                                    heartbeatRequest {
+                                        this.node = ClusterHelper.getLocalNode().toDefinition()
+                                    }
+                                )
                             }
                         }
                         .onFailure { e ->
