@@ -69,20 +69,22 @@ class ClusterCommand {
         runBlocking {
             source.sendMessage("<gray>Listing all nodes...</gray>")
             try {
-                Node.instance.localGrpcClient.clusterAPI
-                    .getAllNodes(getAllNodesRequest {})
-                    .nodesList
-                    .forEach { node ->
-                        val state =
-                            Node.instance.clusterProvider.remoteNodes
-                                .find { it.endpoint.name == node.name }
-                                ?.channel
-                                ?.getState(true)
+                withTimeout(5.seconds) {
+                    Node.instance.localGrpcClient.clusterAPI
+                        .getAllNodes(getAllNodesRequest {})
+                        .nodesList
+                        .forEach { node ->
+                            val state =
+                                Node.instance.clusterProvider.remoteNodes
+                                    .find { it.endpoint.name == node.name }
+                                    ?.channel
+                                    ?.getState(true)
 
-                        source.sendMessage(
-                            " <dark_gray>»</dark_gray> <white>${node.name}</white> <dark_gray>| <gray>State:</gray> <white>${node.state}</white> <dark_gray>| <gray>Connection:</gray> <white>$state</white> <dark_gray>| <gray>Head:</gray> <white>${node.head}</white>"
-                        )
-                    }
+                            source.sendMessage(
+                                " <dark_gray>»</dark_gray> <white>${node.name}</white> <dark_gray>| <gray>State:</gray> <white>${node.state}</white> <dark_gray>| <gray>Connection:</gray> <white>$state</white> <dark_gray>| <gray>Head:</gray> <white>${node.head}</white>"
+                            )
+                        }
+                }
             } catch (exception: Exception) {
                 source.sendMessage("<red>An error occurred while trying to get the nodes!</red>")
                 exception.printStackTrace()
