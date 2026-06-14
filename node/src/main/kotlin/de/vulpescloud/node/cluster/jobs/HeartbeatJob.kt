@@ -5,6 +5,7 @@ import build.buf.gen.vulpescloud.node.v1.heartbeatRequest
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.cluster.ClusterHelper
+import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -29,6 +30,9 @@ object HeartbeatJob {
                             withTimeout(5.seconds) {
                                 val stub =
                                     ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineStub(channel)
+                                        .withInterceptors(
+                                            AuthClientInterceptor(Node.instance.secret)
+                                        )
                                 stub.heartbeat(heartbeatRequest {})
                             }
                         }
