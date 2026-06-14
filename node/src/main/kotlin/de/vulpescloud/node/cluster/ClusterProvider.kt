@@ -13,6 +13,7 @@ import de.vulpescloud.node.NodeShutdown
 import de.vulpescloud.node.cluster.jobs.CheckNodesJob
 import de.vulpescloud.node.cluster.jobs.HeartbeatJob
 import de.vulpescloud.node.event.EventsService
+import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import io.grpc.ManagedChannelBuilder
 import kotlin.io.path.Path
 import kotlin.time.Duration.Companion.minutes
@@ -107,7 +108,9 @@ class ClusterProvider {
                     ManagedChannelBuilder.forAddress(endpoint.host, endpoint.port)
                         .usePlaintext()
                         .build()
-                val stub = ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineStub(tempChannel)
+                val stub =
+                    ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineStub(tempChannel)
+                        .withInterceptors(AuthClientInterceptor(Node.instance.secret))
                 val response =
                     stub.authenticateNode(
                         authenticateNodeRequest {

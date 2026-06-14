@@ -130,23 +130,35 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
     ): AuthenticateNodeResponse {
         val clusterNode =
             ClusterHelper.getNode(request.nodeName)
-                ?: return AuthenticateNodeResponse.newBuilder()
-                    .setSuccess(false)
-                    .setMessage("Not registered in Cluster Config!")
-                    .build()
+                ?: run {
+                    logger.warn("Rejected node ${request.nodeName} because it is not registered!")
+                    return AuthenticateNodeResponse.newBuilder()
+                        .setSuccess(false)
+                        .setMessage("Not registered in Cluster Config!")
+                        .build()
+                }
 
-        if (clusterNode.uuid.toString() != request.nodeUuid)
+        if (clusterNode.uuid.toString() != request.nodeUuid) {
+            logger.warn("Rejected node ${request.nodeName} because UUID is not the same!")
             return AuthenticateNodeResponse.newBuilder()
                 .setSuccess(false)
                 .setMessage("UUID is not the same as in Cluster Config!")
                 .build()
+        }
         val clusterConfig = Node.instance.clusterProvider.getClusterConfig()
-        if (clusterConfig.nodes.none { it.uuid == clusterNode.uuid })
+        if (clusterConfig.nodes.none { it.uuid == clusterNode.uuid }) {
+            logger.warn(
+                "Rejected node ${request.nodeName} because it is not registered in VConfig!"
+            )
             return AuthenticateNodeResponse.newBuilder()
                 .setSuccess(false)
                 .setMessage("Endpoint not registered in Cluster VConfig!")
                 .build()
+        }
 
+        logger.info(
+            "Accepted node ${request.nodeName} (${request.nodeUuid}, ${clusterNode.grpcAddress}:${clusterNode.grpcPort})!"
+        )
         return AuthenticateNodeResponse.newBuilder().setSuccess(true).build()
     }
 
