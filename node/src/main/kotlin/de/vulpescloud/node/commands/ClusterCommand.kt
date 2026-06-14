@@ -1,19 +1,18 @@
 package de.vulpescloud.node.commands
 
-import build.buf.gen.vulpescloud.events.v1.nodeLockEvent
-import build.buf.gen.vulpescloud.events.v1.nodeUnlockEvent
 import build.buf.gen.vulpescloud.node.v1.ClusterAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.node.v1.getAllNodesRequest
 import build.buf.gen.vulpescloud.node.v1.getNodeSnapshotRequest
 import build.buf.gen.vulpescloud.node.v1.pingRequest
 import build.buf.gen.vulpescloud.node.v1.snapshotOrNull
 import de.vulpescloud.api.cluster.ClusterNode
+import de.vulpescloud.api.cluster.NodeEndpointDetails
 import de.vulpescloud.api.cluster.NodeState
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.cluster.ClusterHelper
 import de.vulpescloud.node.command.CommandSource
-import de.vulpescloud.node.event.EventsService
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
+import java.util.UUID
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
@@ -133,11 +132,17 @@ class ClusterCommand {
     @Permission("cluster.node.updateState")
     @Command("cluster node <node> updateState <state>")
     @Confirmation
-    fun updateNodeState(source: CommandSource, @Argument("node") node: List<ClusterNode>, @Argument("state") state: NodeState) {
+    fun updateNodeState(
+        source: CommandSource,
+        @Argument("node") node: List<ClusterNode>,
+        @Argument("state") state: NodeState,
+    ) {
         runBlocking {
             node.forEach { clusterNode ->
                 ClusterHelper.updateNode(clusterNode.copy(state = state))
-                source.sendMessage("<gray>Updated state of node</gray> <white>${clusterNode.name}</white> <gray>to</gray> <white>${state.name}</white>")
+                source.sendMessage(
+                    "<gray>Updated state of node</gray> <white>${clusterNode.name}</white> <gray>to</gray> <white>${state.name}</white>"
+                )
             }
         }
     }
@@ -185,6 +190,45 @@ class ClusterCommand {
                         "<red>Failed to fetch snapshot for node ${it.name}!</red>"
                     )
             }
+        }
+    }
+
+    @Permission("cluster.addNode")
+    @Command("cluster add node <name> <uuid> <host> <port>")
+    fun addNode(
+        source: CommandSource,
+        @Argument("name") name: String,
+        @Argument("uuid") uuidString: String,
+        @Argument("host") host: String,
+        @Argument("port") port: Int,
+    ) {
+        runBlocking {
+            val uuid = UUID.fromString(uuidString)
+            val clusterConfig = Node.instance.clusterProvider.getClusterConfig()
+            Node.instance.virtualConfigProvider.updateCustomConfig(
+                "vc_cluster",
+                clusterConfig.copy(
+                    nodes =
+                        clusterConfig.nodes.toMutableList().apply {
+                            add(NodeEndpointDetails(name, uuid, host, port))
+                        }
+                ),
+            )
+            val node =
+                ClusterNode(
+                    name,
+                    uuid,
+                    host,
+                    port,
+                    NodeState.OFFLINE,
+                    -1,
+                    false,
+                    -1,
+                    mapOf("freshNode" to "true"),
+                )
+            ClusterHelper.updateNode(node)
+
+            source.sendMessage("<green>Added node to cluster!</green>")
         }
     }
 }

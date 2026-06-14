@@ -125,6 +125,31 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
         return HeartbeatResponse.newBuilder().build()
     }
 
+    override suspend fun authenticateNode(
+        request: AuthenticateNodeRequest
+    ): AuthenticateNodeResponse {
+        val clusterNode =
+            ClusterHelper.getNode(request.nodeName)
+                ?: return AuthenticateNodeResponse.newBuilder()
+                    .setSuccess(false)
+                    .setMessage("Not registered in Cluster Config!")
+                    .build()
+
+        if (clusterNode.uuid.toString() != request.nodeUuid)
+            return AuthenticateNodeResponse.newBuilder()
+                .setSuccess(false)
+                .setMessage("UUID is not the same as in Cluster Config!")
+                .build()
+        val clusterConfig = Node.instance.clusterProvider.getClusterConfig()
+        if (clusterConfig.nodes.none { it.uuid == clusterNode.uuid })
+            return AuthenticateNodeResponse.newBuilder()
+                .setSuccess(false)
+                .setMessage("Endpoint not registered in Cluster VConfig!")
+                .build()
+
+        return AuthenticateNodeResponse.newBuilder().setSuccess(true).build()
+    }
+
     private suspend fun getPlayer(uuid: String): UserModel? {
         return MongoUtils.getUserByName(
             Node.instance.localGrpcClient.authAPI

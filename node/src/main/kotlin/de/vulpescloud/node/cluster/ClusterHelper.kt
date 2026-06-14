@@ -22,6 +22,14 @@ object ClusterHelper {
         Caffeine.newBuilder().expireAfterWrite(1, TimeUnit.MINUTES).build<String, ClusterNode>()
     private val logger = LoggerFactory.getLogger(ClusterHelper::class.java)
 
+    suspend fun isLocalNodeInDatabase(): Boolean {
+        return nodesDatabase.get(Node.instance.configProvider.config.nodeName) != null
+    }
+
+    suspend fun hasDatabaseBeenInitialized(): Boolean {
+        return nodesDatabase.getAll().isNotEmpty()
+    }
+
     suspend fun updateNodeState(state: NodeState) {
         val node = getLocalNode()
 
