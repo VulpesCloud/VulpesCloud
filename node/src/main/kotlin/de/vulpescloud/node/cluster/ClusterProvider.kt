@@ -14,6 +14,7 @@ import de.vulpescloud.node.cluster.jobs.CheckNodesJob
 import de.vulpescloud.node.cluster.jobs.HeartbeatJob
 import de.vulpescloud.node.event.EventsService
 import io.grpc.ManagedChannelBuilder
+import kotlin.io.path.Path
 import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
@@ -42,6 +43,7 @@ class ClusterProvider {
     }
 
     suspend fun init() {
+        runCatching { Path("temp/configs/vc_cluster.json").toFile().delete() }
         if (!ClusterHelper.hasDatabaseBeenInitialized()) {
             logger.warn("Cluster database has not been initialized yet! Initializing...")
             val node =
@@ -97,8 +99,9 @@ class ClusterProvider {
         } else {
             try {
                 val clusterConfig = getClusterConfig()
-                logger.info("Authenticating with HeadNode ${head.name} (${head.uuid}, ${head.state}, ${head.head})...")
-                logger.warn("DBG CLUSTER CONFIG: $clusterConfig")
+                logger.info(
+                    "Authenticating with HeadNode ${head.name} (${head.uuid}, ${head.state}, ${head.head})..."
+                )
                 val endpoint = clusterConfig.nodes.first { it.name == head.name }
                 val tempChannel =
                     ManagedChannelBuilder.forAddress(endpoint.host, endpoint.port)
