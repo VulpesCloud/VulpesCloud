@@ -116,6 +116,15 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
         return PingResponse.newBuilder().build()
     }
 
+    override suspend fun heartbeat(request: HeartbeatRequest): HeartbeatResponse {
+        if (ClusterHelper.getHeadNode()!!.uuid != Node.instance.configProvider.config.uuid) {
+            logger.warn("A node tried to send a heartbeat, but is not the head node!")
+            throw RuntimeException("A node tried to send a heartbeat, but is not the head node!")
+        }
+        HeadNodeUtil.handleHeartbeat(request.node)
+        return HeartbeatResponse.newBuilder().build()
+    }
+
     private suspend fun getPlayer(uuid: String): UserModel? {
         return MongoUtils.getUserByName(
             Node.instance.localGrpcClient.authAPI

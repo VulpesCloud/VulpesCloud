@@ -6,8 +6,6 @@ import build.buf.gen.vulpescloud.node.v1.node
 import de.vulpescloud.api.serializer.UUIDSerializer
 import java.util.*
 import kotlinx.serialization.Serializable
-import org.bson.BsonDocument
-import org.bson.BsonString
 
 @Serializable
 data class ClusterNode(
@@ -19,7 +17,7 @@ data class ClusterNode(
     val maxMemory: Int,
     val head: Boolean,
     val bootTimestamp: Long,
-    val locked: Boolean,
+    val attributes: Map<String, String>,
 ) {
 
     fun isRunning(): Boolean {
@@ -36,7 +34,7 @@ data class ClusterNode(
             this.head = this@ClusterNode.head
             this.bootTimestamp = this@ClusterNode.bootTimestamp
             this.state = this@ClusterNode.state.toNodeStates()
-            this.locked = this@ClusterNode.locked
+            this.attributes.putAll(this@ClusterNode.attributes)
         }
     }
 
@@ -57,7 +55,7 @@ data class ClusterNode(
                 definition.maxMemory,
                 definition.head,
                 definition.bootTimestamp,
-                definition.locked,
+                definition.attributesMap,
             )
         }
     }

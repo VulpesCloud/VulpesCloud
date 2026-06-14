@@ -17,7 +17,7 @@ data class NodeSnapshot(
     val cpuUsage: Double,
     val onlinePlayers: Int,
     val timestamp: Long,
-    val locked: Boolean,
+    val attributes: Map<String, String>,
 ) {
 
     fun toDefinition(): NodeSnapshot {
@@ -28,7 +28,7 @@ data class NodeSnapshot(
             this.onlinePlayers = this@NodeSnapshot.onlinePlayers
             this.timestamp = this@NodeSnapshot.timestamp
             this.state = this@NodeSnapshot.state.toNodeStates()
-            this.locked = this@NodeSnapshot.locked
+            this.attributes.putAll(this@NodeSnapshot.attributes)
         }
     }
 
@@ -48,7 +48,7 @@ data class NodeSnapshot(
                 definition.cpuUsage,
                 definition.onlinePlayers,
                 definition.timestamp,
-                definition.locked,
+                definition.attributesMap,
             )
         }
     }

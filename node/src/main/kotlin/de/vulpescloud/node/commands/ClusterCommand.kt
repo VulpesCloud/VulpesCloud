@@ -1,6 +1,7 @@
 package de.vulpescloud.node.commands
 
 import build.buf.gen.vulpescloud.events.v1.nodeLockEvent
+import build.buf.gen.vulpescloud.events.v1.nodeUnlockEvent
 import build.buf.gen.vulpescloud.node.v1.ClusterAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.node.v1.getAllNodesRequest
 import build.buf.gen.vulpescloud.node.v1.getNodeSnapshotRequest
@@ -129,62 +130,14 @@ class ClusterCommand {
         }
     }
 
-    @Permission("cluster.node.lock")
-    @Command("cluster node <node> lock")
+    @Permission("cluster.node.updateState")
+    @Command("cluster node <node> updateState <state>")
     @Confirmation
-    fun lockNode(source: CommandSource, @Argument("node") node: List<ClusterNode>) {
+    fun updateNodeState(source: CommandSource, @Argument("node") node: List<ClusterNode>, @Argument("state") state: NodeState) {
         runBlocking {
             node.forEach { clusterNode ->
-                if (clusterNode.name == Node.instance.configProvider.config.nodeName) {
-                    source.sendMessage("<red>A node cannot lock itself!</red>")
-                    return@forEach
-                }
-
-                if (clusterNode.locked) {
-                    source.sendMessage("<red>Node is already locked!</red>")
-                    return@forEach
-                }
-
-                ClusterHelper.updateNode(clusterNode.copy(locked = true, state = NodeState.UNKNOWN))
-                EventsService.publish(
-                    nodeLockEvent {
-                        this.node =
-                            clusterNode
-                                .copy(locked = true, state = NodeState.UNKNOWN)
-                                .toDefinition()
-                    }
-                )
-                source.sendMessage("<gray>Locked node</gray> <white>${clusterNode.name}</white>")
-            }
-        }
-    }
-
-    @Permission("cluster.node.unlock")
-    @Command("cluster node <node> unlock")
-    @Confirmation
-    fun unlockNode(source: CommandSource, @Argument("node") node: List<ClusterNode>) {
-        runBlocking {
-            node.forEach { clusterNode ->
-                if (clusterNode.name == Node.instance.configProvider.config.nodeName) {
-                    source.sendMessage("<red>A node cannot unlock itself!</red>")
-                    return@forEach
-                }
-                if (!clusterNode.locked) {
-                    source.sendMessage("<red>Node is not locked!</red>")
-                    return@forEach
-                }
-                ClusterHelper.updateNode(
-                    clusterNode.copy(locked = false, state = NodeState.UNKNOWN)
-                )
-                EventsService.publish(
-                    nodeLockEvent {
-                        this.node =
-                            clusterNode
-                                .copy(locked = false, state = NodeState.UNKNOWN)
-                                .toDefinition()
-                    }
-                )
-                source.sendMessage("<gray>Unlocked node</gray> <white>${clusterNode.name}</white>")
+                ClusterHelper.updateNode(clusterNode.copy(state = state))
+                source.sendMessage("<gray>Updated state of node</gray> <white>${clusterNode.name}</white> <gray>to</gray> <white>${state.name}</white>")
             }
         }
     }

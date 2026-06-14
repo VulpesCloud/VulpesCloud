@@ -7,7 +7,10 @@ import de.vulpescloud.api.cluster.NodeEndpointDetails
 import de.vulpescloud.api.cluster.NodeState
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeShutdown
+import de.vulpescloud.node.cluster.jobs.CheckNodesJob
+import de.vulpescloud.node.cluster.jobs.HeartbeatJob
 import de.vulpescloud.node.event.EventsService
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import org.slf4j.LoggerFactory
@@ -45,11 +48,6 @@ class ClusterProvider {
             NodeShutdown.shutdown()
         }
         sameNodeAlreadyOnline = false
-        if (localNode.locked) {
-            logger.error("Node is locked! Stopping in 15 seconds...")
-            delay(15.seconds)
-            NodeShutdown.shutdown()
-        }
 
         if (head == null) {
             val localNode =
@@ -97,7 +95,11 @@ class ClusterProvider {
         ClusterHelper.updateNodeState(NodeState.ONLINE)
 
         NodeSnapshotUpdater.start()
-        // todo NodePingJob
+        if (ClusterHelper.getLocalNode().head) {
+            CheckNodesJob.start()
+        } else {
+            HeartbeatJob.start()
+        }
     }
 
     suspend fun initClusterConfig() {
@@ -114,7 +116,10 @@ class ClusterProvider {
                                     Node.instance.configProvider.config.grpcHost,
                                     Node.instance.configProvider.config.grpcPort,
                                 )
-                            )
+                            ),
+                            60.seconds.toString(),
+                            5.minutes.toString(),
+                            10.minutes.toString(),
                         )
                     )
             }

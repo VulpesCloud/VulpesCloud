@@ -25,7 +25,7 @@ object NodeSnapshotUpdater {
         job = NodeCoroutineScope.launch {
             while (true) {
                 val node = ClusterHelper.getLocalNode()
-                if (node.state == NodeState.OFFLINE || node.locked) {
+                if (node.state == NodeState.OFFLINE) {
                     return@launch
                 }
 
@@ -38,7 +38,7 @@ object NodeSnapshotUpdater {
                         osMXBean.cpuLoad,
                         0,
                         System.currentTimeMillis(),
-                        false,
+                        node.attributes,
                     )
 
                 nodesDatabase.upsert(node.name, Json.encodeToJsonElement(snapshot))

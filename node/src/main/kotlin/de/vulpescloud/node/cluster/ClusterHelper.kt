@@ -24,9 +24,6 @@ object ClusterHelper {
 
     suspend fun updateNodeState(state: NodeState) {
         val node = getLocalNode()
-        if (node.locked) {
-            logger.warn("Cannot update Node State whilst locked!")
-        }
 
         val newNode = node.copy(state = state)
         nodesDatabase.upsert(newNode.name, json.encodeToJsonElement(newNode))
@@ -65,7 +62,7 @@ object ClusterHelper {
                 Node.instance.configProvider.config.maxMemory,
                 false,
                 System.currentTimeMillis(),
-                false,
+                emptyMap(),
             )
         nodesDatabase.upsert(node.name, json.encodeToJsonElement(node))
         cache.put(node.name, node)
@@ -86,7 +83,7 @@ object ClusterHelper {
     }
 
     suspend fun getHeadNode(): ClusterNode? {
-        return getAllNodes().find { it.state == NodeState.ONLINE && it.head && !it.locked }
+        return getAllNodes().find { it.state == NodeState.ONLINE && it.head }
     }
 
     suspend fun getNode(name: String): ClusterNode? {
