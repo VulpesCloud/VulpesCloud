@@ -23,7 +23,7 @@ object CheckNodesJob {
         job = NodeCoroutineScope.launch {
             val config = Node.instance.clusterProvider.getClusterConfig()
             while (true) {
-                delay(60.seconds)
+                delay(25.seconds)
                 if (ClusterHelper.getHeadNode()?.uuid != Node.instance.configProvider.config.uuid) {
                     logger.warn(
                         "CheckNodeJob ran on a node that is not the head node! Stopping Job..."
