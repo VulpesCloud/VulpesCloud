@@ -20,6 +20,8 @@ object HeartbeatJob {
     fun start() {
         job = NodeCoroutineScope.launch {
             while (true) {
+                delay(10.seconds)
+
                 val headNode = ClusterHelper.getHeadNode()
                 val channel =
                     Node.instance.clusterProvider.remoteNodes
@@ -46,8 +48,6 @@ object HeartbeatJob {
                 }
                 // TODO: Do something if HeadNode does not accept heartbeat (Sync with other nodes
                 // if possible)
-
-                delay(10.seconds)
             }
         }
     }
