@@ -26,6 +26,7 @@ class ClusterProvider {
     val remoteNodes = mutableListOf<RemoteNode>()
     private val logger = LoggerFactory.getLogger("ClusterProvider")
     private var sameNodeAlreadyOnline: Boolean = false
+    var bootFromPreviousUnknownState = false
 
     suspend fun connectToOtherNodes() {
         val nodes = getClusterConfig().nodes
@@ -136,17 +137,23 @@ class ClusterProvider {
                 return
             }
 
-            val localNode =
-                ClusterHelper.getLocalNode().copy(state = NodeState.BOOTING, head = false)
-            ClusterHelper.updateNode(localNode)
-            EventsService.publish(
-                nodeStateChangeEvent {
-                    this.node = localNode.toDefinition()
-                    this.oldState = localNode.state.toNodeStates()
-                    this.newState = NodeState.BOOTING.toNodeStates()
-                },
-                true,
-            )
+            if (localNode.state == NodeState.UNKNOWN) {
+                logger.warn("Node has been started with a previous UNKNOWN state!")
+                bootFromPreviousUnknownState = true
+            } else {
+                bootFromPreviousUnknownState = false
+                val localNode =
+                    ClusterHelper.getLocalNode().copy(state = NodeState.BOOTING, head = false)
+                ClusterHelper.updateNode(localNode)
+                EventsService.publish(
+                    nodeStateChangeEvent {
+                        this.node = localNode.toDefinition()
+                        this.oldState = localNode.state.toNodeStates()
+                        this.newState = NodeState.BOOTING.toNodeStates()
+                    },
+                    true,
+                )
+            }
         }
     }
 
@@ -166,7 +173,9 @@ class ClusterProvider {
     }
 
     suspend fun startupDone() {
-        ClusterHelper.updateNodeState(NodeState.ONLINE)
+        if (!bootFromPreviousUnknownState) {
+            ClusterHelper.updateNodeState(NodeState.ONLINE)
+        }
 
         NodeSnapshotUpdater.start()
         if (ClusterHelper.getLocalNode().head) {
