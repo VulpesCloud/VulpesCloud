@@ -163,7 +163,7 @@ object VelocityDownloader : ServerSoftwareDownloader {
                     val latestVersion = versions.getJSONObject(0).getJSONObject("version")
 
                     val downloadUrl =
-                        if (latestVersion.getString("id") == "4.0.0") {
+                        if (latestVersion.getString("id") == "4.0.0" || latestVersion.getString("id") == "3.5.0") {
                             getDownloadUrl(
                                 versions.getJSONObject(1).getJSONObject("version").getString("id")
                             )
@@ -200,7 +200,7 @@ object VelocityDownloader : ServerSoftwareDownloader {
                     if (versions.length() == 0) throw Exception("No versions found")
 
                     val downloadUrl =
-                        if (version == "4.0.0") {
+                        if (version == "4.0.0" || version == "3.5.0") {
                             URI("")
                         } else {
                             getDownloadUrl(version)
@@ -256,7 +256,7 @@ object VelocityDownloader : ServerSoftwareDownloader {
                 for (i in 0 until versions.length()) {
                     val version = versions.getJSONObject(i).getJSONObject("version")
 
-                    if (version.getString("id") == "4.0.0") {
+                    if (version.getString("id") == "4.0.0" || version.getString("id") == "3.5.0") {
                         continue
                     } else {
                         val build =
