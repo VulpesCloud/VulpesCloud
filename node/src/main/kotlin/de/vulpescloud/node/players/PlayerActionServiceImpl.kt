@@ -16,10 +16,12 @@ import build.buf.gen.vulpescloud.players.v1.SendTitleResponse
 import build.buf.gen.vulpescloud.players.v1.getAllOnlinePlayersRequest
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.event.EventsService
+import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 
 class PlayerActionServiceImpl : PlayerActionsServiceGrpcKt.PlayerActionsServiceCoroutineImplBase() {
     private val playerStub by lazy { Node.instance.localGrpcClient.playerAPI }
 
+    @RequiresPermission("players.actions.sendMessage")
     override suspend fun sendMessage(request: SendMessageRequest): SendMessageResponse {
         val player =
             playerStub.getAllOnlinePlayers(getAllOnlinePlayersRequest {}).onlinePlayersList.find {
@@ -38,6 +40,7 @@ class PlayerActionServiceImpl : PlayerActionsServiceGrpcKt.PlayerActionsServiceC
         return SendMessageResponse.newBuilder().setSuccess(true).build()
     }
 
+    @RequiresPermission("players.actions.sendTitle")
     override suspend fun sendTitle(request: SendTitleRequest): SendTitleResponse {
         val player =
             playerStub.getAllOnlinePlayers(getAllOnlinePlayersRequest {}).onlinePlayersList.find {
@@ -59,6 +62,7 @@ class PlayerActionServiceImpl : PlayerActionsServiceGrpcKt.PlayerActionsServiceC
         return SendTitleResponse.newBuilder().setSuccess(true).build()
     }
 
+    @RequiresPermission("players.actions.kickPlayer")
     override suspend fun kickPlayer(request: KickPlayerRequest): KickPlayerResponse {
         val player =
             playerStub.getAllOnlinePlayers(getAllOnlinePlayersRequest {}).onlinePlayersList.find {
@@ -77,6 +81,7 @@ class PlayerActionServiceImpl : PlayerActionsServiceGrpcKt.PlayerActionsServiceC
         return KickPlayerResponse.newBuilder().setSuccess(true).build()
     }
 
+    @RequiresPermission("players.actions.sendActionBar")
     override suspend fun sendActionBar(request: SendActionBarRequest): SendActionBarResponse {
         val player =
             playerStub.getAllOnlinePlayers(getAllOnlinePlayersRequest {}).onlinePlayersList.find {
@@ -95,6 +100,7 @@ class PlayerActionServiceImpl : PlayerActionsServiceGrpcKt.PlayerActionsServiceC
         return SendActionBarResponse.newBuilder().setSuccess(true).build()
     }
 
+    @RequiresPermission("players.actions.connectPlayer")
     override suspend fun connectPlayer(request: ConnectPlayerRequest): ConnectPlayerResponse {
         val player =
             playerStub.getAllOnlinePlayers(getAllOnlinePlayersRequest {}).onlinePlayersList.find {
