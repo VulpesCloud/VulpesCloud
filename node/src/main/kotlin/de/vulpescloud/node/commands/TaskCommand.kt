@@ -134,10 +134,11 @@ class TaskCommand {
                                 source.sendMessage("<red>Node ${it.endpoint.name} is not online!</red>")
                                 return@runBlocking
                             }
-                            if (!it.getNode().isRunning()) {
-                                source.sendMessage("<red>Node ${it.endpoint.name} is not online!</red>")
-                                return@runBlocking
-                            }
+                            // TODO: Implement this
+//                            if (!it.getNode().isRunning()) {
+//                                source.sendMessage("<red>Node ${it.endpoint.name} is not online!</red>")
+//                                return@runBlocking
+//                            }
                             TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub(it.channel!!)
                                 .withInterceptors(AuthClientInterceptor(Node.instance.secret))
                                 .prepareServiceOnTask(

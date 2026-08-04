@@ -44,7 +44,8 @@ class PlayerServiceImpl : PlayersServiceGrpcKt.PlayersServiceCoroutineImplBase()
                 .playersList
         )
         Node.instance.clusterProvider.remoteNodes
-            .filter { it.getNode().isRunning() }
+            // TODO: implement this
+//            .filter { it.getNode().isRunning() }
             .forEach {
                 val stub =
                     stubCache.get(it.endpoint.name) { _ ->
@@ -82,12 +83,13 @@ class PlayerServiceImpl : PlayersServiceGrpcKt.PlayersServiceCoroutineImplBase()
         Node.instance.clusterProvider.remoteNodes
             .find { it.endpoint.name == nodeName }
             ?.let {
-                if (!it.getNode().isRunning()) {
-                    logger.error(
-                        "Received request to get all online players of node $nodeName but node is not online!"
-                    )
-                    return GetAllOnlinePlayerOfNodeResponse.newBuilder().build()
-                }
+                // TODO: implement
+//                if (!it.getNode().isRunning()) {
+//                    logger.error(
+//                        "Received request to get all online players of node $nodeName but node is not online!"
+//                    )
+//                    return GetAllOnlinePlayerOfNodeResponse.newBuilder().build()
+//                }
                 val stub =
                     stubCache.get(it.endpoint.name) { _ ->
                         PlayersServiceGrpcKt.PlayersServiceCoroutineStub(it.channel!!)

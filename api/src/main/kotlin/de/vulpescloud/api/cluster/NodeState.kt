@@ -1,6 +1,6 @@
 package de.vulpescloud.api.cluster
 
-import build.buf.gen.vulpescloud.node.v1.NodeStates
+import build.buf.gen.vulpescloud.cluster.v2.NodeState
 
 enum class NodeState {
 
@@ -9,12 +9,12 @@ enum class NodeState {
     ONLINE,
     DRAINING;
 
-    fun toNodeStates(): NodeStates {
+    fun toNodeStates(): NodeState {
         return when (this) {
-            OFFLINE -> NodeStates.NODE_STATES_OFFLINE_UNSPECIFIED
-            BOOTING -> NodeStates.NODE_STATES_BOOTING
-            ONLINE -> NodeStates.NODE_STATES_ONLINE
-            DRAINING -> NodeStates.NODE_STATES_DRAINING
+            OFFLINE -> NodeState.NODE_STATES_OFFLINE_UNSPECIFIED
+            BOOTING -> NodeState.NODE_STATES_BOOTING
+            ONLINE -> NodeState.NODE_STATES_ONLINE
+            DRAINING -> NodeState.NODE_STATES_DRAINING
         }
     }
 }

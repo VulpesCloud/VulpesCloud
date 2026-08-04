@@ -94,6 +94,7 @@ java {
 
 val generateDependenciesJson by
     tasks.registering {
+        description = "Generates a Json file containing all non implemented dependencies"
         val outFile = layout.buildDirectory.file("dependencies.json")
         outputs.file(outFile)
         doLast { exportDependenciesJson("dependencies.json") }

@@ -45,15 +45,6 @@ class ModuleProvider(val moduleFolder: Path, val modulesJsonURL: String) {
                     return module
                 }
 
-                if (moduleInfo.headNodeOnly) {
-                    if (!ClusterHelper.getLocalNode().head) {
-                        logger.warn(
-                            "Refusing to load module <light_purple>${moduleInfo.name}</light_purple> as it is head node only"
-                        )
-                        return null
-                    }
-                }
-
                 val classLoader =
                     ModuleClassLoader(
                         arrayOf(it.toURI().toURL()),

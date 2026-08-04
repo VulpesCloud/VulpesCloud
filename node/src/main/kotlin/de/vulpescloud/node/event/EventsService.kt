@@ -59,7 +59,8 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
 
         if (request.forwardToOtherNodes) {
             Node.instance.clusterProvider.remoteNodes
-                .filter { it.endpoint.name != localNodeName && it.getNode().isRunning() }
+                // TODO: fix this
+//                .filter { it.endpoint.name != localNodeName && it.getNode().isRunning() }
                 .forEach { node ->
                     val channel = node.channel ?: return@forEach
                     val stub =

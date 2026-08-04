@@ -1,6 +1,6 @@
 package de.vulpescloud.node.cluster
 
-import build.buf.gen.vulpescloud.events.v1.nodeStateChangeEvent
+import build.buf.gen.vulpescloud.cluster.v2.nodeStateChangeEvent
 import build.buf.gen.vulpescloud.virtualconfig.v1.createVirtualConfigRequest
 import de.vulpescloud.api.cluster.ClusterConfig
 import de.vulpescloud.api.cluster.NodeEndpointDetails
@@ -17,6 +17,10 @@ class ClusterProvider {
     val remoteNodes = mutableListOf<RemoteNode>()
     private val logger = LoggerFactory.getLogger("ClusterProvider")
     private var sameNodeAlreadyOnline: Boolean = false
+    var currentState: NodeState = NodeState.OFFLINE
+        private set
+
+    val currentAttributes: MutableMap<String, String> = mutableMapOf()
 
     suspend fun connectToOtherNodes() {
         val nodes = getClusterConfig().nodes
@@ -35,8 +39,7 @@ class ClusterProvider {
     }
 
     suspend fun init() {
-        val head = ClusterHelper.getHeadNode()
-        val localNode = ClusterHelper.getLocalNode()
+        val localNode = ClusterHelper.getLocalNodeSnapshot()
 
         if (localNode.state == NodeState.ONLINE) {
             logger.error("Node with same Name is already online! Stopping in 15 seconds...")
@@ -46,63 +49,40 @@ class ClusterProvider {
         }
         sameNodeAlreadyOnline = false
 
-        if (head == null) {
-            val localNode =
-                ClusterHelper.getLocalNode().copy(state = NodeState.BOOTING, head = true)
-            ClusterHelper.updateNode(localNode)
-            EventsService.publish(
-                nodeStateChangeEvent {
-                    this.node = localNode.toDefinition()
-                    this.oldState = localNode.state.toNodeStates()
-                    this.newState = NodeState.BOOTING.toNodeStates()
-                },
-                true,
-            )
-        } else {
-            val localNode =
-                ClusterHelper.getLocalNode().copy(state = NodeState.BOOTING, head = false)
-            ClusterHelper.updateNode(localNode)
-            EventsService.publish(
-                nodeStateChangeEvent {
-                    this.node = localNode.toDefinition()
-                    this.oldState = localNode.state.toNodeStates()
-                    this.newState = NodeState.BOOTING.toNodeStates()
-                },
-                true,
-            )
-        }
+        currentState = NodeState.BOOTING
+        NodeSnapshotUpdater.updateLocalNodeSnapshot()
+
+        EventsService.publish(
+            nodeStateChangeEvent {
+                this.snapshot = localNode.toDefinition()
+                this.oldState = localNode.state.toNodeStates()
+                this.newState = NodeState.BOOTING.toNodeStates()
+            },
+            true,
+        )
+
+        // TODO: mTLS
     }
 
     suspend fun shutdown() {
         if (!sameNodeAlreadyOnline) {
-            val localNode = ClusterHelper.getLocalNode()
-            ClusterHelper.updateNode(localNode.copy(state = NodeState.OFFLINE, head = false))
+            val localNode = ClusterHelper.getLocalNodeSnapshot()
+            currentState = NodeState.OFFLINE
+            NodeSnapshotUpdater.updateLocalNodeSnapshot()
             EventsService.publish(
                 nodeStateChangeEvent {
-                    this.node = localNode.toDefinition()
+                    this.snapshot = localNode.toDefinition()
                     this.oldState = localNode.state.toNodeStates()
                     this.newState = NodeState.OFFLINE.toNodeStates()
                 },
                 true,
             )
-            logger.error(
-                "HeadNode features have not yet been implemented! (This is not a real problem right now, just reminder for the dev to implement it)"
-            )
-            //            EventsService.publish(
-            //                EventSerializer.encode(
-            //                    ChoseNewHeadEvent(
-            //                        ClusterHelper.getAllNodes()
-            //                            .filter { it.state == NodeState.ONLINE }
-            //                            .minByOrNull { it.bootTimestamp } ?: return
-            //                    )
-            //                ),
-            //                true,
-            //            )
         }
     }
 
     suspend fun startupDone() {
-        ClusterHelper.updateNodeState(NodeState.ONLINE)
+        currentState = NodeState.ONLINE
+        NodeSnapshotUpdater.updateLocalNodeSnapshot()
 
         NodeSnapshotUpdater.start()
     }
@@ -121,7 +101,8 @@ class ClusterProvider {
                                     Node.instance.configProvider.config.grpcHost,
                                     Node.instance.configProvider.config.grpcPort,
                                 )
-                            )
+                            ),
+                            listOf("127.0.0.1", Node.instance.configProvider.config.grpcHost),
                         )
                     )
             }

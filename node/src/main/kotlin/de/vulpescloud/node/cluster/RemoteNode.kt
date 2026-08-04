@@ -2,8 +2,6 @@ package de.vulpescloud.node.cluster
 
 import build.buf.gen.vulpescloud.node.v1.ClusterAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.node.v1.getNodeSnapshotRequest
-import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpcKt
-import de.vulpescloud.api.cluster.ClusterNode
 import de.vulpescloud.api.cluster.NodeEndpointDetails
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
@@ -15,10 +13,6 @@ class RemoteNode(val endpoint: NodeEndpointDetails) {
 
     var channel: ManagedChannel? = null
     private val logger = LoggerFactory.getLogger("RemoteNode-${endpoint.name}")
-
-    suspend fun getNode(): ClusterNode {
-        return ClusterHelper.getNode(endpoint.name) ?: throw Exception("Node not found!")
-    }
 
     suspend fun reconnect() {
         channel?.shutdownNow()

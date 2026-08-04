@@ -1,8 +1,8 @@
 package de.vulpescloud.node.grpc
 
 import build.buf.gen.vulpescloud.auth.v1.AuthServiceGrpcKt
+import build.buf.gen.vulpescloud.cluster.v2.ClusterAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.events.v1.EventServiceGrpcKt
-import build.buf.gen.vulpescloud.node.v1.ClusterAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.players.v1.PlayerActionsServiceGrpcKt
 import build.buf.gen.vulpescloud.players.v1.PlayersServiceGrpcKt
 import build.buf.gen.vulpescloud.services.v1.ServiceAPIServiceGrpcKt

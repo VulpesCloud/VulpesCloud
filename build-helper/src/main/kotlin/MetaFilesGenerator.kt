@@ -1,16 +1,16 @@
+import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
+import java.security.MessageDigest
 import org.gradle.api.Project
 import org.gradle.api.artifacts.repositories.MavenArtifactRepository
 import org.gradle.api.internal.artifacts.repositories.resolver.MavenUniqueSnapshotComponentIdentifier
 import org.json.JSONArray
 import org.json.JSONObject
-import java.io.File
-import java.nio.file.Files
-import java.nio.file.Path
-import java.security.MessageDigest
 
 fun Project.exportDependenciesJson(
     fileName: String = "dependencies.json",
-    ignoredDependencyGroups: Array<String> = emptyArray()
+    ignoredDependencyGroups: Array<String> = emptyArray(),
 ): String {
     val depsArray = JSONArray()
     val outputFolder = layout.buildDirectory.dir("libs").get().asFile
@@ -20,55 +20,59 @@ fun Project.exportDependenciesJson(
         Files.delete(Path.of(outputFolder.toString(), fileName))
     }
 
-    configurations.getByName("compileClasspath")
-        .resolvedConfiguration
-        .resolvedArtifacts
-        .forEach { artifact ->
-            val id = artifact.moduleVersion.id
-            if (id.group == group || ignoredDependencyGroups.contains(id.group)) return@forEach
+    configurations.getByName("compileClasspath").resolvedConfiguration.resolvedArtifacts.forEach {
+        artifact ->
+        val id = artifact.moduleVersion.id
+        if (id.group == group || ignoredDependencyGroups.contains(id.group)) return@forEach
 
-            // Snapshot-Version handling
-            val resolvedVersion = if (
+        // Snapshot-Version handling
+        val resolvedVersion =
+            if (
                 id.version.endsWith("-SNAPSHOT") &&
-                artifact.id.componentIdentifier is MavenUniqueSnapshotComponentIdentifier
+                    artifact.id.componentIdentifier is MavenUniqueSnapshotComponentIdentifier
             ) {
-                (artifact.id.componentIdentifier as MavenUniqueSnapshotComponentIdentifier).timestampedVersion
+                (artifact.id.componentIdentifier as MavenUniqueSnapshotComponentIdentifier)
+                    .timestampedVersion
             } else id.version
 
-            val classifierSuffix = artifact.classifier?.let { "-$it" } ?: ""
+        val classifierSuffix = artifact.classifier?.let { "-$it" } ?: ""
 
-            // Repo URL ermitteln
-            val repoUrl = if (id.group.startsWith("build.buf")) {
+        // Repo URL ermitteln
+        val repoUrl =
+            if (id.group.startsWith("build.buf")) {
                 "https://buf.build/gen/maven/"
             } else {
                 // erstes MavenRepo nehmen, das diese Dependency liefert
-                repositories.filterIsInstance<MavenArtifactRepository>()
+                repositories
+                    .filterIsInstance<MavenArtifactRepository>()
                     .firstOrNull { repo ->
-                        // grober Match: prüft, ob groupId zum Repo passt oder sonst nehmen wir das erste Repo
+                        // grober Match: prüft, ob groupId zum Repo passt oder sonst nehmen wir das
+                        // erste Repo
                         true
-                    }?.url?.toString() ?: ""
+                    }
+                    ?.url
+                    ?.toString() ?: ""
             }
 
-            val jarUrl = "$repoUrl${id.group.replace('.', '/')}/${id.name}/$resolvedVersion/${id.name}-$resolvedVersion$classifierSuffix.jar"
+        val jarUrl =
+            "$repoUrl${id.group.replace('.', '/')}/${id.name}/$resolvedVersion/${id.name}-$resolvedVersion$classifierSuffix.jar"
 
-            val jsonDep = JSONObject()
+        val jsonDep =
+            JSONObject()
                 .put("group", id.group)
                 .put("artifact", id.name)
                 .put("version", id.version)
                 .put("url", jarUrl)
-            artifact.classifier?.let { jsonDep.put("classifier", it) }
+        artifact.classifier?.let { jsonDep.put("classifier", it) }
 
-            depsArray.put(jsonDep)
-        }
+        depsArray.put(jsonDep)
+    }
 
     val root = JSONObject().put("dependencies", depsArray)
     val target = layout.buildDirectory.file(fileName).get().asFile
     target.writeText(root.toString(2))
     return target.absolutePath
 }
-
-fun Project.mavenRepositories(): Iterable<MavenArtifactRepository> =
-    repositories.filterIsInstance<MavenArtifactRepository>()
 
 fun generateCheckSums(destPath: Path, jars: List<String>) {
     val checksumJson = JSONObject()
