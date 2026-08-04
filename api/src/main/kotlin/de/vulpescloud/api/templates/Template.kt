@@ -1,7 +1,7 @@
 package de.vulpescloud.api.templates
 
-import build.buf.gen.vulpescloud.tasks.v1.TemplateDefinition
-import build.buf.gen.vulpescloud.tasks.v1.TemplateStorage
+import build.buf.gen.vulpescloud.templates.v1.TemplateDefinition
+import build.buf.gen.vulpescloud.templates.v1.TemplateStorage
 import kotlinx.serialization.Serializable
 import org.bson.BsonDocument
 import org.bson.BsonInt32
@@ -26,7 +26,7 @@ data class Template(
 
         when (storage) {
             TemplateStorages.LOCAL ->
-                (builder.setStorage(TemplateStorage.TEMPLATE_STORAGE_LOCAL_UNSPECIFIED))
+                (builder.setStorage(TemplateStorage.TEMPLATE_STORAGE_LOCAL))
             TemplateStorages.S3 ->
                 (builder.setStorage(TemplateStorage.TEMPLATE_STORAGE_S3))
         }
@@ -39,7 +39,7 @@ data class Template(
             return Template(
                 templateDefinition.name,
                 when (templateDefinition.storage) {
-                    TemplateStorage.TEMPLATE_STORAGE_LOCAL_UNSPECIFIED ->
+                    TemplateStorage.TEMPLATE_STORAGE_LOCAL ->
                         de.vulpescloud.api.templates.TemplateStorages.LOCAL
                     TemplateStorage.TEMPLATE_STORAGE_S3 ->
                         de.vulpescloud.api.templates.TemplateStorages.S3
