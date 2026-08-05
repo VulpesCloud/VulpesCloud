@@ -1,6 +1,6 @@
 [versions]
 # kotlin
-stdlib = "2.4.0"
+stdlib = "2.4.10"
 kotlinx-serialization = "1.11.0"
 kotlinx-datetime = "0.8.0-0.6.x-compat"
 kotlinx-coroutines = "1.11.0"
