@@ -48,7 +48,7 @@ json = "20250517"
 
 # console
 jline = "3.30.16"
-cloud = "2.0.0"
+cloud = "2.1.0"
 
 # platforms
 paper = "1.17-R0.1-SNAPSHOT"
