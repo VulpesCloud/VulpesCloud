@@ -19,7 +19,7 @@ grpc-kotlin = "1.5.0"
 protospecs-grpc = "1.5.0.4.20260804182210.e86561cd1114"
 perfmark = "0.27.0"
 
-javaJWT = "4.5.2"
+javaJWT = "4.6.0"
 
 # ok
 okhttp = "5.4.0"
