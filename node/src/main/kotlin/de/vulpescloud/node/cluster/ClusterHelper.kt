@@ -13,7 +13,7 @@ object ClusterHelper {
     private val json = Json
 
     suspend fun getLocalNodeSnapshot(): NodeSnapshot {
-        val jsonElement = snapshotDatabase.get(Node.instance.configProvider.config.uuid.toString())
+        val jsonElement = snapshotDatabase.get(Node.instance.configProvider.config.nodeName)
         return if (jsonElement != null) {
             json.decodeFromJsonElement(jsonElement)
         } else {

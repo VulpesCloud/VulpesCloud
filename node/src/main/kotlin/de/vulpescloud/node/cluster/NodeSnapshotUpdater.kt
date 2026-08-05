@@ -60,6 +60,6 @@ object NodeSnapshotUpdater {
         val snapshot =
             generateSnapshot()
 
-        nodesDatabase.upsert(Node.instance.configProvider.config.uuid.toString(), Json.encodeToJsonElement(snapshot))
+        nodesDatabase.upsert(Node.instance.configProvider.config.nodeName, Json.encodeToJsonElement(snapshot))
     }
 }
