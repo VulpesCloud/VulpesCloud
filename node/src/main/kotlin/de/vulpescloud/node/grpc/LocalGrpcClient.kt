@@ -12,6 +12,8 @@ import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import io.grpc.Channel
 import io.grpc.ClientInterceptors
 import io.grpc.ManagedChannelBuilder
+import io.grpc.netty.NettyChannelBuilder
+import io.netty.handler.ssl.SslContext
 
 class LocalGrpcClient {
 
@@ -28,12 +30,19 @@ class LocalGrpcClient {
     fun connect(
         host: String = "127.0.0.1",
         port: Int = 6565,
-        // creds: ChannelCredentials,
+        sslContext: SslContext? = null,
         secret: String,
     ) {
+        val channelBuilder = NettyChannelBuilder.forAddress(host, port)
+        if (sslContext != null) {
+            channelBuilder.sslContext(sslContext)
+        } else {
+            channelBuilder.usePlaintext()
+        }
+
         channel =
             ClientInterceptors.intercept(
-                ManagedChannelBuilder.forAddress(host, port).usePlaintext().build(),
+                channelBuilder.build(),
                 AuthClientInterceptor(secret),
             )
 

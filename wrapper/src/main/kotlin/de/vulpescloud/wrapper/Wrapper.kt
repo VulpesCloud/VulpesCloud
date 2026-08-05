@@ -79,10 +79,37 @@ class Wrapper(args: Array<String>) {
 
         LoadBalancerRegistry.getDefaultRegistry().register(PickFirstLoadBalancerProvider())
 
+        val grpcHostname = System.getenv("grpc_hostname") ?: "127.0.0.1"
+        val grpcPort = (System.getenv("grpc_port") ?: "6565").toInt()
+        val secret = System.getenv("secret") ?: "1osajdf3"
+
+        val certDir = Path("vulpescloud/certs")
+        val nodeCertFile = certDir.resolve("node.crt").toFile()
+        val nodeKeyFile = certDir.resolve("node.key").toFile()
+        val caCertFile = certDir.resolve("ca.crt").toFile()
+
+        val sslContext = if (nodeCertFile.exists() && nodeKeyFile.exists() && caCertFile.exists()) {
+            println("Loading TLS certificates from ${certDir.toAbsolutePath()}")
+            try {
+                GrpcClient.buildClientSslContext(
+                    nodeCertPem = nodeCertFile.readText(),
+                    nodeKeyPem = nodeKeyFile.readText(),
+                    caCertPem = caCertFile.readText()
+                )
+            } catch (e: Exception) {
+                println("Failed to build SSL context: ${e.message}")
+                null
+            }
+        } else {
+            println("TLS certificates not found in ${certDir.toAbsolutePath()}, connecting without TLS")
+            null
+        }
+
         grpcClient.connect(
-            System.getenv("grpc_hostname") ?: "127.0.0.1",
-            (System.getenv("grpc_port") ?: "6565").toInt(),
-            System.getenv("secret") ?: "1osajdf3",
+            host = grpcHostname,
+            port = grpcPort,
+            sslContext = sslContext,
+            secret = secret,
         )
 
         val file = Path(System.getenv("bootstrapFile")).toFile()

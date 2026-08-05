@@ -189,6 +189,25 @@ class LocalServiceFactory : AbstractServiceFactory() {
                     .resolve("vulpescloud-connector.jar"),
                 StandardCopyOption.REPLACE_EXISTING,
             )
+
+            // TLS Certificates
+            val certDir = localService.path().resolve("vulpescloud/certs")
+            Files.createDirectories(certDir)
+            Files.copy(
+                Path("launcher/.secret/certs/node.key.pem"),
+                certDir.resolve("node.key"),
+                StandardCopyOption.REPLACE_EXISTING
+            )
+            Files.copy(
+                Path("launcher/.secret/certs/node.cert.pem"),
+                certDir.resolve("node.crt"),
+                StandardCopyOption.REPLACE_EXISTING
+            )
+            Files.copy(
+                Path("launcher/.secret/certs/ca.cert.pem"),
+                certDir.resolve("ca.crt"),
+                StandardCopyOption.REPLACE_EXISTING
+            )
         }
 
         Node.instance.moduleProvider

@@ -164,8 +164,9 @@ class DockerServiceFactory : AbstractServiceFactory() {
         binds.add(Bind.parse("${Path("${dockerService.path().toAbsolutePath()}/server.jar").toAbsolutePath()}:/app/server.jar"))
         binds.add(Bind.parse("${Path("launcher/dependencies/maven").toAbsolutePath()}:/launcher/dependencies/maven"))
         binds.add(Bind.parse("${Path("launcher/dependencies/vulpescloud").toAbsolutePath()}:/launcher/dependencies/vulpescloud"))
-        binds.add(Bind.parse("${Path("certs").toAbsolutePath()}:/vulpescloud/certs"))
-        binds.add(Bind.parse("${Path("certs").toAbsolutePath()}:/app/vulpescloud/certs"))
+        binds.add(Bind.parse("${Path("launcher/.secret/certs/node.key.pem").toAbsolutePath()}:/app/vulpescloud/certs/node.key"))
+        binds.add(Bind.parse("${Path("launcher/.secret/certs/node.cert.pem").toAbsolutePath()}:/app/vulpescloud/certs/node.crt"))
+        binds.add(Bind.parse("${Path("launcher/.secret/certs/ca.cert.pem").toAbsolutePath()}:/app/vulpescloud/certs/ca.crt"))
 
         val hostConfig = HostConfig.newHostConfig()
             .withBinds(binds)
@@ -177,7 +178,6 @@ class DockerServiceFactory : AbstractServiceFactory() {
                 Volume(dockerService.path().toString()),
                 Volume("launcher/dependencies/maven"),
                 Volume("launcher/dependencies/vulpescloud"),
-                Volume("vulpescloud/certs"),
                 Volume("/app/vulpescloud/certs"),
             )
             .withHostConfig(hostConfig)

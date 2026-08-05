@@ -7,7 +7,9 @@ import de.vulpescloud.api.cluster.NodeEndpointDetails
 import de.vulpescloud.api.cluster.NodeState
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeShutdown
+import de.vulpescloud.node.cluster.tls.TlsManager
 import de.vulpescloud.node.event.EventsService
+import io.netty.handler.ssl.SslContext
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.delay
 import org.slf4j.LoggerFactory
@@ -22,7 +24,7 @@ class ClusterProvider {
 
     val currentAttributes: MutableMap<String, String> = mutableMapOf()
 
-    suspend fun connectToOtherNodes() {
+    suspend fun connectToOtherNodes(sslContext: SslContext? = null) {
         val nodes = getClusterConfig().nodes
 
         nodes.forEach { node ->
@@ -33,7 +35,7 @@ class ClusterProvider {
                 return@forEach
 
             val remoteNode = RemoteNode(node)
-            remoteNode.reconnect()
+            remoteNode.reconnect(sslContext)
             remoteNodes.add(remoteNode)
         }
     }
@@ -60,8 +62,6 @@ class ClusterProvider {
             },
             true,
         )
-
-        // TODO: mTLS
     }
 
     suspend fun shutdown() {
