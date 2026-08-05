@@ -1,8 +1,9 @@
 package de.vulpescloud.node.cluster
 
-import build.buf.gen.vulpescloud.node.v1.ClusterAPIServiceGrpcKt
-import build.buf.gen.vulpescloud.node.v1.getNodeSnapshotRequest
+import build.buf.gen.vulpescloud.cluster.v2.ClusterAPIServiceGrpcKt
+import build.buf.gen.vulpescloud.cluster.v2.getNodeSnapshotRequest
 import de.vulpescloud.api.cluster.NodeEndpointDetails
+import de.vulpescloud.api.cluster.NodeSnapshot
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import io.grpc.ManagedChannel
@@ -41,5 +42,13 @@ class RemoteNode(val endpoint: NodeEndpointDetails) {
 
         val state = channel!!.getState(true)
         logger.info("Connection state from ${endpoint.name}: $state")
+    }
+
+    suspend fun getSnapshot(): NodeSnapshot {
+        return NodeSnapshot.fromDefinition(
+            Node.instance.localGrpcClient.clusterAPI
+                .getNodeSnapshot(getNodeSnapshotRequest { this.name = endpoint.name })
+                .snapshot
+        )
     }
 }

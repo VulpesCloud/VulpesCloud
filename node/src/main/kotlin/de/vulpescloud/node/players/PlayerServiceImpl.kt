@@ -10,6 +10,7 @@ import build.buf.gen.vulpescloud.players.v1.PlayersServiceGrpcKt
 import build.buf.gen.vulpescloud.players.v1.getAllOnlinePlayerOfNodeRequest
 import build.buf.gen.vulpescloud.players.v1.getOfflinePlayersResponse
 import com.github.benmanes.caffeine.cache.Caffeine
+import de.vulpescloud.api.cluster.NodeState
 import de.vulpescloud.api.players.OfflinePlayer
 import de.vulpescloud.api.players.OnlinePlayer
 import de.vulpescloud.node.Node
@@ -44,8 +45,7 @@ class PlayerServiceImpl : PlayersServiceGrpcKt.PlayersServiceCoroutineImplBase()
                 .playersList
         )
         Node.instance.clusterProvider.remoteNodes
-            // TODO: implement this
-//            .filter { it.getNode().isRunning() }
+            .filter { it.getSnapshot().state == NodeState.ONLINE }
             .forEach {
                 val stub =
                     stubCache.get(it.endpoint.name) { _ ->
@@ -83,13 +83,12 @@ class PlayerServiceImpl : PlayersServiceGrpcKt.PlayersServiceCoroutineImplBase()
         Node.instance.clusterProvider.remoteNodes
             .find { it.endpoint.name == nodeName }
             ?.let {
-                // TODO: implement
-//                if (!it.getNode().isRunning()) {
-//                    logger.error(
-//                        "Received request to get all online players of node $nodeName but node is not online!"
-//                    )
-//                    return GetAllOnlinePlayerOfNodeResponse.newBuilder().build()
-//                }
+                if (it.getSnapshot().state != NodeState.ONLINE) {
+                    logger.error(
+                        "Received request to get all online players of node $nodeName but node is not online!"
+                    )
+                    return GetAllOnlinePlayerOfNodeResponse.newBuilder().build()
+                }
                 val stub =
                     stubCache.get(it.endpoint.name) { _ ->
                         PlayersServiceGrpcKt.PlayersServiceCoroutineStub(it.channel!!)
