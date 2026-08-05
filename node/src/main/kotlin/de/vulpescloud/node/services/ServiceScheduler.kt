@@ -36,7 +36,7 @@ object ServiceScheduler {
                     tasks.forEach { task ->
                         logger.debug("Checking task ${task.name}")
                         val currentServiceCount = services.count { it.task.name == task.name }
-                        if (task.maintenance) return@forEach
+                        if (!task.autoStart) return@forEach
                         if (task.preferredNode != Node.instance.configProvider.config.nodeName)
                             return@forEach
                         if (task.minOnlineServices <= currentServiceCount) return@forEach
