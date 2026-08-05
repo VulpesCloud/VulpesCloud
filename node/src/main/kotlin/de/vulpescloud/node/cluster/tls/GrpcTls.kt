@@ -33,7 +33,7 @@ object GrpcTls {
 
         return SslContextBuilder.forServer(nodeKey, nodeCert)
             .trustManager(caCert)
-            .clientAuth(ClientAuth.REQUIRE)
+            .clientAuth(ClientAuth.OPTIONAL)
             .let { GrpcSslContexts.configure(it).build() }
     }
 
