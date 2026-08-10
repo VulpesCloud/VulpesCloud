@@ -23,7 +23,7 @@ javaJWT = "4.6.0"
 
 # ok
 okhttp = "5.4.0"
-okio = "3.17.0"
+okio = "3.18.1"
 
 # docker
 docker-java = "3.7.1"
