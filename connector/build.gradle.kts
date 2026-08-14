@@ -26,6 +26,7 @@ plugins {
     id("java")
     kotlin("jvm") version "2.4.10"
     alias(libs.plugins.shadow)
+    kotlin("kapt")
 
 }
 
@@ -51,6 +52,7 @@ dependencies {
     implementation(libs.commandapi.velocity.shade)
     implementation(libs.commandapi.kotlin.velocity)
     implementation(libs.kotlinx.serialization)
+    testImplementation(kotlin("test"))
 }
 
 java {
