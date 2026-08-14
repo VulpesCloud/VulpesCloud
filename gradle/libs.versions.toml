@@ -52,7 +52,7 @@ cloud = "2.1.0"
 
 # platforms
 paper = "1.17-R0.1-SNAPSHOT"
-velocity = "3.5.1"
+velocity = "4.0.0"
 
 # config
 night-config = "3.9.0"
