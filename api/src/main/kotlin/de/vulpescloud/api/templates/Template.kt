@@ -3,6 +3,7 @@ package de.vulpescloud.api.templates
 import build.buf.gen.vulpescloud.templates.v1.TemplateDefinition
 import build.buf.gen.vulpescloud.templates.v1.TemplateStorage
 import kotlinx.serialization.Serializable
+import org.bson.BsonBoolean
 import org.bson.BsonDocument
 import org.bson.BsonInt32
 import org.bson.BsonString
@@ -10,19 +11,34 @@ import org.bson.BsonString
 @Serializable
 data class Template(
     val name: String,
-    val storage: de.vulpescloud.api.templates.TemplateStorages,
+    val storage: TemplateStorages,
     val weight: Int,
+    val id: String = "",
+    val location: TemplateLocation = TemplateLocation(storage = storage),
+    val version: String = "",
+    val enabled: Boolean = true,
 ) {
 
     fun toDocument(): BsonDocument =
         BsonDocument().apply {
+            append("id", BsonString(id))
             append("name", BsonString(name))
             append("storage", BsonInt32(storage.ordinal))
             append("weight", BsonInt32(weight))
+            append("location", location.toDocument())
+            append("version", BsonString(version))
+            append("enabled", BsonBoolean(enabled))
         }
 
     fun toDefinition(): TemplateDefinition {
-        val builder = TemplateDefinition.newBuilder().setName(name).setWeight(weight)
+        val builder =
+            TemplateDefinition.newBuilder()
+                .setId(id)
+                .setName(name)
+                .setWeight(weight)
+                .setLocation(location.toDefinition())
+                .setVersion(version)
+                .setEnabled(enabled)
 
         when (storage) {
             TemplateStorages.LOCAL ->
@@ -36,25 +52,43 @@ data class Template(
 
     companion object {
         fun fromDefinition(templateDefinition: TemplateDefinition): Template {
-            return Template(
-                templateDefinition.name,
+            val storage =
                 when (templateDefinition.storage) {
                     TemplateStorage.TEMPLATE_STORAGE_LOCAL ->
-                        de.vulpescloud.api.templates.TemplateStorages.LOCAL
+                        TemplateStorages.LOCAL
                     TemplateStorage.TEMPLATE_STORAGE_S3 ->
-                        de.vulpescloud.api.templates.TemplateStorages.S3
-                    else -> de.vulpescloud.api.templates.TemplateStorages.LOCAL
-                },
+                        TemplateStorages.S3
+                    else -> TemplateStorages.LOCAL
+                }
+
+            return Template(
+                templateDefinition.name,
+                storage,
                 templateDefinition.weight,
+                templateDefinition.id,
+                if (templateDefinition.hasLocation())
+                    TemplateLocation.fromDefinition(templateDefinition.location)
+                else TemplateLocation(storage = storage),
+                templateDefinition.version,
+                templateDefinition.enabled,
             )
         }
 
-        fun fromDocument(document: BsonDocument): Template =
-            Template(
+        fun fromDocument(document: BsonDocument): Template {
+            val storage =
+                TemplateStorages.entries[
+                        document.getInt32("storage").value]
+
+            return Template(
                 document.getString("name").value,
-                de.vulpescloud.api.templates.TemplateStorages.entries[
-                        document.getInt32("storage").value],
+                storage,
                 document.getInt32("weight").value,
+                document.getString("id", BsonString("")).value,
+                document.getDocument("location", null)?.let { TemplateLocation.fromDocument(it) }
+                    ?: TemplateLocation(storage = storage),
+                document.getString("version", BsonString("")).value,
+                document.getBoolean("enabled", BsonBoolean(true)).value,
             )
+        }
     }
 }
