@@ -18,6 +18,8 @@ import build.buf.gen.vulpescloud.templates.v1.GetTemplateRequest
 import build.buf.gen.vulpescloud.templates.v1.GetTemplateResponse
 import build.buf.gen.vulpescloud.templates.v1.ListDirectoryRequest
 import build.buf.gen.vulpescloud.templates.v1.ListDirectoryResponse
+import build.buf.gen.vulpescloud.templates.v1.ListRegisteredStoragesRequest
+import build.buf.gen.vulpescloud.templates.v1.ListRegisteredStoragesResponse
 import build.buf.gen.vulpescloud.templates.v1.ListTemplatesRequest
 import build.buf.gen.vulpescloud.templates.v1.ListTemplatesResponse
 import build.buf.gen.vulpescloud.templates.v1.MoveTemplateRequest
@@ -33,6 +35,7 @@ import build.buf.gen.vulpescloud.templates.v1.TemplateServiceGrpcKt
 import build.buf.gen.vulpescloud.templates.v1.TemplateStorage as TemplateStorageDefinition
 import build.buf.gen.vulpescloud.templates.v1.UpdateFileRequest
 import build.buf.gen.vulpescloud.templates.v1.UpdateFileResponse
+import build.buf.gen.vulpescloud.templates.v1.typeOrNull
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.google.protobuf.ByteString
 import de.vulpescloud.api.cluster.NodeState
@@ -49,21 +52,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 
-/**
- * Implements the dashboard-facing template CRUD/browsing API.
- *
- * Template *metadata* (id/name/storage/location/version/enabled) lives in the cluster-wide
- * [TemplateRegistry]. The actual file contents live wherever [Template.location] points at:
- * - [de.vulpescloud.api.templates.TemplateStorages.LOCAL]: on disk on the node identified by
- *   `location.nodeId`. If this node isn't that node, the request is forwarded transparently.
- * - any other storage (e.g. S3, provided by an external module): reachable from every node the
- *   same way, so no forwarding is required - see [TemplateStorageProvider].
- *
- * [moveTemplate]/[copyTemplate] are implemented generically on top of the other RPCs
- * (list/read/create/update), which means they transparently support moving/copying a template
- * across nodes and/or across storage backends without either side needing to know about the
- * other's implementation.
- */
 class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBase() {
 
     private val logger = LoggerFactory.getLogger(TemplateServiceImpl::class.java)
@@ -78,7 +66,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         val destination = request.destination
 
         if (needsForwarding(destination)) {
-            val stub = remoteStub(destination.nodeId) ?: throw unavailable(destination.nodeId)
+            val stub = remoteStub(destination.nodeName) ?: throw unavailable(destination.nodeName)
             return stub.createTemplate(request)
         }
 
@@ -87,7 +75,6 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
             Template.fromDefinition(request.template)
                 .copy(
                     id = request.template.id.ifBlank { UUID.randomUUID().toString() },
-                    storage = locationApi.storage,
                     location = locationApi,
                 )
 
@@ -108,9 +95,11 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         val location = template.location.toDefinition()
         if (needsForwarding(location)) {
             val stub =
-                remoteStub(location.nodeId)
+                remoteStub(location.nodeName)
                     ?: return DeleteTemplateResponse.newBuilder()
-                        .setResult(operationResult(false, "Node '${location.nodeId}' is not reachable"))
+                        .setResult(
+                            operationResult(false, "Node '${location.nodeName}' is not reachable")
+                        )
                         .build()
             return stub.deleteTemplate(request)
         }
@@ -205,7 +194,6 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
                 ?: sourceTemplate.copy(
                     id = UUID.randomUUID().toString(),
                     name = destinationRef.name.ifBlank { sourceTemplate.name },
-                    storage = destinationLocation.storage,
                     location = destinationLocation,
                 )
 
@@ -228,7 +216,11 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         }
     }
 
-    private suspend fun copyDirectoryRecursively(source: Template, destination: Template, path: String) {
+    private suspend fun copyDirectoryRecursively(
+        source: Template,
+        destination: Template,
+        path: String,
+    ) {
         val sourceRef = templateReferenceOf(source)
         val destinationRef = templateReferenceOf(destination)
 
@@ -278,15 +270,19 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         val location = template.location.toDefinition()
         if (needsForwarding(location)) {
             val stub =
-                remoteStub(location.nodeId)
+                remoteStub(location.nodeName)
                     ?: return CreateDirectoryResponse.newBuilder()
-                        .setResult(operationResult(false, "Node '${location.nodeId}' is not reachable"))
+                        .setResult(
+                            operationResult(false, "Node '${location.nodeName}' is not reachable")
+                        )
                         .build()
             return stub.createDirectory(request)
         }
 
         return try {
-            withContext(Dispatchers.IO) { storageFor(template).createDirectory(template, request.path) }
+            withContext(Dispatchers.IO) {
+                storageFor(template).createDirectory(template, request.path)
+            }
             CreateDirectoryResponse.newBuilder()
                 .setResult(operationResult(true, "Directory created"))
                 .build()
@@ -308,9 +304,11 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         val location = template.location.toDefinition()
         if (needsForwarding(location)) {
             val stub =
-                remoteStub(location.nodeId)
+                remoteStub(location.nodeName)
                     ?: return DeleteDirectoryResponse.newBuilder()
-                        .setResult(operationResult(false, "Node '${location.nodeId}' is not reachable"))
+                        .setResult(
+                            operationResult(false, "Node '${location.nodeName}' is not reachable")
+                        )
                         .build()
             return stub.deleteDirectory(request)
         }
@@ -337,7 +335,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
 
         val location = template.location.toDefinition()
         if (needsForwarding(location)) {
-            val stub = remoteStub(location.nodeId) ?: throw unavailable(location.nodeId)
+            val stub = remoteStub(location.nodeName) ?: throw unavailable(location.nodeName)
             return stub.listDirectory(request)
         }
 
@@ -346,7 +344,9 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
                 withContext(Dispatchers.IO) {
                     storageFor(template).listDirectory(template, request.path)
                 }
-            ListDirectoryResponse.newBuilder().addAllEntries(entries.map { toProtoEntry(it) }).build()
+            ListDirectoryResponse.newBuilder()
+                .addAllEntries(entries.map { toProtoEntry(it) })
+                .build()
         } catch (e: IllegalArgumentException) {
             throw StatusException(Status.INVALID_ARGUMENT.withDescription(e.message))
         } catch (e: Exception) {
@@ -365,16 +365,19 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         val location = template.location.toDefinition()
         if (needsForwarding(location)) {
             val stub =
-                remoteStub(location.nodeId)
+                remoteStub(location.nodeName)
                     ?: return CreateFileResponse.newBuilder()
-                        .setResult(operationResult(false, "Node '${location.nodeId}' is not reachable"))
+                        .setResult(
+                            operationResult(false, "Node '${location.nodeName}' is not reachable")
+                        )
                         .build()
             return stub.createFile(request)
         }
 
         return try {
             withContext(Dispatchers.IO) {
-                storageFor(template).createFile(template, request.path, request.content.toByteArray())
+                storageFor(template)
+                    .createFile(template, request.path, request.content.toByteArray())
             }
             CreateFileResponse.newBuilder().setResult(operationResult(true, "File created")).build()
         } catch (e: Exception) {
@@ -395,16 +398,19 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         val location = template.location.toDefinition()
         if (needsForwarding(location)) {
             val stub =
-                remoteStub(location.nodeId)
+                remoteStub(location.nodeName)
                     ?: return UpdateFileResponse.newBuilder()
-                        .setResult(operationResult(false, "Node '${location.nodeId}' is not reachable"))
+                        .setResult(
+                            operationResult(false, "Node '${location.nodeName}' is not reachable")
+                        )
                         .build()
             return stub.updateFile(request)
         }
 
         return try {
             withContext(Dispatchers.IO) {
-                storageFor(template).updateFile(template, request.path, request.content.toByteArray())
+                storageFor(template)
+                    .updateFile(template, request.path, request.content.toByteArray())
             }
             UpdateFileResponse.newBuilder().setResult(operationResult(true, "File updated")).build()
         } catch (e: Exception) {
@@ -425,9 +431,11 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         val location = template.location.toDefinition()
         if (needsForwarding(location)) {
             val stub =
-                remoteStub(location.nodeId)
+                remoteStub(location.nodeName)
                     ?: return DeleteFileResponse.newBuilder()
-                        .setResult(operationResult(false, "Node '${location.nodeId}' is not reachable"))
+                        .setResult(
+                            operationResult(false, "Node '${location.nodeName}' is not reachable")
+                        )
                         .build()
             return stub.deleteFile(request)
         }
@@ -450,13 +458,15 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
 
         val location = template.location.toDefinition()
         if (needsForwarding(location)) {
-            val stub = remoteStub(location.nodeId) ?: throw unavailable(location.nodeId)
+            val stub = remoteStub(location.nodeName) ?: throw unavailable(location.nodeName)
             return stub.readFile(request)
         }
 
         return try {
             val file =
-                withContext(Dispatchers.IO) { storageFor(template).readFile(template, request.path) }
+                withContext(Dispatchers.IO) {
+                    storageFor(template).readFile(template, request.path)
+                }
             ReadFileResponse.newBuilder().setFile(toProtoFile(file)).build()
         } catch (e: IllegalArgumentException) {
             throw StatusException(Status.NOT_FOUND.withDescription(e.message))
@@ -465,18 +475,39 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         }
     }
 
+    @RequiresPermission("templates.listRegisteredStorages")
+    override suspend fun listRegisteredStorages(
+        request: ListRegisteredStoragesRequest
+    ): ListRegisteredStoragesResponse {
+        val type = request.typeOrNull
+        val storages: MutableList<TemplateStorageDefinition> =
+            TemplateStorageRegistry.getAllTemplateStorages(type).map { storage ->
+                TemplateStorageDefinition.newBuilder()
+                    .setType(type)
+                    .setName(storage.name())
+                    .apply { if (storage.nodeName() != null) setNodeName(storage.nodeName()) }
+                    .build()
+            }.toMutableList()
+
+        Node.instance.clusterProvider.remoteNodes.forEach { node ->
+            val stub = remoteStub(node.endpoint.name) ?: return@forEach
+            storages.addAll(stub.listRegisteredStorages(request).storageList.filter { storage -> storage.nodeName == node.endpoint.name })
+        }
+        return ListRegisteredStoragesResponse.newBuilder().addAllStorage(storages).build()
+    }
 
     private fun storageFor(template: Template): TemplateStorage =
-        Node.instance.templateStorageProvider.getTemplateStorage(template.storage)
+        TemplateStorageRegistry.getTemplateStorageByName(template.location.storageName)
+            ?: throw IllegalArgumentException("Template not found")
 
     private fun needsForwarding(location: TemplateLocationDefinition): Boolean =
-        location.storage == TemplateStorageDefinition.TEMPLATE_STORAGE_LOCAL &&
-            location.nodeId.isNotBlank() &&
-            location.nodeId != Node.instance.configProvider.config.nodeName
+        location.nodeName.isNotBlank() &&
+            location.nodeName != Node.instance.configProvider.config.nodeName
 
     private suspend fun remoteStub(
         nodeId: String
     ): TemplateServiceGrpcKt.TemplateServiceCoroutineStub? {
+        if (nodeId == Node.instance.configProvider.config.nodeName) return null
         val remoteNode =
             Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == nodeId }
                 ?: return null
@@ -517,5 +548,4 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
             .setSize(data.size)
             .setModifiedAt(data.modifiedAt)
             .build()
-
 }

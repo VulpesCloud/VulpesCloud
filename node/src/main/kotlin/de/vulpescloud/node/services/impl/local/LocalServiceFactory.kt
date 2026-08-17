@@ -11,6 +11,7 @@ import de.vulpescloud.node.Node
 import de.vulpescloud.node.event.EventsService
 import de.vulpescloud.node.serversoftware.impl.*
 import de.vulpescloud.node.services.AbstractServiceFactory
+import de.vulpescloud.node.templates.TemplateStorageRegistry
 import de.vulpescloud.node.utils.MongoUtils
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -42,7 +43,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
         service.task.templates
             .sortedBy { it.weight }
             .forEach { template ->
-                Node.instance.templateStorageProvider.getTemplateStorage(template.storage).apply {
+                TemplateStorageRegistry.getTemplateStorageByName(template.location.storageName)?.apply {
                     createTemplate(template)
                     copyTemplateToPath(template, localService.path())
                 }

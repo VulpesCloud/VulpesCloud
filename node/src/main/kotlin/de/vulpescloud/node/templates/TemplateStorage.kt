@@ -1,5 +1,6 @@
 package de.vulpescloud.node.templates
 
+import build.buf.gen.vulpescloud.templates.v1.TemplateStorageType
 import de.vulpescloud.api.templates.Template
 
 /** A single file inside a template, as returned by [TemplateStorage.readFile]. */
@@ -44,22 +45,11 @@ data class TemplateDirectoryEntryData(
     val modifiedAt: Long,
 )
 
-/**
- * A backend able to persist templates and their file contents.
- *
- * Implementations are looked up via [TemplateStorageProvider] by their
- * [de.vulpescloud.api.templates.TemplateStorages] value.
- * [de.vulpescloud.api.templates.TemplateStorages.LOCAL] is provided out of the box
- * ([LocalTemplateStorage]); other storages (e.g. S3) are expected to be registered at runtime by
- * an external module via [TemplateStorageProvider.registerStorage].
- *
- * Whether/how a non-local storage caches data on disk (e.g. to avoid re-downloading a template
- * from S3 for every service start) is entirely up to the implementation - callers only ever see
- * the operations below.
- */
 interface TemplateStorage {
 
     fun name(): String
+    fun type(): TemplateStorageType
+    fun nodeName(): String? = null
 
     // Whole template (directory tree) operations
 

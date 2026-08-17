@@ -12,7 +12,7 @@ import kotlinx.serialization.json.encodeToJsonElement
  * Cluster-wide metadata store for [Template]s (id/name/storage/location/version/enabled).
  *
  * This only stores metadata - it does not touch actual file contents, which live on whichever
- * [TemplateStorage] the template's [Template.location] points at (see [TemplateStorageProvider]).
+ * [TemplateStorage] the template's [Template.location] points at (see [TemplateRegistry]).
  * Since this uses the main (shared) database, every node sees the same set of templates
  * regardless of where the template's files actually live.
  */
@@ -61,14 +61,8 @@ object TemplateRegistry {
     }
 
     fun matchesLocation(actual: TemplateLocation, filter: TemplateLocation): Boolean {
-        if (filter.storage != build.buf.gen.vulpescloud.templates.v1.TemplateStorage.TEMPLATE_STORAGE_UNSPECIFIED &&
-            actual.storage != filter.storage
-        ) {
-            return false
-        }
-        if (filter.nodeId.isNotBlank() && actual.nodeId != filter.nodeId) return false
+        if (filter.nodeName.isNotBlank() && actual.nodeName != filter.nodeName) return false
         if (filter.storageName.isNotBlank() && actual.storageName != filter.storageName) return false
-        if (filter.path.isNotBlank() && actual.path != filter.path) return false
         return true
     }
 }

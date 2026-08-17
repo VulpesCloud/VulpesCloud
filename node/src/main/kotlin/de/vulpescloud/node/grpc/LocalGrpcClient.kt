@@ -7,11 +7,11 @@ import build.buf.gen.vulpescloud.players.v1.PlayerActionsServiceGrpcKt
 import build.buf.gen.vulpescloud.players.v1.PlayersServiceGrpcKt
 import build.buf.gen.vulpescloud.services.v1.ServiceAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpcKt
+import build.buf.gen.vulpescloud.templates.v1.TemplateServiceGrpcKt
 import build.buf.gen.vulpescloud.virtualconfig.v1.VirtualConfigServiceGrpcKt
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
 import io.grpc.Channel
 import io.grpc.ClientInterceptors
-import io.grpc.ManagedChannelBuilder
 import io.grpc.netty.NettyChannelBuilder
 import io.netty.handler.ssl.SslContext
 
@@ -26,6 +26,7 @@ class LocalGrpcClient {
     lateinit var playerAPI: PlayersServiceGrpcKt.PlayersServiceCoroutineStub
     lateinit var authAPI: AuthServiceGrpcKt.AuthServiceCoroutineStub
     lateinit var playerActionsAPI: PlayerActionsServiceGrpcKt.PlayerActionsServiceCoroutineStub
+    lateinit var templateAPI: TemplateServiceGrpcKt.TemplateServiceCoroutineStub
 
     fun connect(
         host: String = "127.0.0.1",
@@ -70,5 +71,7 @@ class LocalGrpcClient {
         playerActionsAPI =
             PlayerActionsServiceGrpcKt.PlayerActionsServiceCoroutineStub(channel)
                 .withInterceptors(AuthClientInterceptor(secret))
+        templateAPI = TemplateServiceGrpcKt.TemplateServiceCoroutineStub(channel)
+        .withInterceptors(AuthClientInterceptor(secret))
     }
 }

@@ -21,14 +21,14 @@ class DockerServiceFactory : AbstractServiceFactory() {
 
         dockerService.path().resolve(dockerService.service.task.software.pluginDir).toFile().mkdirs()
 
-        service.task.templates
-            .sortedBy { it.weight }
-            .forEach { template ->
-                Node.instance.templateStorageProvider.getTemplateStorage(template.storage).apply {
-                    createTemplate(template)
-                    copyTemplateToPath(template, dockerService.path())
-                }
-            }
+//        service.task.templates
+//            .sortedBy { it.weight }
+//            .forEach { template ->
+//                Node.instance.templateStorageProvider.getTemplateStorage(template.storage).apply {
+//                    createTemplate(template)
+//                    copyTemplateToPath(template, dockerService.path())
+//                }
+//            }
 
         when (service.task.software.name) {
             "Canvas" -> {

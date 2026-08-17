@@ -6,7 +6,7 @@ import de.vulpescloud.api.serversoftware.ServerSoftware
 import de.vulpescloud.api.serversoftware.SoftwareType
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.api.templates.Template
-import de.vulpescloud.api.templates.TemplateStorages
+import de.vulpescloud.api.templates.TemplateLocation
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.serversoftware.ServerSoftwareDownloader
@@ -192,7 +192,18 @@ class TaskSetup() : Setup {
             task =
                 task.copy(
                     preferredNode = Node.instance.configProvider.config.nodeName,
-                    templates = listOf(Template(task.name, TemplateStorages.LOCAL, 0)),
+                    templates =
+                        listOf(
+                            Template(
+                                task.name,
+                                0,
+                                task.name,
+                                TemplateLocation(
+                                    "LOCAL",
+                                    Node.instance.configProvider.config.nodeName,
+                                ),
+                            )
+                        ),
                 )
 
             Node.instance.localGrpcClient.tasksAPI.createTask(

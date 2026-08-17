@@ -45,13 +45,13 @@ import de.vulpescloud.node.services.impl.local.LocalServiceFactory
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.setups.FirstSetup
 import de.vulpescloud.node.tasks.TasksAPIService
-import de.vulpescloud.node.templates.TemplateStorageProvider
+import de.vulpescloud.node.templates.LocalTemplateStorage
 import de.vulpescloud.node.templates.TemplateServiceImpl
+import de.vulpescloud.node.templates.TemplateStorageRegistry
 import de.vulpescloud.node.terminal.Terminal
 import de.vulpescloud.node.virtualconfig.VirtualConfigProvider
 import de.vulpescloud.node.virtualconfig.VirtualConfigServiceImpl
 import io.grpc.BindableService
-import io.grpc.ChannelCredentials
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.Path
@@ -69,7 +69,6 @@ class Node {
     lateinit var grpcServer: GrpcServer
     lateinit var secret: String
     lateinit var setupProvider: SetupProvider
-    lateinit var credentials: ChannelCredentials
     var inputJob: Job? = null
         private set
 
@@ -78,7 +77,6 @@ class Node {
 
     lateinit var internalEventsService: EventsService
 
-    val templateStorageProvider = TemplateStorageProvider()
     val localGrpcClient = LocalGrpcClient()
     val serviceFactoryProvider = ServiceFactoryProvider()
     val nodeServices: MutableSet<AbstractService> = ConcurrentHashMap.newKeySet()
@@ -150,6 +148,7 @@ class Node {
                     register(SoftwareCommand())
                     register(PlayersCommand())
                     register(TlsCommand())
+                    register(TemplateCommand())
                 }
             } catch (e: Exception) {
                 logger.error("Failed to initialize commands: ${e.stackTraceToString()}")
@@ -226,6 +225,8 @@ class Node {
             clusterProvider.initClusterConfig()
             clusterProvider.init()
             clusterProvider.connectToOtherNodes(clientSslContext)
+
+            TemplateStorageRegistry.registerTemplateStorage(LocalTemplateStorage())
 
             serviceFactoryProvider.apply {
                 registerServiceFactory(DockerServiceFactory())

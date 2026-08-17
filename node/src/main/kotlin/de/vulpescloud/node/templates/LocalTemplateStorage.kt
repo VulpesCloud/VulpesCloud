@@ -1,7 +1,8 @@
 package de.vulpescloud.node.templates
 
+import build.buf.gen.vulpescloud.templates.v1.TemplateStorageType
 import de.vulpescloud.api.templates.Template
-import de.vulpescloud.api.templates.TemplateStorages
+import de.vulpescloud.node.Node
 import de.vulpescloud.node.utils.FileUtils
 import java.nio.file.Files
 import java.nio.file.Path
@@ -9,6 +10,8 @@ import kotlin.io.path.Path
 
 class LocalTemplateStorage : TemplateStorage {
     override fun name(): String = "LOCAL"
+    override fun type(): TemplateStorageType = TemplateStorageType.newBuilder().setName("LOCAL").build()
+    override fun nodeName(): String = Node.instance.configProvider.config.nodeName
 
     private val templatesPath = Path("local/templates")
 
@@ -43,11 +46,12 @@ class LocalTemplateStorage : TemplateStorage {
     }
 
     override fun templates(): List<Template> {
-        return templatesPath
-            .toFile()
-            .listFiles()
-            ?.filter { it.isDirectory }
-            ?.map { Template(it.name, TemplateStorages.LOCAL, 0) } ?: emptyList()
+        TODO("Unimplemented Method!")
+//        return templatesPath
+//            .toFile()
+//            .listFiles()
+//            ?.filter { it.isDirectory }
+//            ?.map { Template(it.name, -1) } ?: emptyList()
     }
 
     override fun createDirectory(template: Template, path: String) {
