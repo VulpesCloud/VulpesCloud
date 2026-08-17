@@ -65,11 +65,6 @@ allprojects {
         }
     }
 
-    dependencies {
-        compileOnly(rootProject.libs.annotations)
-        compileOnly(rootProject.libs.gson)
-    }
-
     publishing {
         repositories {
             maven {
