@@ -484,31 +484,44 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
     ): ListRegisteredStoragesResponse {
         val type = request.typeOrNull
         val storages: MutableList<TemplateStorageDefinition> =
-            TemplateStorageRegistry.getAllTemplateStorages(type).map { storage ->
-                TemplateStorageDefinition.newBuilder()
-                    .setType(storage.type())
-                    .setName(storage.name())
-                    .apply { if (storage.nodeName() != null) setNodeName(storage.nodeName()) }
-                    .build()
-            }.toMutableList()
+            TemplateStorageRegistry.getAllTemplateStorages(type)
+                .map { storage ->
+                    TemplateStorageDefinition.newBuilder()
+                        .setType(storage.type())
+                        .setName(storage.name())
+                        .apply { if (storage.nodeName() != null) setNodeName(storage.nodeName()) }
+                        .build()
+                }
+                .toMutableList()
 
         Node.instance.clusterProvider.remoteNodes.forEach { node ->
             val stub = remoteStub(node.endpoint.name) ?: return@forEach
-            storages.addAll(stub.listLocalRegisteredStorages(listLocalRegisteredStoragesRequest { this.type = request.type }).storageList.filter { storage -> storage.nodeName == node.endpoint.name })
+            storages.addAll(
+                stub
+                    .listLocalRegisteredStorages(
+                        listLocalRegisteredStoragesRequest { this.type = request.type }
+                    )
+                    .storageList
+                    .filter { storage -> logger.info("DBG: ${node.endpoint.name} -> ${storage.nodeName} # ${storage.name}"); storage.nodeName == node.endpoint.name }
+            )
         }
         return ListRegisteredStoragesResponse.newBuilder().addAllStorage(storages).build()
     }
 
-    override suspend fun listLocalRegisteredStorages(request: ListLocalRegisteredStoragesRequest): ListLocalRegisteredStoragesResponse {
+    override suspend fun listLocalRegisteredStorages(
+        request: ListLocalRegisteredStoragesRequest
+    ): ListLocalRegisteredStoragesResponse {
         val type = request.typeOrNull
         val storages: MutableList<TemplateStorageDefinition> =
-            TemplateStorageRegistry.getAllTemplateStorages(type).map { storage ->
-                TemplateStorageDefinition.newBuilder()
-                    .setType(storage.type())
-                    .setName(storage.name())
-                    .apply { if (storage.nodeName() != null) setNodeName(storage.nodeName()) }
-                    .build()
-            }.toMutableList()
+            TemplateStorageRegistry.getAllTemplateStorages(type)
+                .map { storage ->
+                    TemplateStorageDefinition.newBuilder()
+                        .setType(storage.type())
+                        .setName(storage.name())
+                        .apply { if (storage.nodeName() != null) setNodeName(storage.nodeName()) }
+                        .build()
+                }
+                .toMutableList()
         return ListLocalRegisteredStoragesResponse.newBuilder().addAllStorage(storages).build()
     }
 
