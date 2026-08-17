@@ -15,7 +15,7 @@ class TemplateCommand {
             val templates = TemplateRegistry.getAll()
             source.sendMessage("The following ${templates.size} template(s) are registered:")
             templates.forEach { template ->
-                val additional = if (template.location.nodeName != null) "-${template.location.nodeName}" else ""
+                val additional = if (!template.location.nodeName.isNullOrBlank()) "-${template.location.nodeName}" else ""
                 source.sendMessage(" - ${template.name}@${template.location.storageName}$additional | ${template.weight} | ${template.enabled}")
             }
         }
@@ -29,7 +29,7 @@ class TemplateCommand {
             source.sendMessage("The following ${storages.size} storages(s) are registered:")
             storages.forEach { storage ->
                 val node = if (storage.nodeName != null) "@${storage.nodeName}" else ""
-                source.sendMessage(" - ${storage.type} | ${storage.name}$node")
+                source.sendMessage(" - ${storage.type.name} | ${storage.name}$node")
             }
         }
     }
