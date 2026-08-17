@@ -9,14 +9,13 @@ kotlinx-coroutines = "1.11.0"
 guava = "33.7.0-jre"
 
 # utils
-annotations = "26.1.0"
 bcrypt = "0.10.2"
 
 # network
 protobuf = "4.35.1"
 grpc = "1.83.1"
 grpc-kotlin = "1.5.0"
-protospecs-grpc = "1.5.0.4.20260817193918.7ccd23a98801"
+protospecs-grpc = "1.5.0.4.20260817212501.763595d211b4"
 perfmark = "0.27.0"
 
 javaJWT = "4.6.0"
@@ -43,7 +42,6 @@ logback = "1.6.3"
 adventure = "5.2.0"
 
 # configuration
-gson = "2.14.0"
 json = "20250517"
 
 # console
@@ -120,7 +118,6 @@ docker-java = { group = "com.github.docker-java", name = "docker-java-core", ver
 docker-java-transport = { group = "com.github.docker-java", name = "docker-java-transport-httpclient5", version.ref = "docker-java" }
 
 # utils
-annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
 bcrypt = { group = "at.favre.lib", name = "bcrypt", version.ref = "bcrypt" }
 
 # logging
@@ -132,7 +129,6 @@ adventure-text-minimessage = { group = "net.kyori", name = "adventure-text-minim
 adventure_text_serializer_legacy = { group = "net.kyori", name = "adventure-text-serializer-legacy", version.ref = "adventure" }
 
 # configuration
-gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
 json = { group = "org.json", name = "json", version.ref = "json" }
 
 # command api
