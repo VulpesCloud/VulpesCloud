@@ -495,6 +495,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
                 .toMutableList()
 
         Node.instance.clusterProvider.remoteNodes.forEach { node ->
+            logger.info("DBG: Getting stub for $node")
             val stub = remoteStub(node.endpoint.name) ?: return@forEach
             storages.addAll(
                 stub
@@ -536,11 +537,17 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
     private suspend fun remoteStub(
         nodeId: String
     ): TemplateServiceGrpcKt.TemplateServiceCoroutineStub? {
-        if (nodeId == Node.instance.configProvider.config.nodeName) return null
+        if (nodeId == Node.instance.configProvider.config.nodeName) {logger.info("DBG: null due name");return null}
         val remoteNode =
             Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == nodeId }
-                ?: return null
-        if (remoteNode.getSnapshot().state != NodeState.ONLINE) return null
+                ?: run {
+                    logger.info("DBG: null due not found")
+                    return null
+                }
+        if (remoteNode.getSnapshot().state != NodeState.ONLINE) {
+            logger.info("DBG: null due not online")
+            return null
+        }
         return stubCache.get(nodeId) { _ ->
             TemplateServiceGrpcKt.TemplateServiceCoroutineStub(remoteNode.channel!!)
                 .withInterceptors(AuthClientInterceptor(Node.instance.secret))
