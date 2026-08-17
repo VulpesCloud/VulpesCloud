@@ -483,7 +483,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         val storages: MutableList<TemplateStorageDefinition> =
             TemplateStorageRegistry.getAllTemplateStorages(type).map { storage ->
                 TemplateStorageDefinition.newBuilder()
-                    .setType(type)
+                    .setType(storage.type())
                     .setName(storage.name())
                     .apply { if (storage.nodeName() != null) setNodeName(storage.nodeName()) }
                     .build()
