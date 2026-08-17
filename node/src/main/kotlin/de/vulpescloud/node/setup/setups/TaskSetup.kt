@@ -2,6 +2,9 @@ package de.vulpescloud.node.setup.setups
 
 import build.buf.gen.vulpescloud.tasks.v1.createTaskRequest
 import build.buf.gen.vulpescloud.tasks.v1.getAllTasksRequest
+import build.buf.gen.vulpescloud.templates.v1.createTemplateRequest
+import build.buf.gen.vulpescloud.templates.v1.templateDefinition
+import build.buf.gen.vulpescloud.templates.v1.templateLocation
 import de.vulpescloud.api.serversoftware.ServerSoftware
 import de.vulpescloud.api.serversoftware.SoftwareType
 import de.vulpescloud.api.tasks.Task
@@ -205,6 +208,26 @@ class TaskSetup() : Setup {
                             )
                         ),
                 )
+
+            Node.instance.localGrpcClient.templateAPI.createTemplate(
+                createTemplateRequest {
+                    template = templateDefinition {
+                        name = task.name
+                        weight = 0
+                        id = task.name
+                        location = templateLocation {
+                            storageName = "LOCAL"
+                            nodeName = Node.instance.configProvider.config.nodeName
+                        }
+                        version = ""
+                        enabled = true
+                    }
+                    destination = templateLocation {
+                        storageName = "LOCAL"
+                        nodeName = Node.instance.configProvider.config.nodeName
+                    }
+                }
+            )
 
             Node.instance.localGrpcClient.tasksAPI.createTask(
                 createTaskRequest { this.task = this@TaskSetup.task.toDefinition() }

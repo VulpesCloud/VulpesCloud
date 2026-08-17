@@ -28,7 +28,7 @@ class TemplateCommand {
                 listRegisteredStoragesRequest {  }).storageList
             source.sendMessage("The following ${storages.size} storages(s) are registered:")
             storages.forEach { storage ->
-                val node = if (storage.nodeName != null) "${storage.nodeName}" else ""
+                val node = if (storage.nodeName != null) "@${storage.nodeName}" else ""
                 source.sendMessage(" - ${storage.type} | ${storage.name}$node")
             }
         }

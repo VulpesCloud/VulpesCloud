@@ -2,6 +2,7 @@ package de.vulpescloud.node.services.impl.local
 
 import build.buf.gen.vulpescloud.events.v1.serviceStateChangedEvent
 import build.buf.gen.vulpescloud.services.v1.ServiceState
+import build.buf.gen.vulpescloud.templates.v1.createTemplateRequest
 import com.electronwill.nightconfig.core.file.FileConfig
 import com.electronwill.nightconfig.toml.TomlFormat
 import com.electronwill.nightconfig.yaml.YamlFormat
@@ -45,6 +46,10 @@ class LocalServiceFactory : AbstractServiceFactory() {
             .forEach { template ->
                 TemplateStorageRegistry.getTemplateStorageByName(template.location.storageName)?.apply {
                     createTemplate(template)
+                    Node.instance.localGrpcClient.templateAPI.createTemplate(createTemplateRequest {
+                        this.template = template.toDefinition()
+                        this.destination = template.location.toDefinition()
+                    }) // TODO: This is prob. only temporary as I am to lazy to manually re-create my templates
                     copyTemplateToPath(template, localService.path())
                 }
             }
