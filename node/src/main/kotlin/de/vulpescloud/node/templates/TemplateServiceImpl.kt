@@ -495,8 +495,9 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
                 .toMutableList()
 
         Node.instance.clusterProvider.remoteNodes.forEach { node ->
-            logger.info("DBG: Getting stub for $node")
+            logger.info("DBG: Getting stub for ${node.endpoint.name}")
             val stub = remoteStub(node.endpoint.name) ?: return@forEach
+            logger.info("DBG: Got stub for ${node.endpoint.name}")
             storages.addAll(
                 stub
                     .listLocalRegisteredStorages(
@@ -505,6 +506,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
                     .storageList
                     .filter { storage -> logger.info("DBG: ${node.endpoint.name} -> ${storage.nodeName} # ${storage.name}"); storage.nodeName == node.endpoint.name }
             )
+            logger.info("DBG: Got local storages for ${node.endpoint.name}")
         }
         return ListRegisteredStoragesResponse.newBuilder().addAllStorage(storages).build()
     }
@@ -516,6 +518,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         val storages: MutableList<TemplateStorageDefinition> =
             TemplateStorageRegistry.getAllTemplateStorages(type)
                 .map { storage ->
+                    logger.info("DBG: Mapping ${storage.name()} with type ${storage.type()} and ${storage.nodeName()}")
                     TemplateStorageDefinition.newBuilder()
                         .setType(storage.type())
                         .setName(storage.name())
