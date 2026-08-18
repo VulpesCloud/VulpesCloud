@@ -483,6 +483,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         request: ListRegisteredStoragesRequest
     ): ListRegisteredStoragesResponse {
         val type = request.typeOrNull
+        logger.info("DBG: Type: ${type?.name}")
         val storages: MutableList<TemplateStorageDefinition> =
             TemplateStorageRegistry.getAllTemplateStorages(type)
                 .map { storage ->
@@ -501,7 +502,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
             storages.addAll(
                 stub
                     .listLocalRegisteredStorages(
-                        listLocalRegisteredStoragesRequest { this.type = request.type }
+                        listLocalRegisteredStoragesRequest { if (type != null) this.type = request.type }
                     )
                     .storageList
                     .filter { storage -> logger.info("DBG: ${node.endpoint.name} -> ${storage.nodeName} # ${storage.name}"); storage.nodeName == node.endpoint.name }
@@ -515,6 +516,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         request: ListLocalRegisteredStoragesRequest
     ): ListLocalRegisteredStoragesResponse {
         val type = request.typeOrNull
+        logger.info("DBG: Type: ${type?.name}")
         val storages: MutableList<TemplateStorageDefinition> =
             TemplateStorageRegistry.getAllTemplateStorages(type)
                 .map { storage ->
