@@ -483,7 +483,6 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         request: ListRegisteredStoragesRequest
     ): ListRegisteredStoragesResponse {
         val type = request.typeOrNull
-        logger.info("DBG: Type: ${type?.name}")
         val storages: MutableList<TemplateStorageDefinition> =
             TemplateStorageRegistry.getAllTemplateStorages(type)
                 .map { storage ->
@@ -496,18 +495,15 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
                 .toMutableList()
 
         Node.instance.clusterProvider.remoteNodes.forEach { node ->
-            logger.info("DBG: Getting stub for ${node.endpoint.name}")
             val stub = remoteStub(node.endpoint.name) ?: return@forEach
-            logger.info("DBG: Got stub for ${node.endpoint.name}")
             storages.addAll(
                 stub
                     .listLocalRegisteredStorages(
                         listLocalRegisteredStoragesRequest { if (type != null) this.type = request.type }
                     )
                     .storageList
-                    .filter { storage -> logger.info("DBG: ${node.endpoint.name} -> ${storage.nodeName} # ${storage.name}"); storage.nodeName == node.endpoint.name }
+                    .filter { storage -> storage.nodeName == node.endpoint.name }
             )
-            logger.info("DBG: Got local storages for ${node.endpoint.name}")
         }
         return ListRegisteredStoragesResponse.newBuilder().addAllStorage(storages).build()
     }
@@ -516,11 +512,9 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         request: ListLocalRegisteredStoragesRequest
     ): ListLocalRegisteredStoragesResponse {
         val type = request.typeOrNull
-        logger.info("DBG: Type: ${type?.name}")
         val storages: MutableList<TemplateStorageDefinition> =
             TemplateStorageRegistry.getAllTemplateStorages(type)
                 .map { storage ->
-                    logger.info("DBG: Mapping ${storage.name()} with type ${storage.type()} and ${storage.nodeName()}")
                     TemplateStorageDefinition.newBuilder()
                         .setType(storage.type())
                         .setName(storage.name())
@@ -542,15 +536,13 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
     private suspend fun remoteStub(
         nodeId: String
     ): TemplateServiceGrpcKt.TemplateServiceCoroutineStub? {
-        if (nodeId == Node.instance.configProvider.config.nodeName) {logger.info("DBG: null due name");return null}
+        if (nodeId == Node.instance.configProvider.config.nodeName) {return null}
         val remoteNode =
             Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == nodeId }
                 ?: run {
-                    logger.info("DBG: null due not found")
                     return null
                 }
         if (remoteNode.getSnapshot().state != NodeState.ONLINE) {
-            logger.info("DBG: null due not online")
             return null
         }
         return stubCache.get(nodeId) { _ ->
