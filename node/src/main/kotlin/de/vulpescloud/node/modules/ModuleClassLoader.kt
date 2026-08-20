@@ -12,6 +12,7 @@ class ModuleClassLoader(
     private val parentFirstPackages =
         setOf(
             "kotlin.",
+            "kotlinx.",
             "org.jetbrains.exposed.",
             "java.",
             "javax.",
