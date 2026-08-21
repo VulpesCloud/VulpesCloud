@@ -85,7 +85,6 @@ class VirtualConfigServiceImpl :
         val config = virtualConfig {
             this.config = request.config
             this.name = request.name
-            this.createdAt = System.currentTimeMillis()
             this.lastUpdatedAt = System.currentTimeMillis()
         }
 

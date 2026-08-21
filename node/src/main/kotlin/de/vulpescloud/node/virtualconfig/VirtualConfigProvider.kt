@@ -9,6 +9,7 @@ import de.vulpescloud.node.Node
 import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.encodeToJsonElement
 import org.json.JSONObject
 import org.slf4j.LoggerFactory
 
@@ -109,6 +110,9 @@ class VirtualConfigProvider {
     }
 
     suspend inline fun <reified T> updateCustomConfig(name: String, value: T) {
+        logger.info("T1: $value")
+        logger.info("T2: ${json.encodeToString(value)}")
+        logger.info("T3: ${json.encodeToJsonElement(value)}")
         val response =
             Node.instance.virtualConfigServiceImpl.updateVirtualConfig(
                 UpdateVirtualConfigRequest.newBuilder()
