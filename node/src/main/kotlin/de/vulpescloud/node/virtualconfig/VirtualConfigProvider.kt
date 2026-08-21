@@ -23,6 +23,17 @@ class VirtualConfigProvider {
 
     val tempConfigsPath: Path = Path("temp").resolve("configs")
 
+    // NOTE: explicit conversion — do NOT use JSONObject(Object) bean-reflection here.
+    // VirtualConfig.config is itself an org.json.JSONObject, and since JSONObject
+    // does not implement java.util.Map, org.json's bean-wrap fallback reflects over
+    // JSONObject's own getters (isEmpty(), getMapType()) instead of its contents.
+    fun VirtualConfig.internalToJsonObject(): JSONObject =
+        JSONObject()
+            .put("name", name)
+            .put("createdAt", createdAt)
+            .put("lastUpdatedAt", lastUpdatedAt)
+            .put("config", config)
+
     suspend inline fun <reified T> getCustomConfigObject(
         name: String,
         forceGet: Boolean = false,
@@ -45,7 +56,7 @@ class VirtualConfigProvider {
         }
 
         file.parentFile.mkdirs()
-        file.writeText(JSONObject(VirtualConfig.fromDefinition(config)).toString())
+        file.writeText(VirtualConfig.fromDefinition(config).internalToJsonObject().toString())
         return json.decodeFromString<T>(config.config ?: return null)
     }
 
@@ -57,7 +68,6 @@ class VirtualConfigProvider {
     suspend fun getCustomConfig(name: String, forceGet: Boolean = false): VirtualConfig? {
         val file = tempConfigsPath.resolve("$name.json").toFile()
         if (!forceGet) {
-
             return getLocalConfig(name)
         }
         val config =
@@ -69,7 +79,7 @@ class VirtualConfigProvider {
         }
 
         file.parentFile.mkdirs()
-        file.writeText(JSONObject(VirtualConfig.fromDefinition(config)).toString())
+        file.writeText(VirtualConfig.fromDefinition(config).internalToJsonObject().toString())
         return VirtualConfig(
             config.name,
             config.createdAt,
@@ -88,7 +98,7 @@ class VirtualConfigProvider {
             )
         val file = tempConfigsPath.resolve("${config.name}.json").toFile()
         file.parentFile.mkdirs()
-        file.writeText(JSONObject(VirtualConfig.fromDefinition(response.config)).toString())
+        file.writeText(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString())
     }
 
     suspend inline fun <reified T> updateCustomConfig(name: String, value: T) {
@@ -101,7 +111,7 @@ class VirtualConfigProvider {
             )
         val file = tempConfigsPath.resolve("$name.json").toFile()
         file.parentFile.mkdirs()
-        file.writeText(JSONObject(VirtualConfig.fromDefinition(response.config)).toString())
+        file.writeText(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString())
     }
 
     suspend fun updateCustomConfig(config: VirtualConfig) {
@@ -114,7 +124,7 @@ class VirtualConfigProvider {
             )
         val file = tempConfigsPath.resolve("${config.name}.json").toFile()
         file.parentFile.mkdirs()
-        file.writeText(JSONObject(VirtualConfig.fromDefinition(response.config)).toString())
+        file.writeText(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString())
     }
 
     fun getLocalConfigJson(name: String): String? {
@@ -139,14 +149,14 @@ class VirtualConfigProvider {
         val newConfig = getCustomConfig(name, true) ?: return
         val file = tempConfigsPath.resolve("${name}.json").toFile()
         file.parentFile.mkdirs()
-        file.writeText(JSONObject(newConfig).toString())
+        file.writeText(newConfig.internalToJsonObject().toString())
     }
 
     suspend fun updateLocalConfigFromDatabase(config: VirtualConfig) {
         val newConfig = getCustomConfig(config.name, true) ?: return
         val file = tempConfigsPath.resolve("${config.name}.json").toFile()
         file.parentFile.mkdirs()
-        file.writeText(JSONObject(newConfig).toString())
+        file.writeText(newConfig.internalToJsonObject().toString())
     }
 
     suspend fun updateDatabaseFromLocalConfig(name: String) {
