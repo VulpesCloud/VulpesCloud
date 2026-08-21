@@ -10,9 +10,12 @@ import java.nio.file.Path
 import kotlin.io.path.Path
 import kotlinx.serialization.json.Json
 import org.json.JSONObject
+import org.slf4j.LoggerFactory
 
 @Suppress("Unused")
 class VirtualConfigProvider {
+
+    val logger = LoggerFactory.getLogger(VirtualConfigProvider::class.java)
 
     val json = Json {
         ignoreUnknownKeys = true
@@ -56,6 +59,8 @@ class VirtualConfigProvider {
         }
 
         file.parentFile.mkdirs()
+        logger.info("Writing file to ${file.absolutePath} with content:")
+        logger.info(VirtualConfig.fromDefinition(config).internalToJsonObject().toString(4))
         file.writeText(VirtualConfig.fromDefinition(config).internalToJsonObject().toString())
         return json.decodeFromString<T>(config.config ?: return null)
     }
@@ -98,6 +103,8 @@ class VirtualConfigProvider {
             )
         val file = tempConfigsPath.resolve("${config.name}.json").toFile()
         file.parentFile.mkdirs()
+        logger.info("Writing file to ${file.absolutePath} with content:")
+        logger.info(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString(4))
         file.writeText(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString())
     }
 
@@ -111,6 +118,8 @@ class VirtualConfigProvider {
             )
         val file = tempConfigsPath.resolve("$name.json").toFile()
         file.parentFile.mkdirs()
+        logger.info("Writing file to ${file.absolutePath} with content:")
+        logger.info(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString(4))
         file.writeText(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString())
     }
 
@@ -124,6 +133,8 @@ class VirtualConfigProvider {
             )
         val file = tempConfigsPath.resolve("${config.name}.json").toFile()
         file.parentFile.mkdirs()
+        logger.info("Writing file to ${file.absolutePath} with content:")
+        logger.info(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString(4))
         file.writeText(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString())
     }
 
