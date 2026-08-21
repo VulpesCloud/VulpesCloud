@@ -88,6 +88,10 @@ class VirtualConfigServiceImpl :
             this.lastUpdatedAt = System.currentTimeMillis()
         }
 
+        println("Updating virtual config")
+        println("Config: $config")
+        println("Request Config: ${request.config}")
+
         MongoUtils.updateOrInsertVirtualConfig(config)
 
         return updateVirtualConfigResponse { this.config = config }

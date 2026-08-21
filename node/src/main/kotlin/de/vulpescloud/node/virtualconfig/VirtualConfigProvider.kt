@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory
 @Suppress("Unused")
 class VirtualConfigProvider {
 
-    val logger = LoggerFactory.getLogger(VirtualConfigProvider::class.java)
+    val logger = LoggerFactory.getLogger(VirtualConfigProvider::class.java)!!
 
     val json = Json {
         ignoreUnknownKeys = true
@@ -27,10 +27,6 @@ class VirtualConfigProvider {
 
     val tempConfigsPath: Path = Path("temp").resolve("configs")
 
-    // NOTE: explicit conversion — do NOT use JSONObject(Object) bean-reflection here.
-    // VirtualConfig.config is itself an org.json.JSONObject, and since JSONObject
-    // does not implement java.util.Map, org.json's bean-wrap fallback reflects over
-    // JSONObject's own getters (isEmpty(), getMapType()) instead of its contents.
     fun VirtualConfig.internalToJsonObject(): JSONObject =
         JSONObject()
             .put("name", name)
@@ -85,6 +81,8 @@ class VirtualConfigProvider {
         }
 
         file.parentFile.mkdirs()
+        logger.info("Writing file to ${file.absolutePath} with content:")
+        logger.info(VirtualConfig.fromDefinition(config).internalToJsonObject().toString(4))
         file.writeText(VirtualConfig.fromDefinition(config).internalToJsonObject().toString())
         return VirtualConfig(
             config.name,
