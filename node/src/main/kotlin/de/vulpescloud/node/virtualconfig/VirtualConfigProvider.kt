@@ -56,8 +56,8 @@ class VirtualConfigProvider {
         }
 
         file.parentFile.mkdirs()
-        logger.info("Writing file to ${file.absolutePath} with content:")
-        logger.info(VirtualConfig.fromDefinition(config).internalToJsonObject().toString(4))
+        println("Writing file to ${file.absolutePath} with content:")
+        println(VirtualConfig.fromDefinition(config).internalToJsonObject().toString(4))
         file.writeText(VirtualConfig.fromDefinition(config).internalToJsonObject().toString())
         return json.decodeFromString<T>(config.config ?: return null)
     }
@@ -81,8 +81,8 @@ class VirtualConfigProvider {
         }
 
         file.parentFile.mkdirs()
-        logger.info("Writing file to ${file.absolutePath} with content:")
-        logger.info(VirtualConfig.fromDefinition(config).internalToJsonObject().toString(4))
+        println("Writing file to ${file.absolutePath} with content:")
+        println(VirtualConfig.fromDefinition(config).internalToJsonObject().toString(4))
         file.writeText(VirtualConfig.fromDefinition(config).internalToJsonObject().toString())
         return VirtualConfig(
             config.name,
@@ -102,15 +102,15 @@ class VirtualConfigProvider {
             )
         val file = tempConfigsPath.resolve("${config.name}.json").toFile()
         file.parentFile.mkdirs()
-        logger.info("Writing file to ${file.absolutePath} with content:")
-        logger.info(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString(4))
+        println("Writing file to ${file.absolutePath} with content:")
+        println(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString(4))
         file.writeText(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString())
     }
 
     suspend inline fun <reified T> updateCustomConfig(name: String, value: T) {
-        logger.info("T1: $value")
-        logger.info("T2: ${json.encodeToString(value)}")
-        logger.info("T3: ${json.encodeToJsonElement(value)}")
+        println("T1: $value")
+        println("T2: ${json.encodeToString(value)}")
+        println("T3: ${json.encodeToJsonElement(value)}")
         val response =
             Node.instance.virtualConfigServiceImpl.updateVirtualConfig(
                 UpdateVirtualConfigRequest.newBuilder()
@@ -120,8 +120,8 @@ class VirtualConfigProvider {
             )
         val file = tempConfigsPath.resolve("$name.json").toFile()
         file.parentFile.mkdirs()
-        logger.info("Writing file to ${file.absolutePath} with content:")
-        logger.info(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString(4))
+        println("Writing file to ${file.absolutePath} with content:")
+        println(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString(4))
         file.writeText(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString())
     }
 
@@ -135,8 +135,8 @@ class VirtualConfigProvider {
             )
         val file = tempConfigsPath.resolve("${config.name}.json").toFile()
         file.parentFile.mkdirs()
-        logger.info("Writing file to ${file.absolutePath} with content:")
-        logger.info(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString(4))
+        println("Writing file to ${file.absolutePath} with content:")
+        println(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString(4))
         file.writeText(VirtualConfig.fromDefinition(response.config).internalToJsonObject().toString())
     }
 
