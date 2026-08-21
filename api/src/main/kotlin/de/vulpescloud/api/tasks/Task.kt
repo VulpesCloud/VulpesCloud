@@ -21,9 +21,9 @@ data class Task(
     val preferredNode: String,
     val maxPlayers: Int,
     val software: ServerSoftware,
-    val attributes: Map<String, String> = emptyMap(),
-    val jvmArgs: List<String> = emptyList(),
-    val envVars: List<String> = emptyList(),
+    val attributes: Map<String, String>,
+    val jvmArgs: List<String>,
+    val envVars: List<String>,
     val fallback: Boolean,
     val autoStart: Boolean,
 ) {
