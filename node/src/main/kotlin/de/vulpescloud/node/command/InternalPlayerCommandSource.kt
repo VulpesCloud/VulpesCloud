@@ -9,4 +9,8 @@ class InternalPlayerCommandSource(val user: UserModel) : CommandSource {
     override fun sendMessage(message: String) {
         messages.add(message)
     }
+
+    override fun sendError(message: String) {
+        messages.add(message)
+    }
 }

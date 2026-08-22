@@ -10,4 +10,8 @@ class ConsoleCommandSource : CommandSource {
         logger.info(message)
     }
 
+    override fun sendError(message: String) {
+        logger.error(message)
+    }
+
 }
