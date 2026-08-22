@@ -34,7 +34,7 @@ sqlite = "3.53.2.1"
 mariadb = "3.5.10"
 hikaricp = "7.1.0"
 
-reactor = "3.8.6"
+reactor = "3.8.7"
 
 # logging
 slf4j = "2.1.0-alpha1"
