@@ -30,6 +30,7 @@ class ModuleClassLoader(
             "com.google.common.",
             "org.apache.arrow.flatbuf.",
             "io.grpc.netty.",
+            "org.json",
         )
 
     override fun loadClass(name: String, resolve: Boolean): Class<*> {

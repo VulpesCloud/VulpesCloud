@@ -6,8 +6,6 @@ import de.vulpescloud.node.Node
 import de.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import de.vulpescloud.node.utils.MongoUtils
 import kotlinx.serialization.json.Json
-import org.bson.BsonDocument
-import build.buf.gen.vulpescloud.virtualconfig.v1.VirtualConfig as VirtualConfigDefinition
 
 class VirtualConfigServiceImpl :
     VirtualConfigServiceGrpcKt.VirtualConfigServiceCoroutineImplBase() {
@@ -85,7 +83,6 @@ class VirtualConfigServiceImpl :
         val config = virtualConfig {
             this.config = request.config
             this.name = request.name
-            this.createdAt = System.currentTimeMillis()
             this.lastUpdatedAt = System.currentTimeMillis()
         }
 
@@ -94,12 +91,4 @@ class VirtualConfigServiceImpl :
         return updateVirtualConfigResponse { this.config = config }
     }
 
-    private fun fromDocumentToDefinition(document: BsonDocument): VirtualConfigDefinition {
-        return virtualConfig {
-            this.name = document.getString("name").value
-            this.createdAt = document.getInt64("createdAt").value
-            this.lastUpdatedAt = document.getInt64("lastUpdatedAt").value
-            this.config = document.getString("config").value
-        }
-    }
 }
