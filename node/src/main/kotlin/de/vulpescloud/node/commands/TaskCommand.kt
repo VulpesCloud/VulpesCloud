@@ -7,6 +7,7 @@ import build.buf.gen.vulpescloud.tasks.v1.deleteTaskRequest
 import build.buf.gen.vulpescloud.tasks.v1.getAllTasksRequest
 import build.buf.gen.vulpescloud.tasks.v1.updateTaskRequest
 import com.github.benmanes.caffeine.cache.Caffeine
+import de.vulpescloud.api.cluster.NodeState
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.command.CommandSource
@@ -134,7 +135,7 @@ class TaskCommand {
                                 source.sendMessage("<red>Node ${it.endpoint.name} is not online!</red>")
                                 return@runBlocking
                             }
-                            if (!it.getNode().isRunning()) {
+                            if (it.getSnapshot().state != NodeState.ONLINE) {
                                 source.sendMessage("<red>Node ${it.endpoint.name} is not online!</red>")
                                 return@runBlocking
                             }

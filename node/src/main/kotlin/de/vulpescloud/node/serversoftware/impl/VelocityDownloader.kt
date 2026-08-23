@@ -75,6 +75,8 @@ object VelocityDownloader : ServerSoftwareDownloader {
         if (PropertyUtils.isMoreSoftwareLogging())
             logger.info("VelocityDownloader> Getting download URL for version $version")
         val cached = downloadUrlCache.getIfPresent(version)
+        if (version == "4.0.0")
+            throw UnsupportedOperationException("Velocity version 4.0.0 is not supported")
         if (cached != null) return cached
 
         val apiUrl = "$BASE_API_URL/projects/velocity/versions/$version/builds/latest"
@@ -160,7 +162,14 @@ object VelocityDownloader : ServerSoftwareDownloader {
 
                     val latestVersion = versions.getJSONObject(0).getJSONObject("version")
 
-                    val downloadUrl = getDownloadUrl(latestVersion.getString("id"))
+                    val downloadUrl =
+                        if (latestVersion.getString("id") == "4.0.0" || latestVersion.getString("id") == "3.5.0") {
+                            getDownloadUrl(
+                                versions.getJSONObject(1).getJSONObject("version").getString("id")
+                            )
+                        } else {
+                            getDownloadUrl(latestVersion.getString("id"))
+                        }
 
                     val build =
                         downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
@@ -190,18 +199,12 @@ object VelocityDownloader : ServerSoftwareDownloader {
 
                     if (versions.length() == 0) throw Exception("No versions found")
 
-                    val latestVersion =
-                        versions
-                            .find {
-                                (it as JSONObject).getJSONObject("version").getString("id") ==
-                                    version
-                            }
-                            ?.let { (it as JSONObject).getJSONObject("version") }
-                            ?: throw Exception(
-                                "No version found for Velocity with version $version"
-                            )
-
-                    val downloadUrl = getDownloadUrl(version)
+                    val downloadUrl =
+                        if (version == "4.0.0" || version == "3.5.0") {
+                            URI("")
+                        } else {
+                            getDownloadUrl(version)
+                        }
 
                     val build =
                         downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
@@ -253,22 +256,28 @@ object VelocityDownloader : ServerSoftwareDownloader {
                 for (i in 0 until versions.length()) {
                     val version = versions.getJSONObject(i).getJSONObject("version")
 
-                    val downloadUrl = getDownloadUrl(version.getString("id"))
+                    if (version.getString("id") == "4.0.0" || version.getString("id") == "3.5.0") {
+                        continue
+                    } else {
+                        val build =
+                            getDownloadUrl(version.getString("id"))
+                                .path
+                                .substringAfterLast('-')
+                                .substringBefore('.')
+                                .toIntOrNull()
 
-                    val build =
-                        downloadUrl.path.substringAfterLast('-').substringBefore('.').toIntOrNull()
+                        val software =
+                            ServerSoftware(
+                                name = "Velocity",
+                                version = version.getString("id"),
+                                build = build ?: 1,
+                                url = getDownloadUrl(version.getString("id")).toString(),
+                                pluginDir = "plugins",
+                                type = SoftwareType.PROXY,
+                            )
 
-                    val software =
-                        ServerSoftware(
-                            name = "Velocity",
-                            version = version.getString("id"),
-                            build = build ?: 1,
-                            url = downloadUrl.toString(),
-                            pluginDir = "plugins",
-                            type = SoftwareType.PROXY,
-                        )
-
-                    softwareList.add(software)
+                        softwareList.add(software)
+                    }
                 }
 
                 softwareList

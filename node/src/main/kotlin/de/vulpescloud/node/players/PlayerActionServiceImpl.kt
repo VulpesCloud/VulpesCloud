@@ -33,7 +33,8 @@ class PlayerActionServiceImpl : PlayerActionsServiceGrpcKt.PlayerActionsServiceC
                 this.player = player
                 this.action = PlayerActions.MESSAGE
                 this.data.put("message", request.message)
-            }
+            },
+            true,
         )
         return SendMessageResponse.newBuilder().setSuccess(true).build()
     }
@@ -54,7 +55,8 @@ class PlayerActionServiceImpl : PlayerActionsServiceGrpcKt.PlayerActionsServiceC
                     put("title", request.title)
                     put("subtitle", request.subtitle)
                 }
-            }
+            },
+            true,
         )
         return SendTitleResponse.newBuilder().setSuccess(true).build()
     }
@@ -72,7 +74,8 @@ class PlayerActionServiceImpl : PlayerActionsServiceGrpcKt.PlayerActionsServiceC
                 this.player = player
                 this.action = PlayerActions.KICK
                 this.data.apply { put("reason", request.reason) }
-            }
+            },
+            true,
         )
         return KickPlayerResponse.newBuilder().setSuccess(true).build()
     }
@@ -90,7 +93,8 @@ class PlayerActionServiceImpl : PlayerActionsServiceGrpcKt.PlayerActionsServiceC
                 this.player = player
                 this.action = PlayerActions.ACTION_BAR
                 this.data.apply { put("message", request.message) }
-            }
+            },
+            true,
         )
         return SendActionBarResponse.newBuilder().setSuccess(true).build()
     }
@@ -108,7 +112,8 @@ class PlayerActionServiceImpl : PlayerActionsServiceGrpcKt.PlayerActionsServiceC
                 this.player = player
                 this.action = PlayerActions.CONNECT
                 this.data.apply { put("targetServer", request.targetServer) }
-            }
+            },
+            true,
         )
         return ConnectPlayerResponse.newBuilder().setSuccess(true).build()
     }

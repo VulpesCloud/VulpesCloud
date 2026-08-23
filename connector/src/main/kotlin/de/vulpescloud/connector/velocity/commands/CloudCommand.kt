@@ -1,9 +1,9 @@
 package de.vulpescloud.connector.velocity.commands
 
 import build.buf.gen.vulpescloud.auth.v1.getUserByExtraDataRequest
-import build.buf.gen.vulpescloud.node.v1.executeCommandRequest
-import build.buf.gen.vulpescloud.node.v1.playerCommandSource
-import build.buf.gen.vulpescloud.node.v1.tabCompleteRequest
+import build.buf.gen.vulpescloud.cluster.v2.commandTabCompleteRequest
+import build.buf.gen.vulpescloud.cluster.v2.executeCommandRequest
+import build.buf.gen.vulpescloud.cluster.v2.playerCommandSource
 import com.velocitypowered.api.command.SimpleCommand
 import com.velocitypowered.api.proxy.Player
 import de.vulpescloud.bridge.BridgeAPI
@@ -77,8 +77,8 @@ class CloudCommand(val bridgeAPI: BridgeAPI.BridgeCoroutineAPI) : SimpleCommand 
             val player = invocation.source() as Player
 
             Wrapper.instance.grpcClient.clusterAPI
-                .tabComplete(
-                    tabCompleteRequest {
+                .commandTabComplete(
+                    commandTabCompleteRequest {
                         this.command = invocation.arguments().joinToString(" ")
                         this.playerSource = playerCommandSource {
                             this.playerName = player.username

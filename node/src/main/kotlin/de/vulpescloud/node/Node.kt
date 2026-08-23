@@ -10,6 +10,9 @@ import de.vulpescloud.api.players.OnlinePlayer
 import de.vulpescloud.node.auth.AuthServiceImpl
 import de.vulpescloud.node.cluster.ClusterAPIServiceImpl
 import de.vulpescloud.node.cluster.ClusterProvider
+import de.vulpescloud.node.cluster.tls.ClusterCertificateAuthority
+import de.vulpescloud.node.cluster.tls.GrpcTls
+import de.vulpescloud.node.cluster.tls.TlsManager
 import de.vulpescloud.node.command.CommandProvider
 import de.vulpescloud.node.commands.*
 import de.vulpescloud.node.config.ConfigProvider
@@ -42,12 +45,13 @@ import de.vulpescloud.node.services.impl.local.LocalServiceFactory
 import de.vulpescloud.node.setup.SetupProvider
 import de.vulpescloud.node.setup.setups.FirstSetup
 import de.vulpescloud.node.tasks.TasksAPIService
-import de.vulpescloud.node.templates.TemplateStorageProvider
+import de.vulpescloud.node.templates.LocalTemplateStorage
+import de.vulpescloud.node.templates.TemplateServiceImpl
+import de.vulpescloud.node.templates.TemplateStorageRegistry
 import de.vulpescloud.node.terminal.Terminal
 import de.vulpescloud.node.virtualconfig.VirtualConfigProvider
 import de.vulpescloud.node.virtualconfig.VirtualConfigServiceImpl
 import io.grpc.BindableService
-import io.grpc.ChannelCredentials
 import java.time.Duration
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.Path
@@ -65,7 +69,6 @@ class Node {
     lateinit var grpcServer: GrpcServer
     lateinit var secret: String
     lateinit var setupProvider: SetupProvider
-    lateinit var credentials: ChannelCredentials
     var inputJob: Job? = null
         private set
 
@@ -74,7 +77,6 @@ class Node {
 
     lateinit var internalEventsService: EventsService
 
-    val templateStorageProvider = TemplateStorageProvider()
     val localGrpcClient = LocalGrpcClient()
     val serviceFactoryProvider = ServiceFactoryProvider()
     val nodeServices: MutableSet<AbstractService> = ConcurrentHashMap.newKeySet()
@@ -110,17 +112,8 @@ class Node {
             setupProvider = SetupProvider(terminal)
             terminal.init()
 
-            //            CertGen.loadOrCreate(
-            //                keyFile = File("certs/server.key"),
-            //                certFile = File("certs/server.crt"),
-            //            )
-
-            //            val serverCertBytes = File("certs/server.crt")
-            //            creds =
-            // TlsChannelCredentials.newBuilder().trustManager(serverCertBytes).build()
-
             val secretFactory = SecretFactory()
-            secret = secretFactory.loadOrCreateSecret(Path("launcher/secret/.auth.secret"))
+            secret = secretFactory.loadOrCreateSecret(Path("launcher/.secret/.auth.secret"))
 
             inputJob = scope.launch(Dispatchers.IO) { terminal.allowInput() }
 
@@ -154,6 +147,8 @@ class Node {
                     register(ModuleCommand())
                     register(SoftwareCommand())
                     register(PlayersCommand())
+                    register(TlsCommand())
+                    register(TemplateCommand())
                 }
             } catch (e: Exception) {
                 logger.error("Failed to initialize commands: ${e.stackTraceToString()}")
@@ -168,6 +163,19 @@ class Node {
                 lockDatabaseProviderAdding()
                 setAndInitializeMainDatabaseProvider()
             }
+
+            val tlsManager = TlsManager(secret, configProvider.config.nodeName)
+            val bundle = tlsManager.bootstrapNode()
+            val serverSslContext = GrpcTls.buildServerSslContext(
+                bundle.nodeCertPem,
+                ClusterCertificateAuthority.toPem(bundle.nodeKey.private),
+                bundle.caCertPem
+            )
+            val clientSslContext = GrpcTls.buildClientSslContext(
+                bundle.nodeCertPem,
+                ClusterCertificateAuthority.toPem(bundle.nodeKey.private),
+                bundle.caCertPem
+            )
 
             internalEventsService = EventsService()
 
@@ -184,6 +192,7 @@ class Node {
                     ),
                     PlayerServiceImpl(),
                     PlayerActionServiceImpl(),
+                    TemplateServiceImpl(),
                 )
             )
 
@@ -199,6 +208,7 @@ class Node {
                             AuthInterceptor(secret, configProvider.config.auth.jwtSecret),
                             LoggingServerInterceptor(),
                         ),
+                    sslContext = serverSslContext,
                 )
             grpcServer.start()
             NodeCoroutineScope.launch { grpcServer.awaitTermination() }
@@ -206,6 +216,7 @@ class Node {
             localGrpcClient.connect(
                 host = configProvider.config.grpcHost,
                 port = configProvider.config.grpcPort,
+                sslContext = clientSslContext,
                 secret = secret,
             )
 
@@ -213,7 +224,9 @@ class Node {
 
             clusterProvider.initClusterConfig()
             clusterProvider.init()
-            clusterProvider.connectToOtherNodes()
+            clusterProvider.connectToOtherNodes(clientSslContext)
+
+            TemplateStorageRegistry.registerTemplateStorage(LocalTemplateStorage())
 
             serviceFactoryProvider.apply {
                 registerServiceFactory(DockerServiceFactory())

@@ -52,8 +52,10 @@ object NodeShutdown {
             Node.instance.internalEventsService.shutdown()
 
             logger.info("Closing connections to all remote nodes...")
-            Node.instance.clusterProvider.remoteNodes.forEach { it.channel?.shutdownNow() }
             Node.instance.clusterProvider.shutdown()
+            Node.instance.clusterProvider.remoteNodes.forEach { it.channel?.shutdownNow() }
+            logger.info("DBG: State: ${Node.instance.clusterProvider.currentState}")
+            NodeSnapshotUpdater.updateLocalNodeSnapshot()
 
             Node.instance.moduleProvider.apply {
                 disableAllModules()

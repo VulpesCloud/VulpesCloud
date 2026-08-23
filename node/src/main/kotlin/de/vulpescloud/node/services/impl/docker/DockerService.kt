@@ -76,7 +76,7 @@ class DockerService(override val service: Service) : AbstractService {
         return "${service.task.name}-${service.orderedId}-${service.uuid}"
     }
 
-    fun path(): Path {
+    override fun path(): Path {
         return if (service.task.staticServices) {
             Path.of("local/services/${service.task.name}-${service.orderedId}")
         } else {

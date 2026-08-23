@@ -18,10 +18,7 @@
       "matchUpdateTypes": [
         "patch"
       ],
-      "matchPackageNames": [
-        "*",
-        "!gradle"
-      ],
+      "excludePackageNames": [],
       "groupName": "all dependencies with patch changes"
     }
   ],
@@ -32,6 +29,6 @@
   "commitMessageAction": "update",
   "baseBranches": ["development"],
   "ignoreDeps": [
-    "org.incendo:cloud-processors-confirmation",
-  ],
+    "org.incendo:cloud-processors-confirmation"
+  ]
 }

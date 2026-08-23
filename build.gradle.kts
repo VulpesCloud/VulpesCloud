@@ -27,12 +27,12 @@ import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("vulpescloud.parent-build-logic")
-    kotlin("jvm") version "2.3.21"
+    kotlin("jvm") version "2.4.10"
     id("org.jetbrains.dokka") version "2.2.0"
     id("signing")
     id("maven-publish")
     alias(libs.plugins.shadow)
-    kotlin("plugin.serialization") version "2.3.21"
+    kotlin("plugin.serialization") version "2.4.10"
 }
 
 group = "de.vulpescloud"
@@ -63,11 +63,6 @@ allprojects {
             name = "buf"
             url = uri("https://buf.build/gen/maven")
         }
-    }
-
-    dependencies {
-        compileOnly(rootProject.libs.annotations)
-        compileOnly(rootProject.libs.gson)
     }
 
     publishing {
@@ -102,19 +97,19 @@ allprojects {
 
     kotlin {
         jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of(21))
+            languageVersion.set(JavaLanguageVersion.of(25))
         }
     }
 
     tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
         compilerOptions {
-            jvmTarget.set(JvmTarget.JVM_21)
+            jvmTarget.set(JvmTarget.JVM_25)
         }
     }
 
     tasks.withType<JavaCompile> {
-        sourceCompatibility = "21"
-        targetCompatibility = "21"
+        sourceCompatibility = "25"
+        targetCompatibility = "25"
     }
 }
 

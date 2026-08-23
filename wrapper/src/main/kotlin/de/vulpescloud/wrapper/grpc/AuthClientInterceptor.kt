@@ -1,6 +1,12 @@
 package de.vulpescloud.wrapper.grpc
 
-import io.grpc.*
+import io.grpc.CallOptions
+import io.grpc.Channel
+import io.grpc.ClientCall
+import io.grpc.ClientInterceptor
+import io.grpc.ForwardingClientCall
+import io.grpc.Metadata
+import io.grpc.MethodDescriptor
 
 class AuthClientInterceptor(private val token: String) : ClientInterceptor {
 

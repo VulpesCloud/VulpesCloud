@@ -8,10 +8,6 @@ import de.vulpescloud.api.serializer.UUIDSerializer
 import de.vulpescloud.api.tasks.Task
 import java.util.*
 import kotlinx.serialization.Serializable
-import org.bson.BsonDocument
-import org.bson.BsonInt32
-import org.bson.BsonInt64
-import org.bson.BsonString
 
 @Serializable
 data class Service(
@@ -27,23 +23,6 @@ data class Service(
     val metadata: Map<String, String> = emptyMap(),
 ) {
     fun name(): String = task.name + "-" + orderedId
-
-    fun toDocument(): BsonDocument =
-        BsonDocument().apply {
-            append("task", task.toDocument())
-            append("uuid", BsonString(uuid.toString()))
-            append("orderedId", BsonInt32(orderedId))
-            append("port", BsonInt32(port))
-            append("node", BsonString(node))
-            append("playerCount", BsonInt32(playerCount))
-            append("startTime", BsonInt64(startTime.seconds))
-            append("state", BsonInt32(state.ordinal))
-            append("hostname", BsonString(hostname))
-            append(
-                "metadata",
-                BsonDocument().apply { metadata.forEach { append(it.key, BsonString(it.value)) } },
-            )
-        }
 
     fun toDefinition(): ServiceDefinition =
         ServiceDefinition.newBuilder()
@@ -87,25 +66,6 @@ data class Service(
                 },
                 definition.hostname,
                 definition.metadataMap,
-            )
-        }
-
-        fun fromDocument(document: BsonDocument): Service {
-            return Service(
-                Task.fromDocument(document.getDocument("task")),
-                UUID.fromString(document.getString("uuid").value),
-                document.getInt32("orderedId").value,
-                document.getInt32("port").value,
-                document.getString("node").value,
-                document.getInt32("playerCount").value,
-                document.getInt64("startTime").value.let {
-                    Timestamp.newBuilder().setSeconds(it).build()
-                },
-                ServiceStates.entries[document.getInt32("state").value],
-                document.getString("hostname").value,
-                document.getDocument("metadata")?.entries?.associate {
-                    it.key to it.value.asString().value
-                } ?: emptyMap(),
             )
         }
     }

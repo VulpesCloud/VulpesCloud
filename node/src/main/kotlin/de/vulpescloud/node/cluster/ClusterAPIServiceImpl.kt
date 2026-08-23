@@ -1,8 +1,8 @@
 package de.vulpescloud.node.cluster
 
 import build.buf.gen.vulpescloud.auth.v1.getUserByExtraDataRequest
-import build.buf.gen.vulpescloud.node.v1.*
-import de.vulpescloud.api.cluster.ClusterNode
+import build.buf.gen.vulpescloud.cluster.v2.*
+import build.buf.gen.vulpescloud.cluster.v2.ClusterAPIServiceGrpcKt
 import de.vulpescloud.api.cluster.NodeSnapshot
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.command.CommandSource
@@ -20,9 +20,6 @@ import org.slf4j.LoggerFactory
 
 class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineImplBase() {
     private val logger = LoggerFactory.getLogger(ClusterAPIServiceImpl::class.java)
-    private val nodesDatabase by lazy {
-        Node.instance.getDatabaseProvider().getOrCreateDatabase("nodes")
-    }
     private val snapshotsDatabase by lazy {
         Node.instance.getDatabaseProvider().getOrCreateDatabase("nodeSnapshots")
     }
@@ -30,23 +27,20 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
 
     @RequiresPermission("cluster.getAll")
     override suspend fun getAllNodes(request: GetAllNodesRequest): GetAllNodesResponse {
-        val nodes =
-            nodesDatabase
-                .getAll()
-                .map { json.decodeFromJsonElement(ClusterNode.serializer(), it) }
-                .map { it.toDefinition() }
-                .toMutableList()
+        val clusterConfig = Node.instance.clusterProvider.getClusterConfig()
 
-        return GetAllNodesResponse.newBuilder().addAllNodes(nodes).build()
+        return GetAllNodesResponse.newBuilder()
+            .addAllNodes(clusterConfig.nodes.map { it.toDefinition() })
+            .build()
     }
 
     @RequiresPermission("cluster.get")
     override suspend fun getNodeByName(request: GetNodeByNameRequest): GetNodeByNameResponse {
+        val clusterConfig = Node.instance.clusterProvider.getClusterConfig()
         val node =
-            json.decodeFromJsonElement(
-                ClusterNode.serializer(),
-                nodesDatabase.get(request.name) ?: return GetNodeByNameResponse.newBuilder().build(),
-            )
+            clusterConfig.nodes.firstOrNull {
+                it.name.lowercase().contains(request.name.lowercase())
+            } ?: return GetNodeByNameResponse.getDefaultInstance()
 
         return GetNodeByNameResponse.newBuilder().setNode(node.toDefinition()).build()
     }
@@ -70,11 +64,11 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
             val source = CommandSource.player(getPlayer(request.playerSource.playerUuid)!!)
 
             runCatching {
-                    Node.instance.commandProvider
-                        .execute(source, request.command)
-                        .exceptionally { throw it }
-                        .get()
-                }
+                Node.instance.commandProvider
+                    .execute(source, request.command)
+                    .exceptionally { throw it }
+                    .get()
+            }
                 .onFailure { e ->
                     when (e) {
                         is CompletionException,
@@ -97,7 +91,9 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
     }
 
     @RequiresPermission("cluster.tabComplete")
-    override suspend fun tabComplete(request: TabCompleteRequest): TabCompleteResponse {
+    override suspend fun commandTabComplete(
+        request: CommandTabCompleteRequest
+    ): CommandTabCompleteResponse {
         val source = CommandSource.player(getPlayer(request.playerSource.playerUuid)!!)
         val suggestions =
             Node.instance.commandProvider.commandManager
@@ -108,7 +104,7 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
                 .stream()
                 .map(Suggestion::suggestion)
                 .toList()
-        return TabCompleteResponse.newBuilder().addAllSuggestions(suggestions).build()
+        return CommandTabCompleteResponse.newBuilder().addAllSuggestions(suggestions).build()
     }
 
     private suspend fun getPlayer(uuid: String): UserModel? {

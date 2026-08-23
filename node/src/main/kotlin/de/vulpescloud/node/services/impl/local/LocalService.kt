@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory
 
 class LocalService(override val service: Service) : AbstractService {
 
-    fun path(): Path {
+    override fun path(): Path {
         return if (service.task.staticServices) {
             Path.of("local/services/${service.task.name}-${service.orderedId}")
         } else {

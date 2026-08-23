@@ -2,11 +2,14 @@ package de.vulpescloud.node.setup.setups
 
 import build.buf.gen.vulpescloud.tasks.v1.createTaskRequest
 import build.buf.gen.vulpescloud.tasks.v1.getAllTasksRequest
+import build.buf.gen.vulpescloud.templates.v1.createTemplateRequest
+import build.buf.gen.vulpescloud.templates.v1.templateDefinition
+import build.buf.gen.vulpescloud.templates.v1.templateLocation
 import de.vulpescloud.api.serversoftware.ServerSoftware
 import de.vulpescloud.api.serversoftware.SoftwareType
 import de.vulpescloud.api.tasks.Task
 import de.vulpescloud.api.templates.Template
-import de.vulpescloud.api.templates.TemplateStorages
+import de.vulpescloud.api.templates.TemplateLocation
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.serversoftware.ServerSoftwareDownloader
@@ -33,16 +36,17 @@ class TaskSetup() : Setup {
             false,
             0,
             0,
-            false,
-            false,
-            "local",
-            "",
-            1,
-            ServerSoftware("UNKNOWN", "UNKNOWN", 0, "", "", SoftwareType.SERVER),
-            emptyMap(),
-            emptyList(),
-            emptyList(),
-            false,
+            maintenance = false,
+            copyTemplatesToStatic = false,
+            serviceFactoryName = "local",
+            preferredNode = "",
+            maxPlayers = 1,
+            software = ServerSoftware("UNKNOWN", "UNKNOWN", 0, "", "", SoftwareType.SERVER),
+            attributes = emptyMap(),
+            jvmArgs = emptyList(),
+            envVars = emptyList(),
+            fallback = false,
+            autoStart = false,
         )
 
     companion object {
@@ -191,8 +195,39 @@ class TaskSetup() : Setup {
             task =
                 task.copy(
                     preferredNode = Node.instance.configProvider.config.nodeName,
-                    templates = listOf(Template(task.name, TemplateStorages.LOCAL, 0)),
+                    templates =
+                        listOf(
+                            Template(
+                                task.name,
+                                0,
+                                task.name,
+                                TemplateLocation(
+                                    "LOCAL",
+                                    Node.instance.configProvider.config.nodeName,
+                                ),
+                            )
+                        ),
                 )
+
+            Node.instance.localGrpcClient.templateAPI.createTemplate(
+                createTemplateRequest {
+                    template = templateDefinition {
+                        name = task.name
+                        weight = 0
+                        id = task.name
+                        location = templateLocation {
+                            storageName = "LOCAL"
+                            nodeName = Node.instance.configProvider.config.nodeName
+                        }
+                        version = ""
+                        enabled = true
+                    }
+                    destination = templateLocation {
+                        storageName = "LOCAL"
+                        nodeName = Node.instance.configProvider.config.nodeName
+                    }
+                }
+            )
 
             Node.instance.localGrpcClient.tasksAPI.createTask(
                 createTaskRequest { this.task = this@TaskSetup.task.toDefinition() }

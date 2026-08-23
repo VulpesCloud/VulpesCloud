@@ -23,7 +23,7 @@
  */
 
 plugins {
-    kotlin("jvm") version "2.3.21"
+    kotlin("jvm") version "2.4.10"
     id("org.jetbrains.dokka") version "2.2.0"
     alias(libs.plugins.shadow)
 }
@@ -41,7 +41,6 @@ dependencies {
     compileOnly(project(":wrapper"))
     compileOnly(libs.bundles.proto)
     compileOnly(libs.kotlinx.serialization)
-    compileOnly(rootProject.libs.annotations)
     compileOnly(libs.kotlin.stdlib)
     compileOnly(libs.json)
 }
