@@ -104,24 +104,26 @@ class LocalTemplateStorage : TemplateStorage {
         )
     }
 
-    override fun listDirectory(template: Template, path: String): List<TemplateDirectoryEntryData> {
-        val target = FileUtils.resolveSafe(rootOf(template), path)
+    override fun listDirectory(
+        template: Template,
+        path: String,
+    ): List<TemplateDirectoryEntryData> {
+        val root = rootOf(template)
+        val target = if (path.isBlank()) root else FileUtils.resolveSafe(root, path)
+
         if (!Files.exists(target)) return emptyList()
         require(Files.isDirectory(target)) { "'$path' is not a directory" }
 
-        val root = rootOf(template)
         return Files.list(target).use { stream ->
-            stream
-                .map { entry ->
-                    TemplateDirectoryEntryData(
-                        name = entry.fileName.toString(),
-                        path = root.relativize(entry).toString().replace('\\', '/'),
-                        directory = Files.isDirectory(entry),
-                        size = if (Files.isDirectory(entry)) 0 else Files.size(entry),
-                        modifiedAt = Files.getLastModifiedTime(entry).toMillis(),
-                    )
-                }
-                .toList()
+            stream.map { entry ->
+                TemplateDirectoryEntryData(
+                    name = entry.fileName.toString(),
+                    path = root.relativize(entry).toString().replace('\\', '/'),
+                    directory = Files.isDirectory(entry),
+                    size = if (Files.isDirectory(entry)) 0 else Files.size(entry),
+                    modifiedAt = Files.getLastModifiedTime(entry).toMillis(),
+                )
+            }.toList()
         }
     }
 }

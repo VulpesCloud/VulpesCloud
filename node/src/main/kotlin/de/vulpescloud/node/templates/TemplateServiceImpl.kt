@@ -139,13 +139,9 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
                 TemplateRegistry.matchesLocation(it.location.toDefinition(), request.location)
             }
 
-        println(
-            "listTemplates on ${Node.instance.configProvider.config.nodeName}: ${templates.joinToString { "${it.id}@${it.location.storageName}-${it.location.nodeName}" }}"
-        )
         val response = ListTemplatesResponse.newBuilder()
             .addAllTemplates(templates.map { it.toDefinition() })
             .build()
-        println("listTemplates: $response")
         return response
     }
 
