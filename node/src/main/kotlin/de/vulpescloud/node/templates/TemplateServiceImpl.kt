@@ -138,6 +138,12 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
             TemplateRegistry.getAll().filter {
                 TemplateRegistry.matchesLocation(it.location.toDefinition(), request.location)
             }
+
+        logger.info(
+            "listTemplates on {}: {}",
+            Node.instance.configProvider.config.nodeName,
+            templates.joinToString { "${it.id}@${it.location.storageName}-${it.location.nodeName}" },
+        )
         return ListTemplatesResponse.newBuilder()
             .addAllTemplates(templates.map { it.toDefinition() })
             .build()
