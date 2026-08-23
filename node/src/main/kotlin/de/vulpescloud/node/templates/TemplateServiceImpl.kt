@@ -66,7 +66,10 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
 
     @RequiresPermission("templates.create")
     override suspend fun createTemplate(request: CreateTemplateRequest): CreateTemplateResponse {
-        val destination = request.destination
+        // Proto3 returns an empty string for an omitted nodeName.  Persisting that value makes
+        // node-local storages (such as LOCAL) look cluster-wide and loses the node affinity on
+        // every create/upsert. Resolve it before both forwarding and persistence.
+        val destination = resolveDestination(request.destination)
 
         if (needsForwarding(destination)) {
             val stub = remoteStub(destination.nodeName) ?: throw unavailable(destination.nodeName)
@@ -528,6 +531,16 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
     private fun storageFor(template: Template): TemplateStorage =
         TemplateStorageRegistry.getTemplateStorageByName(template.location.storageName)
             ?: throw IllegalArgumentException("Template not found")
+
+    private fun resolveDestination(
+        location: TemplateLocationDefinition
+    ): TemplateLocationDefinition {
+        if (location.nodeName.isNotBlank()) return location
+
+        val storage = TemplateStorageRegistry.getTemplateStorageByName(location.storageName)
+        val nodeName = storage?.nodeName()
+        return if (nodeName.isNullOrBlank()) location else location.toBuilder().setNodeName(nodeName).build()
+    }
 
     private fun needsForwarding(location: TemplateLocationDefinition): Boolean =
         location.nodeName.isNotBlank() &&
