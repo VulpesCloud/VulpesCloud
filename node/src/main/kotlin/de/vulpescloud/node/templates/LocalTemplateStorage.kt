@@ -108,8 +108,8 @@ class LocalTemplateStorage : TemplateStorage {
         template: Template,
         path: String,
     ): List<TemplateDirectoryEntryData> {
-        val root = rootOf(template)
-        val target = if (path.isBlank()) root else FileUtils.resolveSafe(root, path)
+        val root = rootOf(template).toAbsolutePath().normalize()
+        val target = FileUtils.resolveSafe(root, path)
 
         if (!Files.exists(target)) return emptyList()
         require(Files.isDirectory(target)) { "'$path' is not a directory" }
