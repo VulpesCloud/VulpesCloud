@@ -142,9 +142,11 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         println(
             "listTemplates on ${Node.instance.configProvider.config.nodeName}: ${templates.joinToString { "${it.id}@${it.location.storageName}-${it.location.nodeName}" }}"
         )
-        return ListTemplatesResponse.newBuilder()
+        val response = ListTemplatesResponse.newBuilder()
             .addAllTemplates(templates.map { it.toDefinition() })
             .build()
+        println("listTemplates: $response")
+        return response
     }
 
     @RequiresPermission("templates.copy")

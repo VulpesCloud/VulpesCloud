@@ -11,7 +11,9 @@ data class TemplateLocation(
     fun toDefinition(): ProtoTemplateLocation =
         ProtoTemplateLocation.newBuilder()
             .setStorageName(storageName)
-            .apply { if (nodeName != null) setNodeName(nodeName) }
+            .apply {
+                this@TemplateLocation.nodeName?.let { setNodeName(it) }
+            }
             .build()
 
     companion object {
