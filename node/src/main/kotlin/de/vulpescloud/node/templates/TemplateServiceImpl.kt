@@ -356,6 +356,11 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
                 .addAllEntries(entries.map { toProtoEntry(it) })
                 .build()
         } catch (e: IllegalArgumentException) {
+            logger.error(
+                "Failed to list template '${template.name}' at path '${request.path}'",
+                e,
+            )
+            e.printStackTrace()
             throw StatusException(Status.INVALID_ARGUMENT.withDescription(e.message))
         } catch (e: Exception) {
             throw StatusException(Status.INTERNAL.withDescription(e.message))
