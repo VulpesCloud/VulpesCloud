@@ -3,13 +3,13 @@ package de.vulpescloud.node.cluster
 import de.vulpescloud.api.cluster.NodeSnapshot
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
+import java.lang.management.ManagementFactory
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
-import java.lang.management.ManagementFactory
-import kotlin.time.Duration.Companion.seconds
 
 object NodeSnapshotUpdater {
 
@@ -21,27 +21,12 @@ object NodeSnapshotUpdater {
     }
 
     fun start() {
-        job =
-            NodeCoroutineScope.launch {
-                while (true) {
-                    val node = ClusterHelper.getLocalNode()
-
-                    val snapshot =
-                        NodeSnapshot(
-                            Node.instance.configProvider.config.nodeName,
-                            Node.instance.configProvider.config.uuid,
-                            node.state,
-                            usedMemory(),
-                            osMXBean.cpuLoad,
-                            0,
-                            System.currentTimeMillis(),
-                        )
-
-                    nodesDatabase.upsert(node.name, Json.encodeToJsonElement(snapshot))
-
-                    delay(5.seconds)
-                }
+        job = NodeCoroutineScope.launch {
+            while (true) {
+                updateLocalNodeSnapshot()
+                delay(5.seconds)
             }
+        }
     }
 
     fun stop() {
@@ -49,10 +34,32 @@ object NodeSnapshotUpdater {
         job = null
     }
 
-    private fun usedMemory(): Int {
+    private fun usedMemory(): Long {
         return ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) /
-                1024 /
-                1024)
-            .toInt()
+            1024 /
+            1024)
+    }
+
+    fun generateSnapshot(): NodeSnapshot {
+        return NodeSnapshot(
+            Node.instance.configProvider.config.nodeName,
+            Node.instance.configProvider.config.uuid,
+            Node.instance.clusterProvider.currentState,
+            usedMemory(),
+            -1L,
+            -1L,
+            osMXBean.cpuLoad,
+            0,
+            System.currentTimeMillis(),
+            Node.instance.clusterProvider.currentAttributes,
+            Node.instance.nodeServices.size.toLong()
+        )
+    }
+
+    suspend fun updateLocalNodeSnapshot() {
+        val snapshot =
+            generateSnapshot()
+
+        nodesDatabase.upsert(Node.instance.configProvider.config.nodeName, Json.encodeToJsonElement(snapshot))
     }
 }

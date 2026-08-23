@@ -13,7 +13,7 @@ class AuthInterceptor(private val internalToken: String, jwtSecret: String) : Se
 
     private val publicRpcs = setOf("authenticate", "refreshtoken", "istokenvalid")
 
-    override fun <ReqT : Any?, RespT : Any?> interceptCall(
+    override fun <ReqT, RespT> interceptCall(
         call: ServerCall<ReqT, RespT>,
         headers: Metadata,
         next: ServerCallHandler<ReqT, RespT>,
@@ -37,15 +37,21 @@ class AuthInterceptor(private val internalToken: String, jwtSecret: String) : Se
         }
 
         val token = tokenHeader.removePrefix("Bearer ").trim()
+        val sslSession = call.attributes.get(Grpc.TRANSPORT_ATTR_SSL_SESSION)
 
         return when (communicationType) {
-            "internal" -> handleInternalAuth(call, headers, next, token)
+            "internal" -> {
+                if (sslSession == null || sslSession.peerCertificates.isNullOrEmpty()) {
+                    return unauthenticated(call, "Internal communication requires mutual TLS (client certificate)")
+                }
+                handleInternalAuth(call, headers, next, token)
+            }
             "external" -> handleExternalAuth(call, headers, next, token)
             else -> unauthenticated(call, "Unknown communication type: $communicationType")
         }
     }
 
-    private fun <ReqT : Any?, RespT : Any?> handleInternalAuth(
+    private fun <ReqT, RespT> handleInternalAuth(
         call: ServerCall<ReqT, RespT>,
         headers: Metadata,
         next: ServerCallHandler<ReqT, RespT>,
@@ -65,7 +71,7 @@ class AuthInterceptor(private val internalToken: String, jwtSecret: String) : Se
         return Contexts.interceptCall(ctx, call, headers, next)
     }
 
-    private fun <ReqT : Any?, RespT : Any?> handleExternalAuth(
+    private fun <ReqT, RespT> handleExternalAuth(
         call: ServerCall<ReqT, RespT>,
         headers: Metadata,
         next: ServerCallHandler<ReqT, RespT>,

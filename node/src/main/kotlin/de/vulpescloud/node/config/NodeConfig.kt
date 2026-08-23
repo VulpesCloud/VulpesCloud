@@ -12,7 +12,6 @@ data class NodeConfig(
     val grpcHost: String,
     val serviceBindAdress: String,
     val maxMemory: Int = 1024, // MB
-    val defaultServiceType: String = "LOCAL", // can be "LOCAL" or "DOCKER"
     val docker: DockerConfig,
     val useModernForwarding: Boolean,
     val auth: AuthConfig = AuthConfig("changeme", "changeme2", true),

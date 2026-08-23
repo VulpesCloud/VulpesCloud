@@ -11,6 +11,7 @@ import build.buf.gen.vulpescloud.events.v1.subscribeRequest
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.google.protobuf.Any
 import com.google.protobuf.Message
+import de.vulpescloud.api.cluster.NodeState
 import de.vulpescloud.node.Node
 import de.vulpescloud.node.NodeCoroutineScope
 import de.vulpescloud.node.grpc.security.AuthClientInterceptor
@@ -59,7 +60,7 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
 
         if (request.forwardToOtherNodes) {
             Node.instance.clusterProvider.remoteNodes
-                .filter { it.endpoint.name != localNodeName && it.getNode().isRunning() }
+                .filter { it.endpoint.name != localNodeName && it.getSnapshot().state == NodeState.ONLINE }
                 .forEach { node ->
                     val channel = node.channel ?: return@forEach
                     val stub =

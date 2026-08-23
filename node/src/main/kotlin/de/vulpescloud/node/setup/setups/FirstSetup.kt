@@ -141,7 +141,6 @@ class FirstSetup : Setup {
                 grpcHost,
                 bindAddress,
                 totalAllowedMemoryMb.toInt(),
-                "LOCAL",
                 docker = DockerConfig(),
                 modernForwardingEnabled,
             )

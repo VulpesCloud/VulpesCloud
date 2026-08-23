@@ -2,6 +2,7 @@ package de.vulpescloud.node.services.impl.local
 
 import build.buf.gen.vulpescloud.events.v1.serviceStateChangedEvent
 import build.buf.gen.vulpescloud.services.v1.ServiceState
+import build.buf.gen.vulpescloud.templates.v1.createTemplateRequest
 import com.electronwill.nightconfig.core.file.FileConfig
 import com.electronwill.nightconfig.toml.TomlFormat
 import com.electronwill.nightconfig.yaml.YamlFormat
@@ -11,6 +12,7 @@ import de.vulpescloud.node.Node
 import de.vulpescloud.node.event.EventsService
 import de.vulpescloud.node.serversoftware.impl.*
 import de.vulpescloud.node.services.AbstractServiceFactory
+import de.vulpescloud.node.templates.TemplateStorageRegistry
 import de.vulpescloud.node.utils.MongoUtils
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
@@ -42,8 +44,12 @@ class LocalServiceFactory : AbstractServiceFactory() {
         service.task.templates
             .sortedBy { it.weight }
             .forEach { template ->
-                Node.instance.templateStorageProvider.getTemplateStorage(template.storage).apply {
+                TemplateStorageRegistry.getTemplateStorageByName(template.location.storageName)?.apply {
                     createTemplate(template)
+                    Node.instance.localGrpcClient.templateAPI.createTemplate(createTemplateRequest {
+                        this.template = template.toDefinition()
+                        this.destination = template.location.toDefinition()
+                    }) // TODO: This is prob. only temporary as I am to lazy to manually re-create my templates
                     copyTemplateToPath(template, localService.path())
                 }
             }
@@ -103,6 +109,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 acceptEULA(localService)
                 setServerProperties(localService)
                 updatePaperGlobalConfig(localService)
+                arguments.add("--nogui")
             }
             "Folia" -> {
                 FoliaDownloader.apply {
@@ -115,6 +122,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 updatePaperGlobalConfig(localService)
 
                 arguments.add("--separateClassLoader")
+                arguments.add("--nogui")
             }
             "Paper" -> {
                 PaperDownloader.apply {
@@ -140,6 +148,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 updatePaperGlobalConfig(localService)
 
                 arguments.add("--separateClassLoader")
+                arguments.add("--nogui")
             }
             "Velocity" -> {
                 VelocityDownloader.apply {
@@ -185,6 +194,25 @@ class LocalServiceFactory : AbstractServiceFactory() {
                     .resolve(service.task.software.pluginDir)
                     .resolve("vulpescloud-connector.jar"),
                 StandardCopyOption.REPLACE_EXISTING,
+            )
+
+            // TLS Certificates
+            val certDir = localService.path().resolve("vulpescloud/certs")
+            Files.createDirectories(certDir)
+            Files.copy(
+                Path("launcher/.secret/certs/node.key.pem"),
+                certDir.resolve("node.key"),
+                StandardCopyOption.REPLACE_EXISTING
+            )
+            Files.copy(
+                Path("launcher/.secret/certs/node.cert.pem"),
+                certDir.resolve("node.crt"),
+                StandardCopyOption.REPLACE_EXISTING
+            )
+            Files.copy(
+                Path("launcher/.secret/certs/ca.cert.pem"),
+                certDir.resolve("ca.crt"),
+                StandardCopyOption.REPLACE_EXISTING
             )
         }
 

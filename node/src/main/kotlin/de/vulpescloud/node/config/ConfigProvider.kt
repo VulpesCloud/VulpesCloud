@@ -1,6 +1,5 @@
 package de.vulpescloud.node.config
 
-import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import java.nio.file.Files
 import java.util.*
@@ -11,7 +10,6 @@ class ConfigProvider {
     lateinit var config: NodeConfig
         private set
 
-    @OptIn(ExperimentalSerializationApi::class)
     val json = Json {
         prettyPrint = true
         encodeDefaults = true
@@ -34,7 +32,6 @@ class ConfigProvider {
                     "0.0.0.0",
                     "0.0.0.0",
                     4096,
-                    "LOCAL",
                     DockerConfig(),
                     true,
                 )

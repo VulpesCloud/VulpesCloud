@@ -9,6 +9,12 @@ import org.incendo.cloud.Command
 import org.incendo.cloud.CommandManager
 import org.incendo.cloud.annotations.AnnotationParser
 import org.incendo.cloud.annotations.BuilderModifier
+import org.incendo.cloud.exception.ArgumentParseException
+import org.incendo.cloud.exception.CommandExecutionException
+import org.incendo.cloud.exception.InvalidCommandSenderException
+import org.incendo.cloud.exception.InvalidSyntaxException
+import org.incendo.cloud.exception.NoPermissionException
+import org.incendo.cloud.exception.NoSuchCommandException
 import org.incendo.cloud.execution.CommandResult
 import org.incendo.cloud.key.CloudKey
 import org.incendo.cloud.meta.CommandMeta
@@ -17,7 +23,6 @@ import org.incendo.cloud.processors.cache.CaffeineCache
 import org.incendo.cloud.processors.confirmation.ConfirmationConfiguration
 import org.incendo.cloud.processors.confirmation.ConfirmationManager
 import org.incendo.cloud.processors.confirmation.annotation.ConfirmationBuilderModifier
-import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.CompletableFuture
@@ -36,7 +41,6 @@ class CommandProvider {
     private var annotationParser: AnnotationParser<CommandSource>? = null
 
     val commandManager: CommandManager<CommandSource> = CloudCommandManager()
-    private val logger = LoggerFactory.getLogger("CommandProvider")
 
     fun initialize() {
         this.annotationParser =
@@ -113,6 +117,34 @@ class CommandProvider {
         )
 
         registeredCommands!!.add(CommandInfo("confirm", setOf(), "", listOf()))
+
+        this.commandManager.exceptionController().registerHandler(NoSuchCommandException::class.java) { ctx ->
+            ctx.context().sender().sendError("Unknown command: ${ctx.exception().suppliedCommand()}")
+        }
+
+        this.commandManager.exceptionController().registerHandler(InvalidSyntaxException::class.java) { ctx ->
+            ctx.context().sender().sendError("Invalid syntax: /${ctx.exception().correctSyntax()}")
+        }
+
+        this.commandManager.exceptionController().registerHandler(NoPermissionException::class.java) { ctx ->
+            ctx.context().sender().sendError("You don't have permission to do that.")
+        }
+
+        this.commandManager.exceptionController().registerHandler(InvalidCommandSenderException::class.java) { ctx ->
+            ctx.context().sender().sendError(ctx.exception().message ?: "You can't use this command here.")
+        }
+
+        this.commandManager.exceptionController().registerHandler(ArgumentParseException::class.java) { ctx ->
+            // .cause is the actual parser failure (NumberFormatException, etc.)
+            val cause = ctx.exception().cause
+            ctx.context().sender().sendError("Invalid argument: ${cause.message ?: ctx.exception().message}")
+        }
+
+        this.commandManager.exceptionController().registerHandler(CommandExecutionException::class.java) { ctx ->
+            val cause = ctx.exception().cause ?: ctx.exception()
+            ctx.context().sender().sendError("An internal error occurred while executing the command.")
+            cause.printStackTrace() // log it, don't just swallow it
+        }
     }
 
     fun execute(
@@ -120,10 +152,7 @@ class CommandProvider {
         input: String,
     ): CompletableFuture<CommandResult<CommandSource>> {
 
-        return commandManager.commandExecutor().executeCommand(source, input).exceptionally {
-            exception ->
-            throw exception
-        }
+        return commandManager.commandExecutor().executeCommand(source, input)
     }
 
     fun register(command: Any) {

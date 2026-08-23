@@ -3,7 +3,9 @@ package de.vulpescloud.node.grpc
 import io.grpc.BindableService
 import io.grpc.Server
 import io.grpc.ServerInterceptors
+import io.grpc.netty.GrpcSslContexts
 import io.grpc.netty.NettyServerBuilder
+import io.netty.handler.ssl.SslContext
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -17,6 +19,7 @@ class GrpcServer(
     private val services: List<BindableService> = emptyList(),
     private val interceptors: List<io.grpc.ServerInterceptor> = emptyList(),
     private val shutdownTimeoutSec: Long = 5,
+    private val sslContext: SslContext? = null,
 ) {
     private val logger = LoggerFactory.getLogger("gRPC Server")
     @Volatile private var server: Server? = null
@@ -41,6 +44,9 @@ class GrpcServer(
                 server =
                     NettyServerBuilder.forAddress(address)
                         .apply {
+                            if (sslContext != null) {
+                                sslContext(sslContext)
+                            }
                             services.forEach { svc ->
                                 var def = svc.bindService()
                                 val serviceName =

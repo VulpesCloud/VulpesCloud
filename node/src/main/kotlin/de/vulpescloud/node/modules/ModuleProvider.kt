@@ -1,7 +1,6 @@
 package de.vulpescloud.node.modules
 
 import de.vulpescloud.launcher.VulpesLauncher
-import de.vulpescloud.node.cluster.ClusterHelper
 import java.net.URI
 import java.nio.file.Path
 import java.util.concurrent.ConcurrentHashMap
@@ -21,13 +20,14 @@ class ModuleProvider(val moduleFolder: Path, val modulesJsonURL: String) {
     private val json = Json {
         prettyPrint = true
         encodeDefaults = true
+        ignoreUnknownKeys = true
     }
 
     init {
         moduleFolder.toFile().mkdirs()
     }
 
-    suspend fun loadModule(name: String): LoadedModule? {
+    fun loadModule(name: String): LoadedModule? {
         try {
             moduleFolder.resolve("$name.jar").toFile().let {
                 logger.debug("Loading module $name")
@@ -43,15 +43,6 @@ class ModuleProvider(val moduleFolder: Path, val modulesJsonURL: String) {
                 val module = loadedModules.find { modu -> modu.moduleInfo.name == moduleInfo.name }
                 if (module != null) {
                     return module
-                }
-
-                if (moduleInfo.headNodeOnly) {
-                    if (!ClusterHelper.getLocalNode().head) {
-                        logger.warn(
-                            "Refusing to load module <light_purple>${moduleInfo.name}</light_purple> as it is head node only"
-                        )
-                        return null
-                    }
                 }
 
                 val classLoader =

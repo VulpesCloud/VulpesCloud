@@ -1,5 +1,5 @@
 plugins {
-    kotlin("jvm") version "2.3.21"
+    kotlin("jvm") version "2.4.10"
     //id("com.github.johnrengelman.shadow") version "8.1.1"
     alias(libs.plugins.shadow)
 }
@@ -19,6 +19,7 @@ dependencies {
     implementation(libs.grpc.core)
     implementation(libs.json)
     implementation(libs.mongodb.bson.kotlinx)
+    implementation(libs.bouncy.castle)
 }
 
 java {

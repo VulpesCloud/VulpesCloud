@@ -25,7 +25,7 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
  */
 
 plugins {
-    kotlin("jvm") version "2.3.21"
+    kotlin("jvm") version "2.4.10"
     alias(libs.plugins.shadow)
 }
 
@@ -94,6 +94,7 @@ java {
 
 val generateDependenciesJson by
     tasks.registering {
+        description = "Generates a Json file containing all non implemented dependencies"
         val outFile = layout.buildDirectory.file("dependencies.json")
         outputs.file(outFile)
         doLast { exportDependenciesJson("dependencies.json") }

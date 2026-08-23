@@ -10,7 +10,6 @@ data class ModuleInfo(
     val main: String,
     val version: String,
     var website: String = "<none>",
-    val headNodeOnly: Boolean,
     val copyToServices: Boolean,
     val platforms: List<String>,
     var state: ModuleStates = ModuleStates.UNLOADED,
