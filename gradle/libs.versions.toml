@@ -30,7 +30,7 @@ docker-java = "3.7.1"
 # Database
 exposed = "1.4.0"
 mongodb = "5.10.0"
-sqlite = "3.53.2.1"
+sqlite = "3.53.4.0"
 mariadb = "3.5.10"
 hikaricp = "7.1.0"
 
