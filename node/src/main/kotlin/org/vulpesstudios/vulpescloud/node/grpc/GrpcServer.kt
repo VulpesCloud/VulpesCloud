@@ -1,0 +1,122 @@
+/*
+ * Copyright 2024-2026 VulpesStudios & Contributers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package org.vulpesstudios.vulpescloud.node.grpc
+
+import io.grpc.BindableService
+import io.grpc.Server
+import io.grpc.ServerInterceptors
+import io.grpc.netty.NettyServerBuilder
+import io.netty.handler.ssl.SslContext
+import kotlinx.coroutines.*
+import org.slf4j.LoggerFactory
+import java.io.IOException
+import java.net.InetSocketAddress
+import java.util.concurrent.TimeUnit
+import kotlin.coroutines.CoroutineContext
+
+class GrpcServer(
+    private val host: String = "127.0.0.1",
+    private val port: Int = 6565,
+    private val services: List<BindableService> = emptyList(),
+    private val interceptors: List<io.grpc.ServerInterceptor> = emptyList(),
+    private val shutdownTimeoutSec: Long = 5,
+    private val sslContext: SslContext? = null,
+) {
+    private val logger = LoggerFactory.getLogger("gRPC Server")
+    @Volatile private var server: Server? = null
+
+    suspend fun start() =
+        withContext(Dispatchers.IO) {
+            if (server?.isTerminated == false) {
+                logger.warn("Server already running")
+                return@withContext
+            }
+
+            try {
+                //            val certFile = File("certs/server.crt")
+                //            val keyFile = File("certs/server.key")
+
+                //            if (!certFile.exists() || !keyFile.exists()) {
+                //                throw IllegalStateException("TLS Certs are missing:
+                // ${certFile.path}, ${keyFile.path}")
+                //            }
+
+                val address = InetSocketAddress(host, port)
+                server =
+                    NettyServerBuilder.forAddress(address)
+                        .apply {
+                            if (sslContext != null) {
+                                sslContext(sslContext)
+                            }
+                            services.forEach { svc ->
+                                var def = svc.bindService()
+                                val serviceName =
+                                    def.serviceDescriptor.name // e.g. "vulpescloud.ServiceManager"
+                                GrpcServiceRegistry.register(serviceName, svc)
+
+                                interceptors.forEach { def = ServerInterceptors.intercept(def, it) }
+                                addService(def)
+                            }
+                            //                useTransportSecurity(certFile, keyFile)
+                        }
+                        .build()
+                        .start()
+                logger.info("gRPC Server started on $address")
+            } catch (ex: IOException) {
+                logger.error("Failed to start gRPC Server", ex)
+                throw ex
+            }
+
+            Runtime.getRuntime()
+                .addShutdownHook(
+                    Thread {
+                        try {
+                            runBlocking(Dispatchers.IO) { stop() }
+                        } catch (ex: Exception) {
+                            logger.error("Error during shutdown hook", ex)
+                        }
+                    }
+                )
+        }
+
+    suspend fun awaitTermination() = withContext(Dispatchers.IO) { server?.awaitTermination() }
+
+    suspend fun stop() =
+        withContext(Dispatchers.IO) {
+            val s = server ?: return@withContext
+            if (!s.isShutdown) {
+                logger.info("gRPC Server shutting down...")
+                s.shutdown()
+                if (!s.awaitTermination(shutdownTimeoutSec, TimeUnit.SECONDS)) {
+                    logger.warn("Graceful shutdown timeout, forcing now.")
+                    s.shutdownNow()
+                }
+                logger.info("gRPC Server stopped.")
+            }
+            server = null
+        }
+
+    fun serve(scope: CoroutineScope, context: CoroutineContext = Dispatchers.IO): Job =
+        scope.launch(context) {
+            try {
+                start()
+                awaitTermination()
+            } finally {
+                withContext(NonCancellable) { stop() }
+            }
+        }
+}

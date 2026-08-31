@@ -5,5 +5,5 @@
   "authors": [
     "TheCGuy"
   ],
-  "main": "de.vulpescloud.connector.velocity.VelocityConnector"
+  "main": "org.vulpesstudios.vulpescloud.connector.velocity.VelocityConnector"
 }
