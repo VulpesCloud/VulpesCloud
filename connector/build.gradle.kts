@@ -38,6 +38,7 @@ dependencies {
     compileOnly(libs.paper)
     compileOnly(libs.velocity)
     annotationProcessor(libs.velocity)
+    compileOnly(libs.minestom)
 
     compileOnly(libs.bundles.proto)
     implementation("org.bstats:bstats-bukkit:3.2.1")
@@ -46,7 +47,6 @@ dependencies {
     implementation(libs.commandapi.velocity.shade)
     implementation(libs.commandapi.kotlin.velocity)
     implementation(libs.kotlinx.serialization)
-    testImplementation(kotlin("test"))
 }
 
 java {

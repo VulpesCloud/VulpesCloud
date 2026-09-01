@@ -51,6 +51,7 @@ cloud = "2.1.0"
 # platforms
 paper = "1.17-R0.1-SNAPSHOT"
 velocity = "4.0.0"
+minestom = "2026.08.28-26.2"
 
 # config
 night-config = "3.9.0"
@@ -148,6 +149,7 @@ cloud-processors-confirmation = { group = "org.incendo", name = "cloud-processor
 # platforms
 paper = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
 velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
+minestom = { group = "net.minestom", name = "minestom", version.ref = "minestom" }
 
 # config
 nightConfig-toml = { group = "com.electronwill.night-config", name = "toml", version.ref = "night-config" }

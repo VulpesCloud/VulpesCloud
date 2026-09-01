@@ -18,6 +18,7 @@ package org.vulpesstudios.vulpescloud.node.services.impl.local
 
 import build.buf.gen.vulpescloud.events.v1.serviceLogEvent
 import build.buf.gen.vulpescloud.events.v1.serviceStateChangedEvent
+import build.buf.gen.vulpescloud.services.v1.ServiceState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -118,6 +119,14 @@ class LocalService(override val service: Service) : AbstractService {
 
         NodeCoroutineScope.launch {
             MongoUtils.updateService(service.copy(state = ServiceStates.STARTING))
+            EventsService.publish(
+                serviceStateChangedEvent {
+                    this.service = this@LocalService.service.toDefinition()
+                    this.oldState = ServiceState.SERVICE_STATE_PREPARED
+                    this.newState = ServiceState.SERVICE_STATE_STARTING
+                },
+                true,
+            )
         }
     }
 
