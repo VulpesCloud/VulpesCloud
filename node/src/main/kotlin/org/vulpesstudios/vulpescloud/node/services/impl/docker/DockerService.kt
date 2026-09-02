@@ -24,7 +24,7 @@ import org.vulpesstudios.vulpescloud.node.services.AbstractService
 import org.vulpesstudios.vulpescloud.node.utils.DockerUtils
 import java.nio.file.Path
 
-class DockerService(override val service: Service) : AbstractService {
+class DockerService(override var service: Service) : AbstractService {
     private val dockerClient = DockerClientImpl.getInstance(Node.instance.dockerClientConfig, Node.instance.dockerHttpClient)
     private val logger = LoggerFactory.getLogger("DockerService-${service.task.name}-${service.orderedId}")
 

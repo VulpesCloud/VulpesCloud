@@ -78,6 +78,13 @@ import kotlin.time.Duration.Companion.milliseconds
 class Node {
     private val logger = LoggerFactory.getLogger("Node")
 
+    val nodeServices: MutableSet<AbstractService> = ConcurrentHashMap.newKeySet()
+    val nodeServiceSnapshots: MutableSet<ServiceSnapshot> = ConcurrentHashMap.newKeySet()
+    val nodeProxyPlayers: MutableMap<String, MutableList<OnlinePlayer>> =
+        ConcurrentHashMap() // ProxyName<Player>
+    val nodeServerPlayers: MutableMap<String, MutableList<OnlinePlayer>> =
+        ConcurrentHashMap() // ServerName<Player>
+
     val terminal = Terminal()
     val commandProvider = CommandProvider()
     val configProvider = ConfigProvider()
@@ -95,12 +102,6 @@ class Node {
 
     val localGrpcClient = LocalGrpcClient()
     val serviceFactoryProvider = ServiceFactoryProvider()
-    val nodeServices: MutableSet<AbstractService> = ConcurrentHashMap.newKeySet()
-    val nodeServiceSnapshots: MutableSet<ServiceSnapshot> = ConcurrentHashMap.newKeySet()
-    val nodeProxyPlayers: MutableMap<String, MutableList<OnlinePlayer>> =
-        ConcurrentHashMap() // ProxyName<Player>
-    val nodeServerPlayers: MutableMap<String, MutableList<OnlinePlayer>> =
-        ConcurrentHashMap() // ServerName<Player>
     val virtualConfigProvider = VirtualConfigProvider()
     val clusterProvider = ClusterProvider()
     val moduleProvider =

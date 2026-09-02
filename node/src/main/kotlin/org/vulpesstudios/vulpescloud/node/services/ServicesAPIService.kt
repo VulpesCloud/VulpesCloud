@@ -21,15 +21,14 @@ import build.buf.gen.vulpescloud.services.v1.*
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
+import org.vulpesstudios.vulpescloud.api.cluster.NodeState
 import org.vulpesstudios.vulpescloud.api.services.Service
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.cluster.ClusterHelper
 import org.vulpesstudios.vulpescloud.node.event.EventsService
 import org.vulpesstudios.vulpescloud.node.grpc.security.AuthClientInterceptor
 import org.vulpesstudios.vulpescloud.node.grpc.security.annotations.RequiresPermission
-import org.vulpesstudios.vulpescloud.node.utils.MongoUtils
 import org.vulpesstudios.vulpescloud.node.utils.PropertyUtils.isLoggingRedirects
 import java.util.concurrent.ConcurrentHashMap
 
@@ -37,27 +36,61 @@ import java.util.concurrent.ConcurrentHashMap
 class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImplBase() {
 
     private val logger = LoggerFactory.getLogger("ServicesAPIService")
-    private val servicesDatabase by lazy {
-        Node.instance.getDatabaseProvider().getOrCreateDatabase("services")
+
+    override suspend fun getServicesOfNode(
+        request: GetServicesOfNodeRequest
+    ): GetServicesOfNodeResponse {
+        if (Node.instance.configProvider.config.nodeName != request.nodeName) {
+            val correctNode =
+                Node.instance.clusterProvider.remoteNodes.find {
+                    it.endpoint.name == request.nodeName
+                }
+            if (correctNode?.channel == null) {
+                return GetServicesOfNodeResponse.newBuilder().build()
+            }
+
+            val stub =
+                ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(correctNode.channel!!)
+                    .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+
+            return stub.getServicesOfNode(request)
+        }
+
+        return GetServicesOfNodeResponse.newBuilder()
+            .addAllServices(Node.instance.nodeServices.map { it.service.toDefinition() })
+            .build()
     }
 
     @RequiresPermission("services.getAll")
     override suspend fun getAllServices(request: GetAllServicesRequest): GetAllServicesResponse {
-        val services =
-            servicesDatabase
-                .getAll()
-                .map { Json.decodeFromJsonElement(Service.serializer(), it) }
-                .map { it.toDefinition() }
+        val services = mutableListOf<ServiceDefinition>()
+        Node.instance.clusterProvider.remoteNodes
+            .filter {
+                it.channel != null && it.getSnapshot().state == NodeState.ONLINE ||
+                    it.getSnapshot().state == NodeState.DRAINING
+            }
+            .forEach { node ->
+                val stub = ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(node.channel!!)
+                services +=
+                    stub
+                        .getServicesOfNode(
+                            getServicesOfNodeRequest { nodeName = node.endpoint.name }
+                        )
+                        .servicesList
+            }
 
         return GetAllServicesResponse.newBuilder().addAllServices(services).build()
+    }
+
+    private suspend fun getAllService(): List<ServiceDefinition> {
+        return getAllServices(getAllServicesRequest {}).servicesList
     }
 
     @RequiresPermission("services.get")
     override suspend fun getByName(request: GetByNameRequest): GetByNameResponse {
         val service =
-            servicesDatabase
-                .getAll()
-                .map { Json.decodeFromJsonElement(Service.serializer(), it) }
+            getAllService()
+                .map { Service.fromDefinition(it) }
                 .find { "${it.task.name}-${it.orderedId}" == request.name }
 
         return if (service != null) {
@@ -70,11 +103,10 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
     @RequiresPermission("services.get")
     override suspend fun getByUuid(request: GetByUuidRequest): GetByUuidResponse {
         val service =
-            servicesDatabase.get(request.uuid)?.let {
-                Json.decodeFromJsonElement(Service.serializer(), it)
-            } ?: return GetByUuidResponse.newBuilder().build()
+            getAllService().find { it.uuid == request.uuid }
+                ?: return GetByUuidResponse.getDefaultInstance()
 
-        return GetByUuidResponse.newBuilder().setService(service.toDefinition()).build()
+        return GetByUuidResponse.newBuilder().setService(service).build()
     }
 
     @RequiresPermission("services.start")
@@ -361,7 +393,49 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
     ): UpdatePlayerCountResponse {
         val service = Service.fromDefinition(request.service)
 
-        MongoUtils.updateService(service.copy(playerCount = request.playerCount))
+        val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
+        if (abstractService == null) {
+            if (isLoggingRedirects()) {
+                logger.warn(
+                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
+                )
+            }
+            val correctNode =
+                Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == service.node }
+            if (correctNode?.endpoint?.name == ClusterHelper.getLocalNodeSnapshot().name) {
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node!"
+                    )
+                }
+            }
+
+            if (correctNode == null) {
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to update player count of Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
+                    )
+                }
+                return UpdatePlayerCountResponse.newBuilder().build()
+            }
+
+            if (correctNode.channel == null) {
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to update player count of Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
+                    )
+                }
+                return UpdatePlayerCountResponse.newBuilder().build()
+            }
+
+            val stub =
+                ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(correctNode.channel!!)
+                    .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+
+            return stub.updatePlayerCount(request)
+        }
+
+        abstractService.service = abstractService.service.copy(playerCount = request.playerCount)
 
         return UpdatePlayerCountResponse.newBuilder().build()
     }
