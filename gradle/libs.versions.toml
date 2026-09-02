@@ -50,7 +50,7 @@ cloud = "2.1.0"
 
 # platforms
 paper = "1.17-R0.1-SNAPSHOT"
-velocity = "4.0.0"
+velocity = "4.1.1"
 minestom = "2026.08.28-26.2"
 
 # config
