@@ -36,4 +36,6 @@ interface Database {
 
     suspend fun insertIgnore(key: String, value: JsonElement)
 
+    suspend fun compareAndSet(key: String, expected: JsonElement?, value: JsonElement): Boolean
+
 }

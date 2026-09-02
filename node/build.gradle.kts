@@ -77,6 +77,8 @@ dependencies {
     compileOnly(libs.exposed.core)
     compileOnly(libs.exposed.jdbc)
     compileOnly(libs.hikaricp)
+
+    compileOnly(libs.chronyx.core)
 }
 
 sourceSets { getByName("main") { kotlin { srcDir("src/main/kotlin") } } }

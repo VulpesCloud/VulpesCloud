@@ -21,7 +21,6 @@ import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.node.cluster.NodeSnapshotUpdater
 import org.vulpesstudios.vulpescloud.node.event.EventListenHelper
 import org.vulpesstudios.vulpescloud.node.services.ServiceLogHandler
-import org.vulpesstudios.vulpescloud.node.services.ServiceScheduler
 import java.util.concurrent.TimeoutException
 import kotlin.concurrent.atomics.AtomicBoolean
 import kotlin.concurrent.atomics.ExperimentalAtomicApi
@@ -38,7 +37,7 @@ object NodeShutdown {
         if (isShuttingDown.compareAndSet(expectedValue = false, newValue = true)) {
             logger.info("Shutting down the Node...")
 
-            ServiceScheduler.stop()
+            Node.instance.chronyxCoordinator.stop()
 
             try {
                 withTimeout(30.seconds) {

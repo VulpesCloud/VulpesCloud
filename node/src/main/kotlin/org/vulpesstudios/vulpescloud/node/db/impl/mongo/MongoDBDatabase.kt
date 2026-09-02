@@ -86,6 +86,18 @@ class MongoDBDatabase(
         }
     }
 
+    override suspend fun compareAndSet(key: String, expected: JsonElement?, value: JsonElement): Boolean =
+        withContext(Dispatchers.IO) {
+            val filter =
+                if (expected == null) {
+                    Filters.and(Filters.eq("key", key), Filters.exists("value", false))
+                } else {
+                    Filters.and(Filters.eq("key", key), Filters.eq("value", expected))
+                }
+            collection.replaceOne(filter, MongoKVModel(key, value), ReplaceOptions().upsert(expected == null)).modifiedCount > 0 ||
+                    (expected == null && collection.countDocuments(Filters.eq("key", key)) == 1L)
+        }
+
     override suspend fun get(key: String): JsonElement? {
         if (PropertyUtils.isMoreDBLogging()) logger.info("MongoDB[$collectionName]> Getting $key")
         return withContext(Dispatchers.IO) {

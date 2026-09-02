@@ -35,6 +35,7 @@ import org.vulpesstudios.vulpescloud.node.cluster.tls.TlsManager
 import org.vulpesstudios.vulpescloud.node.command.CommandProvider
 import org.vulpesstudios.vulpescloud.node.commands.*
 import org.vulpesstudios.vulpescloud.node.config.ConfigProvider
+import org.vulpesstudios.vulpescloud.node.coordination.ChronyxCoordinator
 import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.mariadb.MariaDBDatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.mongo.MongoDBDatabaseProvider
@@ -57,7 +58,6 @@ import org.vulpesstudios.vulpescloud.node.serversoftware.impl.PurpurDownloader
 import org.vulpesstudios.vulpescloud.node.serversoftware.impl.VelocityDownloader
 import org.vulpesstudios.vulpescloud.node.services.AbstractService
 import org.vulpesstudios.vulpescloud.node.services.ServiceFactoryProvider
-import org.vulpesstudios.vulpescloud.node.services.ServiceScheduler
 import org.vulpesstudios.vulpescloud.node.services.ServicesAPIService
 import org.vulpesstudios.vulpescloud.node.services.impl.docker.DockerServiceFactory
 import org.vulpesstudios.vulpescloud.node.services.impl.local.LocalServiceFactory
@@ -114,6 +114,7 @@ class Node {
         )
     val virtualConfigServiceImpl = VirtualConfigServiceImpl()
     val serverSoftwareProvider = ServerSoftwareProvider()
+    val chronyxCoordinator = ChronyxCoordinator()
 
     private val grpcServices = mutableListOf<BindableService>()
     private var allowGrpcServiceAdding = true
@@ -183,16 +184,18 @@ class Node {
 
             val tlsManager = TlsManager(secret, configProvider.config.nodeName)
             val bundle = tlsManager.bootstrapNode()
-            val serverSslContext = GrpcTls.buildServerSslContext(
-                bundle.nodeCertPem,
-                ClusterCertificateAuthority.toPem(bundle.nodeKey.private),
-                bundle.caCertPem
-            )
-            val clientSslContext = GrpcTls.buildClientSslContext(
-                bundle.nodeCertPem,
-                ClusterCertificateAuthority.toPem(bundle.nodeKey.private),
-                bundle.caCertPem
-            )
+            val serverSslContext =
+                GrpcTls.buildServerSslContext(
+                    bundle.nodeCertPem,
+                    ClusterCertificateAuthority.toPem(bundle.nodeKey.private),
+                    bundle.caCertPem,
+                )
+            val clientSslContext =
+                GrpcTls.buildClientSslContext(
+                    bundle.nodeCertPem,
+                    ClusterCertificateAuthority.toPem(bundle.nodeKey.private),
+                    bundle.caCertPem,
+                )
 
             internalEventsService = EventsService()
 
@@ -306,9 +309,8 @@ class Node {
                 System.currentTimeMillis() - (System.getProperty("startup").toLongOrNull() ?: 0)
             logger.info("Startup Done! Took {}ms", time)
 
-            ServiceScheduler.start()
-
             serverSoftwareProvider.triggerReCache()
+            chronyxCoordinator.start()
 
             // Runtime.getRuntime().addShutdownHook(Thread { NodeShutdown.shutdown() })
         }
