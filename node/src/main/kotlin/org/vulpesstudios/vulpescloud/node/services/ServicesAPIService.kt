@@ -79,6 +79,8 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
                         .servicesList
             }
 
+        services += getServicesOfNode(getServicesOfNodeRequest { nodeName = Node.instance.configProvider.config.nodeName }).servicesList
+
         return GetAllServicesResponse.newBuilder().addAllServices(services).build()
     }
 
