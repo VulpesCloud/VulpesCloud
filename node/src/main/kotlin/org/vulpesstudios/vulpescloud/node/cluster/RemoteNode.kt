@@ -16,8 +16,7 @@
 
 package org.vulpesstudios.vulpescloud.node.cluster
 
-import build.buf.gen.vulpescloud.cluster.v2.ClusterAPIServiceGrpcKt
-import build.buf.gen.vulpescloud.cluster.v2.getNodeSnapshotRequest
+import build.buf.gen.vulpescloud.cluster.v2.*
 import io.grpc.ManagedChannel
 import io.grpc.netty.NettyChannelBuilder
 import io.netty.handler.ssl.SslContext
@@ -64,7 +63,11 @@ class RemoteNode(val endpoint: NodeEndpointDetails) {
         return NodeSnapshot.fromDefinition(
             Node.instance.localGrpcClient.clusterAPI
                 .getNodeSnapshot(getNodeSnapshotRequest { this.name = endpoint.name })
-                .snapshot
+                .snapshotOrNull ?: nodeSnapshot {
+                    this.name = endpoint.name
+                    this.uuid = endpoint.uuid.toString()
+                    this.state = NodeState.NODE_STATES_UNKNOWN
+            }
         )
     }
 }
