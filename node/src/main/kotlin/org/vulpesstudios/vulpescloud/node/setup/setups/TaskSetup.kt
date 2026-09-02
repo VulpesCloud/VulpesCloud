@@ -54,7 +54,7 @@ class TaskSetup() : Setup {
             maintenance = false,
             copyTemplatesToStatic = false,
             serviceFactoryName = "local",
-            preferredNode = "",
+            preferredNodes = listOf(),
             maxPlayers = 1,
             software = ServerSoftware("UNKNOWN", "UNKNOWN", 0, "", "", SoftwareType.SERVER),
             attributes = emptyMap(),
@@ -209,7 +209,7 @@ class TaskSetup() : Setup {
 
             task =
                 task.copy(
-                    preferredNode = Node.instance.configProvider.config.nodeName,
+                    preferredNodes = listOf(Node.instance.configProvider.config.nodeName),
                     templates =
                         listOf(
                             Template(

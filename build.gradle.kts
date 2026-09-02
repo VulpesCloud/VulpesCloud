@@ -53,6 +53,7 @@ allprojects {
     repositories {
         mavenCentral()
         maven("https://repo.vulpesstudios.org/snapshots")
+        maven("https://repo.vulpesstudios.org/releases")
         maven {
             name = "buf"
             url = uri("https://buf.build/gen/maven")

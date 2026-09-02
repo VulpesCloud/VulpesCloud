@@ -77,6 +77,8 @@ dependencies {
     compileOnly(libs.exposed.core)
     compileOnly(libs.exposed.jdbc)
     compileOnly(libs.hikaricp)
+
+    compileOnly(libs.chronyx.core)
 }
 
 sourceSets { getByName("main") { kotlin { srcDir("src/main/kotlin") } } }
@@ -87,7 +89,7 @@ java {
 }
 
 val generateDependenciesJson by
-    tasks.registering {
+    tasks.registering { //TODO: make this better so that gradle does not complain
         description = "Generates a Json file containing all non implemented dependencies"
         val outFile = layout.buildDirectory.file("dependencies.json")
         outputs.file(outFile)

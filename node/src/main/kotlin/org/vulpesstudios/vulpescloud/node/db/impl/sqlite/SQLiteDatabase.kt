@@ -61,6 +61,18 @@ class SQLiteDatabase(
         }
     }
 
+    override suspend fun compareAndSet(key: String, expected: JsonElement?, value: JsonElement): Boolean =
+        transaction(database) {
+            val current = table.selectAll().where { table.key eq key }.map { it[table.value] }.firstOrNull()
+                ?.let { json.decodeFromString(JsonElement.serializer(), it) }
+            if (current != expected) return@transaction false
+            table.upsert(table.key) {
+                it[table.key] = key
+                it[table.value] = json.encodeToString(JsonElement.serializer(), value)
+            }
+            true
+        }
+
     override suspend fun delete(key: String) {
         transaction(database) { table.deleteWhere { table.key eq key } }
     }

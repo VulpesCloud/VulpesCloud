@@ -36,4 +36,8 @@ object ClusterHelper {
             NodeSnapshotUpdater.generateSnapshot()
         }
     }
+
+    suspend fun getAllNodeSnapshots(): List<NodeSnapshot> {
+        return snapshotDatabase.getAll().map { json.decodeFromJsonElement(it) }
+    }
 }

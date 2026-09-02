@@ -44,8 +44,8 @@ object SysUtils {
 
                 client.newCall(request).execute().use { response ->
                     if (response.isSuccessful) {
-                        val ip = response.body?.string()?.trim()
-                        if (!ip.isNullOrBlank() && !results.contains(ip)) {
+                        val ip = response.body.string().trim()
+                        if (ip.isNotBlank() && !results.contains(ip)) {
                             results.add(ip)
                         }
                     }

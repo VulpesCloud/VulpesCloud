@@ -119,21 +119,7 @@ class ClusterCommand {
                         source.sendMessage(
                             "<gold>---------</gold> <white>${snapshot.name}</white> <gold>---------</gold>"
                         )
-                        source.sendMessage(
-                            "<gray>CPU Usage<dark_gray>:</dark_gray> <white>${snapshot.systemCpuUsage}%</white>"
-                        )
-                        source.sendMessage(
-                            "<gray>Services Memory Usage<dark_gray>:</dark_gray> <white>${snapshot.servicesUsedMemory}mb</white>"
-                        )
-                        source.sendMessage(
-                            "<gray>Services Max Memory Usage<dark_gray>:</dark_gray> <white>${snapshot.servicesMaxMemory}mb</white>"
-                        )
-                        source.sendMessage(
-                            "<gray>State<dark_gray>:</dark_gray> <white>${snapshot.state}</white>"
-                        )
-                        source.sendMessage(
-                            "<gray>Online Players<dark_gray>:</dark_gray> <white>${snapshot.onlinePlayers}</white>"
-                        )
+                        //TODO: Display Data
                         source.sendMessage(
                             "<gray>Connection State<dark_gray>:</dark_gray> <white>${remoteNode?.channel?.getState(true)}</white>"
                         )

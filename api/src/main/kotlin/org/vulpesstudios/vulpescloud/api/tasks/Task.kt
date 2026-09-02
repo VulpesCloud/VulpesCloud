@@ -34,7 +34,7 @@ data class Task(
     val maintenance: Boolean,
     val copyTemplatesToStatic: Boolean,
     val serviceFactoryName: String,
-    val preferredNode: String,
+    val preferredNodes: List<String>,
     val maxPlayers: Int,
     val software: ServerSoftware,
     val attributes: Map<String, String>,
@@ -57,7 +57,7 @@ data class Task(
                 .setMaintenance(maintenance)
                 .setCopyTemplateToStatic(copyTemplatesToStatic)
                 .setServiceFactoryName(serviceFactoryName)
-                .setPreferredNode(preferredNode)
+                .addAllPreferredNodes(preferredNodes)
                 .setMaxPlayers(maxPlayers)
                 .setServerSoftware(software.toDefinition())
                 .setFallback(fallback)
@@ -84,7 +84,7 @@ data class Task(
                 taskDefinition.maintenance,
                 taskDefinition.copyTemplateToStatic,
                 taskDefinition.serviceFactoryName,
-                taskDefinition.preferredNode,
+                taskDefinition.preferredNodesList,
                 taskDefinition.maxPlayers,
                 ServerSoftware.fromDefinition(taskDefinition.serverSoftware),
                 taskDefinition.attributesMap,

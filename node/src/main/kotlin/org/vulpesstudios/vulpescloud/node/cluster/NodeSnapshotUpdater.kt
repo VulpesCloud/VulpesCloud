@@ -21,7 +21,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
-import org.vulpesstudios.vulpescloud.api.cluster.NodeSnapshot
+import org.vulpesstudios.vulpescloud.api.cluster.*
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.NodeCoroutineScope
 import java.lang.management.ManagementFactory
@@ -50,25 +50,52 @@ object NodeSnapshotUpdater {
         job = null
     }
 
-    private fun usedMemory(): Long {
-        return ((Runtime.getRuntime().totalMemory() - Runtime.getRuntime().freeMemory()) /
-            1024 /
-            1024)
-    }
-
     fun generateSnapshot(): NodeSnapshot {
+        val config = Node.instance.configProvider.config
+        val nodeServices = Node.instance.nodeServices
+        val serviceSnapshots = Node.instance.nodeServiceSnapshots
+
+        val totalSystemMemory = osMXBean.totalMemorySize / 1024 / 1024
+        val freeSystemMemory = osMXBean.freeMemorySize / 1024 / 1024
+        val usedSystemMemory = totalSystemMemory - freeSystemMemory
+
+        val systemSnapshot = SystemSnapshot(
+            cpu = CpuSnapshot(
+                cores = osMXBean.availableProcessors,
+                usage = osMXBean.cpuLoad,
+            ),
+            memory = MemorySnapshot(
+                totalMemory = totalSystemMemory,
+                usedMemory = usedSystemMemory,
+                availableMemory = freeSystemMemory,
+            ),
+        )
+
+        val memoryLimit = config.maxMemory.toLong()
+        val memoryReserved = nodeServices.sumOf { it.service.task.maxMemory }
+        val memoryUsed = serviceSnapshots
+            .filter { snapshot -> nodeServices.any { it.service.uuid.toString() == snapshot.uuid } }
+            .sumOf { it.heapUsageMemory / 1024 / 1024 }
+        val memoryAvailable = (memoryLimit - memoryReserved).coerceAtLeast(0L)
+
+        val serviceSnapshot = NodeServiceSnapshot(
+            count = nodeServices.size,
+            memoryLimit = memoryLimit,
+            memoryUsed = memoryUsed,
+            memoryReserved = memoryReserved,
+            memoryAvailable = memoryAvailable,
+        )
+
         return NodeSnapshot(
-            Node.instance.configProvider.config.nodeName,
-            Node.instance.configProvider.config.uuid,
-            Node.instance.clusterProvider.currentState,
-            usedMemory(),
-            -1L,
-            -1L,
-            osMXBean.cpuLoad,
-            0,
-            System.currentTimeMillis(),
-            Node.instance.clusterProvider.currentAttributes,
-            Node.instance.nodeServices.size.toLong()
+            name = config.nodeName,
+            uuid = config.uuid,
+            state = Node.instance.clusterProvider.currentState,
+            playersOnNode = Node.instance.nodeProxyPlayers.values.sumOf { it.size }.toLong(),
+            timestamp = System.currentTimeMillis(),
+            startupTimestamp = System.getProperty("startup")?.toLongOrNull() ?: 0L,
+            system = systemSnapshot,
+            services = serviceSnapshot,
+            attributes = Node.instance.clusterProvider.currentAttributes,
         )
     }
 
