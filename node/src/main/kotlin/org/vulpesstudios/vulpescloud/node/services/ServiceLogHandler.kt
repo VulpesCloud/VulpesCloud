@@ -83,11 +83,7 @@ object ServiceLogHandler {
 
     private fun logLine(serviceName: String, line: String) {
         if (Node.instance.configProvider.config.testing.newServiceLoggingStyle) {
-            println(
-                Node.instance.terminal.replaceColors(
-                    "<dark_gray>[</dark_gray><white>$serviceName</white><dark_gray>]</dark_gray> <gray>$line</gray>"
-                )
-            )
+            Node.instance.terminal.print("<dark_gray>[</dark_gray><white>$serviceName</white><dark_gray>]</dark_gray> <gray>$line</gray>")
         } else {
             logger.info("[$serviceName] $line")
         }
