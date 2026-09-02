@@ -70,7 +70,9 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
                     it.getSnapshot().state == NodeState.DRAINING
             }
             .forEach { node ->
-                val stub = ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(node.channel!!)
+                val stub =
+                    ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(node.channel!!)
+                        .withInterceptors(AuthClientInterceptor(Node.instance.secret))
                 services +=
                     stub
                         .getServicesOfNode(
@@ -79,7 +81,13 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
                         .servicesList
             }
 
-        services += getServicesOfNode(getServicesOfNodeRequest { nodeName = Node.instance.configProvider.config.nodeName }).servicesList
+        services +=
+            getServicesOfNode(
+                    getServicesOfNodeRequest {
+                        nodeName = Node.instance.configProvider.config.nodeName
+                    }
+                )
+                .servicesList
 
         return GetAllServicesResponse.newBuilder().addAllServices(services).build()
     }
