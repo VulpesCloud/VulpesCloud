@@ -20,7 +20,6 @@ import at.favre.lib.crypto.bcrypt.BCrypt
 import build.buf.gen.vulpescloud.virtualconfig.v1.VirtualConfig
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.encodeToJsonElement
-import org.vulpesstudios.vulpescloud.api.services.Service
 import org.vulpesstudios.vulpescloud.api.tasks.Task
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.grpc.security.model.GroupModel
@@ -37,9 +36,6 @@ object MongoUtils {
     private val usersDatabase by lazy {
         Node.instance.getDatabaseProvider().getOrCreateDatabase("users")
     }
-    private val servicesDatabase by lazy {
-        Node.instance.getDatabaseProvider().getOrCreateDatabase("services")
-    }
     private val virtualConfigsDatabase by lazy {
         Node.instance.getDatabaseProvider().getOrCreateDatabase("virtualconfigs")
     }
@@ -48,16 +44,8 @@ object MongoUtils {
         tasksDatabase.upsert(task.name, Json.encodeToJsonElement(task))
     }
 
-    suspend fun updateService(service: Service) {
-        servicesDatabase.upsert(service.uuid.toString(), Json.encodeToJsonElement(service))
-    }
-
     suspend fun deleteTask(task: Task) {
         tasksDatabase.delete(task.name)
-    }
-
-    suspend fun deleteService(service: Service) {
-        servicesDatabase.delete(service.uuid.toString())
     }
 
     suspend fun updateOrInsertVirtualConfig(config: VirtualConfig) {

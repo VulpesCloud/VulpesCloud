@@ -29,14 +29,13 @@ import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.NodeCoroutineScope
 import org.vulpesstudios.vulpescloud.node.event.EventsService
 import org.vulpesstudios.vulpescloud.node.services.AbstractService
-import org.vulpesstudios.vulpescloud.node.utils.MongoUtils
 import java.io.BufferedWriter
 import java.io.OutputStreamWriter
 import java.nio.file.Path
 import kotlin.io.path.exists
 import kotlin.time.Duration.Companion.seconds
 
-class LocalService(override val service: Service) : AbstractService {
+class LocalService(override var service: Service) : AbstractService {
 
     override fun path(): Path {
         return if (service.task.staticServices) {
@@ -91,7 +90,6 @@ class LocalService(override val service: Service) : AbstractService {
 
                 this.process = null
 
-                NodeCoroutineScope.launch { MongoUtils.deleteService(service) }
                 Node.instance.nodeServices.removeIf { it.service.uuid == service.uuid }
 
                 EventsService.publish(
@@ -117,8 +115,8 @@ class LocalService(override val service: Service) : AbstractService {
 
         processTracking!!.start()
 
+        service = service.copy(state = ServiceStates.STARTING)
         NodeCoroutineScope.launch {
-            MongoUtils.updateService(service.copy(state = ServiceStates.STARTING))
             EventsService.publish(
                 serviceStateChangedEvent {
                     this.service = this@LocalService.service.toDefinition()

@@ -15,7 +15,7 @@ bcrypt = "0.10.2"
 protobuf = "4.36.0"
 grpc = "1.83.1"
 grpc-kotlin = "1.5.0"
-protospecs-grpc = "1.5.0.4.20260817212501.763595d211b4"
+protospecs-grpc = "1.5.0.4.20260902154435.3b6b9ec94a11"
 perfmark = "0.27.0"
 
 javaJWT = "4.6.0"

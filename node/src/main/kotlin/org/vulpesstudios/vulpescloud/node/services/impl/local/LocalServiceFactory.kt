@@ -31,7 +31,6 @@ import org.vulpesstudios.vulpescloud.node.event.EventsService
 import org.vulpesstudios.vulpescloud.node.serversoftware.impl.*
 import org.vulpesstudios.vulpescloud.node.services.AbstractServiceFactory
 import org.vulpesstudios.vulpescloud.node.templates.TemplateStorageRegistry
-import org.vulpesstudios.vulpescloud.node.utils.MongoUtils
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.*
@@ -52,8 +51,6 @@ class LocalServiceFactory : AbstractServiceFactory() {
             )
 
         Node.instance.nodeServices.add(localService)
-
-        MongoUtils.updateService(localService.service)
 
         localService.path().resolve(localService.service.task.software.pluginDir).toFile().mkdirs()
 
@@ -252,8 +249,6 @@ class LocalServiceFactory : AbstractServiceFactory() {
             }
 
         localService.processBuilder = processBuilder
-
-        MongoUtils.updateService(localService.service)
 
         EventsService.publish(
             serviceStateChangedEvent {

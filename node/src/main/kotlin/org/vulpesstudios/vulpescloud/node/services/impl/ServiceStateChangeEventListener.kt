@@ -19,11 +19,10 @@ package org.vulpesstudios.vulpescloud.node.services.impl
 import build.buf.gen.vulpescloud.events.v1.ServiceStateChangedEvent
 import kotlinx.coroutines.Job
 import org.slf4j.LoggerFactory
-import org.vulpesstudios.vulpescloud.api.services.Service
 import org.vulpesstudios.vulpescloud.api.services.ServiceStates
 import org.vulpesstudios.vulpescloud.api.services.toServiceStates
+import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.event.EventsService
-import org.vulpesstudios.vulpescloud.node.utils.MongoUtils
 
 object ServiceStateChangeEventListener {
 
@@ -38,10 +37,14 @@ object ServiceStateChangeEventListener {
                 )
 
                 if (it.newState == ServiceStates.RUNNING.toServiceState()) {
-                    MongoUtils.updateService(
-                        Service.fromDefinition(it.service)
-                            .copy(state = it.newState.toServiceStates())
-                    )
+                    val abstractService =
+                        Node.instance.nodeServices.find { service ->
+                            service.service.uuid.toString() == it.service.uuid
+                        }
+                    if (abstractService != null) {
+                        abstractService.service =
+                            abstractService.service.copy(state = it.newState.toServiceStates())
+                    }
                 }
             }
     }

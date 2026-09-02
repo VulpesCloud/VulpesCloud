@@ -20,7 +20,7 @@ import org.vulpesstudios.vulpescloud.api.services.Service
 import java.nio.file.Path
 
 interface AbstractService {
-    val service: Service
+    var service: Service
 
     fun start()
 
