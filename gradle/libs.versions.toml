@@ -55,7 +55,7 @@ minestom = "2026.08.28-26.2"
 
 # config
 night-config = "3.9.0"
-snakeyml = "2.6"
+snakeyml = "2.7"
 
 # command api
 commandapi = "12.0.0"
