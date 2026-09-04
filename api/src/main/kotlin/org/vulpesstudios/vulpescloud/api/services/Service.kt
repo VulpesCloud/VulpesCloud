@@ -86,3 +86,21 @@ data class Service(
         }
     }
 }
+
+fun Service.isDraining(): Boolean =
+    metadata["draining"]?.equals("true", ignoreCase = true) == true
+
+fun Service.rolloutId(): String? =
+    metadata["rollout_id"]
+
+fun Service.rolloutGeneration(): String? =
+    metadata["rollout_generation"]
+
+fun ServiceDefinition.isDraining(): Boolean =
+    metadataMap["draining"]?.equals("true", ignoreCase = true) == true
+
+fun ServiceDefinition.rolloutId(): String? =
+    metadataMap["rollout_id"]
+
+fun ServiceDefinition.rolloutGeneration(): String? =
+    metadataMap["rollout_generation"]
