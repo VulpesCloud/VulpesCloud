@@ -31,7 +31,7 @@ data class RolloutGlobalConfig(
     val defaultFallbackRemainingPlayers: Boolean = true,
 ) {
     companion object {
-        const val VIRTUAL_CONFIG_NAME = "vc_rollout_config"
+        const val VIRTUAL_CONFIG_NAME = "rollout_config"
 
         const val KEY_STRATEGY = "rollout.default_strategy"
         const val KEY_BATCH_SIZE = "rollout.default_batch_size"

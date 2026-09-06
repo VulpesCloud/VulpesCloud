@@ -16,7 +16,7 @@ chronyx = "1.0.0"
 protobuf = "4.36.1"
 grpc = "1.84.0"
 grpc-kotlin = "1.5.0"
-protospecs-grpc = "1.5.0.4.20260902204325.ea95685a7896"
+protospecs-grpc = "1.5.0.4.20260904140220.7e045fd1982b"
 perfmark = "0.27.0"
 
 javaJWT = "4.6.0"

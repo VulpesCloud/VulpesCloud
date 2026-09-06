@@ -88,19 +88,45 @@ data class Service(
 }
 
 fun Service.isDraining(): Boolean =
-    metadata["draining"]?.equals("true", ignoreCase = true) == true
+    metadata[RolloutMetadata.KEY_DRAINING]?.equals("true", ignoreCase = true) == true
 
 fun Service.rolloutId(): String? =
-    metadata["rollout_id"]
+    metadata[RolloutMetadata.KEY_ROLLOUT_ID]
 
 fun Service.rolloutGeneration(): String? =
-    metadata["rollout_generation"]
+    metadata[RolloutMetadata.KEY_ROLLOUT_GENERATION]
+
+fun Service.withRolloutMetadata(rolloutId: String, generation: String? = null): Service {
+    val newMeta = metadata.toMutableMap()
+    newMeta[RolloutMetadata.KEY_ROLLOUT_ID] = rolloutId
+    if (generation != null) {
+        newMeta[RolloutMetadata.KEY_ROLLOUT_GENERATION] = generation
+    }
+    return this.copy(metadata = newMeta)
+}
+
+fun Service.withDraining(draining: Boolean = true): Service {
+    val newMeta = metadata.toMutableMap()
+    if (draining) {
+        newMeta[RolloutMetadata.KEY_DRAINING] = "true"
+    } else {
+        newMeta.remove(RolloutMetadata.KEY_DRAINING)
+    }
+    return this.copy(metadata = newMeta)
+}
 
 fun ServiceDefinition.isDraining(): Boolean =
-    metadataMap["draining"]?.equals("true", ignoreCase = true) == true
+    metadataMap[RolloutMetadata.KEY_DRAINING]?.equals("true", ignoreCase = true) == true
 
 fun ServiceDefinition.rolloutId(): String? =
-    metadataMap["rollout_id"]
+    metadataMap[RolloutMetadata.KEY_ROLLOUT_ID]
 
 fun ServiceDefinition.rolloutGeneration(): String? =
-    metadataMap["rollout_generation"]
+    metadataMap[RolloutMetadata.KEY_ROLLOUT_GENERATION]
+
+object RolloutMetadata {
+    const val KEY_DRAINING = "draining"
+    const val KEY_ROLLOUT_ID = "rollout_id"
+    const val KEY_ROLLOUT_GENERATION = "rollout_generation"
+    const val KEY_TASK_ROLLOUT_ID = "rollout_id"
+}
