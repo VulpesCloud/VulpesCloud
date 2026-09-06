@@ -35,10 +35,12 @@ import org.vulpesstudios.vulpescloud.node.db.impl.mariadb.MariaDBDatabaseProvide
 import org.vulpesstudios.vulpescloud.node.db.impl.mongo.MongoDBDatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.sqlite.SQLiteDatabaseProvider
 import org.vulpesstudios.vulpescloud.node.grpc.security.AuthClientInterceptor
+import org.vulpesstudios.vulpescloud.node.rollout.RolloutEngine
 
 class ChronyxCoordinator {
     private val logger = LoggerFactory.getLogger("ChronyxClusterCoordinator")
     private lateinit var chronyx: Chronyx
+    private val rolloutEngine = RolloutEngine()
 
     fun start() {
         val manager = taskManager()
@@ -50,6 +52,9 @@ class ChronyxCoordinator {
         }
         chronyx.task("service-reconciler", manager.name, "*/5 * * * * *", 1, 1) {
             reconcileServices()
+        }
+        chronyx.task("rollout-reconciler", manager.name, "*/2 * * * * *", 1, 1) {
+            rolloutEngine.reconcile()
         }
 
         chronyx.start()

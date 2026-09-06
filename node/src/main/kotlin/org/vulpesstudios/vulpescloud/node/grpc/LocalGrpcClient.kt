@@ -21,6 +21,7 @@ import build.buf.gen.vulpescloud.cluster.v2.ClusterAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.events.v1.EventServiceGrpcKt
 import build.buf.gen.vulpescloud.players.v1.PlayerActionsServiceGrpcKt
 import build.buf.gen.vulpescloud.players.v1.PlayersServiceGrpcKt
+import build.buf.gen.vulpescloud.rollout.v1.RolloutAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.services.v1.ServiceAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.templates.v1.TemplateServiceGrpcKt
@@ -43,6 +44,7 @@ class LocalGrpcClient {
     lateinit var authAPI: AuthServiceGrpcKt.AuthServiceCoroutineStub
     lateinit var playerActionsAPI: PlayerActionsServiceGrpcKt.PlayerActionsServiceCoroutineStub
     lateinit var templateAPI: TemplateServiceGrpcKt.TemplateServiceCoroutineStub
+    lateinit var rolloutAPI: RolloutAPIServiceGrpcKt.RolloutAPIServiceCoroutineStub
 
     fun connect(
         host: String = "127.0.0.1",
@@ -87,7 +89,11 @@ class LocalGrpcClient {
         playerActionsAPI =
             PlayerActionsServiceGrpcKt.PlayerActionsServiceCoroutineStub(channel)
                 .withInterceptors(AuthClientInterceptor(secret))
-        templateAPI = TemplateServiceGrpcKt.TemplateServiceCoroutineStub(channel)
-        .withInterceptors(AuthClientInterceptor(secret))
+        templateAPI =
+            TemplateServiceGrpcKt.TemplateServiceCoroutineStub(channel)
+                .withInterceptors(AuthClientInterceptor(secret))
+        rolloutAPI =
+            RolloutAPIServiceGrpcKt.RolloutAPIServiceCoroutineStub(channel)
+                .withInterceptors(AuthClientInterceptor(secret))
     }
 }

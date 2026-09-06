@@ -96,6 +96,72 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         return getAllServices(getAllServicesRequest {}).servicesList
     }
 
+    @RequiresPermission("services.getByTask")
+    override suspend fun getByTask(request: GetByTaskRequest): GetByTaskResponse {
+        val taskName = request.task.name
+        val services = getAllService().filter { it.task.name == taskName }
+        return GetByTaskResponse.newBuilder().addAllServices(services).build()
+    }
+
+    /**
+     * Replaces a service's metadata map wholesale with [UpdateServiceMetaRequest.getMetaMap].
+     * Callers are expected to build the full desired metadata (e.g. via the `Service.with*`
+     * extension helpers on a freshly fetched [Service]) rather than relying on a partial merge,
+     * mirroring the copy-based mutation used by [updatePlayerCount].
+     */
+    @RequiresPermission("services.updateMeta")
+    override suspend fun updateServiceMeta(request: UpdateServiceMetaRequest): UpdateServiceMetaResponse {
+        val service = Service.fromDefinition(request.service)
+
+        val abstractService = Node.instance.nodeServices.find { it.service.uuid == service.uuid }
+        if (abstractService == null) {
+            if (isLoggingRedirects()) {
+                logger.warn(
+                    "Service ${service.task.name}-${service.orderedId} is not registered on this node, trying to notify responsible node!"
+                )
+            }
+            val correctNode =
+                Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == service.node }
+            if (correctNode?.endpoint?.name == ClusterHelper.getLocalNodeSnapshot().name) {
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                    )
+                }
+            }
+
+            if (correctNode == null) {
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to update metadata of Service ${service.task.name}-${service.orderedId} as it is not registered in this node and the responsible node was not found!"
+                    )
+                }
+                return UpdateServiceMetaResponse.newBuilder().build()
+            }
+
+            if (correctNode.channel == null) {
+                if (isLoggingRedirects()) {
+                    logger.error(
+                        "Unable to update metadata of Service ${service.task.name}-${service.orderedId} as the responsible node has no channel!"
+                    )
+                }
+                return UpdateServiceMetaResponse.newBuilder().build()
+            }
+
+            val stub =
+                ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(correctNode.channel!!)
+                    .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+
+            return stub.updateServiceMeta(request)
+        }
+
+        abstractService.service = abstractService.service.copy(metadata = request.metaMap)
+
+        return UpdateServiceMetaResponse.newBuilder()
+            .setService(abstractService.service.toDefinition())
+            .build()
+    }
+
     @RequiresPermission("services.get")
     override suspend fun getByName(request: GetByNameRequest): GetByNameResponse {
         val service =

@@ -20,6 +20,7 @@ import org.vulpesstudios.vulpescloud.node.cluster.event.NodeStateChangeEventList
 import org.vulpesstudios.vulpescloud.node.players.PlayerJoinEventListener
 import org.vulpesstudios.vulpescloud.node.players.PlayerQuitEventListener
 import org.vulpesstudios.vulpescloud.node.players.PlayerSwitchServerEventListener
+import org.vulpesstudios.vulpescloud.node.rollout.RolloutEventListener
 import org.vulpesstudios.vulpescloud.node.services.ServiceLogHandler
 import org.vulpesstudios.vulpescloud.node.services.impl.ServiceStateChangeEventListener
 
@@ -29,6 +30,7 @@ object EventListenHelper {
         ServiceLogHandler.subscribe()
         NodeStateChangeEventListener.subscribe()
         ServiceStateChangeEventListener.subscribe()
+        RolloutEventListener.subscribe()
 
         PlayerQuitEventListener.subscribe()
         PlayerJoinEventListener.subscribe()
@@ -38,6 +40,7 @@ object EventListenHelper {
     fun unsubscribeFromEvents() {
         NodeStateChangeEventListener.unsubscribe()
         ServiceStateChangeEventListener.unsubscribe()
+        RolloutEventListener.unsubscribe()
 
         PlayerQuitEventListener.unsubscribe()
         PlayerJoinEventListener.unsubscribe()

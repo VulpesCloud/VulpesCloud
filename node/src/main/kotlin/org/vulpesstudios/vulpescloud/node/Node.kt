@@ -50,6 +50,7 @@ import org.vulpesstudios.vulpescloud.node.grpc.security.PermissionInterceptor
 import org.vulpesstudios.vulpescloud.node.modules.ModuleProvider
 import org.vulpesstudios.vulpescloud.node.players.PlayerActionServiceImpl
 import org.vulpesstudios.vulpescloud.node.players.PlayerServiceImpl
+import org.vulpesstudios.vulpescloud.node.rollout.RolloutAPIServiceImpl
 import org.vulpesstudios.vulpescloud.node.secret.SecretFactory
 import org.vulpesstudios.vulpescloud.node.serversoftware.ServerSoftwareProvider
 import org.vulpesstudios.vulpescloud.node.serversoftware.impl.FoliaDownloader
@@ -213,6 +214,7 @@ class Node {
                     PlayerServiceImpl(),
                     PlayerActionServiceImpl(),
                     TemplateServiceImpl(),
+                    RolloutAPIServiceImpl()
                 )
             )
 

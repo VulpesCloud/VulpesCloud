@@ -109,9 +109,24 @@ fun Service.withDraining(draining: Boolean = true): Service {
     val newMeta = metadata.toMutableMap()
     if (draining) {
         newMeta[RolloutMetadata.KEY_DRAINING] = "true"
+        newMeta[RolloutMetadata.KEY_DRAINING_SINCE] = System.currentTimeMillis().toString()
     } else {
         newMeta.remove(RolloutMetadata.KEY_DRAINING)
+        newMeta.remove(RolloutMetadata.KEY_DRAINING_SINCE)
     }
+    return this.copy(metadata = newMeta)
+}
+
+/** Epoch millis timestamp of when this service was marked draining, if any. */
+fun Service.drainingSince(): Long? = metadata[RolloutMetadata.KEY_DRAINING_SINCE]?.toLongOrNull()
+
+/** Removes all rollout-related metadata keys from this service (used by orphan cleanup). */
+fun Service.withoutRolloutMetadata(): Service {
+    val newMeta = metadata.toMutableMap()
+    newMeta.remove(RolloutMetadata.KEY_DRAINING)
+    newMeta.remove(RolloutMetadata.KEY_DRAINING_SINCE)
+    newMeta.remove(RolloutMetadata.KEY_ROLLOUT_ID)
+    newMeta.remove(RolloutMetadata.KEY_ROLLOUT_GENERATION)
     return this.copy(metadata = newMeta)
 }
 
@@ -129,4 +144,7 @@ object RolloutMetadata {
     const val KEY_ROLLOUT_ID = "rollout_id"
     const val KEY_ROLLOUT_GENERATION = "rollout_generation"
     const val KEY_TASK_ROLLOUT_ID = "rollout_id"
+    const val KEY_DRAINING_SINCE = "draining_since"
+    /** Marks a service as a freshly started rollout replacement (vs. an old, pre-existing one). */
+    const val GENERATION_NEW = "new"
 }

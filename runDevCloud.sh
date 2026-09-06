@@ -30,6 +30,9 @@ for arg in "$@"; do
   fi
   if [ "$arg" == "--softwareTiming" ]; then
         JAVA_FLAGS+=("-Dvc.software.timing=true")
+  fi
+  if [ "$arg" == "--debugLogging" ]; then
+          JAVA_FLAGS+=("-DdebugLogging=true")
     fi
 done
 
