@@ -96,3 +96,18 @@ data class Task(
         }
     }
 }
+
+fun Task.rolloutId(): String? =
+    attributes["rollout_id"]
+
+fun Task.withRolloutId(rolloutId: String): Task {
+    val newAttributes = attributes.toMutableMap()
+    newAttributes["rollout_id"] = rolloutId
+    return this.copy(attributes = newAttributes)
+}
+
+fun Task.withoutRolloutId(): Task {
+    val newAttributes = attributes.toMutableMap()
+    newAttributes.remove("rollout_id")
+    return this.copy(attributes = newAttributes)
+}

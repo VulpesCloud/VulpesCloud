@@ -21,6 +21,8 @@ import build.buf.gen.vulpescloud.cluster.v2.ClusterAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.events.v1.EventServiceGrpcKt
 import build.buf.gen.vulpescloud.players.v1.PlayersServiceGrpc
 import build.buf.gen.vulpescloud.players.v1.PlayersServiceGrpcKt
+import build.buf.gen.vulpescloud.rollout.v1.RolloutAPIServiceGrpc
+import build.buf.gen.vulpescloud.rollout.v1.RolloutAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.services.v1.ServiceAPIServiceGrpc
 import build.buf.gen.vulpescloud.services.v1.ServiceAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpc
@@ -52,10 +54,12 @@ class GrpcClient {
     lateinit var playerAPI: PlayersServiceGrpcKt.PlayersServiceCoroutineStub
     lateinit var clusterAPI: ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineStub
     lateinit var authAPI: AuthServiceGrpcKt.AuthServiceCoroutineStub
+    lateinit var rolloutAPI: RolloutAPIServiceGrpcKt.RolloutAPIServiceCoroutineStub
 
     lateinit var futureServiceAPI: ServiceAPIServiceGrpc.ServiceAPIServiceFutureStub
     lateinit var futureTasksAPI: TasksAPIServiceGrpc.TasksAPIServiceFutureStub
     lateinit var futurePlayerAPI: PlayersServiceGrpc.PlayersServiceFutureStub
+    lateinit var futureRolloutAPI: RolloutAPIServiceGrpc.RolloutAPIServiceFutureStub
 
     lateinit var eventsAPI: EventServiceGrpcKt.EventServiceCoroutineStub
 
@@ -105,6 +109,12 @@ class GrpcClient {
                 .withInterceptors(AuthClientInterceptor(secret))
         authAPI =
             AuthServiceGrpcKt.AuthServiceCoroutineStub(channel)
+                .withInterceptors(AuthClientInterceptor(secret))
+        rolloutAPI =
+            RolloutAPIServiceGrpcKt.RolloutAPIServiceCoroutineStub(channel)
+                .withInterceptors(AuthClientInterceptor(secret))
+        futureRolloutAPI =
+            RolloutAPIServiceGrpc.newFutureStub(channel)
                 .withInterceptors(AuthClientInterceptor(secret))
     }
 

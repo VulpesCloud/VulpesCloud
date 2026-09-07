@@ -22,6 +22,7 @@ import dev.jorel.commandapi.executors.PlayerCommandExecutor
 import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.slf4j.LoggerFactory
+import org.vulpesstudios.vulpescloud.api.services.isDraining
 import org.vulpesstudios.vulpescloud.bridge.BridgeAPI
 import org.vulpesstudios.vulpescloud.connector.velocity.config.getConfig
 import java.util.concurrent.TimeUnit
@@ -31,7 +32,7 @@ class HubCommand(proxyServer: ProxyServer, bridgeAPI: BridgeAPI.BridgeFutureAPI)
     private val logger = LoggerFactory.getLogger("HubCommand")
     private val miniMessage = MiniMessage.miniMessage()
 
-    val command =
+    val command: CommandTree =
         CommandTree("hub")
             .withAliases("lobby", "l", "leave")
             .executesPlayer(
@@ -42,6 +43,7 @@ class HubCommand(proxyServer: ProxyServer, bridgeAPI: BridgeAPI.BridgeFutureAPI)
                             .getAllServices()
                             .get(5, TimeUnit.SECONDS)
                             .filter { it.task.fallback }
+                            .filter { !it.isDraining() }
 
                     if (fallbackServer.isEmpty()) {
                         logger.error("No fallback server found!")

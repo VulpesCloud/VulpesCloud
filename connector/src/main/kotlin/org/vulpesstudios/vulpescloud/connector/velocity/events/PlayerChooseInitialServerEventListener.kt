@@ -23,6 +23,7 @@ import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
 import com.velocitypowered.api.proxy.ProxyServer
 import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.text.minimessage.MiniMessage
+import org.vulpesstudios.vulpescloud.api.services.isDraining
 import org.vulpesstudios.vulpescloud.bridge.BridgeAPI
 import org.vulpesstudios.vulpescloud.connector.velocity.config.getConfig
 import java.util.concurrent.TimeUnit
@@ -40,9 +41,11 @@ class PlayerChooseInitialServerEventListener(
                 .getAllServices()
                 .get(5, TimeUnit.SECONDS)
                 .filter {
-                    it.task.software.type != org.vulpesstudios.vulpescloud.api.serversoftware.SoftwareType.PROXY &&
+                    it.task.software.type !=
+                        org.vulpesstudios.vulpescloud.api.serversoftware.SoftwareType.PROXY &&
                         it.task.fallback
                 }
+                .filter { !it.isDraining() }
                 .sortedBy { it.playerCount }
         if (services.isEmpty()) {
             return
@@ -63,8 +66,10 @@ class PlayerChooseInitialServerEventListener(
                     .get(5, TimeUnit.SECONDS)
                     .filter {
                         it.task.software.type !=
-                            org.vulpesstudios.vulpescloud.api.serversoftware.SoftwareType.PROXY && it.task.fallback
+                            org.vulpesstudios.vulpescloud.api.serversoftware.SoftwareType.PROXY &&
+                            it.task.fallback
                     }
+                    .filter { !it.isDraining() }
                     .sortedBy { it.playerCount }
             if (services.isEmpty()) {
                 event.result =

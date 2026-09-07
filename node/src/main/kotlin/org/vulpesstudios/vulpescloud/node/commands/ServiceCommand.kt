@@ -79,13 +79,21 @@ class ServiceCommand {
     @Command("services|service <service> info")
     fun infoService(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
+            var metadataMessage = ""
+            it.metadata.forEach { (key, value) ->
+                metadataMessage += "    - $key: $value\n"
+            }
+
             source.sendMessage(
                 "<gold>---------</gold> <white>${it.name()}</white> <gold>---------</gold>\n" +
-                        "<gray>UUID<dark_gray>:</dark_gray> <white>${it.uuid}</white>\n" +
-                        "<gray>Port<dark_gray>:</dark_gray> <white>${it.port}</white>\n" +
-                        "<gray>Node<dark_gray>:</dark_gray> <white>${it.node}</white>\n" +
-                        "<gray>Players<dark_gray>:</dark_gray> <white>${it.playerCount}</white>\n" +
-                        "<gray>State<dark_gray>:</dark_gray> <white>${it.state}</white>"
+                    "<gray>UUID<dark_gray>:</dark_gray> <white>${it.uuid}</white>\n" +
+                    "<gray>Port<dark_gray>:</dark_gray> <white>${it.port}</white>\n" +
+                    "<gray>Node<dark_gray>:</dark_gray> <white>${it.node}</white>\n" +
+                    "<gray>Players<dark_gray>:</dark_gray> <white>${it.playerCount}</white>\n" +
+                    "<gray>State<dark_gray>:</dark_gray> <white>${it.state}</white>\n" +
+                    "<gray>StartTime<dark_gray>:</dark_gray> <white>${it.startTime}</white>\n" +
+                    "<gray>MetaData<dark_gray>:</dark_gray> <white>:</white>\n" +
+                    metadataMessage
             )
         }
     }
@@ -99,7 +107,9 @@ class ServiceCommand {
                 return
             }
             runBlocking {
-                source.sendMessage("<gray>Starting service</gray> <white>${it.task.name}-${it.orderedId}</white><gray>...</gray>")
+                source.sendMessage(
+                    "<gray>Starting service</gray> <white>${it.task.name}-${it.orderedId}</white><gray>...</gray>"
+                )
                 Node.instance.localGrpcClient.serviceAPI.startService(
                     StartServiceRequest.newBuilder().setService(it.toDefinition()).build()
                 )

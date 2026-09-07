@@ -86,3 +86,68 @@ data class Service(
         }
     }
 }
+
+fun Service.isDraining(): Boolean =
+    metadata[RolloutMetadata.KEY_DRAINING]?.equals("true", ignoreCase = true) == true
+
+fun Service.rolloutId(): String? =
+    metadata[RolloutMetadata.KEY_ROLLOUT_ID]
+
+fun Service.rolloutGeneration(): String? =
+    metadata[RolloutMetadata.KEY_ROLLOUT_GENERATION]
+
+fun Service.withRolloutMetadata(rolloutId: String, generation: String? = null): Service {
+    val newMeta = metadata.toMutableMap()
+    newMeta[RolloutMetadata.KEY_ROLLOUT_ID] = rolloutId
+    if (generation != null) {
+        newMeta[RolloutMetadata.KEY_ROLLOUT_GENERATION] = generation
+        newMeta[RolloutMetadata.KEY_BATCH_STARTED_AT] = System.currentTimeMillis().toString()
+    }
+    return this.copy(metadata = newMeta)
+}
+
+fun Service.withDraining(draining: Boolean = true): Service {
+    val newMeta = metadata.toMutableMap()
+    if (draining) {
+        newMeta[RolloutMetadata.KEY_DRAINING] = "true"
+        newMeta[RolloutMetadata.KEY_DRAINING_SINCE] = System.currentTimeMillis().toString()
+    } else {
+        newMeta.remove(RolloutMetadata.KEY_DRAINING)
+        newMeta.remove(RolloutMetadata.KEY_DRAINING_SINCE)
+    }
+    return this.copy(metadata = newMeta)
+}
+
+fun Service.drainingSince(): Long? = metadata[RolloutMetadata.KEY_DRAINING_SINCE]?.toLongOrNull()
+
+fun Service.rolloutBatchStartedAt(): Long? =
+    metadata[RolloutMetadata.KEY_BATCH_STARTED_AT]?.toLongOrNull()
+
+fun Service.withoutRolloutMetadata(): Service {
+    val newMeta = metadata.toMutableMap()
+    newMeta.remove(RolloutMetadata.KEY_DRAINING)
+    newMeta.remove(RolloutMetadata.KEY_DRAINING_SINCE)
+    newMeta.remove(RolloutMetadata.KEY_ROLLOUT_ID)
+    newMeta.remove(RolloutMetadata.KEY_ROLLOUT_GENERATION)
+    newMeta.remove(RolloutMetadata.KEY_BATCH_STARTED_AT)
+    return this.copy(metadata = newMeta)
+}
+
+fun ServiceDefinition.isDraining(): Boolean =
+    metadataMap[RolloutMetadata.KEY_DRAINING]?.equals("true", ignoreCase = true) == true
+
+fun ServiceDefinition.rolloutId(): String? =
+    metadataMap[RolloutMetadata.KEY_ROLLOUT_ID]
+
+fun ServiceDefinition.rolloutGeneration(): String? =
+    metadataMap[RolloutMetadata.KEY_ROLLOUT_GENERATION]
+
+object RolloutMetadata {
+    const val KEY_DRAINING = "draining"
+    const val KEY_ROLLOUT_ID = "rollout_id"
+    const val KEY_ROLLOUT_GENERATION = "rollout_generation"
+    const val KEY_TASK_ROLLOUT_ID = "rollout_id"
+    const val KEY_DRAINING_SINCE = "draining_since"
+    const val KEY_BATCH_STARTED_AT = "rollout_batch_started_at"
+    const val GENERATION_NEW = "new"
+}
