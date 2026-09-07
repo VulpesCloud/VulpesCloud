@@ -202,6 +202,7 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
                     servicesStopped = progress.servicesStopped + batchOld.size,
                     pendingStopServiceNames =
                         progress.pendingStopServiceNames - batchOldNames.toSet(),
+                    currentBatchNumber = progress.currentBatchNumber + 1,
                 )
             RolloutEvents.batchProgress(next, task, emptyList(), batchOld)
             storage.save(next)
@@ -216,6 +217,7 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
                 status = RolloutStatus.IN_PROGRESS,
                 newServiceNames = progress.newServiceNames + started.map { it.name() },
                 servicesStarted = progress.servicesStarted + started.size,
+                currentBatchNumber = progress.currentBatchNumber + 1,
             )
         RolloutEvents.batchProgress(next, task, started, emptyList())
         storage.save(next)
@@ -260,6 +262,7 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
                     status = RolloutStatus.IN_PROGRESS,
                     newServiceNames = progress.newServiceNames + started.map { it.name() },
                     servicesStarted = progress.servicesStarted + started.size,
+                    currentBatchNumber = progress.currentBatchNumber + 1,
                 )
             RolloutEvents.batchProgress(next, task, started, emptyList())
             storage.save(next)
@@ -397,6 +400,8 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
                 servicesReady = progress.servicesReady + started.size,
                 servicesStopped = progress.servicesStopped + batchOld.size,
                 pendingStopServiceNames = emptyList(),
+                currentBatchNumber = 1,
+                totalBatches = 1,
             )
         RolloutEvents.batchProgress(next, task, started, batchOld)
         markCompleted(next, task)

@@ -20,6 +20,8 @@ import org.vulpesstudios.vulpescloud.bridge.impl.event.EventAPI
 import org.vulpesstudios.vulpescloud.bridge.impl.metrics.CoroutineMetricsImpl
 import org.vulpesstudios.vulpescloud.bridge.impl.player.PlayerCoroutineAPIImpl
 import org.vulpesstudios.vulpescloud.bridge.impl.player.PlayerFutureAPIImpl
+import org.vulpesstudios.vulpescloud.bridge.impl.rollout.RolloutCoroutineAPI
+import org.vulpesstudios.vulpescloud.bridge.impl.rollout.RolloutFutureAPI
 import org.vulpesstudios.vulpescloud.bridge.impl.service.ServiceCoroutineAPI
 import org.vulpesstudios.vulpescloud.bridge.impl.service.ServiceFutureAPI
 import org.vulpesstudios.vulpescloud.bridge.impl.tasks.TasksCoroutineAPI
@@ -36,6 +38,7 @@ interface BridgeAPI {
         private val virtualConfigAPI = VirtualConfigCoroutineAPIImpl()
         private val playerAPI = PlayerCoroutineAPIImpl()
         private val metricsAPI = CoroutineMetricsImpl()
+        private val rolloutAPI = RolloutCoroutineAPI()
 
         fun getTasksAPI() = tasksAPI
 
@@ -48,6 +51,8 @@ interface BridgeAPI {
         fun getPlayerAPI() = playerAPI
 
         fun getMetricsAPI() = metricsAPI
+
+        fun getRolloutAPI() = rolloutAPI
     }
 
     class BridgeFutureAPI {
@@ -57,6 +62,7 @@ interface BridgeAPI {
         private val eventAPI = EventAPI()
         private val virtualConfigAPI = VirtualConfigCoroutineAPIImpl()
         private val playerAPI = PlayerFutureAPIImpl()
+        private val rolloutAPI = RolloutFutureAPI()
 
         fun getTasksAPI() = tasksAPI
 
@@ -67,6 +73,8 @@ interface BridgeAPI {
         fun getCoroutineVirtualConfigAPI() = virtualConfigAPI
 
         fun getPlayerAPI() = playerAPI
+
+        fun getRolloutAPI() = rolloutAPI
     }
 
     companion object {

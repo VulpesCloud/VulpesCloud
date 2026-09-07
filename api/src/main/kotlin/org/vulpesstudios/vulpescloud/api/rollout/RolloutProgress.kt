@@ -36,6 +36,8 @@ data class RolloutProgress(
     @Serializable(TimestampSerializer::class) val startedAt: Timestamp? = null,
     @Serializable(TimestampSerializer::class) val completedAt: Timestamp? = null,
     val failureReason: String = "",
+    val currentBatchNumber: Int = 0,
+    val totalBatches: Int = 0,
 ) {
     fun toDefinition(): ProtoRolloutProgress {
         val builder = ProtoRolloutProgress.newBuilder()
@@ -50,6 +52,8 @@ data class RolloutProgress(
             .addAllPendingStopServiceNames(pendingStopServiceNames)
             .addAllNewServiceNames(newServiceNames)
             .setFailureReason(failureReason)
+            .setCurrentBatchNumber(currentBatchNumber)
+            .setTotalBatches(totalBatches)
 
         startedAt?.let { builder.setStartedAt(it) }
         completedAt?.let { builder.setCompletedAt(it) }
@@ -73,6 +77,8 @@ data class RolloutProgress(
                 startedAt = if (definition.hasStartedAt()) definition.startedAt else null,
                 completedAt = if (definition.hasCompletedAt()) definition.completedAt else null,
                 failureReason = definition.failureReason,
+                currentBatchNumber = definition.currentBatchNumber,
+                totalBatches = definition.totalBatches,
             )
         }
     }

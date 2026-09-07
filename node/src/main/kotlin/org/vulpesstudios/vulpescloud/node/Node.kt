@@ -214,7 +214,7 @@ class Node {
                     PlayerServiceImpl(),
                     PlayerActionServiceImpl(),
                     TemplateServiceImpl(),
-                    RolloutAPIServiceImpl()
+                    RolloutAPIServiceImpl(),
                 )
             )
 
