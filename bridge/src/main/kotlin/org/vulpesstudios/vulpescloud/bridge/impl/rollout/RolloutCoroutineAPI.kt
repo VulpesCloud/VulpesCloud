@@ -50,7 +50,7 @@ class RolloutCoroutineAPI : RolloutAPI.RolloutCoroutineAPI {
             RolloutProgress.fromDefinition(
                 rolloutStub.getRolloutStatus(getRolloutStatusRequest { this.rolloutId = rolloutId }).rollout
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }
@@ -60,7 +60,7 @@ class RolloutCoroutineAPI : RolloutAPI.RolloutCoroutineAPI {
             RolloutProgress.fromDefinition(
                 rolloutStub.getRolloutStatus(getRolloutStatusRequest { this.taskName = taskName }).rollout
             )
-        } catch (e: Exception) {
+        } catch (_: Exception) {
             null
         }
     }

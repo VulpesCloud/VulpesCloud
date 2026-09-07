@@ -56,7 +56,6 @@ import org.vulpesstudios.vulpescloud.api.rollout.RolloutStrategy
 import org.vulpesstudios.vulpescloud.api.rollout.toRolloutStrategy
 import org.vulpesstudios.vulpescloud.api.services.*
 import org.vulpesstudios.vulpescloud.api.tasks.Task
-import org.vulpesstudios.vulpescloud.api.tasks.rolloutId
 import org.vulpesstudios.vulpescloud.api.tasks.withRolloutId
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.event.EventsService

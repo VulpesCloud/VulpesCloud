@@ -168,6 +168,7 @@ class Node {
                     register(PlayersCommand())
                     register(TlsCommand())
                     register(TemplateCommand())
+                    register(RolloutCommand())
                 }
             } catch (e: Exception) {
                 logger.error("Failed to initialize commands: ${e.stackTraceToString()}")
