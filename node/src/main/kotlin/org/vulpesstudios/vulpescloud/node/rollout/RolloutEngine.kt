@@ -756,7 +756,8 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
         }
 
         val overdue = liveBatch.filter {
-            it.state != ServiceStates.RUNNING && startMillis(it) + timeoutMs < now
+            it.state != ServiceStates.RUNNING &&
+                (it.rolloutBatchStartedAt() ?: now) + timeoutMs < now
         }
         if (overdue.isNotEmpty()) {
             markFailed(
@@ -820,10 +821,6 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
     private fun millisOf(timestamp: Timestamp?): Long? {
         if (timestamp == null) return null
         return timestamp.seconds * 1000 + timestamp.nanos / 1_000_000
-    }
-
-    private fun startMillis(service: Service): Long {
-        return service.startTime.seconds * 1000 + service.startTime.nanos / 1_000_000
     }
 
     private fun nowTimestamp(): Timestamp {
