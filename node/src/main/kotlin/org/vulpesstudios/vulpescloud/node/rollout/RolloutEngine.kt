@@ -37,34 +37,11 @@ import org.vulpesstudios.vulpescloud.node.cluster.ClusterHelper
 import org.vulpesstudios.vulpescloud.node.grpc.security.AuthClientInterceptor
 import build.buf.gen.vulpescloud.tasks.v1.getByNameRequest as taskGetByNameRequest
 
-/**
- * Drives active rollouts to completion via periodic reconciliation, in the same spirit as
- * [org.vulpesstudios.vulpescloud.node.coordination.ChronyxCoordinator]'s automatic service
- * starting: every tick, for every active rollout, we look at *live* cluster state (never trusted
- * counters alone) and take at most one incremental step towards the rollout's goal.
- *
- * This makes every step idempotent and crash-safe: if the coordinator node dies mid-step, whichever
- * node picks up the Chronyx lease next will recompute the same decision from live service/task
- * metadata rather than from in-memory state that died with the old coordinator.
- * [reconcileLiveDrift] is the piece that folds any such drift back into the stored
- * [RolloutProgress] before a strategy step reasons about it.
- *
- * Batch/replacement pairing is tracked entirely via service metadata (see [RolloutMetadata]) rather
- * than extra fields on [RolloutProgress] (which is fixed by the `rollout.proto` schema):
- * - A freshly started replacement service is tagged `rollout_id` + `rollout_generation=new`.
- * - An old service that has been marked for removal is tagged `rollout_id` and, once its
- *   replacement(s) are healthy, `draining=true` (+ `draining_since` for passive-drain timeouts).
- */
 class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
 
     private val logger = LoggerFactory.getLogger("RolloutEngine")
 
-    // Grace period from a rollout's startedAt before the self-healing sweeps will touch it, so we
-    // never race a rollout record that is still in the process of being created / attached.
     private val creationGraceMillis = 10_000L
-
-    // How long a finished (COMPLETED/FAILED/CANCELLED) rollout record is kept around for inspection
-    // (e.g. `rollout status`) before being purged by [reconcileEmptyRollouts].
     private val retentionMillis = 5 * 60 * 1000L
 
     suspend fun reconcile() {
@@ -83,7 +60,11 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
                 } catch (e: Exception) {
                     logger.error("Rollout ${progress.rolloutId} hit an unexpected error", e)
                     runCatching {
-                        markFailed(progress, getTask(progress.taskName), "internal_error: ${e.message}")
+                        markFailed(
+                            progress,
+                            getTask(progress.taskName),
+                            "internal_error: ${e.message}",
+                        )
                     }
                 }
             }
@@ -112,10 +93,6 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
             }
     }
 
-    // ------------------------------------------------------------------
-    // Dispatch
-    // ------------------------------------------------------------------
-
     private suspend fun stepRollout(progress: RolloutProgress) {
         val task = getTask(progress.taskName)
         if (task == null) {
@@ -133,10 +110,6 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
             RolloutStrategy.IMMEDIATE -> stepImmediate(progress, task)
         }
     }
-
-    // ------------------------------------------------------------------
-    // ROLLING_REPLACE
-    // ------------------------------------------------------------------
 
     private suspend fun stepRollingReplace(progressIn: RolloutProgress, task: Task) {
         val live = getServicesOfTask(task)
@@ -190,8 +163,6 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
                 progress.options.bypassMaxServiceCount,
             )
         ) {
-            // Replace-first fallback (design.md 1.3): free up capacity by stopping a batch of old
-            // services now; the next tick(s) will start their replacements once room exists.
             val batchOldNames = progress.pendingStopServiceNames.take(batchSize)
             val batchOld = live.filter { it.name() in batchOldNames }
             markServicesDraining(batchOld, progress.rolloutId)
@@ -210,7 +181,7 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
         }
 
         val started = startBatch(task, batchSize, progress.rolloutId)
-        if (started.isEmpty()) return // No node had capacity right now; retry next tick.
+        if (started.isEmpty()) return
 
         val next =
             progress.copy(
@@ -222,10 +193,6 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
         RolloutEvents.batchProgress(next, task, started, emptyList())
         storage.save(next)
     }
-
-    // ------------------------------------------------------------------
-    // PASSIVE_DRAIN
-    // ------------------------------------------------------------------
 
     private suspend fun stepPassiveDrain(progressIn: RolloutProgress, task: Task) {
         val live = getServicesOfTask(task)
@@ -248,9 +215,6 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
                     progress.options.bypassMaxServiceCount,
                 )
             ) {
-                // Unlike rolling replace, passive drain never force-stops old services early just
-                // to
-                // make room - draining is meant to be graceful. Wait for capacity to free up.
                 return
             }
 
@@ -284,7 +248,6 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
         }
 
         if (batchOld.none { it.isDraining() }) {
-            // Batch just became ready this tick - start the graceful drain window.
             markServicesDraining(batchOld, progress.rolloutId)
             val next =
                 progress.copy(
@@ -308,10 +271,8 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
             underThreshold || timedOut
         }
 
-        if (toStop.isEmpty()) return // still waiting on players to leave / the timeout to elapse
+        if (toStop.isEmpty()) return
 
-        // Transfer any remaining players off services that hit the timeout (rather than the
-        // threshold) before stopping them, when configured to do so.
         if (progress.options.fallbackRemainingPlayers && fallbackTarget != null) {
             toStop
                 .filter { it.playerCount > 0 }
@@ -335,16 +296,10 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
         finishOrPersist(next, task)
     }
 
-    // ------------------------------------------------------------------
-    // IMMEDIATE
-    // ------------------------------------------------------------------
-
     private suspend fun stepImmediate(progressIn: RolloutProgress, task: Task) {
         val live = getServicesOfTask(task)
         val progress = reconcileLiveDrift(progressIn, live)
 
-        // If we already actioned this rollout (e.g. we crashed right after starting new services
-        // but before persisting COMPLETED), just finish up idempotently rather than starting again.
         if (progress.newServiceNames.isNotEmpty() || progress.servicesStarted > 0) {
             val leftoverOld = live.filter { it.name() in progress.pendingStopServiceNames }
             if (leftoverOld.isNotEmpty()) {
@@ -386,8 +341,6 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
             return
         }
 
-        // "Launch all replacement instances concurrently... immediately shut down old services,
-        // does not wait for new services to be RUNNING" (design.md strategy table).
         val started = startBatch(task, targetCount, progress.rolloutId)
         val batchOld = live.filter { it.name() in progress.pendingStopServiceNames }
         markServicesDraining(batchOld, progress.rolloutId)
@@ -407,10 +360,6 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
         markCompleted(next, task)
     }
 
-    // ------------------------------------------------------------------
-    // Cancellation / failure cleanup (design.md §6.3)
-    // ------------------------------------------------------------------
-
     private suspend fun cleanupTerminalRollout(progress: RolloutProgress) {
         val touched = getAllServicesLive().filter { it.rolloutId() == progress.rolloutId }
         if (touched.isEmpty()) {
@@ -422,8 +371,6 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
         val oldOnes = touched.filter { it.rolloutGeneration() != RolloutMetadata.GENERATION_NEW }
 
         if (progress.status == RolloutStatus.CANCELLED) {
-            // "Terminate newly started Services, leave remaining old services alone and remove
-            // draining flag" - the behavior chosen in design.md §6.3.
             if (newOnes.isNotEmpty()) {
                 stopServices(newOnes)
                 deleteServices(newOnes)
@@ -432,22 +379,13 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
                 .filter { it.isDraining() || it.rolloutId() != null }
                 .forEach { clearRolloutMetadata(it) }
 
-            // Best-effort: this cleanup pass may run again on a later tick if a stop/delete call
-            // above fails and `touched` isn't empty yet, in which case this could publish more than
-            // once - acceptable for a notification, unlike the state transition itself.
             getTask(progress.taskName)?.let { RolloutEvents.cancelled(progress, it, newOnes) }
         } else {
-            // FAILED: don't guess whether new services are safe to keep, but don't leave anything
-            // permanently tagged/draining for a rollout that is no longer active either.
             (newOnes + oldOnes).forEach { clearRolloutMetadata(it) }
         }
 
         clearTaskRolloutId(progress.taskName, progress.rolloutId)
     }
-
-    // ------------------------------------------------------------------
-    // Self-healing sweeps (Phase 4 §4)
-    // ------------------------------------------------------------------
 
     private suspend fun reconcileOrphans(all: List<RolloutProgress>) {
         val existingIds = all.map { it.rolloutId }.toSet()
@@ -492,16 +430,6 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
             }
     }
 
-    // ------------------------------------------------------------------
-    // Live-drift reconciliation
-    // ------------------------------------------------------------------
-
-    /**
-     * Folds any state that happened live (services started/stopped) but never made it into the
-     * stored [RolloutProgress] - e.g. because the coordinator died between acting and persisting -
-     * back into the record, then persists it. Always returns the up-to-date progress to keep
-     * reasoning about.
-     */
     private suspend fun reconcileLiveDrift(
         progress: RolloutProgress,
         live: List<Service>,
@@ -547,10 +475,6 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
         if (changed) storage.save(updated)
         return updated
     }
-
-    // ------------------------------------------------------------------
-    // Service / task mutation helpers (all cluster-transparent via localGrpcClient's redirects)
-    // ------------------------------------------------------------------
 
     private suspend fun markServicesDraining(services: List<Service>, rolloutId: String) {
         services.forEach { svc ->
@@ -633,12 +557,6 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
         }
     }
 
-    // ------------------------------------------------------------------
-    // New service provisioning (mirrors ChronyxCoordinator's node-selection dispatch, since
-    // PrepareServiceOnTask - unlike the other Service/Task RPCs - must be called on the exact
-    // target node rather than redirecting itself).
-    // ------------------------------------------------------------------
-
     private suspend fun startBatch(task: Task, count: Int, rolloutId: String): List<Service> {
         val excludedNodes = mutableSetOf<String>()
         val started = mutableListOf<Service>()
@@ -658,7 +576,6 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
             )
             return null
         }
-        // Spread the rest of this batch across other nodes where possible.
         excludedNodes.add(bestNode.name)
 
         val request =
@@ -696,16 +613,13 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
 
     private suspend fun pickBestNode(task: Task, exclude: Set<String>): NodeSnapshot? {
         return ClusterHelper.getAllNodeSnapshots()
+            .asSequence()
             .filter { it.name in task.preferredNodes }
             .filter { it.name !in exclude }
             .filter { it.state == NodeState.ONLINE }
             .filter { it.services.memoryAvailable >= task.maxMemory }
             .maxByOrNull { it.services.memoryAvailable }
     }
-
-    // ------------------------------------------------------------------
-    // Small utilities
-    // ------------------------------------------------------------------
 
     private suspend fun getTask(name: String): Task? {
         return Node.instance.localGrpcClient.tasksAPI
@@ -742,7 +656,7 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
         expectedNames: List<String>,
     ) {
         val timeoutMs = durationMillis(progress.options.readinessTimeout)
-        if (timeoutMs <= 0) return // No timeout configured - keep waiting indefinitely.
+        if (timeoutMs <= 0) return
 
         val now = System.currentTimeMillis()
         val missing = expectedNames - liveBatch.map { it.name() }.toSet()
@@ -809,7 +723,7 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
         bypass: Boolean,
     ): Boolean {
         if (bypass) return false
-        if (task.maxOnlineServices <= 0) return false // Non-positive is treated as "no cap".
+        if (task.maxOnlineServices <= 0) return false
         return currentOnline + batch > task.maxOnlineServices
     }
 

@@ -21,12 +21,6 @@ import org.vulpesstudios.vulpescloud.api.tasks.Task
 
 object RolloutConfigResolver {
 
-    /**
-     * Resolves the effective [RolloutOptions] for a rollout operation using hierarchical precedence:
-     * 1. Request parameters / CLI command flags (highest priority)
-     * 2. Task attributes (e.g., task.attributes["rollout.<option>"])
-     * 3. Global VirtualConfig defaults (fallback)
-     */
     fun resolve(
         flagOptions: RolloutOptions? = null,
         task: Task? = null,

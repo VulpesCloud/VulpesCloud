@@ -16,29 +16,9 @@
 
 package org.vulpesstudios.vulpescloud.node.rollout
 
-import build.buf.gen.vulpescloud.rollout.v1.CancelRolloutRequest
-import build.buf.gen.vulpescloud.rollout.v1.CancelRolloutResponse
-import build.buf.gen.vulpescloud.rollout.v1.GetRolloutStatusRequest
-import build.buf.gen.vulpescloud.rollout.v1.GetRolloutStatusResponse
-import build.buf.gen.vulpescloud.rollout.v1.ListActiveRolloutsRequest
-import build.buf.gen.vulpescloud.rollout.v1.ListActiveRolloutsResponse
-import build.buf.gen.vulpescloud.rollout.v1.RolloutAPIServiceGrpcKt
-import build.buf.gen.vulpescloud.rollout.v1.StartRolloutRequest
-import build.buf.gen.vulpescloud.rollout.v1.StartRolloutResponse
-import build.buf.gen.vulpescloud.rollout.v1.StreamRolloutProgressRequest
-import build.buf.gen.vulpescloud.rollout.v1.cancelRolloutResponse
-import build.buf.gen.vulpescloud.rollout.v1.getRolloutStatusResponse
-import build.buf.gen.vulpescloud.rollout.v1.listActiveRolloutsResponse
-import build.buf.gen.vulpescloud.rollout.v1.startRolloutResponse
-import build.buf.gen.vulpescloud.rollout.v1.RolloutProgress as ProtoRolloutProgress
-import build.buf.gen.vulpescloud.rollout.v1.RolloutStrategy as ProtoRolloutStrategy
-import build.buf.gen.vulpescloud.events.v1.RolloutBatchProgressEvent
-import build.buf.gen.vulpescloud.events.v1.RolloutCancelledEvent
-import build.buf.gen.vulpescloud.events.v1.RolloutCompletedEvent
-import build.buf.gen.vulpescloud.events.v1.RolloutDrainingEvent
-import build.buf.gen.vulpescloud.events.v1.RolloutFailedEvent
+import build.buf.gen.vulpescloud.events.v1.*
+import build.buf.gen.vulpescloud.rollout.v1.*
 import build.buf.gen.vulpescloud.services.v1.getByTaskRequest
-import build.buf.gen.vulpescloud.tasks.v1.getByNameRequest as taskGetByNameRequest
 import build.buf.gen.vulpescloud.tasks.v1.taskOrNull
 import build.buf.gen.vulpescloud.tasks.v1.updateTaskRequest
 import com.google.protobuf.Timestamp
@@ -48,27 +28,24 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import org.slf4j.LoggerFactory
-import org.vulpesstudios.vulpescloud.api.rollout.RolloutConfigResolver
-import org.vulpesstudios.vulpescloud.api.rollout.RolloutGlobalConfig
+import org.vulpesstudios.vulpescloud.api.rollout.*
 import org.vulpesstudios.vulpescloud.api.rollout.RolloutProgress
 import org.vulpesstudios.vulpescloud.api.rollout.RolloutStatus
 import org.vulpesstudios.vulpescloud.api.rollout.RolloutStrategy
-import org.vulpesstudios.vulpescloud.api.rollout.toRolloutStrategy
-import org.vulpesstudios.vulpescloud.api.services.*
+import org.vulpesstudios.vulpescloud.api.services.Service
+import org.vulpesstudios.vulpescloud.api.services.ServiceStates
+import org.vulpesstudios.vulpescloud.api.services.isDraining
+import org.vulpesstudios.vulpescloud.api.services.rolloutId
 import org.vulpesstudios.vulpescloud.api.tasks.Task
 import org.vulpesstudios.vulpescloud.api.tasks.withRolloutId
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.event.EventsService
 import org.vulpesstudios.vulpescloud.node.grpc.security.annotations.RequiresPermission
-import java.util.UUID
+import java.util.*
+import build.buf.gen.vulpescloud.rollout.v1.RolloutProgress as ProtoRolloutProgress
+import build.buf.gen.vulpescloud.rollout.v1.RolloutStrategy as ProtoRolloutStrategy
+import build.buf.gen.vulpescloud.tasks.v1.getByNameRequest as taskGetByNameRequest
 
-/**
- * CLI/Dashboard-facing entry points for rollouts (Phase 6). This service only validates requests
- * and, for [startRollout], persists the initial [RolloutProgress] record - it deliberately does
- * *not* drive the rollout itself. Any node can serve these RPCs since [RolloutStorage] is a shared
- * database; the actual state machine lives in [RolloutEngine], run exclusively by whichever node
- * currently holds the `rollout-reconciler` Chronyx lease.
- */
 class RolloutAPIServiceImpl : RolloutAPIServiceGrpcKt.RolloutAPIServiceCoroutineImplBase() {
 
     private val logger = LoggerFactory.getLogger("RolloutAPIService")
@@ -167,9 +144,6 @@ class RolloutAPIServiceImpl : RolloutAPIServiceGrpcKt.RolloutAPIServiceCoroutine
             "Rollout $rolloutId started for task ${task.name}: ${eligible.size} service(s) to replace, strategy=${effectiveOptions.strategy}"
         )
 
-        // Note: RolloutStartedEvent is published by RolloutEngine itself on the first reconciler
-        // tick that observes this PENDING record, not here - keeping "the engine owns lifecycle
-        // events" a single, consistent rule regardless of which node accepted the StartRollout call.
         return startRolloutResponse {
             success = true
             rollout = progress.toDefinition()
@@ -231,9 +205,6 @@ class RolloutAPIServiceImpl : RolloutAPIServiceGrpcKt.RolloutAPIServiceCoroutine
             }
         }
 
-        // Just flip the status here - the rollout-reconciler Chronyx task (RolloutEngine) picks up
-        // CANCELLED records on its next tick, does the actual cleanup (terminate new services, clear
-        // draining flags) and publishes RolloutCancelledEvent once that's done.
         storage.update(progress.rolloutId) {
             it.copy(status = RolloutStatus.CANCELLED, completedAt = nowTimestamp())
         }

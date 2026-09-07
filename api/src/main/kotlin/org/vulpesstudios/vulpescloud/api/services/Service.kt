@@ -101,9 +101,6 @@ fun Service.withRolloutMetadata(rolloutId: String, generation: String? = null): 
     newMeta[RolloutMetadata.KEY_ROLLOUT_ID] = rolloutId
     if (generation != null) {
         newMeta[RolloutMetadata.KEY_ROLLOUT_GENERATION] = generation
-        // Only relevant for freshly started replacements - this is what checkReadinessTimeout
-        // measures against, since Service.startTime is never actually populated anywhere in the
-        // codebase (always epoch 0) and can't be used for this.
         newMeta[RolloutMetadata.KEY_BATCH_STARTED_AT] = System.currentTimeMillis().toString()
     }
     return this.copy(metadata = newMeta)
@@ -121,14 +118,11 @@ fun Service.withDraining(draining: Boolean = true): Service {
     return this.copy(metadata = newMeta)
 }
 
-/** Epoch millis timestamp of when this service was marked draining, if any. */
 fun Service.drainingSince(): Long? = metadata[RolloutMetadata.KEY_DRAINING_SINCE]?.toLongOrNull()
 
-/** Epoch millis timestamp of when this service was tagged as a rollout batch replacement, if any. */
 fun Service.rolloutBatchStartedAt(): Long? =
     metadata[RolloutMetadata.KEY_BATCH_STARTED_AT]?.toLongOrNull()
 
-/** Removes all rollout-related metadata keys from this service (used by orphan cleanup). */
 fun Service.withoutRolloutMetadata(): Service {
     val newMeta = metadata.toMutableMap()
     newMeta.remove(RolloutMetadata.KEY_DRAINING)
@@ -155,6 +149,5 @@ object RolloutMetadata {
     const val KEY_TASK_ROLLOUT_ID = "rollout_id"
     const val KEY_DRAINING_SINCE = "draining_since"
     const val KEY_BATCH_STARTED_AT = "rollout_batch_started_at"
-    /** Marks a service as a freshly started rollout replacement (vs. an old, pre-existing one). */
     const val GENERATION_NEW = "new"
 }

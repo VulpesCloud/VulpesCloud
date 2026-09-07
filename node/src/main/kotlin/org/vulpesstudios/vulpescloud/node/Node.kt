@@ -255,7 +255,7 @@ class Node {
                 createVirtualConfigRequest {
                     this.name = RolloutGlobalConfig.VIRTUAL_CONFIG_NAME
                     this.config =
-                        Node.instance.virtualConfigProvider.json.encodeToString(
+                        virtualConfigProvider.json.encodeToString(
                             RolloutGlobalConfig.serializer(),
                             RolloutGlobalConfig(),
                         )

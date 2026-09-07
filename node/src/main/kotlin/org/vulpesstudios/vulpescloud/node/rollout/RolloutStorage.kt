@@ -103,7 +103,6 @@ class RolloutStorage {
                 }
                 retries++
             }
-            // If compareAndSet failed after retries, fallback to upsert under lock
             val current = get(rolloutId) ?: return null
             val updated = transform(current)
             save(updated)

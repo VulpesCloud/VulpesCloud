@@ -16,22 +16,11 @@
 
 package org.vulpesstudios.vulpescloud.node.rollout
 
-import build.buf.gen.vulpescloud.events.v1.RolloutBatchProgressEvent
-import build.buf.gen.vulpescloud.events.v1.RolloutCancelledEvent
-import build.buf.gen.vulpescloud.events.v1.RolloutCompletedEvent
-import build.buf.gen.vulpescloud.events.v1.RolloutDrainingEvent
-import build.buf.gen.vulpescloud.events.v1.RolloutFailedEvent
-import build.buf.gen.vulpescloud.events.v1.RolloutStartedEvent
+import build.buf.gen.vulpescloud.events.v1.*
 import kotlinx.coroutines.Job
 import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.node.event.EventsService
 
-/**
- * Prints formatted (MiniMessage-tagged, see [org.vulpesstudios.vulpescloud.node.terminal.ConsoleAppender])
- * console log lines for rollout lifecycle events (Phase 5.2). Runs on every node - since events
- * are broadcast cluster-wide (see [RolloutEvents]), every node's console reflects rollout progress
- * regardless of which node is currently coordinating it.
- */
 object RolloutEventListener {
 
     private val logger = LoggerFactory.getLogger("Rollout")

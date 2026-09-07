@@ -16,30 +16,12 @@
 
 package org.vulpesstudios.vulpescloud.node.rollout
 
-import build.buf.gen.vulpescloud.events.v1.rolloutBatchProgressEvent
-import build.buf.gen.vulpescloud.events.v1.rolloutCancelledEvent
-import build.buf.gen.vulpescloud.events.v1.rolloutCompletedEvent
-import build.buf.gen.vulpescloud.events.v1.rolloutDrainingEvent
-import build.buf.gen.vulpescloud.events.v1.rolloutFailedEvent
-import build.buf.gen.vulpescloud.events.v1.rolloutStartedEvent
+import build.buf.gen.vulpescloud.events.v1.*
 import org.vulpesstudios.vulpescloud.api.rollout.RolloutProgress
 import org.vulpesstudios.vulpescloud.api.services.Service
 import org.vulpesstudios.vulpescloud.api.tasks.Task
 import org.vulpesstudios.vulpescloud.node.event.EventsService
 
-/**
- * Publishes rollout lifecycle events (Phase 5) onto the cluster event bus.
- *
- * Everything is published with `broadcast = true`: a rollout is only ever driven by whichever
- * node currently holds the Chronyx coordinator lease, but listeners - the console logger
- * ([RolloutEventListener]) as well as any external module (e.g. a Discord/notify module) - may be
- * attached on *any* node, so events always need to reach the whole cluster rather than just the
- * node that happened to perform the step.
- *
- * No further "integration hook" is required for external modules: [EventsService] is already the
- * public event bus modules run in-process against (see [EventsService.subscribe]), so a Notify
- * Module simply subscribes to these event types the same way [RolloutEventListener] does.
- */
 object RolloutEvents {
 
     fun started(progress: RolloutProgress, task: Task) {
