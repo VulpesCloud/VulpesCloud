@@ -18,7 +18,7 @@
 
 plugins {
     id("java")
-    kotlin("jvm") version "2.4.10"
+    kotlin("jvm") version "2.4.20"
     alias(libs.plugins.shadow)
     kotlin("kapt")
 
