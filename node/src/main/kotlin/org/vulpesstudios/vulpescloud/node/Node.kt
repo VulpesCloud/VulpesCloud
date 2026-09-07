@@ -17,6 +17,7 @@
 package org.vulpesstudios.vulpescloud.node
 
 import build.buf.gen.vulpescloud.services.v1.ServiceSnapshot
+import build.buf.gen.vulpescloud.virtualconfig.v1.createVirtualConfigRequest
 import com.github.dockerjava.core.DefaultDockerClientConfig
 import com.github.dockerjava.core.DockerClientConfig
 import com.github.dockerjava.core.DockerClientImpl
@@ -26,6 +27,7 @@ import io.grpc.BindableService
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.api.players.OnlinePlayer
+import org.vulpesstudios.vulpescloud.api.rollout.RolloutGlobalConfig
 import org.vulpesstudios.vulpescloud.node.auth.AuthServiceImpl
 import org.vulpesstudios.vulpescloud.node.cluster.ClusterAPIServiceImpl
 import org.vulpesstudios.vulpescloud.node.cluster.ClusterProvider
@@ -248,6 +250,17 @@ class Node {
             clusterProvider.initClusterConfig()
             clusterProvider.init()
             clusterProvider.connectToOtherNodes(clientSslContext)
+
+            virtualConfigServiceImpl.createVirtualConfig(
+                createVirtualConfigRequest {
+                    this.name = RolloutGlobalConfig.VIRTUAL_CONFIG_NAME
+                    this.config =
+                        Node.instance.virtualConfigProvider.json.encodeToString(
+                            RolloutGlobalConfig.serializer(),
+                            RolloutGlobalConfig(),
+                        )
+                }
+            )
 
             TemplateStorageRegistry.registerTemplateStorage(LocalTemplateStorage())
 
