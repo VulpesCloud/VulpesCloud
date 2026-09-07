@@ -17,6 +17,7 @@
 package org.vulpesstudios.vulpescloud.node.templates
 
 import build.buf.gen.vulpescloud.templates.v1.TemplateStorageType
+import kotlinx.coroutines.runBlocking
 import org.vulpesstudios.vulpescloud.api.templates.Template
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.utils.FileUtils
@@ -26,7 +27,10 @@ import kotlin.io.path.Path
 
 class LocalTemplateStorage : TemplateStorage {
     override fun name(): String = "LOCAL"
-    override fun type(): TemplateStorageType = TemplateStorageType.newBuilder().setName("LOCAL").build()
+
+    override fun type(): TemplateStorageType =
+        TemplateStorageType.newBuilder().setName("LOCAL").build()
+
     override fun nodeName(): String = Node.instance.configProvider.config.nodeName
 
     private val templatesPath = Path("local/templates")
@@ -35,7 +39,7 @@ class LocalTemplateStorage : TemplateStorage {
         templatesPath.toFile().mkdirs()
     }
 
-    private fun rootOf(template: Template): Path = templatesPath.resolve(template.name)
+    private fun rootOf(template: Template): Path = templatesPath.resolve(template.id)
 
     override fun copyTemplateToPath(template: Template, path: Path) {
         val templatePath = rootOf(template)
@@ -61,13 +65,18 @@ class LocalTemplateStorage : TemplateStorage {
         return Files.exists(rootOf(template))
     }
 
+    private suspend fun fillTemplateData(id: String): Template {
+        return TemplateRegistry.getById(id)!!
+    }
+
     override fun templates(): List<Template> {
-        TODO("Unimplemented Method!")
-//        return templatesPath
-//            .toFile()
-//            .listFiles()
-//            ?.filter { it.isDirectory }
-//            ?.map { Template(it.name, -1) } ?: emptyList()
+        return runBlocking {
+            templatesPath
+                .toFile()
+                .listFiles()
+                ?.filter { it.isDirectory }
+                ?.map { fillTemplateData(it.name) } ?: emptyList()
+        }
     }
 
     override fun createDirectory(template: Template, path: String) {
@@ -109,7 +118,9 @@ class LocalTemplateStorage : TemplateStorage {
 
     override fun readFile(template: Template, path: String): TemplateFileData {
         val target = FileUtils.resolveSafe(rootOf(template), path)
-        require(Files.exists(target) && !Files.isDirectory(target)) { "File '$path' does not exist" }
+        require(Files.exists(target) && !Files.isDirectory(target)) {
+            "File '$path' does not exist"
+        }
 
         return TemplateFileData(
             path = path,
@@ -131,15 +142,17 @@ class LocalTemplateStorage : TemplateStorage {
         require(Files.isDirectory(target)) { "'$path' is not a directory" }
 
         return Files.list(target).use { stream ->
-            stream.map { entry ->
-                TemplateDirectoryEntryData(
-                    name = entry.fileName.toString(),
-                    path = root.relativize(entry).toString().replace('\\', '/'),
-                    directory = Files.isDirectory(entry),
-                    size = if (Files.isDirectory(entry)) 0 else Files.size(entry),
-                    modifiedAt = Files.getLastModifiedTime(entry).toMillis(),
-                )
-            }.toList()
+            stream
+                .map { entry ->
+                    TemplateDirectoryEntryData(
+                        name = entry.fileName.toString(),
+                        path = root.relativize(entry).toString().replace('\\', '/'),
+                        directory = Files.isDirectory(entry),
+                        size = if (Files.isDirectory(entry)) 0 else Files.size(entry),
+                        modifiedAt = Files.getLastModifiedTime(entry).toMillis(),
+                    )
+                }
+                .toList()
         }
     }
 }
