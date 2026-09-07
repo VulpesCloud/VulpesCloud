@@ -23,16 +23,17 @@ import kotlinx.serialization.descriptors.PrimitiveSerialDescriptor
 import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
+import java.util.*
 
 object TimestampSerializer : KSerializer<Timestamp> {
     override val descriptor: SerialDescriptor =
         PrimitiveSerialDescriptor("Timestamp", PrimitiveKind.STRING)
 
     override fun serialize(encoder: Encoder, value: Timestamp) {
-        encoder.encodeString(value.toString())
+        encoder.encodeString(Base64.getEncoder().encodeToString(value.toByteArray()))
     }
 
     override fun deserialize(decoder: Decoder): Timestamp {
-        return Timestamp.parseFrom(decoder.decodeString().toByteArray())
+        return Timestamp.parseFrom(Base64.getDecoder().decode(decoder.decodeString()))
     }
 }
