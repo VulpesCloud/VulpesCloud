@@ -54,11 +54,11 @@ class RolloutCommand {
         source: CommandSource,
         @Argument("tasks") tasks: List<Task>,
         @Flag(value = "strategy", suggestions = "rolloutStrategies") strategy: String?,
-        @Flag(value = "batch", aliases = ["b"]) batch: Int?,
+        @Flag(value = "batch") batch: Int?,
         @Flag(value = "drain-threshold") drainThreshold: Int?,
-        @Flag(value = "drain-timeout", aliases = ["t"]) drainTimeout: Int?,
+        @Flag(value = "drain-timeout") drainTimeout: Int?,
         @Flag(value = "readiness-timeout") readinessTimeout: Int?,
-        @Flag(value = "bypass-max-services", aliases = ["force"]) bypassMaxServices: Boolean,
+        @Flag(value = "bypass-max-services") bypassMaxServices: Boolean,
         @Flag(value = "no-transfer") noTransfer: Boolean,
     ) {
         val options =

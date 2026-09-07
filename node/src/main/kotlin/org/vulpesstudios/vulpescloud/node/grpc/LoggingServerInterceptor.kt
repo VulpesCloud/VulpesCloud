@@ -23,6 +23,12 @@ class LoggingServerInterceptor : ServerInterceptor {
     private val log = LoggerFactory.getLogger(LoggingServerInterceptor::class.java)
     private val ignoredStatuses = setOf(Status.Code.CANCELLED, Status.Code.UNAVAILABLE)
 
+    // Expected client-input outcomes (e.g. looking up something that doesn't exist, or a bad
+    // request) rather than genuine server-side failures - still worth a log line, but not at
+    // ERROR level.
+    private val clientErrorStatuses =
+        setOf(Status.Code.NOT_FOUND, Status.Code.INVALID_ARGUMENT, Status.Code.ALREADY_EXISTS)
+
     override fun <ReqT : Any, RespT : Any> interceptCall(
         call: ServerCall<ReqT, RespT>,
         headers: Metadata,
@@ -36,6 +42,8 @@ class LoggingServerInterceptor : ServerInterceptor {
                         status.isOk -> Unit
                         ignoredStatuses.contains(status.code) ->
                             log.debug("gRPC <{}> ended with {}", method, status)
+                        clientErrorStatuses.contains(status.code) ->
+                            log.warn("gRPC <{}> rejected: {}", method, status)
                         else -> log.error("gRPC <$method> failed: $status")
                     }
                     super.close(status, trailers)
