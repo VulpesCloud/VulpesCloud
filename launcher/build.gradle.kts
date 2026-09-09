@@ -17,13 +17,13 @@
 
 
 plugins {
-    kotlin("jvm") version "2.4.10"
+    kotlin("jvm") version "2.4.20"
     // id("com.github.johnrengelman.shadow") version "8.1.1"
     alias(libs.plugins.shadow)
 }
 
 dependencies {
-    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.4.10")
+    implementation("org.jetbrains.kotlin:kotlin-stdlib:2.4.20")
     implementation(libs.nightConfig.toml)
     implementation(libs.json)
     implementation(kotlin("reflect"))
