@@ -46,7 +46,7 @@ adventure = "5.2.0"
 json = "20250517"
 
 # console
-jline = "3.30.16"
+jline = "3.30.17"
 cloud = "2.1.0"
 
 # platforms
