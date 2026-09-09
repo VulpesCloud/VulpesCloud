@@ -43,6 +43,7 @@ jobs:
           MESSAGE: 'Update Meta for branch {target-branch} of commit {sha}'
 
       - name: Publish to maven repo
+        if: ${{ github.event_name == 'push' && !startsWith(github.ref, 'refs/heads/renovate/') }}
         run: ./gradlew publishAllPublicationsToVulpescloudSnapshotsRepository
         env:
           REPO_USERNAME: ${{ secrets.REPO_USERNAME }}
