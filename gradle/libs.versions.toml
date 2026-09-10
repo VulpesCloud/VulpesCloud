@@ -1,6 +1,6 @@
 [versions]
 # kotlin
-stdlib = "2.4.10"
+stdlib = "2.4.20"
 kotlinx-serialization = "1.11.0"
 kotlinx-datetime = "0.8.0-0.6.x-compat"
 kotlinx-coroutines = "1.11.0"
@@ -10,27 +10,28 @@ guava = "33.7.1-jre"
 
 # utils
 bcrypt = "0.10.2"
+chronyx = "1.0.0"
 
 # network
-protobuf = "4.36.0"
-grpc = "1.83.1"
+protobuf = "4.36.1"
+grpc = "1.84.0"
 grpc-kotlin = "1.5.0"
-protospecs-grpc = "1.5.0.4.20260817212501.763595d211b4"
+protospecs-grpc = "1.5.0.4.20260907084334.3a03e9acd25a"
 perfmark = "0.27.0"
 
-javaJWT = "4.6.0"
+javaJWT = "4.6.1"
 
 # ok
 okhttp = "5.5.0"
-okio = "3.18.1"
+okio = "3.18.2"
 
 # docker
 docker-java = "3.7.1"
 
 # Database
-exposed = "1.4.0"
-mongodb = "5.10.0"
-sqlite = "3.53.2.1"
+exposed = "1.5.0"
+mongodb = "5.11.0"
+sqlite = "3.53.4.0"
 mariadb = "3.5.10"
 hikaricp = "7.1.0"
 
@@ -45,16 +46,17 @@ adventure = "5.2.0"
 json = "20250517"
 
 # console
-jline = "3.30.16"
+jline = "3.30.17"
 cloud = "2.1.0"
 
 # platforms
 paper = "1.17-R0.1-SNAPSHOT"
-velocity = "4.0.0"
+velocity = "4.1.1"
+minestom = "2026.08.28-26.2"
 
 # config
 night-config = "3.9.0"
-snakeyml = "2.6"
+snakeyml = "2.7"
 
 # command api
 commandapi = "12.0.0"
@@ -119,6 +121,7 @@ docker-java-transport = { group = "com.github.docker-java", name = "docker-java-
 
 # utils
 bcrypt = { group = "at.favre.lib", name = "bcrypt", version.ref = "bcrypt" }
+chronyx-core = { group = "org.vulpesstudios.chronyx", name = "core", version.ref = "chronyx" }
 
 # logging
 slf4jApi = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
@@ -148,6 +151,7 @@ cloud-processors-confirmation = { group = "org.incendo", name = "cloud-processor
 # platforms
 paper = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
 velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
+minestom = { group = "net.minestom", name = "minestom", version.ref = "minestom" }
 
 # config
 nightConfig-toml = { group = "com.electronwill.night-config", name = "toml", version.ref = "night-config" }

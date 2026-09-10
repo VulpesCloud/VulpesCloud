@@ -1,6 +1,6 @@
 # VulpesCloud
 
-![build](https://jenkins.vulpescloud.de/job/VulpesCloud/badge/icon) ![Downloads](https://img.shields.io/github/downloads/VulpesCloud/VulpesCloud/total) ![GitHub Release](https://img.shields.io/github/v/release/VulpesCloud/VulpesCloud?include_prereleases)
+![Downloads](https://img.shields.io/github/downloads/VulpesCloud/VulpesCloud/total) ![GitHub Release](https://img.shields.io/github/v/release/VulpesCloud/VulpesCloud?include_prereleases)
 
 
 
@@ -13,7 +13,7 @@
 ##### build.gradle.kts
 ```kotlin
 repositories {
-    maven("https://repo.vulpescloud.de/releases")
+    maven("https://repo.vulpesstudios.org/releases")
 }
 ```
 ### Artifacts
@@ -30,15 +30,15 @@ repositories {
 #### build.gradle.kts
 ```kotlin
 repositories {
-    maven("https://repo.vulpescloud.de/releases")
+    maven("https://repo.vulpesstudios.org/releases")
 }
 
 dependencies {
-    compileOnly("de.vulpescloud:api:%version%")
-    compileOnly("de.vulpescloud:node:%version%")
-    compileOnly("de.vulpescloud:bridge:%version%")
-    compileOnly("de.vulpescloud:connector:%version%")
-    compileOnly("de.vulpescloud:wrapper:%version%")
+    compileOnly("org.vulpesstudios.vulpescloud:api:%version%")
+    compileOnly("org.vulpesstudios.vulpescloud:node:%version%")
+    compileOnly("org.vulpesstudios.vulpescloud:bridge:%version%")
+    compileOnly("org.vulpesstudios.vulpescloud:connector:%version%")
+    compileOnly("org.vulpesstudios.vulpescloud:wrapper:%version%")
 }
 ```
 #### Replace the `%version%` to the latest version of VulpesCloud (current: `2.0.0-ALPHA)
@@ -48,12 +48,11 @@ Snapshots are available from the snapshot repository!
 ##### build.gradle.kts
 ```kotlin
 repositories {
-    maven("https://repo.vulpescloud.de/snapshots")
+    maven("https://repo.vulpesstudios.org/snapshots")
 }
 ```
 
 ## Links
 
 - [Discord](https://discord.gg/dcFSujWqfw)
-- [Dokka Docs](https://dokka.vulpescloud.de)
-- [Repository](https://repo.vulpescloud.de)
+- [Repository](https://repo.vulpesstudios.org)
