@@ -28,7 +28,9 @@ import org.vulpesstudios.vulpescloud.node.setup.annotations.SetupQuestion
 import org.vulpesstudios.vulpescloud.node.setup.answers.AddressAnswer
 import org.vulpesstudios.vulpescloud.node.setup.answers.BooleanSetupAnswer
 import org.vulpesstudios.vulpescloud.node.setup.answers.MemorySetupAnswer
+import java.nio.file.Files
 import java.util.*
+import kotlin.io.path.Path
 
 class FirstSetup : Setup {
     override val header = "Fist Setup"
@@ -144,7 +146,10 @@ class FirstSetup : Setup {
 
     @SetupCancel
     fun cancel() {
-        runBlocking { NodeShutdown.shutdown() }
+        runBlocking {
+            Files.deleteIfExists(Path("config.json"))
+            NodeShutdown.shutdown()
+        }
     }
 
     @SetupFinish
