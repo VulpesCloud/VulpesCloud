@@ -1,67 +1,70 @@
 /*
- * MIT License
+ * Copyright 2024-2026 VulpesStudios & Contributers
  *
- * Copyright (c) 2024 VulpesCloud
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
  *
- * Permission is hereby granted, free of charge, to any person obtaining a copy
- * of this software and associated documentation files (the "Software"), to deal
- * in the Software without restriction, including without limitation the rights
- * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
- * copies of the Software, and to permit persons to whom the Software is
- * furnished to do so, subject to the following conditions:
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
- * The above copyright notice and this permission notice shall be included in all
- * copies or substantial portions of the Software.
- *
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
- * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
- * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
- * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
- * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
- * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
- * SOFTWARE.
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
+
+
+
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 plugins {
     id("vulpescloud.parent-build-logic")
-    kotlin("jvm") version "2.2.0"
-    id("org.jetbrains.dokka") version "2.0.0"
+    kotlin("jvm") version "2.4.20"
+    id("org.jetbrains.dokka") version "2.2.0"
     id("signing")
     id("maven-publish")
     alias(libs.plugins.shadow)
+    kotlin("plugin.serialization") version "2.4.20"
 }
 
-group = "de.vulpescloud"
-version = "2.0.0"
+group = "org.vulpesstudios.vulpescloud"
+version = "3.0.0"
+
+tasks.named("build") {
+    enabled = false
+}
+
+tasks.named("shadowJar") {
+    enabled = false
+}
 
 allprojects {
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
     apply(plugin = "org.jetbrains.dokka")
     apply(plugin = "org.jetbrains.kotlin.jvm")
+    apply(plugin = "org.jetbrains.kotlin.plugin.serialization")
 
-    version = "2.0.0"
-    group = "de.vulpescloud"
+    version = "3.0.0"
+    group = "org.vulpesstudios.vulpescloud"
 
     repositories {
         mavenCentral()
-        maven("https://repo.vulpescloud.de/snapshots")
-    }
-
-    dependencies {
-        "implementation"(rootProject.libs.annotations)
-        "implementation"(rootProject.libs.gson)
-        "implementation"(rootProject.libs.guava)
-        "implementation"(kotlin("reflect"))
-        "implementation"(rootProject.libs.koin)
-        "implementation"(rootProject.libs.kotlin.stdlib)
+        maven("https://repo.vulpesstudios.org/snapshots")
+        maven("https://repo.vulpesstudios.org/releases")
+        maven {
+            name = "buf"
+            url = uri("https://buf.build/gen/maven")
+        }
     }
 
     publishing {
         repositories {
             maven {
                 name = "vulpescloudReleases"
-                url = uri("https://repo.vulpescloud.de/releases/")
+                url = uri("https://repo.vulpesstudios.org/releases/")
                 credentials{
                     username = System.getenv("REPO_USERNAME")
                     password = System.getenv("REPO_PASSWORD")
@@ -70,7 +73,7 @@ allprojects {
 
             maven {
                 name = "vulpescloudSnapshots"
-                url = uri("https://repo.vulpescloud.de/snapshots/")
+                url = uri("https://repo.vulpesstudios.org/snapshots/")
                 credentials{
                     username = System.getenv("REPO_USERNAME")
                     password = System.getenv("REPO_PASSWORD")
@@ -89,53 +92,71 @@ allprojects {
 
     kotlin {
         jvmToolchain {
-            languageVersion.set(JavaLanguageVersion.of(21))
+            languageVersion.set(JavaLanguageVersion.of(25))
         }
     }
+
+    tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        compilerOptions {
+            jvmTarget.set(JvmTarget.JVM_25)
+        }
+    }
+
+    tasks.withType<JavaCompile> {
+        sourceCompatibility = "25"
+        targetCompatibility = "25"
+    }
+}
+
+subprojects {
+    tasks.withType<ShadowJar> {
+        archiveBaseName.set("vulpescloud-${project.name}")
+        archiveFileName.set("vulpescloud-${project.name}.jar")
+
+        destinationDirectory.set(file("${rootProject.layout.buildDirectory.get()}/libs"))
+    }
+}
+
+tasks.register("buildAll") {
+    group = "build"
+    description = "Builds all valid subprojects using shadowJar"
+
+
+
+    dependsOn(
+        subprojects.filter { sub ->
+            val hasBuildFile = file("${sub.projectDir}/build.gradle.kts").exists()
+            val hasPlugin = sub.plugins.hasPlugin("java") || sub.plugins.hasPlugin("org.jetbrains.kotlin.jvm")
+            hasBuildFile && hasPlugin
+        }.mapNotNull { sub ->
+            sub.tasks.findByName("shadowJar")
+        }
+    )
 }
 
 tasks.register("copyFilesForMetaRepo") {
-    dependsOn(project(":VulpesCloud-api").tasks.jar)
-    dependsOn(project(":VulpesCloud-bridge").tasks.jar)
-    dependsOn(project(":VulpesCloud-node").tasks.shadowJar)
-    dependsOn(project(":VulpesCloud-wrapper").tasks.shadowJar)
-    dependsOn(project(":VulpesCloud-connector").tasks.shadowJar)
-    dependsOn(project(":VulpesCloud-launcher").tasks.shadowJar)
+    dependsOn(tasks.named("buildAll"))
 
     doLast {
-        copy {
-            from(project(":VulpesCloud-api").buildDir.resolve("libs/vulpescloud-api.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-api.jar" }
+        val buildDir = rootProject.layout.buildDirectory.get().asFile
+        val libsDir = File(buildDir, "libs")
+
+        // Copy all JAR files from the libs directory to the meta-repo directory
+        val metaRepoDir = File(buildDir, "meta-repo")
+        if (metaRepoDir.exists()) {
+            metaRepoDir.deleteRecursively()
         }
-        copy {
-            from(project(":VulpesCloud-bridge").buildDir.resolve("libs/vulpescloud-bridge.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-bridge.jar" }
-        }
-        copy {
-            from(project(":VulpesCloud-node").buildDir.resolve("libs/vulpescloud-node.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-node.jar" }
-        }
-        copy {
-            from(project(":VulpesCloud-wrapper").buildDir.resolve("libs/vulpescloud-wrapper.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-wrapper.jar" }
-        }
-        copy {
-            from(project(":VulpesCloud-connector").buildDir.resolve("libs/vulpescloud-connector.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-connector.jar" }
-        }
-        copy {
-            from(project(":VulpesCloud-launcher").buildDir.resolve("libs/vulpescloud-launcher.jar"))
-            into("$buildDir/meta-repo")
-            rename { "vulpescloud-launcher.jar" }
+        metaRepoDir.mkdirs()
+
+        libsDir.listFiles { file -> file.extension == "jar" }?.forEach { jarFile ->
+            jarFile.copyTo(File(metaRepoDir, jarFile.name), overwrite = true)
         }
 
-        generateCheckSums("$buildDir/meta-repo")
+        println("All JAR files copied to ${metaRepoDir.absolutePath}")
+
+        val jarFiles = metaRepoDir.listFiles { file -> file.extension == "jar" }
+        if (jarFiles != null && jarFiles.isNotEmpty()) {
+            generateCheckSums(File(buildDir, "meta-repo").toPath(), jarFiles.map { it.name })
+        }
     }
 }
-
-

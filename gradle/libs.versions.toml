@@ -1,99 +1,194 @@
 [versions]
 # kotlin
-stdlib = "2.2.0"
-kotlinx-serialization = "1.9.0"
+stdlib = "2.4.20"
+kotlinx-serialization = "1.11.0"
+kotlinx-datetime = "0.8.0-0.6.x-compat"
+kotlinx-coroutines = "1.11.0"
 
 # google deps
-guava = "33.4.8-jre"
+guava = "33.7.1-jre"
 
 # utils
-lombok = "1.18.36"
-annotations = "26.0.2"
+bcrypt = "0.10.2"
+chronyx = "1.0.0"
 
 # network
-jedis = "6.0.0"
-hikariCP = "6.3.0"
-mariadb = "3.5.4"
-exposed = "1.0.0-beta-3"
-jedisWrapper = "1.1.4"
+protobuf = "4.36.1"
+grpc = "1.84.0"
+grpc-kotlin = "1.5.0"
+protospecs-grpc = "1.5.0.4.20260907084334.3a03e9acd25a"
+perfmark = "0.27.0"
 
-#logging
+javaJWT = "4.6.1"
+
+# ok
+okhttp = "5.5.0"
+okio = "3.18.2"
+
+# docker
+docker-java = "3.7.1"
+
+# Database
+exposed = "1.5.0"
+mongodb = "5.11.0"
+sqlite = "3.53.4.0"
+mariadb = "3.5.10"
+hikaricp = "7.1.0"
+
+reactor = "3.8.7"
+
+# logging
 slf4j = "2.1.0-alpha1"
-logback = "1.5.18"
+logback = "1.6.3"
+adventure = "5.2.0"
 
 # configuration
-gson = "2.13.1"
 json = "20250517"
 
 # console
-jline = "3.30.4"
-cloud = "2.0.0"
+jline = "3.30.17"
+cloud = "2.1.0"
 
 # platforms
-paper = "1.21.1-R0.1-SNAPSHOT"
-velocity = "3.4.0-SNAPSHOT"
-
-# dependency injection
-koin = "4.1.0"
+paper = "1.17-R0.1-SNAPSHOT"
+velocity = "4.1.1"
+minestom = "2026.08.28-26.2"
 
 # config
+night-config = "3.9.0"
+snakeyml = "2.7"
 
-night-config = "3.8.2"
+# command api
+commandapi = "12.0.0"
 
 # shadowJar
-shadow = "8.1.1"
+shadow = "9.6.1"
+
+# bouncy castle
+bouncy-castle = "1.70"
+
+# caffeine
+caffeine = "3.2.4"
 
 [plugins]
-shadow = { id = "com.github.johnrengelman.shadow", version.ref = "shadow" }
+shadow = { id = "com.gradleup.shadow", version.ref = "shadow" }
 
 [libraries]
 # kotlin
 kotlin-stdlib = { group = "org.jetbrains.kotlin", name = "kotlin-stdlib", version.ref = "stdlib" }
-kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization"}
+kotlinx-serialization = { group = "org.jetbrains.kotlinx", name = "kotlinx-serialization-json", version.ref = "kotlinx-serialization" }
+kotlinx-datetime = { group = "org.jetbrains.kotlinx", name = "kotlinx-datetime", version.ref = "kotlinx-datetime" }
+kotlinx-coroutines-core = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinx-coroutines" }
+kotlinx-coroutines-reactive = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-reactive", version.ref = "kotlinx-coroutines" }
+
+# ok
+okhttp = { group = "com.squareup.okhttp3", name = "okhttp", version.ref = "okhttp" }
+okio = { group = "com.squareup.okio", name = "okio", version.ref = "okio" }
 
 # google libs
 guava = { group = "com.google.guava", name = "guava", version.ref = "guava" }
 
-# utils
-lombok = { group = "org.projectlombok", name = "lombok", version.ref = "lombok" }
-annotations = { group = "org.jetbrains", name = "annotations", version.ref = "annotations" }
+# bouncy castle
+bouncy-castle = { group = "org.bouncycastle", name = "bcpkix-jdk15on", version.ref = "bouncy-castle" }
 
-# network
-jedis = {group = "redis.clients", name = "jedis", version.ref = "jedis"}
-hikariCP = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikariCP" }
-mariadb-java-client = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.ref = "mariadb" }
-exposed-core = { module = "org.jetbrains.exposed:exposed-core", version.ref = "exposed" }
-exposed-jdbc = { module = "org.jetbrains.exposed:exposed-jdbc", version.ref = "exposed" }
-jedisWrapper = { group = "de.vulpescloud", name = "JedisWrapper", version.ref = "jedisWrapper"}
+# proto
+protobuf-kotlin = { module = "com.google.protobuf:protobuf-kotlin", version.ref = "protobuf" }
+grpc-stub = { module = "io.grpc:grpc-stub", version.ref = "grpc" }
+grpc-kotlin-stub = { module = "io.grpc:grpc-kotlin-stub", version.ref = "grpc-kotlin" }
+grpc-protobuf = { module = "io.grpc:grpc-protobuf", version.ref = "grpc" }
+grpc-protobuf-lite = { module = "io.grpc:grpc-protobuf-lite", version.ref = "grpc" }
+grpc-netty = { module = "io.grpc:grpc-netty", version.ref = "grpc" }
+grpc-core = { module = "io.grpc:grpc-core", version.ref = "grpc" }
+protospecs-grpc = { group = "build.buf.gen", name = "vulpescloud_protospecs_grpc_kotlin", version.ref = "protospecs-grpc" }
+perfmark = { group = "io.perfmark", name = "perfmark-api", version.ref = "perfmark" }
+
+javaJWT = { group = "com.auth0", name = "java-jwt", version.ref = "javaJWT" }
+
+# Database
+exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
+exposed-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref = "exposed" }
+mongodb-driver-coroutine = { group = "org.mongodb", name = "mongodb-driver-kotlin-coroutine", version.ref = "mongodb" }
+mongodb-bson-kotlinx = { group = "org.mongodb", name = "bson-kotlinx", version.ref = "mongodb" }
+sqlite = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqlite" }
+mariadb = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.ref = "mariadb" }
+hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
+
+reactor-core = { group = "io.projectreactor", name = "reactor-core", version.ref = "reactor" }
+
+# docker
+docker-java = { group = "com.github.docker-java", name = "docker-java-core", version.ref = "docker-java" }
+docker-java-transport = { group = "com.github.docker-java", name = "docker-java-transport-httpclient5", version.ref = "docker-java" }
+
+# utils
+bcrypt = { group = "at.favre.lib", name = "bcrypt", version.ref = "bcrypt" }
+chronyx-core = { group = "org.vulpesstudios.chronyx", name = "core", version.ref = "chronyx" }
 
 # logging
 slf4jApi = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
 logbackCore = { group = "ch.qos.logback", name = "logback-core", version.ref = "logback" }
 logbackClassic = { group = "ch.qos.logback", name = "logback-classic", version.ref = "logback" }
+adventure-text-serializer-ansi = { group = "net.kyori", name = "adventure-text-serializer-ansi", version.ref = "adventure" }
+adventure-text-minimessage = { group = "net.kyori", name = "adventure-text-minimessage", version.ref = "adventure" }
+adventure_text_serializer_legacy = { group = "net.kyori", name = "adventure-text-serializer-legacy", version.ref = "adventure" }
 
 # configuration
-gson = { group = "com.google.code.gson", name = "gson", version.ref = "gson" }
-json = { group = "org.json", name = "json", version.ref = "json"}
+json = { group = "org.json", name = "json", version.ref = "json" }
+
+# command api
+commandapi-velocity-shade = { group = "dev.jorel", name = "commandapi-velocity-shade", version.ref = "commandapi" }
+commandapi-kotlin-velocity = { group = "dev.jorel", name = "commandapi-kotlin-velocity", version.ref = "commandapi" }
 
 # console
 jline = { group = "org.jline", name = "jline", version.ref = "jline" }
-cloud = { group = "org.incendo", name = "cloud-core", version.ref = "cloud"}
+jline-console-ui = { group = "org.jline", name = "jline-console-ui", version.ref = "jline" }
+cloud = { group = "org.incendo", name = "cloud-core", version.ref = "cloud" }
 cloud-extension = { group = "org.incendo", name = "cloud-kotlin-extensions", version.ref = "cloud" }
-cloud-annotations = { group = "org.incendo", name = "cloud-annotations", version.ref = "cloud"}
-cloud-kotlin-coroutines = { group = "org.incendo", name = "cloud-kotlin-coroutines", version.ref = "cloud"}
-cloud-kotlin-coroutines-annotations = { group = "org.incendo", name = "cloud-kotlin-coroutines-annotations", version.ref = "cloud"}
-cloud-velocity = { group = "org.incendo", name = "cloud-velocity", version = "2.0.0-SNAPSHOT"}
-cloud-processors-confirmation = { group = "org.incendo", name = "cloud-processors-confirmation", version = "1.0.0-rc.1"}
+cloud-annotations = { group = "org.incendo", name = "cloud-annotations", version.ref = "cloud" }
+cloud-kotlin-coroutines = { group = "org.incendo", name = "cloud-kotlin-coroutines", version.ref = "cloud" }
+cloud-kotlin-coroutines-annotations = { group = "org.incendo", name = "cloud-kotlin-coroutines-annotations", version.ref = "cloud" }
+cloud-processors-confirmation = { group = "org.incendo", name = "cloud-processors-confirmation", version = "1.0.0-rc.1" }
 
 # platforms
 paper = { group = "io.papermc.paper", name = "paper-api", version.ref = "paper" }
 velocity = { group = "com.velocitypowered", name = "velocity-api", version.ref = "velocity" }
-
-# depdendency injection
-koin = { group = "io.insert-koin", name = "koin-core", version.ref = "koin"}
+minestom = { group = "net.minestom", name = "minestom", version.ref = "minestom" }
 
 # config
-
 nightConfig-toml = { group = "com.electronwill.night-config", name = "toml", version.ref = "night-config" }
 nightConfig-json = { group = "com.electronwill.night-config", name = "json", version.ref = "night-config" }
 nightConfig-yaml = { group = "com.electronwill.night-config", name = "yaml", version.ref = "night-config" }
+snakeyml = { group = "org.yaml", name = "snakeyaml", version.ref = "snakeyml" }
+
+# caffeine
+caffeine = { group = "com.github.ben-manes.caffeine", name = "caffeine", version.ref = "caffeine" }
+
+[bundles]
+proto = [
+    "grpc-core",
+    "protobuf-kotlin",
+    "grpc-stub",
+    "grpc-kotlin-stub",
+    "grpc-protobuf",
+    "grpc-netty",
+    "protospecs-grpc",
+    "grpc-protobuf-lite",
+]
+
+docker = [
+    "docker-java",
+    "docker-java-transport"
+]
+
+kotlin = [
+    "kotlin-stdlib",
+    "kotlinx-serialization",
+    "kotlinx-datetime",
+    "kotlinx-coroutines-core",
+    "kotlinx-coroutines-reactive"
+]
+
+mongo = [
+    "mongodb-driver-coroutine",
+    "mongodb-bson-kotlinx",
+    "reactor-core"
+]
