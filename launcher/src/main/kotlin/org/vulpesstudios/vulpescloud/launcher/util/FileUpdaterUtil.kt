@@ -26,6 +26,7 @@ import java.net.http.HttpResponse
 import java.net.http.HttpResponse.BodyHandler
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardCopyOption
 import java.nio.file.StandardOpenOption
 import java.time.Duration
 
@@ -64,6 +65,13 @@ object FileUpdaterUtil {
                 println("File ${target.name} is already up to date!")
                 return false
             }
+
+            val backup = target.toPath().resolveSibling("${target.name}.bak")
+            Files.copy(
+                target.toPath(),
+                backup,
+                StandardCopyOption.REPLACE_EXISTING
+            )
         }
 
         println("Updating ${target.name}")
