@@ -227,7 +227,6 @@ class TaskCommand {
     fun deleteTask(source: CommandSource, @Argument("tasks") tasks: List<Task>) {
         runBlocking {
             tasks.forEach { task ->
-                val resp =
                     Node.instance.localGrpcClient.tasksAPI.deleteTask(
                         deleteTaskRequest { this.task = task.toDefinition() }
                     )
@@ -259,18 +258,18 @@ class TaskCommand {
     }
 
     @Permission("tasks.update")
-    @Command("task|tasks task <tasks> set maintenance <maintenance>")
-    fun setMaintenance(
+    @Command("task|tasks task <tasks> set startPort <port>")
+    fun setStartPort(
         source: CommandSource,
         @Argument("tasks") tasks: List<Task>,
-        @Argument("maintenance") maintenance: Boolean,
+        @Argument("port") startPort: Int,
     ) {
         runBlocking {
             tasks.forEach { task ->
                 source.sendMessage(
-                    "<gray>Setting maintenance for task</gray> <white>${task.name}</white> <gray>to</gray> <white>$maintenance</white>"
+                    "<gray>Setting start port for task</gray> <white>${task.name}</white> <gray>to</gray> <gold>$startPort MB</gold>"
                 )
-                val newTask = task.copy(maintenance = maintenance)
+                val newTask = task.copy(startPort = startPort.toLong())
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
                 )
@@ -299,18 +298,78 @@ class TaskCommand {
     }
 
     @Permission("tasks.update")
-    @Command("task|tasks task <tasks> set fallback <fallback>")
-    fun setFallback(
+    @Command("task|tasks task <tasks> set minServiceCount <count>")
+    fun setMinServiceCount(
         source: CommandSource,
         @Argument("tasks") tasks: List<Task>,
-        @Argument("fallback") fallback: Boolean,
+        @Argument("count") count: Int,
     ) {
         runBlocking {
             tasks.forEach { task ->
                 source.sendMessage(
-                    "<gray>Setting fallback for task</gray> <white>${task.name}</white> <gray>to</gray> <white>$fallback</white>"
+                    "<gray>Setting minServiceCount for task</gray> <white>${task.name}</white> <gray>to</gray> <gold>$count</gold>"
                 )
-                val newTask = task.copy(fallback = fallback)
+                val newTask = task.copy(minOnlineServices = count)
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+
+    @Permission("tasks.update")
+    @Command("task|tasks task <tasks> set maxServiceCount <count>")
+    fun setMaxServiceCount(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("count") count: Int,
+    ) {
+        runBlocking {
+            tasks.forEach { task ->
+                source.sendMessage(
+                    "<gray>Setting maxServiceCount for task</gray> <white>${task.name}</white> <gray>to</gray> <gold>$count</gold>"
+                )
+                val newTask = task.copy(maxOnlineServices = count)
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+
+    @Permission("tasks.update")
+    @Command("task|tasks task <tasks> set maintenance <maintenance>")
+    fun setMaintenance(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("maintenance") maintenance: Boolean,
+    ) {
+        runBlocking {
+            tasks.forEach { task ->
+                source.sendMessage(
+                    "<gray>Setting maintenance for task</gray> <white>${task.name}</white> <gray>to</gray> <white>$maintenance</white>"
+                )
+                val newTask = task.copy(maintenance = maintenance)
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+
+    @Permission("tasks.update")
+    @Command("task|tasks task <tasks> set copyTemplatesToStatic <copyTemplatesToStatic>")
+    fun setCopyTemplatesToStatic(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("copyTemplatesToStatic") copyTemplatesToStatic: Boolean,
+    ) {
+        runBlocking {
+            tasks.forEach { task ->
+                source.sendMessage(
+                    "<gray>Setting copyTemplatesToStatic for task</gray> <white>${task.name}</white> <gray>to</gray> <white>$copyTemplatesToStatic</white>"
+                )
+                val newTask = task.copy(copyTemplatesToStatic = copyTemplatesToStatic)
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
                 )
@@ -371,18 +430,252 @@ class TaskCommand {
     }
 
     @Permission("tasks.update")
-    @Command("task|tasks task <tasks> set minServiceCount <count>")
-    fun setMinServiceCount(
+    @Command("task|tasks task <tasks> set maxPlayers <maxPlayers>")
+    fun setMaxPlayers(
         source: CommandSource,
         @Argument("tasks") tasks: List<Task>,
-        @Argument("count") count: Int,
+        @Argument("maxPlayers") maxPlayers: Int,
     ) {
         runBlocking {
             tasks.forEach { task ->
                 source.sendMessage(
-                    "<gray>Setting minServiceCount for task</gray> <white>${task.name}</white> <gray>to</gray> <gold>$count</gold>"
+                    "<gray>Setting maxPlayers for task</gray> <white>${task.name}</white> <gray>to</gray> <white>$maxPlayers</white>"
                 )
-                val newTask = task.copy(minOnlineServices = count)
+                val newTask = task.copy(maxPlayers = maxPlayers)
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+
+    @Permission("tasks.update")
+    @Command("task|tasks task <tasks> add attribute <key> <value>")
+    fun addAttribute(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("key") key: String,
+        @Argument("value") value: String,
+    ) {
+        runBlocking {
+            tasks.forEach { task ->
+                if (task.attributes.containsKey(key)) {
+                    source.sendMessage(
+                        "<red>Attribute</red> <white>$key</white> <red>already exists for task</red> <white>${task.name}</white>"
+                    )
+                    return@forEach
+                }
+
+                source.sendMessage(
+                    "<gray>Adding attribute</gray> <white>$key=$value</white> <gray>to task</gray> <white>${task.name}</white>"
+                )
+
+                val newTask = task.copy(
+                    attributes = task.attributes + (key to value)
+                )
+
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+
+    @Permission("tasks.update")
+    @Command("task|tasks task <tasks> remove attribute <key>")
+    fun removeAttribute(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("key") key: String,
+    ) {
+        runBlocking {
+            tasks.forEach { task ->
+                if (!task.attributes.containsKey(key)) {
+                    source.sendMessage(
+                        "<red>Attribute</red> <white>$key</white> <red>does not exist for task</red> <white>${task.name}</white>"
+                    )
+                    return@forEach
+                }
+
+                source.sendMessage(
+                    "<gray>Removing attribute</gray> <white>$key</white> <gray>from task</gray> <white>${task.name}</white>"
+                )
+
+                val newTask = task.copy(
+                    attributes = task.attributes - key
+                )
+
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+
+    @Permission("tasks.update")
+    @Command("task|tasks task <tasks> add jvmArg <arg>")
+    fun addJvmArg(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("arg") arg: String,
+    ) {
+        runBlocking {
+            tasks.forEach { task ->
+                if (task.jvmArgs.contains(arg)) {
+                    source.sendMessage(
+                        "<red>JVM argument</red> <white>$arg</white> <red>is already present in task</red> <white>${task.name}</white>"
+                    )
+                    return@forEach
+                }
+
+                source.sendMessage(
+                    "<gray>Adding JVM argument</gray> <white>$arg</white> <gray>to task</gray> <white>${task.name}</white>"
+                )
+
+                val newTask = task.copy(
+                    jvmArgs = task.jvmArgs + arg
+                )
+
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+
+    @Permission("tasks.update")
+    @Command("task|tasks task <tasks> remove jvmArg <arg>")
+    fun removeJvmArg(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("arg") arg: String,
+    ) {
+        runBlocking {
+            tasks.forEach { task ->
+                if (!task.jvmArgs.contains(arg)) {
+                    source.sendMessage(
+                        "<red>JVM argument</red> <white>$arg</white> <red>is not present in task</red> <white>${task.name}</white>"
+                    )
+                    return@forEach
+                }
+
+                source.sendMessage(
+                    "<gray>Removing JVM argument</gray> <white>$arg</white> <gray>from task</gray> <white>${task.name}</white>"
+                )
+
+                val newTask = task.copy(
+                    jvmArgs = task.jvmArgs - arg
+                )
+
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+
+    @Permission("tasks.update")
+    @Command("task|tasks task <tasks> add envVar <key> <value>")
+    fun addEnvVar(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("key") key: String,
+        @Argument("value") value: String,
+    ) {
+        runBlocking {
+            tasks.forEach { task ->
+                val envVar = "$key=$value"
+
+                if (task.envVars.any { it.substringBefore("=") == key }) {
+                    source.sendMessage(
+                        "<red>Environment variable</red> <white>$key</white> <red>already exists for task</red> <white>${task.name}</white>"
+                    )
+                    return@forEach
+                }
+
+                source.sendMessage(
+                    "<gray>Adding environment variable</gray> <white>$envVar</white> <gray>to task</gray> <white>${task.name}</white>"
+                )
+
+                val newTask = task.copy(
+                    envVars = task.envVars + envVar
+                )
+
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+
+    @Permission("tasks.update")
+    @Command("task|tasks task <tasks> remove envVar <key>")
+    fun removeEnvVar(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("key") key: String,
+    ) {
+        runBlocking {
+            tasks.forEach { task ->
+                val existing = task.envVars.find {
+                    it.substringBefore("=") == key
+                }
+
+                if (existing == null) {
+                    source.sendMessage(
+                        "<red>Environment variable</red> <white>$key</white> <red>does not exist for task</red> <white>${task.name}</white>"
+                    )
+                    return@forEach
+                }
+
+                source.sendMessage(
+                    "<gray>Removing environment variable</gray> <white>$key</white> <gray>from task</gray> <white>${task.name}</white>"
+                )
+
+                val newTask = task.copy(
+                    envVars = task.envVars - existing
+                )
+
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+
+    @Permission("tasks.update")
+    @Command("task|tasks task <tasks> set fallback <fallback>")
+    fun setFallback(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("fallback") fallback: Boolean,
+    ) {
+        runBlocking {
+            tasks.forEach { task ->
+                source.sendMessage(
+                    "<gray>Setting fallback for task</gray> <white>${task.name}</white> <gray>to</gray> <white>$fallback</white>"
+                )
+                val newTask = task.copy(fallback = fallback)
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+
+    @Permission("tasks.update")
+    @Command("task|tasks task <tasks> set autoStart <autoStart>")
+    fun setAutoStart(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("autoStart") autoStart: Boolean,
+    ) {
+        runBlocking {
+            tasks.forEach { task ->
+                source.sendMessage(
+                    "<gray>Setting autoStart for task</gray> <white>${task.name}</white> <gray>to</gray> <white>$autoStart</white>"
+                )
+                val newTask = task.copy(autoStart = autoStart)
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
                 )
