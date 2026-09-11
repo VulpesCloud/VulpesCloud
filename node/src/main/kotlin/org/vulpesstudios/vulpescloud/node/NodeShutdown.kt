@@ -38,6 +38,7 @@ object NodeShutdown {
             logger.info("Shutting down the Node...")
 
             Node.instance.chronyxCoordinator.stop()
+            Node.instance.clusterProvider.markShutdownDraining()
 
             try {
                 withTimeout(30.seconds) {

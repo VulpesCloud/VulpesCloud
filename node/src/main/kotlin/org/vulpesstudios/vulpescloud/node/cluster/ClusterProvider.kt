@@ -124,6 +124,21 @@ class ClusterProvider {
         )
     }
 
+    suspend fun markShutdownDraining() {
+        val localNode = ClusterHelper.getLocalNodeSnapshot()
+        currentState = NodeState.DRAINING
+        currentAttributes["drainReason"] = "SHUTTING_DOWN"
+        NodeSnapshotUpdater.updateLocalNodeSnapshot()
+        EventsService.publish(
+            nodeStateChangeEvent {
+                this.snapshot = localNode.toDefinition()
+                this.oldState = localNode.state.toNodeStates()
+                this.newState = NodeState.DRAINING.toNodeStates()
+            },
+            true,
+        )
+    }
+
     suspend fun getClusterConfig(): ClusterConfig {
         return Node.instance.virtualConfigProvider.getCustomConfigObject<ClusterConfig>(
             "vc_cluster"
