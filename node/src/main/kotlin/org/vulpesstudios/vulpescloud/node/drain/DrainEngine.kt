@@ -24,8 +24,7 @@ import build.buf.gen.vulpescloud.services.v1.getAllServicesRequest
 import build.buf.gen.vulpescloud.services.v1.stopServiceRequest
 import build.buf.gen.vulpescloud.services.v1.updateServiceMetaRequest
 import com.google.protobuf.Timestamp
-import kotlinx.coroutines.CancellationException
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.api.drain.NodeDrainProgress
 import org.vulpesstudios.vulpescloud.api.drain.NodeDrainStatus
@@ -260,6 +259,7 @@ class DrainEngine(private val storage: NodeDrainStorage = NodeDrainStorage()) {
         }
     }
 
+    @OptIn(DelicateCoroutinesApi::class)
     private suspend fun complete(progress: NodeDrainProgress) {
         val done = progress.copy(status = NodeDrainStatus.COMPLETED, completedAt = now())
         storage.save(done)
@@ -269,7 +269,7 @@ class DrainEngine(private val storage: NodeDrainStorage = NodeDrainStorage()) {
             true,
         )
         Node.instance.nodeMaintenanceProvider.setMaintenance(progress.nodeName, true)
-        NodeShutdown.shutdown()
+        GlobalScope.launch { NodeShutdown.shutdown() }
     }
 
     suspend fun cancel(nodeName: String): Boolean {
