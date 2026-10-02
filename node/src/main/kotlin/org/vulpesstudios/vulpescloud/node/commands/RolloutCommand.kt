@@ -27,6 +27,7 @@ import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.vulpesstudios.vulpescloud.api.tasks.Task
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.command.CommandSource
+import org.vulpesstudios.vulpescloud.node.command.ScopedCommandPermissions
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
 import com.google.protobuf.Duration as ProtoDuration
@@ -79,6 +80,15 @@ class RolloutCommand {
 
         runBlocking {
             tasks.forEach { task ->
+                if (!ScopedCommandPermissions.hasPermission(
+                        source,
+                        "rollout.restart",
+                        mapOf("task" to setOf(task.name)),
+                    )) {
+                    source.sendError("You don't have permission to restart task ${task.name}.")
+                    return@forEach
+                }
+
                 val response =
                     Node.instance.localGrpcClient.rolloutAPI.startRollout(
                         startRolloutRequest {
@@ -112,6 +122,12 @@ class RolloutCommand {
     ) {
         runBlocking {
             val isKnownTask = TaskCache.getTasks().any { it.name == target }
+            val resources =
+                if (isKnownTask) mapOf("task" to setOf(target)) else mapOf("rollout" to setOf(target))
+            if (!ScopedCommandPermissions.hasPermission(source, "rollout.view", resources)) {
+                source.sendError("You don't have permission to view rollout target $target.")
+                return@runBlocking
+            }
 
             val response =
                 try {
@@ -138,6 +154,15 @@ class RolloutCommand {
         @Argument(value = "rolloutId", suggestions = "activeRolloutIds") rolloutId: String,
     ) {
         runBlocking {
+            if (!ScopedCommandPermissions.hasPermission(
+                    source,
+                    "rollout.cancel",
+                    mapOf("rollout" to setOf(rolloutId)),
+                )) {
+                source.sendError("You don't have permission to cancel rollout $rolloutId.")
+                return@runBlocking
+            }
+
             val response =
                 Node.instance.localGrpcClient.rolloutAPI.cancelRollout(
                     cancelRolloutRequest { this.rolloutId = rolloutId }

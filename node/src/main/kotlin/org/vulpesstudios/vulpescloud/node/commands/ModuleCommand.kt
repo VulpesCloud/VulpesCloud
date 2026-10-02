@@ -21,16 +21,14 @@ import kotlinx.coroutines.withTimeout
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Flag
+import org.incendo.cloud.annotations.Permission
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.command.CommandSource
-import org.vulpesstudios.vulpescloud.node.command.ConsoleCommandSource
-import org.vulpesstudios.vulpescloud.node.command.annotation.SpecificCommandSource
 import java.util.stream.Stream
 import kotlin.time.Duration.Companion.seconds
 
 @Suppress("UNUSED")
-@SpecificCommandSource(ConsoleCommandSource::class)
 class ModuleCommand {
 
     private val moduleProvider = Node.instance.moduleProvider
@@ -45,6 +43,7 @@ class ModuleCommand {
         return moduleProvider.getAllDownloadableModules().map { it.name }.stream()
     }
 
+    @Permission("modules.load")
     @Command("module load <name>")
     fun loadModule(source: CommandSource, @Argument("name") name: String) {
         runBlocking {
@@ -59,6 +58,7 @@ class ModuleCommand {
         }
     }
 
+    @Permission("modules.start")
     @Command("module start <name>")
     fun startModule(
         source: CommandSource,
@@ -74,6 +74,7 @@ class ModuleCommand {
         }
     }
 
+    @Permission("modules.stop")
     @Command("module stop <name>")
     fun stopModule(
         source: CommandSource,
@@ -87,6 +88,7 @@ class ModuleCommand {
         }
     }
 
+    @Permission("modules.unload")
     @Command("module unload <name>")
     fun unloadModule(
         source: CommandSource,
@@ -100,6 +102,7 @@ class ModuleCommand {
         }
     }
 
+    @Permission("modules.list")
     @Command("module list")
     fun listModules(source: CommandSource) {
         val modules = moduleProvider.getAllModules()
@@ -117,6 +120,7 @@ class ModuleCommand {
         }
     }
 
+    @Permission("modules.listDownloadable")
     @Command("module list downloadable")
     fun listDownloadableModules(source: CommandSource) {
         try {
@@ -142,6 +146,7 @@ class ModuleCommand {
         }
     }
 
+    @Permission("modules.update")
     @Command("module update <name>")
     fun updateModule(
         source: CommandSource,
@@ -165,6 +170,7 @@ class ModuleCommand {
         }
     }
 
+    @Permission("modules.restart")
     @Command("module restart <name>")
     fun reloadModule(
         source: CommandSource,
@@ -180,6 +186,7 @@ class ModuleCommand {
         }
     }
 
+    @Permission("modules.info")
     @Command("module info installed <name>")
     fun installedModuleInfo(
         source: CommandSource,
@@ -203,6 +210,7 @@ class ModuleCommand {
         )
     }
 
+    @Permission("modules.info")
     @Command("module info downloadable <name>")
     fun downloadableModuleInfo(
         source: CommandSource,
@@ -231,6 +239,7 @@ class ModuleCommand {
         }
     }
 
+    @Permission("modules.checkForUpdates")
     @Command("module checkForUpdates")
     fun checkForModuleUpdates(source: CommandSource) {
         moduleProvider.checkAllLoadedModulesForUpdates()

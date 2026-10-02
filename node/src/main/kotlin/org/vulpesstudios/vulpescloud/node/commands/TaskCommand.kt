@@ -32,6 +32,7 @@ import org.vulpesstudios.vulpescloud.api.tasks.Task
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.cluster.ClusterHelper
 import org.vulpesstudios.vulpescloud.node.command.CommandSource
+import org.vulpesstudios.vulpescloud.node.command.ScopedCommandPermissions
 import org.vulpesstudios.vulpescloud.node.command.ConsoleCommandSource
 import org.vulpesstudios.vulpescloud.node.command.annotation.Alias
 import org.vulpesstudios.vulpescloud.node.command.annotation.SpecificCommandSource
@@ -139,6 +140,12 @@ class TaskCommand {
                 }
 
             tasks.forEach { task ->
+                val resources = mutableMapOf("task" to setOf(task.name))
+                node?.let { resources["node"] = setOf(it) }
+                if (!ScopedCommandPermissions.hasPermission(source, "tasks.prepareServiceOnTask", resources)) {
+                    source.sendError("You don't have permission to prepare services for task ${task.name}.")
+                    return@forEach
+                }
                 val requiredMemory = memory?.toLong() ?: task.maxMemory
                 val nodeName: String =
                     if (node != null) {

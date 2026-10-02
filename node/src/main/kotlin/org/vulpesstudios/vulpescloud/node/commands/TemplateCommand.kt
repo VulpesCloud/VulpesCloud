@@ -19,12 +19,14 @@ package org.vulpesstudios.vulpescloud.node.commands
 import build.buf.gen.vulpescloud.templates.v1.listRegisteredStoragesRequest
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Command
+import org.incendo.cloud.annotations.Permission
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.command.CommandSource
 import org.vulpesstudios.vulpescloud.node.templates.TemplateRegistry
 
 class TemplateCommand {
 
+    @Permission("templates.list")
     @Command("template list")
     fun listTemplates(source: CommandSource) {
         runBlocking {
@@ -37,6 +39,7 @@ class TemplateCommand {
         }
     }
 
+    @Permission("templates.listRegisteredStorages")
     @Command("template storages")
     fun listStorages(source: CommandSource) {
         runBlocking {

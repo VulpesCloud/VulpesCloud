@@ -42,7 +42,7 @@ class TasksAPIService : TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineImplBase()
         Node.instance.getDatabaseProvider().getOrCreateDatabase("tasks")
     }
 
-    @RequiresPermission("tasks.create")
+    @RequiresPermission("tasks.create", ["task=task.name"])
     override suspend fun createTask(request: CreateTaskRequest): CreateTaskResponse {
         val task = Task.fromDefinition(request.task)
 
@@ -59,7 +59,7 @@ class TasksAPIService : TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineImplBase()
         return CreateTaskResponse.newBuilder().setTask(request.task).build()
     }
 
-    @RequiresPermission("tasks.delete")
+    @RequiresPermission("tasks.delete", ["task=task.name"])
     override suspend fun deleteTask(request: DeleteTaskRequest): DeleteTaskResponse {
         val task = Task.fromDefinition(request.task)
 
@@ -82,7 +82,7 @@ class TasksAPIService : TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineImplBase()
         return GetAllTasksResponse.newBuilder().addAllTasks(tasks.map { it.toDefinition() }).build()
     }
 
-    @RequiresPermission("tasks.get")
+    @RequiresPermission("tasks.get", ["task=name"])
     override suspend fun getByName(request: GetByNameRequest): GetByNameResponse {
         val task =
             Json.decodeFromJsonElement(
@@ -93,13 +93,13 @@ class TasksAPIService : TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineImplBase()
         return GetByNameResponse.newBuilder().setTask(task.toDefinition()).build()
     }
 
-    @RequiresPermission("tasks.update")
+    @RequiresPermission("tasks.update", ["task=task.name"])
     override suspend fun updateTask(request: UpdateTaskRequest): UpdateTaskResponse {
         MongoUtils.updateTask(Task.fromDefinition(request.task))
         return UpdateTaskResponse.newBuilder().setTask(request.task).build()
     }
 
-    @RequiresPermission("tasks.prepareServiceOnTask")
+    @RequiresPermission("tasks.prepareServiceOnTask", ["task=task.name", "node=nodeName"])
     override suspend fun prepareServiceOnTask(
         request: PrepareServiceOnTaskRequest
     ): PrepareServiceOnTaskResponse {

@@ -20,7 +20,11 @@ import org.vulpesstudios.vulpescloud.node.utils.MongoUtils
 
 object PermissionHelper {
 
-    suspend fun hasPermission(username: String, permission: String): Boolean {
+    suspend fun hasPermission(
+        username: String,
+        permission: String,
+        resources: Map<String, Set<String>> = emptyMap(),
+    ): Boolean {
         val permissions = mutableListOf<String>()
 
         val user = MongoUtils.getUserByName(username) ?: return false
@@ -29,21 +33,39 @@ object PermissionHelper {
         groups.forEach { it?.permissions?.let(permissions::addAll) }
         permissions.addAll(user.permissions)
 
-        return permissions.any { matchesPermission(it, permission) }
+        return permissions.any { matchesPermission(it, permission, resources) }
     }
 
-    private fun matchesPermission(allowed: String, requested: String): Boolean {
-        if (allowed == requested) return true
+    private fun matchesPermission(
+        grant: String,
+        requested: String,
+        resources: Map<String, Set<String>>,
+    ): Boolean {
+        val parts = grant.split('@', limit = 2)
+        val permissionGrant = parts[0]
+        val permissionMatches = matchesPermissionBase(permissionGrant, requested)
+        if (!permissionMatches) return false
 
-        if (allowed == "*") return true
+        // Legacy unqualified permissions retain their existing global meaning.
+        if (parts.size == 1) return true
 
-        if (allowed.endsWith(".*")) {
-            val prefix = allowed.removeSuffix(".*")
-            return requested.startsWith("$prefix.")
+        val qualifiers = parts[1].split(',').mapNotNull { qualifier ->
+            val separator = qualifier.indexOf('=')
+            if (separator <= 0 || separator == qualifier.lastIndex) null
+            else qualifier.substring(0, separator).trim() to qualifier.substring(separator + 1).trim()
         }
-
-        return false
+        if (qualifiers.isEmpty()) return false
+        return qualifiers.all { (scope, value) ->
+            val requestedValues = resources[scope].orEmpty()
+            requestedValues.isNotEmpty() && requestedValues.all { resource ->
+                value.split('|').any { candidate -> candidate == "*" || candidate == resource }
+            }
+        }
     }
+
+    private fun matchesPermissionBase(grant: String, requested: String): Boolean =
+        grant == requested || grant == "*" ||
+            (grant.endsWith(".*") && requested.startsWith("${grant.removeSuffix(".*")}."))
 
     suspend fun getAllPermissionsOfUser(username: String): List<String> {
         val permissions = mutableListOf<String>()

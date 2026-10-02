@@ -39,6 +39,7 @@ import org.vulpesstudios.vulpescloud.api.drain.NodeDrainStrategy
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.cluster.ClusterHelper
 import org.vulpesstudios.vulpescloud.node.command.CommandSource
+import org.vulpesstudios.vulpescloud.node.command.ScopedCommandPermissions
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
@@ -71,6 +72,10 @@ class ClusterCommand {
         val timeoutMs = timeout?.let(::parseDurationMillis)
         if (timeout != null && timeoutMs == null) { source.sendMessage("<red>Invalid timeout: $timeout</red>"); return@runBlocking }
         endpoints.forEach { endpoint ->
+            if (!ScopedCommandPermissions.hasPermission(source, "cluster.drain", mapOf("node" to setOf(endpoint.name)))) {
+                source.sendError("You don't have permission to drain node ${endpoint.name}.")
+                return@forEach
+            }
             val response = Node.instance.localGrpcClient.nodeDrainAPI.startNodeDrain(startNodeDrainRequest {
                 nodeName = endpoint.name
                 options = nodeDrainOptions {
@@ -88,6 +93,10 @@ class ClusterCommand {
     @Command("cluster node <node> drain status")
     fun drainStatus(source: CommandSource, @Argument("node") endpoints: List<NodeEndpointDetails>) = runBlocking {
         endpoints.forEach { endpoint ->
+            if (!ScopedCommandPermissions.hasPermission(source, "cluster.drainStatus", mapOf("node" to setOf(endpoint.name)))) {
+                source.sendError("You don't have permission to view drain status for node ${endpoint.name}.")
+                return@forEach
+            }
             runCatching { Node.instance.localGrpcClient.nodeDrainAPI.getNodeDrainStatus(getNodeDrainStatusRequest { nodeName = endpoint.name }).drain }
                 .onSuccess { source.sendMessage("<gray>${endpoint.name}: <white>${it.status} <dark_gray>| <gray>services ${it.servicesStopped}/${it.servicesTotal}, players ${it.playersRemaining}") }
                 .onFailure { source.sendMessage("<red>No drain status for ${endpoint.name}: ${it.message}</red>") }
@@ -98,6 +107,10 @@ class ClusterCommand {
     @Command("cluster node <node> undrain")
     fun undrainNode(source: CommandSource, @Argument("node") endpoints: List<NodeEndpointDetails>) = runBlocking {
         endpoints.forEach { endpoint ->
+            if (!ScopedCommandPermissions.hasPermission(source, "cluster.undrain", mapOf("node" to setOf(endpoint.name)))) {
+                source.sendError("You don't have permission to cancel a drain on node ${endpoint.name}.")
+                return@forEach
+            }
             val response = Node.instance.localGrpcClient.nodeDrainAPI.cancelNodeDrain(cancelNodeDrainRequest { nodeName = endpoint.name })
             source.sendMessage(if (response.success) "<green>${endpoint.name}: ${response.message}</green>" else "<red>${endpoint.name}: ${response.message}</red>")
         }
@@ -107,6 +120,10 @@ class ClusterCommand {
     @Command("cluster node <node> maintenance <enabled>")
     fun setNodeMaintenance(source: CommandSource, @Argument("node") endpoints: List<NodeEndpointDetails>, @Argument("enabled") enabled: Boolean) = runBlocking {
         endpoints.forEach { endpoint ->
+            if (!ScopedCommandPermissions.hasPermission(source, "cluster.maintenance", mapOf("node" to setOf(endpoint.name)))) {
+                source.sendError("You don't have permission to change maintenance for node ${endpoint.name}.")
+                return@forEach
+            }
             val response = Node.instance.localGrpcClient.nodeMaintenanceAPI.setNodeMaintenance(setNodeMaintenanceRequest { nodeName = endpoint.name; this.enabled = enabled })
             source.sendMessage(if (response.success) "<green>Maintenance $enabled for ${endpoint.name}.</green>" else "<red>${response.error}</red>")
         }

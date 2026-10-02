@@ -19,8 +19,11 @@ package org.vulpesstudios.vulpescloud.node.command
 import org.vulpesstudios.vulpescloud.node.grpc.security.model.UserModel
 import java.util.concurrent.ConcurrentLinkedQueue
 
-class InternalPlayerCommandSource(val user: UserModel) : CommandSource {
-    val messages = ConcurrentLinkedQueue<String>()
+class InternalPlayerCommandSource(
+    val user: UserModel,
+    val permissionResources: Map<String, Set<String>> = emptyMap(),
+    val messages: ConcurrentLinkedQueue<String> = ConcurrentLinkedQueue(),
+) : CommandSource {
 
     override fun sendMessage(message: String) {
         messages.add(message)

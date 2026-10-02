@@ -112,6 +112,7 @@ class PlayersCommand {
         }
     }
 
+    @Permission("players.sendMessage")
     @Command("player|players online message <onlinePlayer> <message>")
     fun sendMessage(
         source: CommandSource,
@@ -173,6 +174,7 @@ class PlayersCommand {
         return Service.fromDefinition(services.first())
     }
 
+    @Permission("players.kick")
     @Command("player|players online kick <onlinePlayer> [reason]")
     fun kickPlayer(
         source: CommandSource,
@@ -192,6 +194,7 @@ class PlayersCommand {
         }
     }
 
+    @Permission("players.sendTitle")
     @Command("player|players online title <onlinePlayer> <title> <subtitle>")
     fun sendTitle(
         source: CommandSource,
@@ -213,6 +216,7 @@ class PlayersCommand {
         }
     }
 
+    @Permission("players.sendActionBar")
     @Command("player|players online actionbar <onlinePlayer> <message>")
     fun sendActionBar(
         source: CommandSource,
@@ -232,6 +236,7 @@ class PlayersCommand {
         }
     }
 
+    @Permission("players.connect")
     @Command("player|players online connect <onlinePlayer> <server>")
     fun connectPlayer(
         source: CommandSource,
