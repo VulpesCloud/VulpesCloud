@@ -24,6 +24,7 @@ import build.buf.gen.vulpescloud.services.v1.getAllServicesRequest
 import build.buf.gen.vulpescloud.services.v1.stopServiceRequest
 import build.buf.gen.vulpescloud.services.v1.updateServiceMetaRequest
 import com.google.protobuf.Timestamp
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.delay
 import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.api.drain.NodeDrainProgress
@@ -38,6 +39,7 @@ import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.NodeShutdown
 import org.vulpesstudios.vulpescloud.node.cluster.ClusterHelper
 import org.vulpesstudios.vulpescloud.node.event.EventsService
+import kotlin.time.Duration.Companion.milliseconds
 
 class DrainEngine(private val storage: NodeDrainStorage = NodeDrainStorage()) {
     private val logger = LoggerFactory.getLogger("DrainEngine")
@@ -63,12 +65,14 @@ class DrainEngine(private val storage: NodeDrainStorage = NodeDrainStorage()) {
                     clearLocalDrainingMetadata(local)
                     return@forEach
                 }
-                runCatching { step(progress) }
-                    .onFailure {
-                        logger.error("Drain of node $local failed", it)
-                        it.printStackTrace()
-                        fail(progress, it.message ?: "internal_error")
-                    }
+                try {
+                    step(progress)
+                } catch (cancelled: CancellationException) {
+                    throw cancelled
+                } catch (failure: Exception) {
+                    logger.error("Drain of node $local failed", failure)
+                    fail(progress, failure.message ?: "internal_error")
+                }
             }
     }
 
@@ -126,7 +130,7 @@ class DrainEngine(private val storage: NodeDrainStorage = NodeDrainStorage()) {
             step(current, shutdownMode = true)
             val latest = storage.get(local) ?: return
             if (!latest.status.isActive || latest.servicesRemaining == 0) return
-            delay(1_000)
+            delay(1_000.milliseconds)
         }
     }
 
@@ -301,6 +305,7 @@ class DrainEngine(private val storage: NodeDrainStorage = NodeDrainStorage()) {
     }
 
     private suspend fun fail(progress: NodeDrainProgress, reason: String) {
+        if (storage.getActive(progress.nodeName) == null) return
         val failed =
             progress.copy(
                 status = NodeDrainStatus.FAILED,
