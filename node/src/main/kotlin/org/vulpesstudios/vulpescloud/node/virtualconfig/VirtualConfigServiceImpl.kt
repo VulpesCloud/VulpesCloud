@@ -41,7 +41,7 @@ class VirtualConfigServiceImpl :
         return getAllResponse { this.configs.addAll(configs) }
     }
 
-    @RequiresPermission("virtualconfig.get")
+    @RequiresPermission("virtualconfig.get", ["virtualconfig=name"])
     override suspend fun getByName(request: GetByNameRequest): GetByNameResponse {
 
         require(request.name.isNotEmpty()) { "Name must not be empty" }
@@ -56,7 +56,7 @@ class VirtualConfigServiceImpl :
         return getByNameResponse { this.config = config }
     }
 
-    @RequiresPermission("virtualconfig.create")
+    @RequiresPermission("virtualconfig.create", ["virtualconfig=name"])
     override suspend fun createVirtualConfig(
         request: CreateVirtualConfigRequest
     ): CreateVirtualConfigResponse {
@@ -76,7 +76,7 @@ class VirtualConfigServiceImpl :
         return createVirtualConfigResponse { this.config = config }
     }
 
-    @RequiresPermission("virtualconfig.delete")
+    @RequiresPermission("virtualconfig.delete", ["virtualconfig=name"])
     override suspend fun deleteVirtualConfig(
         request: DeleteVirtualConfigRequest
     ): DeleteVirtualConfigResponse {
@@ -88,7 +88,7 @@ class VirtualConfigServiceImpl :
         return deleteVirtualConfigResponse { this.success = true }
     }
 
-    @RequiresPermission("virtualconfig.update")
+    @RequiresPermission("virtualconfig.update", ["virtualconfig=name"])
     override suspend fun updateVirtualConfig(
         request: UpdateVirtualConfigRequest
     ): UpdateVirtualConfigResponse {

@@ -28,6 +28,7 @@ import org.incendo.cloud.context.CommandInput
 import org.vulpesstudios.vulpescloud.api.virtualconfig.VirtualConfig
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.command.CommandSource
+import org.vulpesstudios.vulpescloud.node.command.ScopedCommandPermissions
 import java.time.Instant
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
@@ -102,6 +103,15 @@ class VirtualConfigCommand {
         @Argument("config") config: VirtualConfig,
     ) {
         runBlocking {
+            if (!ScopedCommandPermissions.hasPermission(
+                    source,
+                    "virtualconfig.get",
+                    mapOf("virtualconfig" to setOf(config.name)),
+                )) {
+                source.sendError("You don't have permission to access virtual config ${config.name}.")
+                return@runBlocking
+            }
+
             Node.instance.virtualConfigProvider.getCustomConfig(config.name, force).let {
                 if (it == null) {
                     source.sendMessage(
@@ -125,6 +135,15 @@ class VirtualConfigCommand {
         @Argument("config") config: VirtualConfig,
     ) {
         runBlocking {
+            if (!ScopedCommandPermissions.hasPermission(
+                    source,
+                    "virtualconfig.updateFromLocal",
+                    mapOf("virtualconfig" to setOf(config.name)),
+                )) {
+                source.sendError("You don't have permission to update virtual config ${config.name}.")
+                return@runBlocking
+            }
+
             Node.instance.virtualConfigProvider.updateDatabaseFromLocalConfig(config.name)
             source.sendMessage(
                 "<green>Successfully updated the database from the local config file for virtual config</green> <white>${config.name}</white><green>!</green>"
@@ -139,6 +158,15 @@ class VirtualConfigCommand {
         @Argument("config") config: VirtualConfig,
     ) {
         runBlocking {
+            if (!ScopedCommandPermissions.hasPermission(
+                    source,
+                    "virtualconfig.updateFromDatabase",
+                    mapOf("virtualconfig" to setOf(config.name)),
+                )) {
+                source.sendError("You don't have permission to update virtual config ${config.name}.")
+                return@runBlocking
+            }
+
             Node.instance.virtualConfigProvider.updateLocalConfigFromDatabase(config.name)
             source.sendMessage(
                 "<green>Successfully updated the local config file from the database for virtual config</green> <white>${config.name}</white><green>!</green>"

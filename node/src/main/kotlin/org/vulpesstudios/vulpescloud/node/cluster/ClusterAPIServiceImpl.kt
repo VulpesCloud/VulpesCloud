@@ -50,18 +50,18 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
             .build()
     }
 
-    @RequiresPermission("cluster.get")
+    @RequiresPermission("cluster.get", ["node=name"])
     override suspend fun getNodeByName(request: GetNodeByNameRequest): GetNodeByNameResponse {
         val clusterConfig = Node.instance.clusterProvider.getClusterConfig()
         val node =
             clusterConfig.nodes.firstOrNull {
-                it.name.lowercase().contains(request.name.lowercase())
+                it.name.equals(request.name, ignoreCase = true)
             } ?: return GetNodeByNameResponse.getDefaultInstance()
 
         return GetNodeByNameResponse.newBuilder().setNode(node.toDefinition()).build()
     }
 
-    @RequiresPermission("cluster.getSnapshot")
+    @RequiresPermission("cluster.getSnapshot", ["node=name"])
     override suspend fun getNodeSnapshot(request: GetNodeSnapshotRequest): GetNodeSnapshotResponse {
         val snapshot =
             json.decodeFromJsonElement(
@@ -72,7 +72,7 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
         return GetNodeSnapshotResponse.newBuilder().setSnapshot(snapshot.toDefinition()).build()
     }
 
-    @RequiresPermission("cluster.executeCommand")
+    @RequiresPermission("cluster.executeCommand", ["node=\$localNode"])
     override suspend fun executeCommand(request: ExecuteCommandRequest): ExecuteCommandResponse {
         return withContext(Dispatchers.IO) {
             // TODO: Add hook for Metrics Module to track commands
@@ -106,7 +106,7 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
         }
     }
 
-    @RequiresPermission("cluster.tabComplete")
+    @RequiresPermission("cluster.tabComplete", ["node=\$localNode"])
     override suspend fun commandTabComplete(
         request: CommandTabCompleteRequest
     ): CommandTabCompleteResponse {

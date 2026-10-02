@@ -53,7 +53,7 @@ class RolloutAPIServiceImpl : RolloutAPIServiceGrpcKt.RolloutAPIServiceCoroutine
     private val logger = LoggerFactory.getLogger("RolloutAPIService")
     private val storage = RolloutStorage()
 
-    @RequiresPermission("rollout.start")
+    @RequiresPermission("rollout.start", ["task=taskName"])
     override suspend fun startRollout(request: StartRolloutRequest): StartRolloutResponse {
         val task =
             getTask(request.taskName)
@@ -156,7 +156,7 @@ class RolloutAPIServiceImpl : RolloutAPIServiceGrpcKt.RolloutAPIServiceCoroutine
         }
     }
 
-    @RequiresPermission("rollout.status")
+    @RequiresPermission("rollout.status", ["task=taskName", "rollout=rolloutId"])
     override suspend fun getRolloutStatus(request: GetRolloutStatusRequest): GetRolloutStatusResponse {
         val progress =
             if (request.rolloutId.isNotBlank()) {
@@ -195,7 +195,7 @@ class RolloutAPIServiceImpl : RolloutAPIServiceGrpcKt.RolloutAPIServiceCoroutine
         return listActiveRolloutsResponse { rollouts.addAll(storage.getActive().map { it.toDefinition() }) }
     }
 
-    @RequiresPermission("rollout.cancel")
+    @RequiresPermission("rollout.cancel", ["rollout=rolloutId"])
     override suspend fun cancelRollout(request: CancelRolloutRequest): CancelRolloutResponse {
         val progress =
             storage.get(request.rolloutId)
@@ -223,7 +223,7 @@ class RolloutAPIServiceImpl : RolloutAPIServiceGrpcKt.RolloutAPIServiceCoroutine
         }
     }
 
-    @RequiresPermission("rollout.stream")
+    @RequiresPermission("rollout.stream", ["rollout=rolloutId"])
     override fun streamRolloutProgress(request: StreamRolloutProgressRequest): Flow<ProtoRolloutProgress> {
         return callbackFlow {
             storage.get(request.rolloutId)?.let { trySend(it.toDefinition()) }

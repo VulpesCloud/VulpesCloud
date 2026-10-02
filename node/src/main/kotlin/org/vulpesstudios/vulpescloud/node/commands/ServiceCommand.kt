@@ -31,6 +31,7 @@ import org.vulpesstudios.vulpescloud.api.services.Service
 import org.vulpesstudios.vulpescloud.api.services.ServiceStates
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.command.CommandSource
+import org.vulpesstudios.vulpescloud.node.command.ScopedCommandPermissions
 import org.vulpesstudios.vulpescloud.node.command.ConsoleCommandSource
 import org.vulpesstudios.vulpescloud.node.command.annotation.Alias
 import org.vulpesstudios.vulpescloud.node.command.annotation.SpecificCommandSource
@@ -102,6 +103,10 @@ class ServiceCommand {
     @Command("services|ser <service> start")
     fun startService(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
+            if (!runBlocking { ScopedCommandPermissions.hasPermission(source, "services.start", mapOf("task" to setOf(it.task.name), "node" to setOf(it.node), "service" to setOf(it.name()))) }) {
+                source.sendError("You don't have permission to start ${it.name()}.")
+                return@forEach
+            }
             if (it.state == ServiceStates.STARTING || it.state == ServiceStates.RUNNING) {
                 source.sendMessage("<red>Service is already running!</red>")
                 return
@@ -121,6 +126,10 @@ class ServiceCommand {
     @Command("services|ser <service> stop")
     fun stopService(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
+            if (!runBlocking { ScopedCommandPermissions.hasPermission(source, "services.stop", mapOf("task" to setOf(it.task.name), "node" to setOf(it.node), "service" to setOf(it.name()))) }) {
+                source.sendError("You don't have permission to stop ${it.name()}.")
+                return@forEach
+            }
             runBlocking {
                 Node.instance.localGrpcClient.serviceAPI.stopService(
                     StopServiceRequest.newBuilder().setService(it.toDefinition()).build()
@@ -129,10 +138,32 @@ class ServiceCommand {
         }
     }
 
+    @Permission("services.restart")
+    @Command("services|ser <service> restart")
+    fun restartService(source: CommandSource, @Argument("service") service: List<Service>) {
+        service.forEach {
+            if (!runBlocking { ScopedCommandPermissions.hasPermission(source, "services.restart", mapOf("task" to setOf(it.task.name), "node" to setOf(it.node), "service" to setOf(it.name()))) }) {
+                source.sendError("You don't have permission to restart ${it.name()}.")
+                return@forEach
+            }
+            runBlocking {
+                val response = Node.instance.localGrpcClient.serviceAPI.restartService(
+                    RestartServiceRequest.newBuilder().setService(it.toDefinition()).build()
+                )
+                if (response.success) source.sendMessage("<green>Restarted ${it.name()}.</green>")
+                else source.sendError("Failed to restart ${it.name()}: ${response.error}")
+            }
+        }
+    }
+
     @Permission("services.getSnapshot")
     @Command("services|ser <service> snapshot")
     fun getSnapshot(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
+            if (!runBlocking { ScopedCommandPermissions.hasPermission(source, "services.getSnapshot", mapOf("task" to setOf(it.task.name), "node" to setOf(it.node), "service" to setOf(it.name()))) }) {
+                source.sendError("You don't have permission to view the snapshot for ${it.name()}.")
+                return@forEach
+            }
             runBlocking {
                 source.sendMessage(
                     "<gray>Retrieving snapshot for service</gray> <white>${it.task.name}-${it.orderedId}</white><gray>...</gray>"
@@ -162,6 +193,10 @@ class ServiceCommand {
     @Command("services|ser <service> delete")
     fun deleteService(source: CommandSource, @Argument("service") service: List<Service>) {
         service.forEach {
+            if (!runBlocking { ScopedCommandPermissions.hasPermission(source, "services.delete", mapOf("task" to setOf(it.task.name), "node" to setOf(it.node), "service" to setOf(it.name()))) }) {
+                source.sendError("You don't have permission to delete ${it.name()}.")
+                return@forEach
+            }
             runBlocking {
                 Node.instance.localGrpcClient.serviceAPI.deleteService(
                     DeleteServiceRequest.newBuilder().setService(it.toDefinition()).build()
@@ -213,6 +248,10 @@ class ServiceCommand {
     ) {
         runBlocking {
             service.forEach {
+                if (!ScopedCommandPermissions.hasPermission(source, "services.sendCommand", mapOf("task" to setOf(it.task.name), "node" to setOf(it.node), "service" to setOf(it.name())))) {
+                    source.sendError("You don't have permission to send commands to ${it.name()}.")
+                    return@forEach
+                }
                 val resp =
                     Node.instance.localGrpcClient.serviceAPI.sendCommand(
                         build.buf.gen.vulpescloud.services.v1.sendCommandRequest {

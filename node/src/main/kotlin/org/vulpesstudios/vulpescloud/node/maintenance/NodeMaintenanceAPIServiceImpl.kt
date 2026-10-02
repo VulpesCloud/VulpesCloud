@@ -23,7 +23,7 @@ import org.vulpesstudios.vulpescloud.node.grpc.security.annotations.RequiresPerm
 
 class NodeMaintenanceAPIServiceImpl :
     NodeMaintenanceAPIServiceGrpcKt.NodeMaintenanceAPIServiceCoroutineImplBase() {
-    @RequiresPermission("maintenance.set")
+    @RequiresPermission("maintenance.set", ["node=nodeName"])
     override suspend fun setNodeMaintenance(
         request: SetNodeMaintenanceRequest
     ): SetNodeMaintenanceResponse {

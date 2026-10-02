@@ -96,7 +96,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         return getAllServices(getAllServicesRequest {}).servicesList
     }
 
-    @RequiresPermission("services.getByTask")
+    @RequiresPermission("services.getByTask", ["task=task.name"])
     override suspend fun getByTask(request: GetByTaskRequest): GetByTaskResponse {
         val taskName = request.task.name
         val services = getAllService().filter { it.task.name == taskName }
@@ -109,7 +109,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
      * extension helpers on a freshly fetched [Service]) rather than relying on a partial merge,
      * mirroring the copy-based mutation used by [updatePlayerCount].
      */
-    @RequiresPermission("services.updateMeta")
+    @RequiresPermission("services.updateMeta", ["task=service.task.name", "node=service.node"])
     override suspend fun updateServiceMeta(request: UpdateServiceMetaRequest): UpdateServiceMetaResponse {
         val service = Service.fromDefinition(request.service)
 
@@ -162,7 +162,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             .build()
     }
 
-    @RequiresPermission("services.get")
+    @RequiresPermission("services.get", ["service=name"])
     override suspend fun getByName(request: GetByNameRequest): GetByNameResponse {
         val service =
             getAllService()
@@ -176,7 +176,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         }
     }
 
-    @RequiresPermission("services.get")
+    @RequiresPermission("services.get", ["service=uuid"])
     override suspend fun getByUuid(request: GetByUuidRequest): GetByUuidResponse {
         val service =
             getAllService().find { it.uuid == request.uuid }
@@ -185,7 +185,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         return GetByUuidResponse.newBuilder().setService(service).build()
     }
 
-    @RequiresPermission("services.start")
+    @RequiresPermission("services.start", ["task=service.task.name", "node=service.node"])
     override suspend fun startService(request: StartServiceRequest): StartServiceResponse {
         val service = Service.fromDefinition(request.service)
 
@@ -244,7 +244,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         return StartServiceResponse.newBuilder().setSuccess(true).build()
     }
 
-    @RequiresPermission("services.stop")
+    @RequiresPermission("services.stop", ["task=service.task.name", "node=service.node"])
     override suspend fun stopService(request: StopServiceRequest): StopServiceResponse {
         val service = Service.fromDefinition(request.service)
 
@@ -301,7 +301,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         return StopServiceResponse.newBuilder().setSuccess(true).build()
     }
 
-    @RequiresPermission("services.restart")
+    @RequiresPermission("services.restart", ["task=service.task.name", "node=service.node"])
     override suspend fun restartService(request: RestartServiceRequest): RestartServiceResponse {
         val service = Service.fromDefinition(request.service)
 
@@ -358,7 +358,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         return RestartServiceResponse.newBuilder().setSuccess(true).build()
     }
 
-    @RequiresPermission("services.delete")
+    @RequiresPermission("services.delete", ["task=service.task.name", "node=service.node"])
     override suspend fun deleteService(request: DeleteServiceRequest): DeleteServiceResponse {
         val service = Service.fromDefinition(request.service)
 
@@ -414,7 +414,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         return DeleteServiceResponse.newBuilder().setSuccess(true).build()
     }
 
-    @RequiresPermission("services.sendCommand")
+    @RequiresPermission("services.sendCommand", ["task=service.task.name", "node=service.node"])
     override suspend fun sendCommand(request: SendCommandRequest): SendCommandResponse {
         val service = Service.fromDefinition(request.service)
 
@@ -516,7 +516,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         return UpdatePlayerCountResponse.newBuilder().build()
     }
 
-    @RequiresPermission("services.getLogs")
+    @RequiresPermission("services.getLogs", ["task=service.task.name", "node=service.node"])
     override suspend fun getServiceLogs(request: GetServiceLogsRequest): GetServiceLogsResponse {
         val logs =
             ServiceLogHandler.getLogs(
@@ -526,7 +526,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         return getServiceLogsResponse { this.lines.addAll(logs) }
     }
 
-    @RequiresPermission("services.streamLogs")
+    @RequiresPermission("services.streamLogs", ["task=service.task.name", "node=service.node"])
     override fun streamServiceLogs(
         request: StreamServiceLogsRequest
     ): Flow<StreamServiceLogsResponse> {
@@ -591,7 +591,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
         return UpdateServiceSnapshotResponse.newBuilder().setSnapshot(request.snapshot).build()
     }
 
-    @RequiresPermission("services.getSnapshot")
+    @RequiresPermission("services.getSnapshot", ["task=service.task.name", "node=service.node"])
     override suspend fun getLatestServiceSnapshot(
         request: GetLatestServiceSnapshotRequest
     ): GetLatestServiceSnapshotResponse {

@@ -33,7 +33,11 @@ class CloudCommandManager :
             return@runBlocking when (sender) {
                 is ConsoleCommandSource -> true
                 is InternalPlayerCommandSource ->
-                    PermissionHelper.hasPermission(sender.user.name, permission)
+                    PermissionHelper.hasPermission(
+                        sender.user.name,
+                        permission,
+                        sender.permissionResources,
+                    )
                 else -> throw UnsupportedOperationException()
             }
         }

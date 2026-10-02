@@ -19,5 +19,7 @@ package org.vulpesstudios.vulpescloud.node.grpc.security.annotations
 @Target(AnnotationTarget.FUNCTION)
 @Retention(AnnotationRetention.RUNTIME)
 annotation class RequiresPermission(
-    val permission: String
+    val permission: String,
+    /** Resource scope mappings in `scope=protobuf.field.path` form. */
+    val resources: Array<String> = [],
 )

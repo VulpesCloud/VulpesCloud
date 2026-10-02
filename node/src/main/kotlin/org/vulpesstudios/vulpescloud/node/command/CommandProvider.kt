@@ -162,8 +162,15 @@ class CommandProvider {
         source: CommandSource,
         input: String,
     ): CompletableFuture<CommandResult<CommandSource>> {
-
-        return commandManager.commandExecutor().executeCommand(source, input)
+        val commandSource =
+            if (source is InternalPlayerCommandSource) {
+                InternalPlayerCommandSource(
+                    source.user,
+                    ScopedCommandPermissions.inferResources(input),
+                    source.messages,
+                )
+            } else source
+        return commandManager.commandExecutor().executeCommand(commandSource, input)
     }
 
     fun register(command: Any) {

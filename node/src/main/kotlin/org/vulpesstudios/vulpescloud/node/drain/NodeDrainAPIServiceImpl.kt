@@ -38,7 +38,7 @@ class NodeDrainAPIServiceImpl : NodeDrainAPIServiceGrpcKt.NodeDrainAPIServiceCor
     private val storage = NodeDrainStorage()
     private val engine = DrainEngine(storage)
 
-    @RequiresPermission("drain.start")
+    @RequiresPermission("drain.start", ["node=nodeName"])
     override suspend fun startNodeDrain(request: StartNodeDrainRequest): StartNodeDrainResponse {
         val node = request.nodeName
         val local = Node.instance.configProvider.config.nodeName
@@ -134,7 +134,7 @@ class NodeDrainAPIServiceImpl : NodeDrainAPIServiceGrpcKt.NodeDrainAPIServiceCor
         }
     }
 
-    @RequiresPermission("drain.cancel")
+    @RequiresPermission("drain.cancel", ["node=nodeName"])
     override suspend fun cancelNodeDrain(request: CancelNodeDrainRequest): CancelNodeDrainResponse {
         val local = Node.instance.configProvider.config.nodeName
         if (request.nodeName != local) {
@@ -158,7 +158,7 @@ class NodeDrainAPIServiceImpl : NodeDrainAPIServiceGrpcKt.NodeDrainAPIServiceCor
         else cancelNodeDrainResponse { message = "no_active_drain" }
     }
 
-    @RequiresPermission("drain.status")
+    @RequiresPermission("drain.status", ["node=nodeName"])
     override suspend fun getNodeDrainStatus(
         request: GetNodeDrainStatusRequest
     ): GetNodeDrainStatusResponse {
@@ -177,7 +177,7 @@ class NodeDrainAPIServiceImpl : NodeDrainAPIServiceGrpcKt.NodeDrainAPIServiceCor
         drains.addAll(storage.getActive().map { it.toDefinition() })
     }
 
-    @RequiresPermission("drain.stream")
+    @RequiresPermission("drain.stream", ["node=nodeName"])
     override fun streamNodeDrainProgress(
         request: StreamNodeDrainProgressRequest
     ): Flow<build.buf.gen.vulpescloud.draining.v1.NodeDrainProgress> = callbackFlow {
