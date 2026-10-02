@@ -66,6 +66,7 @@ class DrainEngine(private val storage: NodeDrainStorage = NodeDrainStorage()) {
                 runCatching { step(progress) }
                     .onFailure {
                         logger.error("Drain of node $local failed", it)
+                        it.printStackTrace()
                         fail(progress, it.message ?: "internal_error")
                     }
             }

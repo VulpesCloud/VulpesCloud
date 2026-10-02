@@ -97,9 +97,16 @@ class ClusterProvider {
 
     suspend fun startupDone() {
         // a node that was left in maintenance mode comes back in maintenance mode
-        Node.instance.nodeMaintenanceProvider.applyLocalAttribute(forceGet = true)
+        val localNodeName = Node.instance.configProvider.config.nodeName
+        val inMaintenance =
+            Node.instance.nodeMaintenanceProvider.isInMaintenance(localNodeName, forceGet = true)
+        Node.instance.nodeMaintenanceProvider.applyLocalAttribute()
         currentState = NodeState.ONLINE
         NodeSnapshotUpdater.updateLocalNodeSnapshot()
+
+        if (inMaintenance) {
+            logger.info("Node {} started in Maintenance Mode", localNodeName)
+        }
 
         NodeSnapshotUpdater.start()
     }
