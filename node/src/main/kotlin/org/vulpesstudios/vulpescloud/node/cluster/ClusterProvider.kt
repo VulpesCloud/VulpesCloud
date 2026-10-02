@@ -96,8 +96,17 @@ class ClusterProvider {
     }
 
     suspend fun startupDone() {
+        // a node that was left in maintenance mode comes back in maintenance mode
+        val localNodeName = Node.instance.configProvider.config.nodeName
+        val inMaintenance =
+            Node.instance.nodeMaintenanceProvider.isInMaintenance(localNodeName, forceGet = true)
+        Node.instance.nodeMaintenanceProvider.applyLocalAttribute()
         currentState = NodeState.ONLINE
         NodeSnapshotUpdater.updateLocalNodeSnapshot()
+
+        if (inMaintenance) {
+            logger.warn("This Node started in <red>Maintenance</red> Mode")
+        }
 
         NodeSnapshotUpdater.start()
     }
@@ -124,10 +133,25 @@ class ClusterProvider {
         )
     }
 
+    /** True if the node is draining because of a drain command (not because it is shutting down). */
+    val isDrainingByCommand: Boolean
+        get() =
+            currentState == NodeState.DRAINING &&
+                currentAttributes[DRAIN_REASON_KEY] == DRAIN_REASON_MAINTENANCE
+
+    /**
+     * Marks the node as draining because it is shutting down. If the node is already draining
+     * (e.g. through a drain command) the state and its reason are left untouched.
+     */
     suspend fun markShutdownDraining() {
+        if (currentState == NodeState.DRAINING) return
+        markDraining(DRAIN_REASON_SHUTTING_DOWN)
+    }
+
+    suspend fun markDraining(reason: String) {
         val localNode = ClusterHelper.getLocalNodeSnapshot()
         currentState = NodeState.DRAINING
-        currentAttributes["drainReason"] = "SHUTTING_DOWN"
+        currentAttributes[DRAIN_REASON_KEY] = reason
         NodeSnapshotUpdater.updateLocalNodeSnapshot()
         EventsService.publish(
             nodeStateChangeEvent {
@@ -139,9 +163,31 @@ class ClusterProvider {
         )
     }
 
+    /** Leaves the draining state again (undrain). */
+    suspend fun markOnline() {
+        val localNode = ClusterHelper.getLocalNodeSnapshot()
+        currentState = NodeState.ONLINE
+        currentAttributes.remove(DRAIN_REASON_KEY)
+        NodeSnapshotUpdater.updateLocalNodeSnapshot()
+        EventsService.publish(
+            nodeStateChangeEvent {
+                this.snapshot = localNode.toDefinition()
+                this.oldState = localNode.state.toNodeStates()
+                this.newState = NodeState.ONLINE.toNodeStates()
+            },
+            true,
+        )
+    }
+
     suspend fun getClusterConfig(): ClusterConfig {
         return Node.instance.virtualConfigProvider.getCustomConfigObject<ClusterConfig>(
             "vc_cluster"
         ) ?: throw IllegalStateException("ClusterConfig not found!")
+    }
+
+    companion object {
+        const val DRAIN_REASON_KEY = "drainReason"
+        const val DRAIN_REASON_MAINTENANCE = "MAINTENANCE"
+        const val DRAIN_REASON_SHUTTING_DOWN = "SHUTTING_DOWN"
     }
 }

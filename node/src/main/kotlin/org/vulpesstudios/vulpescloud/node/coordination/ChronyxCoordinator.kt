@@ -27,6 +27,7 @@ import org.vulpesstudios.chronyx.TaskManager
 import org.vulpesstudios.chronyx.chronyx
 import org.vulpesstudios.vulpescloud.api.cluster.NodeState
 import org.vulpesstudios.vulpescloud.api.services.Service
+import org.vulpesstudios.vulpescloud.api.maintenance.NodeMaintenanceConfig
 import org.vulpesstudios.vulpescloud.api.tasks.Task
 import org.vulpesstudios.vulpescloud.api.tasks.rolloutId
 import org.vulpesstudios.vulpescloud.node.Node
@@ -52,10 +53,14 @@ class ChronyxCoordinator {
             renewIntervalMillis = 5_000
         }
         chronyx.task("service-reconciler", manager.name, "*/5 * * * * *", 1, 1) {
+            Node.instance.nodeMaintenanceProvider.syncLocalAttribute()
             reconcileServices()
         }
         chronyx.task("rollout-reconciler", manager.name, "*/2 * * * * *", 1, 1) {
             rolloutEngine.reconcile()
+        }
+        chronyx.task("node-drain-reconciler", manager.name, "*/2 * * * * *", 1, 1) {
+            Node.instance.drainEngine.reconcile()
         }
 
         chronyx.start()
@@ -88,6 +93,7 @@ class ChronyxCoordinator {
                 .map { Service.fromDefinition(it) }
 
         val nodeSnapshots = ClusterHelper.getAllNodeSnapshots()
+        val maintenance = Node.instance.nodeMaintenanceProvider.getConfig()
 
         tasks.forEach { task ->
             logger.debug("Checking task ${task.name}")
@@ -98,7 +104,10 @@ class ChronyxCoordinator {
                 return@forEach
             }
 
-            val currentServiceCount = services.count { it.task.name == task.name }
+            val currentServiceCount = services.count { service ->
+                service.task.name == task.name &&
+                    (maintenance.countMaintenanceServices || !maintenance.isInMaintenance(service.node))
+            }
             if (!task.autoStart) return@forEach
             if (task.minOnlineServices <= currentServiceCount) return@forEach
 
@@ -106,6 +115,7 @@ class ChronyxCoordinator {
                 nodeSnapshots
                     .filter { it.name in task.preferredNodes }
                     .filter { it.state == NodeState.ONLINE }
+                    .filter { it.attributes[NodeMaintenanceConfig.ATTRIBUTE_KEY] != "true" }
                     .filter { it.services.memoryAvailable >= task.maxMemory }
                     .maxByOrNull { it.services.memoryAvailable }
 
