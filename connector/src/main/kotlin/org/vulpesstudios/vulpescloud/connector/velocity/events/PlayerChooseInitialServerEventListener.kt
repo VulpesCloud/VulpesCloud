@@ -20,10 +20,12 @@ import com.velocitypowered.api.event.PostOrder
 import com.velocitypowered.api.event.Subscribe
 import com.velocitypowered.api.event.player.KickedFromServerEvent
 import com.velocitypowered.api.event.player.PlayerChooseInitialServerEvent
+import com.velocitypowered.api.event.player.ServerPreConnectEvent
 import com.velocitypowered.api.proxy.ProxyServer
 import kotlinx.coroutines.runBlocking
 import net.kyori.adventure.text.minimessage.MiniMessage
 import org.vulpesstudios.vulpescloud.api.services.isDraining
+import org.vulpesstudios.vulpescloud.api.maintenance.NodeMaintenanceConfig
 import org.vulpesstudios.vulpescloud.bridge.BridgeAPI
 import org.vulpesstudios.vulpescloud.connector.velocity.config.getConfig
 import java.util.concurrent.TimeUnit
@@ -32,6 +34,23 @@ class PlayerChooseInitialServerEventListener(
     private val bridgeAPI: BridgeAPI.BridgeFutureAPI,
     private val proxyServer: ProxyServer,
 ) {
+
+    @Subscribe(order = PostOrder.FIRST)
+    fun onServerPreConnectEvent(event: ServerPreConnectEvent) {
+        runBlocking {
+            val serviceName = event.originalServer.serverInfo.name
+            val service = bridgeAPI.getServicesAPI().getAllServices().get(5, TimeUnit.SECONDS)
+                .firstOrNull { it.name() == serviceName } ?: return@runBlocking
+            val config = bridgeAPI.getCoroutineVirtualConfigAPI().getCustomConfigObject(
+                NodeMaintenanceConfig.VIRTUAL_CONFIG_NAME,
+                NodeMaintenanceConfig.serializer(),
+                forceGet = true,
+            ) ?: return@runBlocking
+            if (!config.isInMaintenance(service.node)) return@runBlocking
+            val permission = config.resolveJoinPermission(service.node) ?: return@runBlocking
+            if (!event.player.hasPermission(permission)) event.result = ServerPreConnectEvent.ServerResult.denied()
+        }
+    }
 
     @Subscribe(order = PostOrder.FIRST)
     fun onPlayerChooseInitialServerEvent(event: PlayerChooseInitialServerEvent) {

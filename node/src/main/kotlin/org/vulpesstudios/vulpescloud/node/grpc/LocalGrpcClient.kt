@@ -22,6 +22,8 @@ import build.buf.gen.vulpescloud.events.v1.EventServiceGrpcKt
 import build.buf.gen.vulpescloud.players.v1.PlayerActionsServiceGrpcKt
 import build.buf.gen.vulpescloud.players.v1.PlayersServiceGrpcKt
 import build.buf.gen.vulpescloud.rollout.v1.RolloutAPIServiceGrpcKt
+import build.buf.gen.vulpescloud.draining.v1.NodeDrainAPIServiceGrpcKt
+import build.buf.gen.vulpescloud.maintenance.v1.NodeMaintenanceAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.services.v1.ServiceAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.templates.v1.TemplateServiceGrpcKt
@@ -45,6 +47,8 @@ class LocalGrpcClient {
     lateinit var playerActionsAPI: PlayerActionsServiceGrpcKt.PlayerActionsServiceCoroutineStub
     lateinit var templateAPI: TemplateServiceGrpcKt.TemplateServiceCoroutineStub
     lateinit var rolloutAPI: RolloutAPIServiceGrpcKt.RolloutAPIServiceCoroutineStub
+    lateinit var nodeDrainAPI: NodeDrainAPIServiceGrpcKt.NodeDrainAPIServiceCoroutineStub
+    lateinit var nodeMaintenanceAPI: NodeMaintenanceAPIServiceGrpcKt.NodeMaintenanceAPIServiceCoroutineStub
 
     fun connect(
         host: String = "127.0.0.1",
@@ -95,5 +99,9 @@ class LocalGrpcClient {
         rolloutAPI =
             RolloutAPIServiceGrpcKt.RolloutAPIServiceCoroutineStub(channel)
                 .withInterceptors(AuthClientInterceptor(secret))
+        nodeDrainAPI = NodeDrainAPIServiceGrpcKt.NodeDrainAPIServiceCoroutineStub(channel)
+            .withInterceptors(AuthClientInterceptor(secret))
+        nodeMaintenanceAPI = NodeMaintenanceAPIServiceGrpcKt.NodeMaintenanceAPIServiceCoroutineStub(channel)
+            .withInterceptors(AuthClientInterceptor(secret))
     }
 }

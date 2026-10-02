@@ -38,27 +38,40 @@ object NodeShutdown {
             logger.info("Shutting down the Node...")
 
             Node.instance.chronyxCoordinator.stop()
+            val commandDrain = Node.instance.clusterProvider.isDrainingByCommand
+            val gracefulShutdownDrain = !commandDrain &&
+                Node.instance.clusterProvider.currentState == org.vulpesstudios.vulpescloud.api.cluster.NodeState.ONLINE
+            if (commandDrain) {
+                Node.instance.drainEngine.closeForShutdown()
+            }
             Node.instance.clusterProvider.markShutdownDraining()
 
-            try {
-                withTimeout(30.seconds) {
-                    coroutineScope {
-                        Node.instance.nodeServices
-                            .map { service ->
-                                async {
-                                    logger.info(
-                                        "Stopping ${service.service.task.name}-${service.service.orderedId}"
-                                    )
-                                    service.stop()
+            if (gracefulShutdownDrain) {
+                logger.info("Draining local services before shutdown")
+                Node.instance.drainEngine.drainForShutdown()
+            }
+
+            if (!gracefulShutdownDrain) {
+                try {
+                    withTimeout(30.seconds) {
+                        coroutineScope {
+                            Node.instance.nodeServices
+                                .map { service ->
+                                    async {
+                                        logger.info(
+                                            "Stopping ${service.service.task.name}-${service.service.orderedId}"
+                                        )
+                                        service.stop()
+                                    }
                                 }
-                            }
-                            .awaitAll()
-                        delay(1.seconds)
+                                .awaitAll()
+                            delay(1.seconds)
+                        }
                     }
+                } catch (_: TimeoutException) {
+                    logger.warn("Some services did not stop within 30 seconds, forcing shutdown...")
+                    Node.instance.nodeServices.forEach { it.delete() }
                 }
-            } catch (_: TimeoutException) {
-                logger.warn("Some services did not stop within 30 seconds, forcing shutdown...")
-                Node.instance.nodeServices.forEach { it.delete() }
             }
 
             NodeSnapshotUpdater.stop()

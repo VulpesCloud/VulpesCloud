@@ -29,6 +29,7 @@ import org.vulpesstudios.vulpescloud.api.rollout.RolloutProgress
 import org.vulpesstudios.vulpescloud.api.rollout.RolloutStatus
 import org.vulpesstudios.vulpescloud.api.rollout.RolloutStrategy
 import org.vulpesstudios.vulpescloud.api.services.*
+import org.vulpesstudios.vulpescloud.api.maintenance.NodeMaintenanceConfig
 import org.vulpesstudios.vulpescloud.api.tasks.Task
 import org.vulpesstudios.vulpescloud.api.tasks.rolloutId
 import org.vulpesstudios.vulpescloud.api.tasks.withoutRolloutId
@@ -477,7 +478,8 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
     }
 
     private suspend fun markServicesDraining(services: List<Service>, rolloutId: String) {
-        services.forEach { svc ->
+        val drainingNodes = ClusterHelper.getAllNodeSnapshots().filter { it.state == NodeState.DRAINING }.map { it.name }.toSet()
+        services.filterNot { it.node in drainingNodes }.forEach { svc ->
             val updated = svc.withRolloutMetadata(rolloutId).withDraining(true)
             Node.instance.localGrpcClient.serviceAPI.updateServiceMeta(
                 updateServiceMetaRequest {
@@ -509,7 +511,10 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
     }
 
     private suspend fun stopServices(services: List<Service>) {
-        services.forEach { svc ->
+        val drainingNodes = ClusterHelper.getAllNodeSnapshots().filter { it.state == NodeState.DRAINING }.map { it.name }.toSet()
+        val skipped = services.filter { it.node in drainingNodes }
+        if (skipped.isNotEmpty()) logger.warn("Ignoring ${skipped.size} rollout service(s) on draining nodes; node drain owns their shutdown")
+        services.filterNot { it.node in drainingNodes }.forEach { svc ->
             Node.instance.localGrpcClient.serviceAPI.stopService(
                 stopServiceRequest { this.service = svc.toDefinition() }
             )
@@ -617,6 +622,7 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
             .filter { it.name in task.preferredNodes }
             .filter { it.name !in exclude }
             .filter { it.state == NodeState.ONLINE }
+            .filter { it.attributes[NodeMaintenanceConfig.ATTRIBUTE_KEY] != "true" }
             .filter { it.services.memoryAvailable >= task.maxMemory }
             .maxByOrNull { it.services.memoryAvailable }
     }

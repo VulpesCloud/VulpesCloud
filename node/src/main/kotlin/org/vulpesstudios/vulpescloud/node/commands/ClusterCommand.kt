@@ -19,21 +19,105 @@ package org.vulpesstudios.vulpescloud.node.commands
 import build.buf.gen.vulpescloud.cluster.v2.getAllNodesRequest
 import build.buf.gen.vulpescloud.cluster.v2.getNodeSnapshotRequest
 import build.buf.gen.vulpescloud.cluster.v2.snapshotOrNull
+import build.buf.gen.vulpescloud.draining.v1.cancelNodeDrainRequest
+import build.buf.gen.vulpescloud.draining.v1.getNodeDrainStatusRequest
+import build.buf.gen.vulpescloud.draining.v1.nodeDrainOptions
+import build.buf.gen.vulpescloud.draining.v1.startNodeDrainRequest
+import build.buf.gen.vulpescloud.maintenance.v1.setNodeMaintenanceRequest
+import com.google.protobuf.Duration
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
+import org.incendo.cloud.annotations.Flag
 import org.incendo.cloud.annotations.Permission
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandInput
 import org.vulpesstudios.vulpescloud.api.cluster.NodeEndpointDetails
+import org.vulpesstudios.vulpescloud.api.cluster.NodeState
+import org.vulpesstudios.vulpescloud.api.drain.NodeDrainStrategy
 import org.vulpesstudios.vulpescloud.node.Node
+import org.vulpesstudios.vulpescloud.node.cluster.ClusterHelper
 import org.vulpesstudios.vulpescloud.node.command.CommandSource
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
 
 class ClusterCommand {
+
+    @Permission("cluster.drain")
+    @Command("cluster node <node> drain")
+    fun drainNode(
+        source: CommandSource,
+        @Argument("node") endpoints: List<NodeEndpointDetails>,
+        @Flag("strategy") strategy: String? = null,
+        @Flag("timeout") timeout: String? = null,
+        @Flag("threshold") threshold: Int? = null,
+        @Flag("force") force: Boolean = false,
+    ) = runBlocking {
+        val snapshots = ClusterHelper.getAllNodeSnapshots()
+        val matchedOnline = endpoints.mapNotNull { endpoint -> snapshots.firstOrNull { it.name == endpoint.name } }
+            .filter { it.state == NodeState.ONLINE }
+        val totalOnline = snapshots.count { it.state == NodeState.ONLINE }
+        if (!force && totalOnline > 0 && matchedOnline.size >= totalOnline) {
+            source.sendMessage("<red>Refusing to drain every online node. Use --force to override.</red>")
+            return@runBlocking
+        }
+        val drainStrategy = when (strategy?.lowercase()) {
+            null, "passive" -> NodeDrainStrategy.PASSIVE
+            "immediate" -> NodeDrainStrategy.IMMEDIATE
+            else -> { source.sendMessage("<red>Strategy must be passive or immediate.</red>"); return@runBlocking }
+        }
+        val timeoutMs = timeout?.let(::parseDurationMillis)
+        if (timeout != null && timeoutMs == null) { source.sendMessage("<red>Invalid timeout: $timeout</red>"); return@runBlocking }
+        endpoints.forEach { endpoint ->
+            val response = Node.instance.localGrpcClient.nodeDrainAPI.startNodeDrain(startNodeDrainRequest {
+                nodeName = endpoint.name
+                options = nodeDrainOptions {
+                    this.strategy = drainStrategy.toDefinition()
+                    timeoutMs?.let { this.timeout = Duration.newBuilder().setSeconds(it / 1000).setNanos(((it % 1000) * 1_000_000).toInt()).build() }
+                    threshold?.let { playerThreshold = it.coerceAtLeast(0) }
+                    this.force = force
+                }
+            })
+            source.sendMessage(if (response.success) "<green>Drain started for ${endpoint.name}.</green>" else "<red>${response.error}</red>")
+        }
+    }
+
+    @Permission("cluster.drainStatus")
+    @Command("cluster node <node> drain status")
+    fun drainStatus(source: CommandSource, @Argument("node") endpoints: List<NodeEndpointDetails>) = runBlocking {
+        endpoints.forEach { endpoint ->
+            runCatching { Node.instance.localGrpcClient.nodeDrainAPI.getNodeDrainStatus(getNodeDrainStatusRequest { nodeName = endpoint.name }).drain }
+                .onSuccess { source.sendMessage("<gray>${endpoint.name}: <white>${it.status} <dark_gray>| <gray>services ${it.servicesStopped}/${it.servicesTotal}, players ${it.playersRemaining}") }
+                .onFailure { source.sendMessage("<red>No drain status for ${endpoint.name}: ${it.message}</red>") }
+        }
+    }
+
+    @Permission("cluster.undrain")
+    @Command("cluster node <node> undrain")
+    fun undrainNode(source: CommandSource, @Argument("node") endpoints: List<NodeEndpointDetails>) = runBlocking {
+        endpoints.forEach { endpoint ->
+            val response = Node.instance.localGrpcClient.nodeDrainAPI.cancelNodeDrain(cancelNodeDrainRequest { nodeName = endpoint.name })
+            source.sendMessage(if (response.success) "<green>${endpoint.name}: ${response.message}</green>" else "<red>${endpoint.name}: ${response.message}</red>")
+        }
+    }
+
+    @Permission("cluster.maintenance")
+    @Command("cluster node <node> maintenance <enabled>")
+    fun setNodeMaintenance(source: CommandSource, @Argument("node") endpoints: List<NodeEndpointDetails>, @Argument("enabled") enabled: Boolean) = runBlocking {
+        endpoints.forEach { endpoint ->
+            val response = Node.instance.localGrpcClient.nodeMaintenanceAPI.setNodeMaintenance(setNodeMaintenanceRequest { nodeName = endpoint.name; this.enabled = enabled })
+            source.sendMessage(if (response.success) "<green>Maintenance $enabled for ${endpoint.name}.</green>" else "<red>${response.error}</red>")
+        }
+    }
+
+    private fun parseDurationMillis(value: String): Long? {
+        val match = Regex("^(\\d+)(ms|s|m|h)$", RegexOption.IGNORE_CASE).matchEntire(value) ?: return null
+        val amount = match.groupValues[1].toLongOrNull() ?: return null
+        val scale = when (match.groupValues[2].lowercase()) { "ms" -> 1L; "s" -> 1_000L; "m" -> 60_000L; "h" -> 3_600_000L; else -> return null }
+        return amount * scale
+    }
 
     @Suggestions("nodes")
     fun suggestNodes(): Stream<String> {

@@ -36,6 +36,8 @@ import org.vulpesstudios.vulpescloud.api.services.Service
 import org.vulpesstudios.vulpescloud.api.services.ServiceStates
 import org.vulpesstudios.vulpescloud.api.services.isDraining
 import org.vulpesstudios.vulpescloud.api.services.rolloutId
+import org.vulpesstudios.vulpescloud.api.cluster.NodeState
+import org.vulpesstudios.vulpescloud.api.maintenance.NodeMaintenanceConfig
 import org.vulpesstudios.vulpescloud.api.tasks.Task
 import org.vulpesstudios.vulpescloud.api.tasks.withRolloutId
 import org.vulpesstudios.vulpescloud.node.Node
@@ -70,10 +72,14 @@ class RolloutAPIServiceImpl : RolloutAPIServiceGrpcKt.RolloutAPIServiceCoroutine
             }
         }
 
-        val eligible =
-            getServicesOfTask(task).filter {
-                !it.isDraining() && it.rolloutId() == null && it.state != ServiceStates.STOPPED
-            }
+        val snapshots = org.vulpesstudios.vulpescloud.node.cluster.ClusterHelper.getAllNodeSnapshots()
+        val eligible = getServicesOfTask(task).filter { service ->
+            !service.isDraining() && service.rolloutId() == null && service.state != ServiceStates.STOPPED &&
+                snapshots.firstOrNull { it.name == service.node }?.state != NodeState.DRAINING &&
+                snapshots.firstOrNull { it.name == service.node }?.attributes?.get(NodeMaintenanceConfig.ATTRIBUTE_KEY) != "true"
+        }
+        val skipped = getServicesOfTask(task).size - eligible.size
+        if (skipped > 0) logger.warn("Skipping $skipped service(s) on draining or maintenance nodes for rollout of ${task.name}")
 
         if (eligible.isEmpty()) {
             return startRolloutResponse {

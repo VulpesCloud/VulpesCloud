@@ -19,8 +19,11 @@ package org.vulpesstudios.vulpescloud.node.players
 import build.buf.gen.vulpescloud.events.v1.PlayerActions
 import build.buf.gen.vulpescloud.events.v1.playerActionEvent
 import build.buf.gen.vulpescloud.players.v1.*
+import build.buf.gen.vulpescloud.services.v1.getAllServicesRequest
+import org.vulpesstudios.vulpescloud.api.services.Service
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.event.EventsService
+import org.vulpesstudios.vulpescloud.node.grpc.security.PermissionHelper
 
 class PlayerActionServiceImpl : PlayerActionsServiceGrpcKt.PlayerActionsServiceCoroutineImplBase() {
     private val playerStub by lazy { Node.instance.localGrpcClient.playerAPI }
@@ -111,6 +114,18 @@ class PlayerActionServiceImpl : PlayerActionsServiceGrpcKt.PlayerActionsServiceC
             }
 
         if (player == null) return ConnectPlayerResponse.newBuilder().setSuccess(false).build()
+
+        val target = Node.instance.localGrpcClient.serviceAPI
+            .getAllServices(getAllServicesRequest {}).servicesList
+            .firstOrNull { "${it.task.name}-${it.orderedId}" == request.targetServer }
+            ?.let(Service::fromDefinition)
+        if (target != null && Node.instance.nodeMaintenanceProvider.isInMaintenance(target.node)) {
+            val permission = Node.instance.nodeMaintenanceProvider.getConfig()
+                .resolveJoinPermission(target.node)
+            if (permission != null && !PermissionHelper.hasPermission(player.name, permission)) {
+                return ConnectPlayerResponse.newBuilder().setSuccess(false).build()
+            }
+        }
 
         EventsService.publish(
             playerActionEvent {

@@ -28,6 +28,7 @@ import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.api.players.OnlinePlayer
 import org.vulpesstudios.vulpescloud.api.rollout.RolloutGlobalConfig
+import org.vulpesstudios.vulpescloud.api.maintenance.NodeMaintenanceConfig
 import org.vulpesstudios.vulpescloud.node.auth.AuthServiceImpl
 import org.vulpesstudios.vulpescloud.node.cluster.ClusterAPIServiceImpl
 import org.vulpesstudios.vulpescloud.node.cluster.ClusterProvider
@@ -53,6 +54,10 @@ import org.vulpesstudios.vulpescloud.node.modules.ModuleProvider
 import org.vulpesstudios.vulpescloud.node.players.PlayerActionServiceImpl
 import org.vulpesstudios.vulpescloud.node.players.PlayerServiceImpl
 import org.vulpesstudios.vulpescloud.node.rollout.RolloutAPIServiceImpl
+import org.vulpesstudios.vulpescloud.node.drain.DrainEngine
+import org.vulpesstudios.vulpescloud.node.drain.NodeDrainAPIServiceImpl
+import org.vulpesstudios.vulpescloud.node.maintenance.NodeMaintenanceAPIServiceImpl
+import org.vulpesstudios.vulpescloud.node.maintenance.NodeMaintenanceProvider
 import org.vulpesstudios.vulpescloud.node.secret.SecretFactory
 import org.vulpesstudios.vulpescloud.node.serversoftware.ServerSoftwareProvider
 import org.vulpesstudios.vulpescloud.node.serversoftware.impl.FoliaDownloader
@@ -106,6 +111,8 @@ class Node {
     val localGrpcClient = LocalGrpcClient()
     val serviceFactoryProvider = ServiceFactoryProvider()
     val virtualConfigProvider = VirtualConfigProvider()
+    val nodeMaintenanceProvider = NodeMaintenanceProvider()
+    val drainEngine = DrainEngine()
     val clusterProvider = ClusterProvider()
     val moduleProvider =
         ModuleProvider(
@@ -218,6 +225,8 @@ class Node {
                     PlayerActionServiceImpl(),
                     TemplateServiceImpl(),
                     RolloutAPIServiceImpl(),
+                    NodeDrainAPIServiceImpl(),
+                    NodeMaintenanceAPIServiceImpl(),
                 )
             )
 
@@ -246,6 +255,7 @@ class Node {
             )
 
             EventListenHelper.subscribeToEvents()
+            nodeMaintenanceProvider.subscribeToEvents()
 
             clusterProvider.initClusterConfig()
             clusterProvider.init()
@@ -259,6 +269,13 @@ class Node {
                             RolloutGlobalConfig.serializer(),
                             RolloutGlobalConfig(),
                         )
+                }
+            )
+
+            virtualConfigServiceImpl.createVirtualConfig(
+                createVirtualConfigRequest {
+                    name = NodeMaintenanceConfig.VIRTUAL_CONFIG_NAME
+                    config = virtualConfigProvider.json.encodeToString(NodeMaintenanceConfig())
                 }
             )
 
