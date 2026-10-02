@@ -105,9 +105,6 @@ class NodeMaintenanceProvider {
         }
 
         if (changed) {
-            logger.info(
-                "Maintenance mode of node $nodeName is now ${if (enabled) "ENABLED" else "DISABLED"}"
-            )
             if (nodeName == localNodeName) syncLocalAttribute()
             publishChanged(nodeName, enabled)
         }

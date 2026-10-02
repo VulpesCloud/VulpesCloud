@@ -105,7 +105,7 @@ class ClusterProvider {
         NodeSnapshotUpdater.updateLocalNodeSnapshot()
 
         if (inMaintenance) {
-            logger.info("Node {} started in Maintenance Mode", localNodeName)
+            logger.warn("This Node started in <red>Maintenance</red> Mode")
         }
 
         NodeSnapshotUpdater.start()
