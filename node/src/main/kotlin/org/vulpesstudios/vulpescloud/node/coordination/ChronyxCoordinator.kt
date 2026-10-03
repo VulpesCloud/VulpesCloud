@@ -26,8 +26,8 @@ import org.vulpesstudios.chronyx.StoreTaskManager
 import org.vulpesstudios.chronyx.TaskManager
 import org.vulpesstudios.chronyx.chronyx
 import org.vulpesstudios.vulpescloud.api.cluster.NodeState
-import org.vulpesstudios.vulpescloud.api.services.Service
 import org.vulpesstudios.vulpescloud.api.maintenance.NodeMaintenanceConfig
+import org.vulpesstudios.vulpescloud.api.services.Service
 import org.vulpesstudios.vulpescloud.api.tasks.Task
 import org.vulpesstudios.vulpescloud.api.tasks.rolloutId
 import org.vulpesstudios.vulpescloud.node.Node
@@ -59,7 +59,7 @@ class ChronyxCoordinator {
         chronyx.task("rollout-reconciler", manager.name, "*/2 * * * * *", 1, 1) {
             rolloutEngine.reconcile()
         }
-        chronyx.task("node-drain-reconciler", manager.name, "*/2 * * * * *", 1, 1) {
+        chronyx.task("node-drain-reconciler", manager.name, "*/2 * * * * *", Int.MAX_VALUE, 1) {
             Node.instance.drainEngine.reconcile()
         }
 

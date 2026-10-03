@@ -18,6 +18,8 @@ package org.vulpesstudios.vulpescloud.node.coordination
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.encodeToJsonElement
 import org.vulpesstudios.chronyx.ChronyxStore
 import org.vulpesstudios.chronyx.LockInfo
@@ -34,6 +36,8 @@ private data class ChronyxLease(
     val expires: Long,
 )
 
+@Serializable private data class ChronyxLeaseSet(val leases: List<ChronyxLease>)
+
 class VulpesChronyxStore : ChronyxStore {
     private val database by lazy {
         Node.instance.getDatabaseProvider().getOrCreateDatabase("chronyxLeases")
@@ -42,8 +46,22 @@ class VulpesChronyxStore : ChronyxStore {
 
     private fun key(task: String) = "lease:$task"
 
-    private suspend fun read(task: String) =
-        database.get(key(task))?.let { json.decodeFromJsonElement(ChronyxLease.serializer(), it) }
+    private fun decode(raw: JsonElement?): List<ChronyxLease> =
+        when (raw) {
+            null -> emptyList()
+            is JsonObject if "leases" in raw ->
+                json.decodeFromJsonElement(ChronyxLeaseSet.serializer(), raw).leases
+
+            else -> listOf(json.decodeFromJsonElement(ChronyxLease.serializer(), raw))
+        }
+
+    private fun encode(leases: List<ChronyxLease>): JsonElement =
+        json.encodeToJsonElement(ChronyxLeaseSet(leases))
+
+    private suspend fun active(task: String): List<ChronyxLease> {
+        val now = System.currentTimeMillis()
+        return decode(database.get(key(task))).filter { it.expires > now }
+    }
 
     override suspend fun acquire(
         taskName: String,
@@ -54,18 +72,24 @@ class VulpesChronyxStore : ChronyxStore {
     ): String? {
         while (true) {
             val raw = database.get(key(taskName))
-            val current = raw?.let { json.decodeFromJsonElement(ChronyxLease.serializer(), it) }
-            if (current != null && current.expires > System.currentTimeMillis()) return null
-            val next =
+            val now = System.currentTimeMillis()
+            // Expired leases are dropped whenever we write, so the document doesn't grow forever.
+            val active = decode(raw).filter { it.expires > now }
+
+            if (active.size >= maxGlobalInstances) return null
+            if (active.count { it.host == hostId } >= maxHostInstances) return null
+
+            val lease =
                 ChronyxLease(
-                    taskName,
-                    hostId,
-                    UUID.randomUUID().toString(),
-                    System.currentTimeMillis(),
-                    System.currentTimeMillis() + leaseDurationMillis,
+                    task = taskName,
+                    host = hostId,
+                    token = UUID.randomUUID().toString(),
+                    acquired = now,
+                    expires = now + leaseDurationMillis,
                 )
-            if (database.compareAndSet(key(taskName), raw, json.encodeToJsonElement(next)))
-                return next.token
+            if (database.compareAndSet(key(taskName), raw, encode(active + lease))) {
+                return lease.token
+            }
         }
     }
 
@@ -75,45 +99,41 @@ class VulpesChronyxStore : ChronyxStore {
         token: String,
         leaseDurationMillis: Long,
     ): Boolean {
-        val raw = database.get(key(taskName)) ?: return false
-        val current = json.decodeFromJsonElement(ChronyxLease.serializer(), raw)
-        return !(current.host != hostId ||
-            current.token != token ||
-            current.expires <= System.currentTimeMillis()) &&
-            database.compareAndSet(
-                key(taskName),
-                raw,
-                json.encodeToJsonElement(
-                    current.copy(expires = System.currentTimeMillis() + leaseDurationMillis)
-                ),
-            )
+        while (true) {
+            val raw = database.get(key(taskName)) ?: return false
+            val now = System.currentTimeMillis()
+            val active = decode(raw).filter { it.expires > now }
+
+            val current =
+                active.firstOrNull { it.host == hostId && it.token == token } ?: return false
+            val updated = active.map {
+                if (it.token == token) current.copy(expires = now + leaseDurationMillis) else it
+            }
+            if (database.compareAndSet(key(taskName), raw, encode(updated))) return true
+        }
     }
 
     override suspend fun release(taskName: String, hostId: String, token: String): Boolean {
-        val raw = database.get(key(taskName)) ?: return false
-        val current = json.decodeFromJsonElement(ChronyxLease.serializer(), raw)
-        return !(current.host != hostId || current.token != token) &&
-            database.compareAndSet(
-                key(taskName),
-                raw,
-                json.encodeToJsonElement(current.copy(expires = 0)),
-            )
+        while (true) {
+            val raw = database.get(key(taskName)) ?: return false
+            val now = System.currentTimeMillis()
+            val leases = decode(raw)
+
+            if (leases.none { it.host == hostId && it.token == token }) return false
+            // Remove the released lease and prune anything expired while we're at it.
+            val remaining = leases.filter { it.expires > now && it.token != token }
+            if (database.compareAndSet(key(taskName), raw, encode(remaining))) return true
+        }
     }
 
-    override suspend fun getGlobalCount(taskName: String): Int =
-        if ((read(taskName)?.expires ?: 0) > System.currentTimeMillis()) 1 else 0
+    override suspend fun getGlobalCount(taskName: String): Int = active(taskName).size
 
     override suspend fun getHostCount(taskName: String, hostId: String): Int =
-        if (
-            read(taskName)?.let { it.host == hostId && it.expires > System.currentTimeMillis() } ==
-                true
-        )
-            1
-        else 0
+        active(taskName).count { it.host == hostId }
 
     override suspend fun getLockInfo(taskName: String): LockInfo? =
-        read(taskName)
-            ?.takeIf { it.expires > System.currentTimeMillis() }
+        active(taskName)
+            .minByOrNull { it.acquired }
             ?.let {
                 LockInfo(
                     it.task,
