@@ -276,7 +276,6 @@ class DrainEngine(private val storage: NodeDrainStorage = NodeDrainStorage()) {
         val progress = storage.getActive(nodeName) ?: return false
         storage.save(progress.copy(status = NodeDrainStatus.CANCELLED, completedAt = now()))
         if (nodeName == Node.instance.configProvider.config.nodeName) {
-            Node.instance.nodeMaintenanceProvider.setMaintenance(nodeName, false)
             val local =
                 Node.instance.localGrpcClient.serviceAPI
                     .getAllServices(getAllServicesRequest {})
