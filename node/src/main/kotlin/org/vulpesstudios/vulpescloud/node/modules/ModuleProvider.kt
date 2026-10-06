@@ -89,6 +89,7 @@ class ModuleProvider(val moduleFolder: Path, val modulesJsonURL: String) {
                 "An error occurred while loading module $name",
                 exception.stackTraceToString(),
             )
+            exception.printStackTrace()
             return null
         }
     }

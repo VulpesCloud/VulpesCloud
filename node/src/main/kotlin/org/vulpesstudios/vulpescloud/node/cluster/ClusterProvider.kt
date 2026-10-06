@@ -113,7 +113,7 @@ class ClusterProvider {
             .forEach { node ->
                 val stub =
                     ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineStub(
-                            remoteNodes.find { it.endpoint.uuid == node.uuid }!!.channel
+                            remoteNodes.find { it.endpoint.uuid == node.uuid }?.channel
                                 ?: return@forEach
                         )
                         .withInterceptors(AuthClientInterceptor(Node.instance.secret))

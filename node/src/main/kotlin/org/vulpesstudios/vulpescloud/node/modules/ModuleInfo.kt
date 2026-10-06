@@ -28,6 +28,6 @@ data class ModuleInfo(
     var website: String = "<none>",
     val copyToServices: Boolean,
     val platforms: List<String>,
-    val neededOnAllNodes: Boolean,
+    val neededOnAllNodes: Boolean = false,
     var state: ModuleStates = ModuleStates.UNLOADED,
 )
