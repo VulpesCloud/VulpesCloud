@@ -16,6 +16,9 @@
 
 package org.vulpesstudios.vulpescloud.node.cluster
 
+import build.buf.gen.vulpescloud.cluster.v2.ClusterAPIServiceGrpcKt
+import build.buf.gen.vulpescloud.cluster.v2.NodeModule
+import build.buf.gen.vulpescloud.cluster.v2.getModulesOfNodeRequest
 import build.buf.gen.vulpescloud.cluster.v2.nodeStateChangeEvent
 import build.buf.gen.vulpescloud.virtualconfig.v1.createVirtualConfigRequest
 import io.netty.handler.ssl.SslContext
@@ -27,6 +30,7 @@ import org.vulpesstudios.vulpescloud.api.cluster.NodeState
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.NodeShutdown
 import org.vulpesstudios.vulpescloud.node.event.EventsService
+import org.vulpesstudios.vulpescloud.node.grpc.security.AuthClientInterceptor
 import kotlin.time.Duration.Companion.seconds
 
 class ClusterProvider {
@@ -103,6 +107,34 @@ class ClusterProvider {
         Node.instance.nodeMaintenanceProvider.applyLocalAttribute()
         currentState = NodeState.ONLINE
         NodeSnapshotUpdater.updateLocalNodeSnapshot()
+        val modulesOfAllOnlineNodes: MutableMap<String, List<NodeModule>> = mutableMapOf()
+        ClusterHelper.getAllNodeSnapshots()
+            .filter { it.state == NodeState.ONLINE }
+            .forEach { node ->
+                val stub =
+                    ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineStub(
+                            remoteNodes.find { it.endpoint.uuid == node.uuid }!!.channel
+                                ?: return@forEach
+                        )
+                        .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+                modulesOfAllOnlineNodes[node.name] =
+                    stub
+                        .getModulesOfNode(getModulesOfNodeRequest { nodeName = node.name })
+                        .modulesList
+            }
+
+        val localModuleNames: Set<String> =
+            Node.instance.moduleProvider.getAllModules().mapTo(hashSetOf()) { it.moduleInfo.name }
+
+        modulesOfAllOnlineNodes.forEach { (nodeName, modules) ->
+            modules
+                .filter { it.neededOnAllNodes && it.name !in localModuleNames }
+                .forEach { module ->
+                    logger.warn(
+                        "Node <yellow>$nodeName</yellow> has module <dark_purple>${module.name}</dark_purple>, but it is <dark_red>missing</dark_red> on this node!"
+                    )
+                }
+        }
 
         if (inMaintenance) {
             logger.warn("This Node started in <red>Maintenance</red> Mode")
@@ -133,15 +165,17 @@ class ClusterProvider {
         )
     }
 
-    /** True if the node is draining because of a drain command (not because it is shutting down). */
+    /**
+     * True if the node is draining because of a drain command (not because it is shutting down).
+     */
     val isDrainingByCommand: Boolean
         get() =
             currentState == NodeState.DRAINING &&
                 currentAttributes[DRAIN_REASON_KEY] == DRAIN_REASON_MAINTENANCE
 
     /**
-     * Marks the node as draining because it is shutting down. If the node is already draining
-     * (e.g. through a drain command) the state and its reason are left untouched.
+     * Marks the node as draining because it is shutting down. If the node is already draining (e.g.
+     * through a drain command) the state and its reason are left untouched.
      */
     suspend fun markShutdownDraining() {
         if (currentState == NodeState.DRAINING) return

@@ -18,21 +18,22 @@ package org.vulpesstudios.vulpescloud.node.cluster
 
 import build.buf.gen.vulpescloud.auth.v1.getUserByExtraDataRequest
 import build.buf.gen.vulpescloud.cluster.v2.*
-import build.buf.gen.vulpescloud.cluster.v2.ClusterAPIServiceGrpcKt
-import org.vulpesstudios.vulpescloud.api.cluster.NodeSnapshot
-import org.vulpesstudios.vulpescloud.node.Node
-import org.vulpesstudios.vulpescloud.node.command.CommandSource
-import org.vulpesstudios.vulpescloud.node.grpc.security.annotations.RequiresPermission
-import org.vulpesstudios.vulpescloud.node.grpc.security.model.UserModel
-import org.vulpesstudios.vulpescloud.node.utils.MongoUtils
-import java.util.concurrent.CompletionException
-import java.util.concurrent.ExecutionException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.json.Json
 import org.incendo.cloud.exception.InvalidSyntaxException
 import org.incendo.cloud.suggestion.Suggestion
 import org.slf4j.LoggerFactory
+import org.vulpesstudios.vulpescloud.api.cluster.NodeSnapshot
+import org.vulpesstudios.vulpescloud.node.Node
+import org.vulpesstudios.vulpescloud.node.command.CommandSource
+import org.vulpesstudios.vulpescloud.node.grpc.security.AuthClientInterceptor
+import org.vulpesstudios.vulpescloud.node.grpc.security.annotations.RequiresPermission
+import org.vulpesstudios.vulpescloud.node.grpc.security.model.UserModel
+import org.vulpesstudios.vulpescloud.node.modules.ModuleStates
+import org.vulpesstudios.vulpescloud.node.utils.MongoUtils
+import java.util.concurrent.CompletionException
+import java.util.concurrent.ExecutionException
 
 class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineImplBase() {
     private val logger = LoggerFactory.getLogger(ClusterAPIServiceImpl::class.java)
@@ -106,7 +107,7 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
         }
     }
 
-    @RequiresPermission("cluster.tabComplete", ["node=\$localNode"])
+    @RequiresPermission("cluster.tabComplete", [$$"node=$localNode"])
     override suspend fun commandTabComplete(
         request: CommandTabCompleteRequest
     ): CommandTabCompleteResponse {
@@ -121,6 +122,47 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
                 .map(Suggestion::suggestion)
                 .toList()
         return CommandTabCompleteResponse.newBuilder().addAllSuggestions(suggestions).build()
+    }
+
+    @RequiresPermission("cluster.modulesOfNode", [$$"node=$nodeName"])
+    override suspend fun getModulesOfNode(
+        request: GetModulesOfNodeRequest
+    ): GetModulesOfNodeResponse {
+        if (Node.instance.configProvider.config.nodeName != request.nodeName) {
+            val correctNode =
+                Node.instance.clusterProvider.remoteNodes.find {
+                    it.endpoint.name == request.nodeName
+                }
+            if (correctNode?.channel == null) {
+                return GetModulesOfNodeResponse.newBuilder().build()
+            }
+
+            val stub =
+                ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineStub(correctNode.channel!!)
+                    .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+
+            return stub.getModulesOfNode(request)
+        }
+        val modules =
+            Node.instance.moduleProvider.getAllModules().map {
+                nodeModule {
+                    name = it.moduleInfo.name
+                    authors.addAll(it.moduleInfo.authors)
+                    description = it.moduleInfo.description
+                    version = it.moduleInfo.version
+                    website = it.moduleInfo.website
+                    copyToServices = it.moduleInfo.copyToServices
+                    servicePlatforms.addAll(it.moduleInfo.platforms)
+                    neededOnAllNodes = it.moduleInfo.neededOnAllNodes
+                    state =
+                        when (it.moduleInfo.state) {
+                            ModuleStates.UNLOADED -> NodeModuleState.NODE_MODULE_STATE_UNLOADED
+                            ModuleStates.LOADED -> NodeModuleState.NODE_MODULE_STATE_LOADED
+                            ModuleStates.ENABLED -> NodeModuleState.NODE_MODULE_STATE_ENABLED
+                        }
+                }
+            }
+        return GetModulesOfNodeResponse.newBuilder().addAllModules(modules).build()
     }
 
     private suspend fun getPlayer(uuid: String): UserModel? {
