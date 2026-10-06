@@ -31,8 +31,8 @@ import org.vulpesstudios.vulpescloud.api.services.Service
 import org.vulpesstudios.vulpescloud.api.services.ServiceStates
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.command.CommandSource
-import org.vulpesstudios.vulpescloud.node.command.ScopedCommandPermissions
 import org.vulpesstudios.vulpescloud.node.command.ConsoleCommandSource
+import org.vulpesstudios.vulpescloud.node.command.ScopedCommandPermissions
 import org.vulpesstudios.vulpescloud.node.command.annotation.Alias
 import org.vulpesstudios.vulpescloud.node.command.annotation.SpecificCommandSource
 import org.vulpesstudios.vulpescloud.node.services.ServiceLogHandler
@@ -180,9 +180,7 @@ class ServiceCommand {
                         "<gray>Players<dark_gray>:</dark_gray> <white>${snapshot.playerCount}</white>\n" +
                         "<gray>System CPU<dark_gray>:</dark_gray> <white>${snapshot.systemCpuUsage}%</white>\n" +
                         "<gray>Process CPU<dark_gray>:</dark_gray> <white>${snapshot.cpuUsage}%</white>\n" +
-                        "<gray>Max Memory<dark_gray>:</dark_gray> <white>${snapshot.maxHeapMemory}mb</white>\n" +
-                        "<gray>Heap Usage<dark_gray>:</dark_gray> <white>${snapshot.heapUsageMemory}mb</white>\n" +
-                        "<gray>Non-Heap Usage<dark_gray>:</dark_gray> <white>${snapshot.noHeapUsageMemory}mb</white>\n" +
+                        "<gray>Current Memory Usage<dark_gray>:</dark_gray> <white>${snapshot.memoryUsageBytes}mb</white>\n" +
                         "<gray>Uptime<dark_gray>:</dark_gray> <white>${snapshot.uptimeMillis.toDuration(DurationUnit.MILLISECONDS)}</white>"
                 )
             }
