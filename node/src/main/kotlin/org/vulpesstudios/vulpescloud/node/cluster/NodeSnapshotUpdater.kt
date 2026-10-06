@@ -55,8 +55,8 @@ object NodeSnapshotUpdater {
         val nodeServices = Node.instance.nodeServices
         val serviceSnapshots = Node.instance.nodeServiceSnapshots
 
-        val totalSystemMemory = osMXBean.totalMemorySize / 1024 / 1024
-        val freeSystemMemory = osMXBean.freeMemorySize / 1024 / 1024
+        val totalSystemMemory = osMXBean.totalMemorySize
+        val freeSystemMemory = osMXBean.freeMemorySize
         val usedSystemMemory = totalSystemMemory - freeSystemMemory
 
         val systemSnapshot = SystemSnapshot(
@@ -75,7 +75,7 @@ object NodeSnapshotUpdater {
         val memoryReserved = nodeServices.sumOf { it.service.task.maxMemory }
         val memoryUsed = serviceSnapshots
             .filter { snapshot -> nodeServices.any { it.service.uuid.toString() == snapshot.uuid } }
-            .sumOf { it.heapUsageMemory / 1024 / 1024 }
+            .sumOf { it.heapUsageMemory }
         val memoryAvailable = (memoryLimit - memoryReserved).coerceAtLeast(0L)
 
         val serviceSnapshot = NodeServiceSnapshot(

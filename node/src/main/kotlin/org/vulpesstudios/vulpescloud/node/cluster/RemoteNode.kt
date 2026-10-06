@@ -25,6 +25,7 @@ import org.vulpesstudios.vulpescloud.api.cluster.NodeEndpointDetails
 import org.vulpesstudios.vulpescloud.api.cluster.NodeSnapshot
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.grpc.security.AuthClientInterceptor
+import java.net.ConnectException
 
 class RemoteNode(val endpoint: NodeEndpointDetails) {
 
@@ -60,14 +61,25 @@ class RemoteNode(val endpoint: NodeEndpointDetails) {
     }
 
     suspend fun getSnapshot(): NodeSnapshot {
-        return NodeSnapshot.fromDefinition(
-            Node.instance.localGrpcClient.clusterAPI
-                .getNodeSnapshot(getNodeSnapshotRequest { this.name = endpoint.name })
-                .snapshotOrNull ?: nodeSnapshot {
+        return try {
+            NodeSnapshot.fromDefinition(
+                Node.instance.localGrpcClient.clusterAPI
+                    .getNodeSnapshot(getNodeSnapshotRequest { this.name = endpoint.name })
+                    .snapshotOrNull
+                    ?: nodeSnapshot {
+                        this.name = endpoint.name
+                        this.uuid = endpoint.uuid.toString()
+                        this.state = NodeState.NODE_STATES_UNKNOWN
+                    }
+            )
+        } catch (_: ConnectException) {
+            NodeSnapshot.fromDefinition(
+                nodeSnapshot {
                     this.name = endpoint.name
                     this.uuid = endpoint.uuid.toString()
                     this.state = NodeState.NODE_STATES_UNKNOWN
-            }
-        )
+                }
+            )
+        }
     }
 }
