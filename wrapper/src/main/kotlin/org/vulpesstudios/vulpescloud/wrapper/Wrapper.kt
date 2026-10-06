@@ -25,6 +25,7 @@ import io.grpc.internal.PickFirstLoadBalancerProvider
 import kotlinx.coroutines.*
 import org.vulpesstudios.vulpescloud.wrapper.Premain.preClassCall
 import org.vulpesstudios.vulpescloud.wrapper.grpc.GrpcClient
+import oshi.SystemInfo
 import java.lang.management.ManagementFactory
 import java.net.URLClassLoader
 import java.util.*
@@ -49,6 +50,8 @@ class Wrapper(args: Array<String>) {
 
         val osBean = ManagementFactory.getPlatformMXBean(OperatingSystemMXBean::class.java)
         val memoryBean = ManagementFactory.getMemoryMXBean()
+        val si = SystemInfo()
+        val os = si.operatingSystem
 
         var startTime: Long = 0
     }
@@ -57,6 +60,8 @@ class Wrapper(args: Array<String>) {
 
     suspend fun triggerSnapshotUpdate() {
         runCatching {
+                val rss = os.getProcess(os.processId)?.residentMemory ?: -1
+
                 val service =
                     grpcClient.serviceAPI
                         .getByUuid(getByUuidRequest { uuid = SERVICE_UUID.toString() })
@@ -76,9 +81,7 @@ class Wrapper(args: Array<String>) {
                     this.pid = ProcessHandle.current().pid()
                     this.cpuUsage = osBean.processCpuLoad
                     this.systemCpuUsage = osBean.cpuLoad
-                    this.maxHeapMemory = memoryBean.heapMemoryUsage.max
-                    this.heapUsageMemory = memoryBean.heapMemoryUsage.used
-                    this.noHeapUsageMemory = memoryBean.nonHeapMemoryUsage.used
+                    this.memoryUsageBytes = rss
                     this.uptimeMillis = uptime
                 }
 

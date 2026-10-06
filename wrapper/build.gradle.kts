@@ -36,6 +36,8 @@ dependencies {
     implementation(libs.json)
     implementation(libs.mongodb.bson.kotlinx)
     implementation(libs.bouncy.castle)
+
+    implementation(libs.oshi.core)
 }
 
 java {

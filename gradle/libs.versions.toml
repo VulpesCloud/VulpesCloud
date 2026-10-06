@@ -11,12 +11,13 @@ guava = "33.7.2-jre"
 # utils
 bcrypt = "0.10.2"
 chronyx = "1.0.0"
+oshi = "7.7.0"
 
 # network
 protobuf = "4.36.2"
 grpc = "1.84.0"
 grpc-kotlin = "1.5.0"
-protospecs-grpc = "1.5.0.4.20261006143450.b1778b234177"
+protospecs-grpc = "1.5.0.4.20261006204618.79b0f0455462"
 perfmark = "0.27.0"
 
 javaJWT = "4.6.1"
@@ -122,6 +123,7 @@ docker-java-transport = { group = "com.github.docker-java", name = "docker-java-
 # utils
 bcrypt = { group = "at.favre.lib", name = "bcrypt", version.ref = "bcrypt" }
 chronyx-core = { group = "org.vulpesstudios.chronyx", name = "core", version.ref = "chronyx" }
+oshi-core = { group = "com.github.oshi", name = "oshi-core", version.ref = "oshi" }
 
 # logging
 slf4jApi = { group = "org.slf4j", name = "slf4j-api", version.ref = "slf4j" }
