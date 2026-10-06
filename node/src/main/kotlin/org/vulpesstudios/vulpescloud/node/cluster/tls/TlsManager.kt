@@ -25,6 +25,9 @@ import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
 import org.vulpesstudios.vulpescloud.node.utils.AddressUtils
 import java.io.File
 import java.security.KeyPair
+import java.security.cert.X509Certificate
+import java.time.Duration
+import java.time.Instant
 
 @Serializable
 data class StoredCa(
@@ -40,10 +43,14 @@ data class NodeCertBundle(
 
 class TlsManager(
     private val clusterSecret: String,
-    private val nodeId: String
+    private val nodeId: String,
 ) {
     private val logger = LoggerFactory.getLogger(TlsManager::class.java)
-    private val database = DatabaseProvider.getMainDatabaseProvider().getOrCreateDatabase("cluster_tls")
+    private val database =
+        DatabaseProvider.getMainDatabaseProvider().getOrCreateDatabase("cluster_tls")
+    private val certDir = File("launcher/.secret/certs")
+
+    @Volatile private var currentBundle: NodeCertBundle? = null
 
     suspend fun isClusterInitialized(): Boolean {
         return database.get("ca") != null
@@ -68,25 +75,35 @@ class TlsManager(
     }
 
     suspend fun bootstrapNode(): NodeCertBundle {
-        val certDir = File("launcher/.secret/certs")
         if (hasLocalCertBundle(certDir)) {
-            logger.info("Loading existing local certificate bundle.")
-            return loadLocalBundle(certDir)
+            val local = loadLocalBundle(certDir)
+            val cert = ClusterCertificateAuthority.certificateFromPem(local.nodeCertPem)
+
+            if (!needsRenewal(cert)) {
+                logger.info(
+                    "Loading existing local certificate bundle (valid until {}).",
+                    cert.notAfter,
+                )
+                currentBundle = local
+                return local
+            }
+
+            logger.warn(
+                "Local node certificate is expired or about to expire (notAfter={}). Re-signing...",
+                cert.notAfter,
+            )
         }
 
+        return issueNewBundle()
+    }
+
+    private suspend fun issueNewBundle(): NodeCertBundle {
         if (!isClusterInitialized()) {
-            // In a real scenario, we might want to wait or fail.
-            // But if this is the first node, we might want to init it.
-            // The issue says: "The Cluster will have a root CA stored in the Cluster Database"
-            // "run cluster init explicitly before starting a node" was in the example.
-            // Let's check if we should auto-init or not.
-            // For now, let's assume if it's not initialized, we try to init it if we are the first node?
-            // Actually, Node.kt has FirstSetup.
             initCluster()
         }
 
-        logger.info("Bootstrapping node certificate...")
-        val storedCaElement = database.get("ca") ?: throw IllegalStateException("Cluster CA not found in database!")
+        val storedCaElement =
+            database.get("ca") ?: throw IllegalStateException("Cluster CA not found in database!")
         val storedCa = Json.decodeFromJsonElement<StoredCa>(storedCaElement)
 
         val caKeyPem = CaKeyEncryption.decrypt(storedCa.encryptedKey, clusterSecret)
@@ -94,28 +111,44 @@ class TlsManager(
         val caPrivateKey = ClusterCertificateAuthority.privateKeyFromPem(caKeyPem)
         val ca = ClusterCertificateAuthority.CaMaterial(caCert, caPrivateKey)
 
+        // New key pair on every issue = key rotation for free.
         val (keyPair, csrPem) = NodeKeyMaterial.generateCsr(nodeId)
-        val signedCert = ClusterCertificateAuthority.signNodeCsr(
-            csrPem = csrPem,
-            nodeId = nodeId,
-            ca = ca,
-            ips = AddressUtils.getAvailableAddresses()
-        )
+        val signedCert =
+            ClusterCertificateAuthority.signNodeCsr(
+                csrPem = csrPem,
+                nodeId = nodeId,
+                ca = ca,
+                ips = AddressUtils.getAvailableAddresses(),
+            )
 
-        val bundle = NodeCertBundle(
-            nodeKey = keyPair,
-            nodeCertPem = ClusterCertificateAuthority.toPem(signedCert),
-            caCertPem = storedCa.caCertPem
-        )
+        val bundle =
+            NodeCertBundle(
+                nodeKey = keyPair,
+                nodeCertPem = ClusterCertificateAuthority.toPem(signedCert),
+                caCertPem = storedCa.caCertPem,
+            )
 
         persist(bundle, certDir)
-        logger.info("Node certificate bootstrapped and persisted.")
+        currentBundle = bundle
+        logger.info("Node certificate issued (valid until {}) and persisted.", signedCert.notAfter)
         return bundle
+    }
+
+    /** Renew when expired, or when less than 1/3 of the total lifetime is left. */
+    private fun needsRenewal(cert: X509Certificate, now: Instant = Instant.now()): Boolean {
+        val notBefore = cert.notBefore.toInstant()
+        val notAfter = cert.notAfter.toInstant()
+        if (!now.isBefore(notAfter)) return true
+
+        val lifetime = Duration.between(notBefore, notAfter)
+        val renewAt = notAfter.minus(lifetime.dividedBy(3))
+        return !now.isBefore(renewAt)
     }
 
     private fun persist(bundle: NodeCertBundle, dir: File) {
         dir.mkdirs()
-        File(dir, "node.key.pem").writeText(ClusterCertificateAuthority.toPem(bundle.nodeKey.private))
+        File(dir, "node.key.pem")
+            .writeText(ClusterCertificateAuthority.toPem(bundle.nodeKey.private))
         File(dir, "node.cert.pem").writeText(bundle.nodeCertPem)
         File(dir, "ca.cert.pem").writeText(bundle.caCertPem)
     }
@@ -126,18 +159,15 @@ class TlsManager(
         val caCertPem = File(dir, "ca.cert.pem").readText()
 
         val nodeKey = ClusterCertificateAuthority.privateKeyFromPem(nodeKeyPem)
-        // We only need the private key for the server/client, but NodeCertBundle wants a KeyPair.
-        // We can just use null for public key if it's not used, or better, don't use KeyPair there if not needed.
-        // But for consistency with example:
         return NodeCertBundle(
             nodeKey = KeyPair(null, nodeKey),
             nodeCertPem = nodeCertPem,
-            caCertPem = caCertPem
+            caCertPem = caCertPem,
         )
     }
 
     private fun hasLocalCertBundle(dir: File): Boolean =
         File(dir, "node.key.pem").exists() &&
-                File(dir, "node.cert.pem").exists() &&
-                File(dir, "ca.cert.pem").exists()
+            File(dir, "node.cert.pem").exists() &&
+            File(dir, "ca.cert.pem").exists()
 }
