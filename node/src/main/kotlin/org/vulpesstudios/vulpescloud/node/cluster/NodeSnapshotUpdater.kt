@@ -87,7 +87,7 @@ object NodeSnapshotUpdater {
         )
 
         println("")
-        println("TMU: $memoryUsed OTH: ${serviceSnapshots.first().memoryMaxBytes}")
+        println("TMU: $memoryUsed OTH: ${serviceSnapshots.firstOrNull()?.memoryMaxBytes}")
 
         return NodeSnapshot(
             name = config.nodeName,
