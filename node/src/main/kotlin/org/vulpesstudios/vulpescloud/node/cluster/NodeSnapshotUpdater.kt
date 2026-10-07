@@ -75,7 +75,7 @@ object NodeSnapshotUpdater {
         val memoryReserved = nodeServices.sumOf { it.service.task.maxMemory }
         val memoryUsed = serviceSnapshots
             .filter { snapshot -> nodeServices.any { it.service.uuid.toString() == snapshot.uuid } }
-            .sumOf { it.memoryMaxBytes }
+            .sumOf { it.memoryUsageBytes }
         val memoryAvailable = (memoryLimit - memoryReserved).coerceAtLeast(0L)
 
         val serviceSnapshot = NodeServiceSnapshot(
@@ -85,9 +85,6 @@ object NodeSnapshotUpdater {
             memoryReserved = memoryReserved,
             memoryAvailable = memoryAvailable,
         )
-
-        println("")
-        println("TMU: $memoryUsed OTH: ${serviceSnapshots.firstOrNull()?.memoryMaxBytes}")
 
         return NodeSnapshot(
             name = config.nodeName,
