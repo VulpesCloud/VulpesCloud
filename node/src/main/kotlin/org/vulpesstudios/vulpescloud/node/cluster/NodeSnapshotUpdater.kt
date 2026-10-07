@@ -86,6 +86,9 @@ object NodeSnapshotUpdater {
             memoryAvailable = memoryAvailable,
         )
 
+        println("")
+        println("TMU: $memoryUsed OTH: ${serviceSnapshots.first().memoryMaxBytes}")
+
         return NodeSnapshot(
             name = config.nodeName,
             uuid = config.uuid,

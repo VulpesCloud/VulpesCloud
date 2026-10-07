@@ -113,6 +113,7 @@ class ChronyxCoordinator {
 
             val bestNode =
                 nodeSnapshots
+                    .asSequence()
                     .filter { it.name in task.preferredNodes }
                     .filter { it.state == NodeState.ONLINE }
                     .filter { it.attributes[NodeMaintenanceConfig.ATTRIBUTE_KEY] != "true" }

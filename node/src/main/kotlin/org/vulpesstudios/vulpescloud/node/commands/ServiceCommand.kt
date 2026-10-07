@@ -180,7 +180,7 @@ class ServiceCommand {
                         "<gray>Players<dark_gray>:</dark_gray> <white>${snapshot.playerCount}</white>\n" +
                         "<gray>System CPU<dark_gray>:</dark_gray> <white>${snapshot.systemCpuUsage}%</white>\n" +
                         "<gray>Process CPU<dark_gray>:</dark_gray> <white>${snapshot.cpuUsage}%</white>\n" +
-                        "<gray>Current Memory Usage<dark_gray>:</dark_gray> <white>${snapshot.memoryUsageBytes}mb</white>\n" +
+                        "<gray>Current Memory Usage<dark_gray>:</dark_gray> <white>${snapshot.memoryUsageBytes}mb</white>\n" + //TODO: Format correctly
                         "<gray>Uptime<dark_gray>:</dark_gray> <white>${snapshot.uptimeMillis.toDuration(DurationUnit.MILLISECONDS)}</white>"
                 )
             }
