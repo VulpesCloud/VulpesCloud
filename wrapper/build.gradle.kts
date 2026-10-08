@@ -15,7 +15,7 @@
  */
 
 plugins {
-    kotlin("jvm") version "2.4.20"
+    kotlin("jvm") version "2.4.21"
     //id("com.github.johnrengelman.shadow") version "8.1.1"
     alias(libs.plugins.shadow)
 }
