@@ -26,7 +26,7 @@ plugins {
     id("signing")
     id("maven-publish")
     alias(libs.plugins.shadow)
-    kotlin("plugin.serialization") version "2.4.20"
+    kotlin("plugin.serialization") version "2.4.21"
 }
 
 group = "org.vulpesstudios.vulpescloud"
