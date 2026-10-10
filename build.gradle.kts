@@ -135,6 +135,7 @@ tasks.register("buildAll") {
 }
 
 tasks.register("copyFilesForMetaRepo") {
+    description = "Copies all needed files into one folder for meta-publish!"
     dependsOn(tasks.named("buildAll"))
 
     doLast {

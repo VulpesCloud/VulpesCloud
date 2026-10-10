@@ -91,13 +91,12 @@ java {
     withJavadocJar()
 }
 
-val generateDependenciesJson by
-    tasks.registering { //TODO: make this better so that gradle does not complain
-        description = "Generates a Json file containing all non implemented dependencies"
-        val outFile = layout.buildDirectory.file("dependencies.json")
-        outputs.file(outFile)
-        doLast { exportDependenciesJson("dependencies.json") }
-    }
+val generateDependenciesJson = tasks.register("generateDependenciesJson") {
+    description = "Generates a Json file containing all non implemented dependencies"
+    val outFile = layout.buildDirectory.file("dependencies.json")
+    outputs.file(outFile)
+    doLast { exportDependenciesJson("dependencies.json") }
+}
 
 tasks.named<ShadowJar>("shadowJar") {
     dependsOn(generateDependenciesJson)
@@ -108,9 +107,9 @@ tasks.shadowJar {
     val buildNumber = System.getenv("BUILD_NUMBER")
     val versionString =
         if (buildNumber != null) {
-            "${version}_${getGitBranch()}@${getGitCommit()}_$buildNumber"
+            "${version}_${providers.gitBranch()}@${providers.gitCommit()}_$buildNumber"
         } else {
-            "${version}_${getGitBranch()}@${getGitCommit()}"
+            "${version}_${providers.gitBranch()}@${providers.gitCommit()}"
         }
 
     manifest {
