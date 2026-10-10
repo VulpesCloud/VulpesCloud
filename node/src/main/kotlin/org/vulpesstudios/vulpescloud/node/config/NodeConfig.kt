@@ -34,4 +34,5 @@ data class NodeConfig(
     val databaseType: String = "sqlite",
     val testing: TestingConfig = TestingConfig(),
     val serviceStartDelayMillis: Int = 1000,
+    val chronyxManager: String = "memory"
 )

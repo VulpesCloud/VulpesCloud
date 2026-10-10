@@ -79,6 +79,9 @@ dependencies {
     compileOnly(libs.hikaricp)
 
     compileOnly(libs.chronyx.core)
+    compileOnly(libs.chronyx.redis)
+
+    compileOnly(libs.rethis)
 }
 
 sourceSets { getByName("main") { kotlin { srcDir("src/main/kotlin") } } }

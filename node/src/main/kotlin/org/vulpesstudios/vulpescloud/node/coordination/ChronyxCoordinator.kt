@@ -20,11 +20,10 @@ import build.buf.gen.vulpescloud.services.v1.getAllServicesRequest
 import build.buf.gen.vulpescloud.tasks.v1.PrepareServiceOnTaskRequest
 import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.tasks.v1.getAllTasksRequest
+import eu.vendeli.rethis.ReThis
 import org.slf4j.LoggerFactory
-import org.vulpesstudios.chronyx.Chronyx
-import org.vulpesstudios.chronyx.StoreTaskManager
-import org.vulpesstudios.chronyx.TaskManager
-import org.vulpesstudios.chronyx.chronyx
+import org.vulpesstudios.chronyx.*
+import org.vulpesstudios.chronyx.redis.RedisChronyxStore
 import org.vulpesstudios.vulpescloud.api.cluster.NodeState
 import org.vulpesstudios.vulpescloud.api.maintenance.NodeMaintenanceConfig
 import org.vulpesstudios.vulpescloud.api.services.Service
@@ -32,6 +31,7 @@ import org.vulpesstudios.vulpescloud.api.tasks.Task
 import org.vulpesstudios.vulpescloud.api.tasks.rolloutId
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.cluster.ClusterHelper
+import org.vulpesstudios.vulpescloud.node.config.chronyx.ChronyxRedisConfig
 import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.mariadb.MariaDBDatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.mongo.MongoDBDatabaseProvider
@@ -71,13 +71,37 @@ class ChronyxCoordinator {
         if (::chronyx.isInitialized) chronyx.stop()
     }
 
-    private fun taskManager(): TaskManager =
-        when (val provider = DatabaseProvider.getMainDatabaseProvider()) {
-            is SQLiteDatabaseProvider,
-            is MariaDBDatabaseProvider,
-            is MongoDBDatabaseProvider -> StoreTaskManager("vulpescloud", VulpesChronyxStore())
-            else -> error("Unsupported cluster database provider: ${provider::class.simpleName}")
+    private fun taskManager(): TaskManager {
+        return when (Node.instance.configProvider.config.chronyxManager) {
+            "database" ->
+                when (val provider = DatabaseProvider.getMainDatabaseProvider()) {
+                    is SQLiteDatabaseProvider,
+                    is MariaDBDatabaseProvider,
+                    is MongoDBDatabaseProvider ->
+                        StoreTaskManager("vulpescloud", VulpesChronyxStore())
+                    else ->
+                        error(
+                            "Unsupported cluster database provider: ${provider::class.simpleName}"
+                        )
+                }
+            "redis" -> tryMakeRedisStore()
+            "memory" -> InMemoryTaskManager()
+            else -> error("Unsupported ${Node.instance.configProvider.config.chronyxManager}")
         }
+    }
+
+    private fun tryMakeRedisStore(): RedisChronyxStore {
+        val config = ChronyxRedisConfig.read()
+        val rethis =
+            ReThis(host = config.host, port = config.port) {
+                auth(
+                    username = config.username,
+                    password = config.password.toCharArray(),
+                )
+                db = config.database
+            }
+        return RedisChronyxStore(rethis, "rethis", "vulpescloud")
+    }
 
     private suspend fun reconcileServices() {
         val tasks =
@@ -106,7 +130,8 @@ class ChronyxCoordinator {
 
             val currentServiceCount = services.count { service ->
                 service.task.name == task.name &&
-                    (maintenance.countMaintenanceServices || !maintenance.isInMaintenance(service.node))
+                    (maintenance.countMaintenanceServices ||
+                        !maintenance.isInMaintenance(service.node))
             }
             if (!task.autoStart) return@forEach
             if (task.minOnlineServices <= currentServiceCount) return@forEach
