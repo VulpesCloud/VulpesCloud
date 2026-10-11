@@ -96,6 +96,13 @@ class SQLiteDatabase(
         }
     }
 
+    override suspend fun getAllEntries(): List<Pair<String, JsonElement>> =
+        transaction(database) {
+            table.selectAll().map {
+                it[table.key] to json.decodeFromString(JsonElement.serializer(), it[table.value])
+            }
+        }
+
     override suspend fun find(filter: String): List<JsonElement> {
         return transaction(database) {
             table

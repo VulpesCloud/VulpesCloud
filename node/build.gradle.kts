@@ -16,8 +16,6 @@
 
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 
-
-
 plugins {
     kotlin("jvm") version "2.4.21"
     alias(libs.plugins.shadow)
@@ -91,12 +89,13 @@ java {
     withJavadocJar()
 }
 
-val generateDependenciesJson = tasks.register("generateDependenciesJson") {
-    description = "Generates a Json file containing all non implemented dependencies"
-    val outFile = layout.buildDirectory.file("dependencies.json")
-    outputs.file(outFile)
-    doLast { exportDependenciesJson("dependencies.json") }
-}
+val generateDependenciesJson =
+    tasks.register("generateDependenciesJson") {
+        description = "Generates a Json file containing all non implemented dependencies"
+        val outFile = layout.buildDirectory.file("dependencies.json")
+        outputs.file(outFile)
+        doLast { exportDependenciesJson("dependencies.json") }
+    }
 
 tasks.named<ShadowJar>("shadowJar") {
     dependsOn(generateDependenciesJson)
@@ -105,11 +104,15 @@ tasks.named<ShadowJar>("shadowJar") {
 
 tasks.shadowJar {
     val buildNumber = System.getenv("BUILD_NUMBER")
+
+    val branch = providers.gitBranch().orElse("unknown").get()
+    val commit = providers.gitCommit().orElse("unknown").get()
+
     val versionString =
         if (buildNumber != null) {
-            "${version}_${providers.gitBranch()}@${providers.gitCommit()}_$buildNumber"
+            "${version}_${branch}@${commit}_$buildNumber"
         } else {
-            "${version}_${providers.gitBranch()}@${providers.gitCommit()}"
+            "${version}_${branch}@${commit}"
         }
 
     manifest {

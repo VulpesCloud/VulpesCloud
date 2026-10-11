@@ -199,6 +199,11 @@ class MongoDBDatabase(
         }
     }
 
+    override suspend fun getAllEntries(): List<Pair<String, JsonElement>> =
+        withContext(Dispatchers.IO) {
+            collection.find().map { it.key to it.value }.toList()
+        }
+
     override suspend fun find(filter: String): List<JsonElement> {
         if (PropertyUtils.isMoreDBLogging()) {
             logger.info("MongoDB[$collectionName]> Finding $filter")

@@ -20,6 +20,8 @@ import com.mongodb.ConnectionString
 import com.mongodb.MongoClientSettings
 import com.mongodb.kotlin.client.coroutine.MongoClient
 import com.mongodb.kotlin.client.coroutine.MongoDatabase
+import kotlinx.coroutines.flow.toList
+import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.node.config.db.MongoConfig
@@ -59,6 +61,10 @@ class MongoDBDatabaseProvider : DatabaseProvider {
         database = client.getDatabase(options.database)
     }
 
+    override fun close() {
+        client.close()
+    }
+
     override fun getOrCreateDatabase(name: String): MongoDBDatabase {
         if (PropertyUtils.isMoreDBLogging()) logger.info("Getting or creating database $name")
         return databases.getOrPut(name) {
@@ -67,7 +73,13 @@ class MongoDBDatabaseProvider : DatabaseProvider {
     }
 
     override fun hasDatabase(name: String): Boolean {
-        throw UnsupportedOperationException("I was to lazy implementing this xD")
+        return getDatabaseNames().contains(name)
+    }
+
+    override fun getDatabaseNames(): Set<String> = runBlocking {
+        database.listCollectionNames().toList()
+            .mapNotNull { collection -> collection.removePrefix(options.collectionPrefix).takeIf { collection.startsWith(options.collectionPrefix) } }
+            .toSet()
     }
 
     override fun deleteDatabase(name: String) {

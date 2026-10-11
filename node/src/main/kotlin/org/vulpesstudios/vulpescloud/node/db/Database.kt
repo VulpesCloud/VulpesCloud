@@ -34,6 +34,9 @@ interface Database {
 
     suspend fun getAll(): List<JsonElement>
 
+    /** Returns stored keys and values, for lossless database migration. */
+    suspend fun getAllEntries(): List<Pair<String, JsonElement>>
+
     suspend fun insertIgnore(key: String, value: JsonElement)
 
     suspend fun compareAndSet(key: String, expected: JsonElement?, value: JsonElement): Boolean

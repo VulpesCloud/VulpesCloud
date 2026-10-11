@@ -24,9 +24,14 @@ interface DatabaseProvider {
 
     fun initialize()
 
+    fun close()
+
     fun getOrCreateDatabase(name: String): Database
 
     fun hasDatabase(name: String): Boolean
+
+    /** Names of VulpesCloud key/value databases currently present in this provider. */
+    fun getDatabaseNames(): Set<String>
 
     fun deleteDatabase(name: String)
 

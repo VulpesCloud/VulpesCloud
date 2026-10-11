@@ -36,6 +36,10 @@ class SQLiteDatabaseProvider : DatabaseProvider {
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     }
 
+    override fun close() {
+        TransactionManager.closeAndUnregister(database)
+    }
+
     override fun getOrCreateDatabase(name: String): SQLiteDatabase {
         return databases.getOrPut(name) { SQLiteDatabase(name, database) }
     }
@@ -43,6 +47,9 @@ class SQLiteDatabaseProvider : DatabaseProvider {
     override fun hasDatabase(name: String): Boolean {
         return transaction(database) { SchemaUtils.listTables().any { it == name } }
     }
+
+    override fun getDatabaseNames(): Set<String> =
+        transaction(database) { SchemaUtils.listTables().toSet() }
 
     override fun deleteDatabase(name: String) {
         if (hasDatabase(name)) {
