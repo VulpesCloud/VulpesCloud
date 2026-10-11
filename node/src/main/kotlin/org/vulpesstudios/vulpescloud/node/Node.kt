@@ -26,9 +26,9 @@ import com.github.dockerjava.transport.DockerHttpClient
 import io.grpc.BindableService
 import kotlinx.coroutines.*
 import org.slf4j.LoggerFactory
+import org.vulpesstudios.vulpescloud.api.maintenance.NodeMaintenanceConfig
 import org.vulpesstudios.vulpescloud.api.players.OnlinePlayer
 import org.vulpesstudios.vulpescloud.api.rollout.RolloutGlobalConfig
-import org.vulpesstudios.vulpescloud.api.maintenance.NodeMaintenanceConfig
 import org.vulpesstudios.vulpescloud.node.auth.AuthServiceImpl
 import org.vulpesstudios.vulpescloud.node.cluster.ClusterAPIServiceImpl
 import org.vulpesstudios.vulpescloud.node.cluster.ClusterProvider
@@ -43,6 +43,8 @@ import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.mariadb.MariaDBDatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.mongo.MongoDBDatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.sqlite.SQLiteDatabaseProvider
+import org.vulpesstudios.vulpescloud.node.drain.DrainEngine
+import org.vulpesstudios.vulpescloud.node.drain.NodeDrainAPIServiceImpl
 import org.vulpesstudios.vulpescloud.node.event.EventListenHelper
 import org.vulpesstudios.vulpescloud.node.event.EventsService
 import org.vulpesstudios.vulpescloud.node.grpc.GrpcServer
@@ -50,14 +52,12 @@ import org.vulpesstudios.vulpescloud.node.grpc.LocalGrpcClient
 import org.vulpesstudios.vulpescloud.node.grpc.LoggingServerInterceptor
 import org.vulpesstudios.vulpescloud.node.grpc.security.AuthInterceptor
 import org.vulpesstudios.vulpescloud.node.grpc.security.PermissionInterceptor
+import org.vulpesstudios.vulpescloud.node.maintenance.NodeMaintenanceAPIServiceImpl
+import org.vulpesstudios.vulpescloud.node.maintenance.NodeMaintenanceProvider
 import org.vulpesstudios.vulpescloud.node.modules.ModuleProvider
 import org.vulpesstudios.vulpescloud.node.players.PlayerActionServiceImpl
 import org.vulpesstudios.vulpescloud.node.players.PlayerServiceImpl
 import org.vulpesstudios.vulpescloud.node.rollout.RolloutAPIServiceImpl
-import org.vulpesstudios.vulpescloud.node.drain.DrainEngine
-import org.vulpesstudios.vulpescloud.node.drain.NodeDrainAPIServiceImpl
-import org.vulpesstudios.vulpescloud.node.maintenance.NodeMaintenanceAPIServiceImpl
-import org.vulpesstudios.vulpescloud.node.maintenance.NodeMaintenanceProvider
 import org.vulpesstudios.vulpescloud.node.secret.SecretFactory
 import org.vulpesstudios.vulpescloud.node.serversoftware.ServerSoftwareProvider
 import org.vulpesstudios.vulpescloud.node.serversoftware.impl.FoliaDownloader
@@ -178,6 +178,7 @@ class Node {
                     register(TlsCommand())
                     register(TemplateCommand())
                     register(RolloutCommand())
+                    register(MigrateCommand())
                 }
             } catch (e: Exception) {
                 logger.error("Failed to initialize commands: ${e.stackTraceToString()}")

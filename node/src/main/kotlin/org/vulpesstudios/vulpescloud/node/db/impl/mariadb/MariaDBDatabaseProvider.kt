@@ -21,6 +21,7 @@ import com.zaxxer.hikari.HikariDataSource
 import kotlinx.serialization.json.Json
 import org.jetbrains.exposed.v1.jdbc.Database
 import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.vulpesstudios.vulpescloud.node.config.db.MariaDBConfig
 import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
@@ -31,6 +32,7 @@ import kotlin.io.path.exists
 class MariaDBDatabaseProvider : DatabaseProvider {
 
     lateinit var database: Database
+    lateinit var dataSource: HikariDataSource
     private val databases = mutableMapOf<String, MariaDBDatabase>()
 
     override fun initialize() {
@@ -42,8 +44,13 @@ class MariaDBDatabaseProvider : DatabaseProvider {
         hikariConfig.username = options.user
         hikariConfig.password = options.password
 
-        val dataSource = HikariDataSource(hikariConfig)
+        dataSource = HikariDataSource(hikariConfig)
         database = Database.connect(dataSource)
+    }
+
+    override fun close() {
+        TransactionManager.closeAndUnregister(database)
+        dataSource.close()
     }
 
     override fun getOrCreateDatabase(name: String): MariaDBDatabase {
@@ -53,6 +60,9 @@ class MariaDBDatabaseProvider : DatabaseProvider {
     override fun hasDatabase(name: String): Boolean {
         return transaction(database) { SchemaUtils.listTables().any { it == name } }
     }
+
+    override fun getDatabaseNames(): Set<String> =
+        transaction(database) { SchemaUtils.listTables().toSet() }
 
     override fun deleteDatabase(name: String) {
         if (hasDatabase(name)) {

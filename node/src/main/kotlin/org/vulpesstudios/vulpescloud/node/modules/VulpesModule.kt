@@ -16,6 +16,8 @@
 
 package org.vulpesstudios.vulpescloud.node.modules
 
+import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
+
 interface VulpesModule {
 
     fun onLoad()
@@ -25,5 +27,8 @@ interface VulpesModule {
     fun onEnable()
 
     fun onDisable()
+
+    /** Called after VulpesCloud's own data has been copied during a database migration. */
+    suspend fun onDatabaseMigration(source: DatabaseProvider, destination: DatabaseProvider) {}
 
 }
