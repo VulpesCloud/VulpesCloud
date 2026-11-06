@@ -23,7 +23,7 @@ perfmark = "0.27.0"
 javaJWT = "4.6.1"
 
 # ok
-okhttp = "5.5.0"
+okhttp = "5.5.1"
 okio = "3.18.2"
 
 # docker
