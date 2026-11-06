@@ -37,7 +37,7 @@ mariadb = "3.5.11"
 hikaricp = "7.1.0"
 rethis = "0.4.4"
 
-reactor = "3.8.7"
+reactor = "3.8.8"
 
 # logging
 slf4j = "2.1.0-alpha1"
