@@ -33,7 +33,7 @@ docker-java = "3.7.1"
 exposed = "1.5.1"
 mongodb = "5.13.0"
 sqlite = "3.53.4.0"
-mariadb = "3.5.10"
+mariadb = "3.5.11"
 hikaricp = "7.1.0"
 rethis = "0.4.4"
 
