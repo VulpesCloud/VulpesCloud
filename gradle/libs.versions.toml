@@ -35,7 +35,7 @@ mongodb = "5.13.0"
 sqlite = "3.53.4.0"
 mariadb = "3.5.11"
 hikaricp = "7.1.0"
-rethis = "0.4.4"
+rethis = "0.4.5"
 
 reactor = "3.8.8"
 
