@@ -98,7 +98,7 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
         val logger: Logger = LoggerFactory.getLogger(EventsService::class.java)
 
         inline fun <reified T : Message> publish(event: T, broadcast: Boolean = false) {
-            logger.trace("Publishing event {} with broadcast {}", event, broadcast)
+            logger.trace("Publishing event {} with broadcast {} and Data: \n {}", event::class.qualifiedName, broadcast, event)
             NodeCoroutineScope.launch {
                 Node.instance.internalEventsService.publish(
                     publishRequest {
