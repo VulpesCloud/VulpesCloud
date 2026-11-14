@@ -17,7 +17,11 @@
 package org.vulpesstudios.vulpescloud.node.commands
 
 import build.buf.gen.vulpescloud.services.v1.PrepareServiceOnTaskRequest
-import build.buf.gen.vulpescloud.tasks.v1.*
+import build.buf.gen.vulpescloud.services.v1.ServiceAPIServiceGrpcKt
+import build.buf.gen.vulpescloud.tasks.v1.TaskDefinition
+import build.buf.gen.vulpescloud.tasks.v1.deleteTaskRequest
+import build.buf.gen.vulpescloud.tasks.v1.getAllTasksRequest
+import build.buf.gen.vulpescloud.tasks.v1.updateTaskRequest
 import com.github.benmanes.caffeine.cache.Caffeine
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
@@ -127,7 +131,6 @@ class TaskCommand {
         @Flag("node") node: String?,
         @Flag("memory") memory: Int?,
         @Flag("startOrderedId") startOrderedId: Int?,
-        prepareServiceOnTask: TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub.(Any) -> Unit,
     ) {
         runBlocking {
             val nodeSnapshots =
@@ -181,7 +184,7 @@ class TaskCommand {
                     }
 
                 if (nodeName == Node.instance.configProvider.config.nodeName) {
-                    Node.instance.localGrpcClient.tasksAPI.prepareServiceOnTask(
+                    Node.instance.localGrpcClient.serviceAPI.prepareServiceOnTask(
                         PrepareServiceOnTaskRequest.newBuilder()
                             .setTask(task.toDefinition())
                             .setAmount(amount ?: 1)
@@ -213,7 +216,7 @@ class TaskCommand {
                         )
                         return@forEach
                     }
-                    TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub(remoteNode.channel!!)
+                    ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(remoteNode.channel!!)
                         .withInterceptors(AuthClientInterceptor(Node.instance.secret))
                         .prepareServiceOnTask(
                             PrepareServiceOnTaskRequest.newBuilder()
