@@ -49,12 +49,6 @@ import org.vulpesstudios.vulpescloud.node.utils.TableUtils
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
 import kotlin.text.Regex
-import kotlin.text.RegexOption
-import kotlin.text.equals
-import kotlin.text.isNotEmpty
-import kotlin.text.split
-import kotlin.text.substringBefore
-import kotlin.text.trim
 
 @Suppress("UNUSED")
 @Alias(["task"])
@@ -156,7 +150,7 @@ class TaskCommand {
                     .tasksList
                     .map { Task.fromDefinition(it) }
 
-            val table = TableUtils.newTable()
+            val table = TableUtils.newTable().defaultStyle()
 
             table.header(
                 mapOf(

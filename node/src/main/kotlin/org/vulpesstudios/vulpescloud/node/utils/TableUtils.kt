@@ -18,9 +18,15 @@ package org.vulpesstudios.vulpescloud.node.utils
 
 object TableUtils {
 
+    private val TAG_REGEX = Regex("(?<!\\\\)</?[a-zA-Z#!?][^<>]*>")
     private val ANSI_REGEX = Regex("\u001B\\[[0-9;]*m")
 
-    private fun visibleLength(text: String): Int = text.replace(ANSI_REGEX, "").length
+    private fun visibleLength(text: String): Int =
+        text
+            .replace(ANSI_REGEX, "")
+            .replace(TAG_REGEX, "")
+            .replace("\\<", "<")   // MiniMessage drops the escaping backslash
+            .length
 
     fun newTable(): Table = Table()
 
@@ -36,7 +42,8 @@ object TableUtils {
         val column: String,
         val row: Int,
         val value: String,
-        val missing: Boolean
+        val missing: Boolean,
+        val columnIndex: Int = 0
     )
 
     class Table {
@@ -56,11 +63,31 @@ object TableUtils {
         private var defaultContentFormatter: ((Cell) -> String)? = null
         private val columnContentFormatters = mutableMapOf<String, (Cell) -> String>()
 
+        private var headerSeparator = true
+        private var separatorChar = '-'
+
+        fun defaultStyle(): Table {
+            headerFormatter { cell ->
+                "<color:#FF9F43><bold>${cell.value}</bold></color>"
+            }
+            contentFormatter { cell ->
+                val color = if ((cell.row + cell.columnIndex) % 2 == 0) "#E8E8E8" else "#8A8A8A"
+                "<color:$color>${cell.value}</color>"
+            }
+            return this
+        }
+
         // ---------------------------------------------------------------- data
 
         /** Sets the header row. Calling it again replaces the previous header. */
         fun header(header: Map<String, String>): Table {
             this.header = header
+            return this
+        }
+
+        fun headerSeparator(enabled: Boolean, char: Char = '-'): Table {
+            headerSeparator = enabled
+            separatorChar = char
             return this
         }
 
@@ -142,10 +169,10 @@ object TableUtils {
             val renderedRows = mutableListOf<List<String>>()
 
             header?.let { header ->
-                renderedRows.add(columns.map { renderHeaderCell(it, header) })
+                renderedRows.add(columns.mapIndexed { i, c -> renderHeaderCell(c, i, header) })
             }
             content.forEachIndexed { index, row ->
-                renderedRows.add(columns.map { renderContentCell(it, index, row) })
+                renderedRows.add(columns.mapIndexed { i, c -> renderContentCell(c, i, index, row) })
             }
             if (renderedRows.isEmpty()) return emptyList()
 
@@ -153,25 +180,34 @@ object TableUtils {
                 renderedRows.maxOf { visibleLength(it[col]) }
             }
 
-            return renderedRows.map { cells ->
+            val rendered = renderedRows.map { cells ->
                 cells.indices.joinToString(separator = "|", prefix = "|", postfix = "|") { col ->
                     val pad = " ".repeat(columnPadding[columns[col]] ?: defaultPadding)
                     val fill = " ".repeat(widths[col] - visibleLength(cells[col]))
                     pad + cells[col] + fill + pad
                 }
             }
+
+            if (header == null || !headerSeparator) return rendered
+
+            val separator = columns.indices.joinToString(separator = "|", prefix = "|", postfix = "|") { col ->
+                val pad = columnPadding[columns[col]] ?: defaultPadding
+                separatorChar.toString().repeat(widths[col] + pad * 2)
+            }
+
+            return listOf(rendered.first(), separator) + rendered.drop(1)
         }
 
-        private fun renderHeaderCell(column: String, row: Map<String, String>): String {
-            val cell = Cell(column, -1, row[column] ?: "", column !in row)
+        private fun renderHeaderCell(column: String, columnIndex: Int, row: Map<String, String>): String {
+            val cell = Cell(column, -1, row[column] ?: "", column !in row, columnIndex)
             val formatter = columnHeaderFormatters[column] ?: defaultHeaderFormatter
             return formatter?.invoke(cell) ?: cell.value
         }
 
-        private fun renderContentCell(column: String, index: Int, row: Map<String, String>): String {
+        private fun renderContentCell(column: String, columnIndex: Int, index: Int, row: Map<String, String>): String {
             val missing = column !in row
             val value = row[column] ?: (columnMissing[column] ?: defaultMissing)
-            val cell = Cell(column, index, value, missing)
+            val cell = Cell(column, index, value, missing, columnIndex)
             val formatter = columnContentFormatters[column] ?: defaultContentFormatter
             return formatter?.invoke(cell) ?: cell.value
         }
