@@ -26,10 +26,12 @@ import com.github.benmanes.caffeine.cache.Caffeine
 import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
+import org.incendo.cloud.annotations.Default
 import org.incendo.cloud.annotations.Flag
 import org.incendo.cloud.annotations.Permission
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
+import org.incendo.cloud.context.CommandContext
 import org.incendo.cloud.context.CommandInput
 import org.incendo.cloud.processors.confirmation.annotation.Confirmation
 import org.vulpesstudios.vulpescloud.api.cluster.NodeState
@@ -46,10 +48,48 @@ import org.vulpesstudios.vulpescloud.node.setup.setups.TaskSetup
 import org.vulpesstudios.vulpescloud.node.utils.TableUtils
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
+import kotlin.text.Regex
+import kotlin.text.RegexOption
+import kotlin.text.equals
+import kotlin.text.isNotEmpty
+import kotlin.text.split
+import kotlin.text.substringBefore
+import kotlin.text.trim
 
 @Suppress("UNUSED")
 @Alias(["task"])
 class TaskCommand {
+
+    private val defaultColumns =
+        listOf(
+            "name",
+            "autoStart",
+            "maintenance",
+            "preferredNodes",
+            "maxPlayers",
+            "staticServices",
+            "software",
+        )
+
+    private val allColumns =
+        listOf(
+            "name",
+            "maxMemory",
+            "minMemory",
+            "startPort",
+            "templates",
+            "staticServices",
+            "minOnlineServices",
+            "maxOnlineServices",
+            "maintenance",
+            "copyTemplatesToStatic",
+            "serviceFactoryName",
+            "preferredNodes",
+            "maxPlayers",
+            "software",
+            "fallback",
+            "autoStart",
+        )
 
     @Suggestions("tasks")
     fun taskSuggestions(): Stream<String> {
@@ -67,6 +107,12 @@ class TaskCommand {
             .map { Task.fromDefinition(it) }
     }
 
+    @Suggestions("task-columns")
+    fun taskColumnSuggestions(
+        ctx: CommandContext<CommandSource>,
+        input: CommandInput,
+    ): List<String> = allColumns + listOf("all", "default")
+
     @Command("task|tasks setup")
     @SpecificCommandSource(ConsoleCommandSource::class)
     fun setupTask(source: CommandSource) {
@@ -74,8 +120,35 @@ class TaskCommand {
     }
 
     @Permission("tasks.getAll")
-    @Command("task|tasks list")
-    fun listTasks(source: CommandSource) {
+    @Command("task|tasks list [columns]")
+    fun listTasks(
+        source: CommandSource,
+        @Argument("columns", suggestions = "task-columns") @Default("default") columns: String,
+        @Flag("all") all: Boolean,
+    ) {
+        val selected: List<String> =
+            when {
+                all || columns.equals("all", ignoreCase = true) -> allColumns
+                columns.equals("default", ignoreCase = true) -> defaultColumns
+                else -> {
+                    val requested = columns.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+
+                    val invalid = requested.filter { r ->
+                        allColumns.none { it.equals(r, ignoreCase = true) }
+                    }
+
+                    if (invalid.isNotEmpty()) {
+                        source.sendMessage("Unknown column(s): ${invalid.joinToString()}")
+                        source.sendMessage("Available: ${allColumns.joinToString()}")
+                        return
+                    }
+
+                    requested
+                        .map { r -> allColumns.first { it.equals(r, ignoreCase = true) } }
+                        .distinct()
+                }
+            }
+
         runBlocking {
             val tasks =
                 Node.instance.localGrpcClient.tasksAPI
@@ -129,21 +202,9 @@ class TaskCommand {
                 )
             }
 
-            table
-                .lines(
-                    listOf(
-                        "name",
-                        "autoStart",
-                        "maintenance",
-                        "preferredNodes",
-                        "maxPlayers",
-                        "staticServices",
-                        "software",
-                    )
-                )
-                .forEach { line ->
-                    source.sendMessage(line)
-                }
+            table.lines(selected).forEach { line ->
+                source.sendMessage(line)
+            }
         }
     }
 
