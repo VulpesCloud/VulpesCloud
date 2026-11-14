@@ -26,6 +26,8 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.api.cluster.NodeState
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.NodeCoroutineScope
@@ -93,7 +95,10 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
     }
 
     companion object {
+        val logger: Logger = LoggerFactory.getLogger(EventsService::class.java)
+
         inline fun <reified T : Message> publish(event: T, broadcast: Boolean = false) {
+            logger.trace("Publishing event {} with broadcast {}", event, broadcast)
             NodeCoroutineScope.launch {
                 Node.instance.internalEventsService.publish(
                     publishRequest {
@@ -113,6 +118,7 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
         }
 
         inline fun <reified T : Message> subscribe(crossinline handler: suspend (T) -> Unit): Job {
+            logger.trace("Subscribing to event ${T::class.qualifiedName}")
             return NodeCoroutineScope.launch {
                 Node.instance.internalEventsService
                     .subscribe(

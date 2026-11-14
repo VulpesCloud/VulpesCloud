@@ -24,15 +24,25 @@ import org.vulpesstudios.vulpescloud.node.Node
 class ConsoleAppender : ConsoleAppender<ILoggingEvent>() {
 
     override fun append(eventObject: ILoggingEvent) {
-
-        val debugLogging = System.getProperty("debugLogging").toBoolean()
-
         if (eventObject.level == Level.DEBUG || eventObject.level == Level.TRACE) {
-            if (debugLogging) {
+            if (allowedDebugLoggers.contains(eventObject.loggerName)) {
                 Node.instance.terminal.print(String(super.encoder.encode(eventObject)))
             }
         } else {
             Node.instance.terminal.print(String(super.encoder.encode(eventObject)))
+        }
+    }
+
+
+    companion object {
+        private val allowedDebugLoggers: MutableSet<String> = mutableSetOf()
+
+        fun enableDebugLogger(name: String) {
+            allowedDebugLoggers.add(name)
+        }
+
+        fun disableDebugLogger(name: String) {
+            allowedDebugLoggers.remove(name)
         }
     }
 }

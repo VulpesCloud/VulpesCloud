@@ -25,6 +25,7 @@ import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.command.CommandSource
 import org.vulpesstudios.vulpescloud.node.command.ConsoleCommandSource
 import org.vulpesstudios.vulpescloud.node.command.annotation.SpecificCommandSource
+import org.vulpesstudios.vulpescloud.node.terminal.ConsoleAppender
 import org.vulpesstudios.vulpescloud.node.virtualconfig.VirtualConfigDebugHelper
 
 @SpecificCommandSource(ConsoleCommandSource::class)
@@ -335,4 +336,17 @@ class DebugCommand {
     //            source.sendMessage(task.toString())
     //        }
     //    }
+
+
+    @Command("debug logging enable <name>")
+    fun enableDebugLogger(source: CommandSource, @Argument("name") name: String) {
+        ConsoleAppender.enableDebugLogger(name)
+        source.sendMessage("<gray>Logging enabled for $name</gray>")
+    }
+
+    @Command("debug logging disable <name>")
+    fun disableDebugLogger(source: CommandSource, @Argument("name") name: String) {
+        ConsoleAppender.disableDebugLogger(name)
+        source.sendMessage("<gray>Logging disabled for $name</gray>")
+    }
 }
