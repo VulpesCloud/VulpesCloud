@@ -797,6 +797,46 @@ class TaskCommand {
             }
         }
     }
+
+    @Permission("tasks.update")
+    @Command("task|tasks task <tasks> set minMemory <memory>")
+    fun setMinMemory(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("memory") memory: Int,
+    ) {
+        runBlocking {
+            tasks.forEach { task ->
+                source.sendMessage(
+                    "<gray>Setting min memory for task</gray> <white>${task.name}</white> <gray>to</gray> <gold>$memory MB</gold>"
+                )
+                val newTask = task.copy(minMemory = memory.toLong())
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
+
+    @Permission("tasks.update")
+    @Command("task|tasks task <tasks> set serviceFactory <factory>")
+    fun setServiceFactory(
+        source: CommandSource,
+        @Argument("tasks") tasks: List<Task>,
+        @Argument("factory") factory: String,
+    ) {
+        runBlocking {
+            tasks.forEach { task ->
+                source.sendMessage(
+                    "<gray>Setting service factory for task</gray> <white>${task.name}</white> <gray>to</gray> <white>$factory</white>"
+                )
+                val newTask = task.copy(serviceFactoryName = factory)
+                Node.instance.localGrpcClient.tasksAPI.updateTask(
+                    updateTaskRequest { this.task = newTask.toDefinition() }
+                )
+            }
+        }
+    }
 }
 
 object TaskCache {
