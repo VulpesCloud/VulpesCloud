@@ -43,6 +43,7 @@ import org.vulpesstudios.vulpescloud.node.command.annotation.Alias
 import org.vulpesstudios.vulpescloud.node.command.annotation.SpecificCommandSource
 import org.vulpesstudios.vulpescloud.node.grpc.security.AuthClientInterceptor
 import org.vulpesstudios.vulpescloud.node.setup.setups.TaskSetup
+import org.vulpesstudios.vulpescloud.node.utils.TableUtils
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
 
@@ -82,17 +83,67 @@ class TaskCommand {
                     .tasksList
                     .map { Task.fromDefinition(it) }
 
-            val maxNameLength = tasks.maxOfOrNull { it.name.length } ?: 0
+            val table = TableUtils.newTable()
 
-            source.sendMessage(
-                "<gray>The following</gray> <gold>${tasks.size}</gold> <gray>task(s) are registered:</gray>"
+            table.header(
+                mapOf(
+                    "name" to "Name",
+                    "maxMemory" to "Max Memory",
+                    "minMemory" to "Min Memory",
+                    "startPort" to "Start Port",
+                    "templates" to "Templates",
+                    "staticServices" to "Static Services",
+                    "minOnlineServices" to "Min Online Services",
+                    "maxOnlineServices" to "Max Online Services",
+                    "maintenance" to "Maintenance",
+                    "copyTemplatesToStatic" to "Copy Templates to Static Services",
+                    "serviceFactoryName" to "Service Factory",
+                    "preferredNodes" to "Preferred Nodes",
+                    "maxPlayers" to "Max Players",
+                    "software" to "Software",
+                    "fallback" to "Fallback",
+                    "autoStart" to "Auto Start",
+                )
             )
-            tasks.forEach {
-                val name = it.name.padEnd(maxNameLength)
-                source.sendMessage(
-                    " <dark_gray>»</dark_gray> <white>$name</white> <dark_gray>| <gray>Maintenance:</gray> <white>${it.maintenance}</white> <dark_gray>| <gray>MaxPlayers:</gray> <white>${it.maxPlayers}</white> <dark_gray>| <gray>MaxMemory:</gray> <white>${it.maxMemory}MB</white> <dark_gray>| <gray>Static:</gray> <white>${it.staticServices}</white> <dark_gray>| <gray>Fallback:</gray> <white>${it.fallback}</white> <dark_gray>| <gray>StartPort:</gray> <white>${it.startPort}</white> <dark_gray>| <gray>Version:</gray> <white>${it.software.name}-${it.software.version}</white>"
+
+            tasks.forEach { task ->
+                table.addContent(
+                    mapOf(
+                        "name" to task.name,
+                        "maxMemory" to task.maxMemory.toString(),
+                        "minMemory" to task.minMemory.toString(),
+                        "startPort" to task.startPort.toString(),
+                        "templates" to task.templates.toString(),
+                        "staticServices" to task.staticServices.toString(),
+                        "minOnlineServices" to task.minOnlineServices.toString(),
+                        "maxOnlineServices" to task.maxOnlineServices.toString(),
+                        "maintenance" to task.maintenance.toString(),
+                        "copyTemplatesToStatic" to task.copyTemplatesToStatic.toString(),
+                        "serviceFactoryName" to task.serviceFactoryName,
+                        "preferredNodes" to task.preferredNodes.toString(),
+                        "maxPlayers" to task.maxPlayers.toString(),
+                        "fallback" to task.fallback.toString(),
+                        "software" to "${task.software.name}-${task.software.version}",
+                        "autoStart" to task.autoStart.toString(),
+                    )
                 )
             }
+
+            table
+                .lines(
+                    listOf(
+                        "name",
+                        "autoStart",
+                        "maintenance",
+                        "preferredNodes",
+                        "maxPlayers",
+                        "staticServices",
+                        "software",
+                    )
+                )
+                .forEach { line ->
+                    source.sendMessage(line)
+                }
         }
     }
 
@@ -147,8 +198,16 @@ class TaskCommand {
             tasks.forEach { task ->
                 val resources = mutableMapOf("task" to setOf(task.name))
                 node?.let { resources["node"] = setOf(it) }
-                if (!ScopedCommandPermissions.hasPermission(source, "tasks.prepareServiceOnTask", resources)) {
-                    source.sendError("You don't have permission to prepare services for task ${task.name}.")
+                if (
+                    !ScopedCommandPermissions.hasPermission(
+                        source,
+                        "tasks.prepareServiceOnTask",
+                        resources,
+                    )
+                ) {
+                    source.sendError(
+                        "You don't have permission to prepare services for task ${task.name}."
+                    )
                     return@forEach
                 }
                 val requiredMemory = memory?.toLong() ?: task.maxMemory
@@ -239,9 +298,9 @@ class TaskCommand {
     fun deleteTask(source: CommandSource, @Argument("tasks") tasks: List<Task>) {
         runBlocking {
             tasks.forEach { task ->
-                    Node.instance.localGrpcClient.tasksAPI.deleteTask(
-                        deleteTaskRequest { this.task = task.toDefinition() }
-                    )
+                Node.instance.localGrpcClient.tasksAPI.deleteTask(
+                    deleteTaskRequest { this.task = task.toDefinition() }
+                )
                 source.sendMessage(
                     "<gray>Deleted task</gray> <white>${task.name}</white><dark_gray>.</dark_gray>"
                 )
@@ -482,9 +541,7 @@ class TaskCommand {
                     "<gray>Adding attribute</gray> <white>$key=$value</white> <gray>to task</gray> <white>${task.name}</white>"
                 )
 
-                val newTask = task.copy(
-                    attributes = task.attributes + (key to value)
-                )
+                val newTask = task.copy(attributes = task.attributes + (key to value))
 
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
@@ -513,9 +570,7 @@ class TaskCommand {
                     "<gray>Removing attribute</gray> <white>$key</white> <gray>from task</gray> <white>${task.name}</white>"
                 )
 
-                val newTask = task.copy(
-                    attributes = task.attributes - key
-                )
+                val newTask = task.copy(attributes = task.attributes - key)
 
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
@@ -544,9 +599,7 @@ class TaskCommand {
                     "<gray>Adding JVM argument</gray> <white>$arg</white> <gray>to task</gray> <white>${task.name}</white>"
                 )
 
-                val newTask = task.copy(
-                    jvmArgs = task.jvmArgs + arg
-                )
+                val newTask = task.copy(jvmArgs = task.jvmArgs + arg)
 
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
@@ -575,9 +628,7 @@ class TaskCommand {
                     "<gray>Removing JVM argument</gray> <white>$arg</white> <gray>from task</gray> <white>${task.name}</white>"
                 )
 
-                val newTask = task.copy(
-                    jvmArgs = task.jvmArgs - arg
-                )
+                val newTask = task.copy(jvmArgs = task.jvmArgs - arg)
 
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
@@ -609,9 +660,7 @@ class TaskCommand {
                     "<gray>Adding environment variable</gray> <white>$envVar</white> <gray>to task</gray> <white>${task.name}</white>"
                 )
 
-                val newTask = task.copy(
-                    envVars = task.envVars + envVar
-                )
+                val newTask = task.copy(envVars = task.envVars + envVar)
 
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }
@@ -629,9 +678,10 @@ class TaskCommand {
     ) {
         runBlocking {
             tasks.forEach { task ->
-                val existing = task.envVars.find {
-                    it.substringBefore("=") == key
-                }
+                val existing =
+                    task.envVars.find {
+                        it.substringBefore("=") == key
+                    }
 
                 if (existing == null) {
                     source.sendMessage(
@@ -644,9 +694,7 @@ class TaskCommand {
                     "<gray>Removing environment variable</gray> <white>$key</white> <gray>from task</gray> <white>${task.name}</white>"
                 )
 
-                val newTask = task.copy(
-                    envVars = task.envVars - existing
-                )
+                val newTask = task.copy(envVars = task.envVars - existing)
 
                 Node.instance.localGrpcClient.tasksAPI.updateTask(
                     updateTaskRequest { this.task = newTask.toDefinition() }

@@ -23,7 +23,7 @@
 
     <conversionRule conversionWord="levelColor" class="org.vulpesstudios.vulpescloud.node.terminal.CompositeConverterImpl"/>
 
-    <variable name="cloud.log.level" value="DEBUG"/>
+    <variable name="cloud.log.level" value="TRACE"/>
 
     <property name="LINE_PATTERN"
               value="%gray([%boldWhite(%d{dd.MM HH:mm:ss.SSS}%gray(]))) %gray(%levelColor(%-5level)) %gray(:)&lt;reset&gt; %msg"/>
