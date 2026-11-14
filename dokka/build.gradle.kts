@@ -20,7 +20,7 @@ plugins {
 }
 
 dependencies {
-    implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.2.0")
+    implementation("org.jetbrains.dokka:dokka-gradle-plugin:2.3.0")
     dokka(project(":api"))
     dokka(project(":bridge"))
     dokka(project(":connector"))
