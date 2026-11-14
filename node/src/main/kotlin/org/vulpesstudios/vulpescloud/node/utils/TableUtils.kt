@@ -71,7 +71,7 @@ object TableUtils {
                 "<color:#FF9F43><bold>${cell.value}</bold></color>"
             }
             contentFormatter { cell ->
-                val color = if ((cell.row + cell.columnIndex) % 2 == 0) "#E8E8E8" else "#8A8A8A"
+                val color = if ((cell.row) % 2 == 0) "#E8E8E8" else "#8A8A8A"
                 "<color:$color>${cell.value}</color>"
             }
             return this
