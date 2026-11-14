@@ -92,14 +92,16 @@ class LocalService(override var service: Service) : AbstractService {
 
                 Node.instance.nodeServices.removeIf { it.service.uuid == service.uuid }
 
-                EventsService.publish(
-                    serviceStateChangedEvent {
-                        this.service = this@LocalService.service.toDefinition()
-                        this.oldState = ServiceStates.RUNNING.toServiceState()
-                        this.newState = ServiceStates.STOPPED.toServiceState()
-                    },
-                    true
-                )
+                runBlocking {
+                    EventsService.publish(
+                        serviceStateChangedEvent {
+                            this.service = this@LocalService.service.toDefinition()
+                            this.oldState = ServiceStates.RUNNING.toServiceState()
+                            this.newState = ServiceStates.STOPPED.toServiceState()
+                        },
+                        true
+                    )
+                }
                 logger.info("Service ${service.task.name}-${service.orderedId} stopped!")
 
                 if (!service.task.staticServices) {

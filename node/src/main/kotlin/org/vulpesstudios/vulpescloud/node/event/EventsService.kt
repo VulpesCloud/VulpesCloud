@@ -97,20 +97,18 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
     companion object {
         val logger: Logger = LoggerFactory.getLogger(EventsService::class.java)
 
-        inline fun <reified T : Message> publish(event: T, broadcast: Boolean = false) {
+        suspend inline fun <reified T : Message> publish(event: T, broadcast: Boolean = false) {
             logger.trace("Publishing event {} with broadcast {} and Data: \n {}", event::class.qualifiedName, broadcast, event)
-            NodeCoroutineScope.launch {
-                Node.instance.internalEventsService.publish(
-                    publishRequest {
-                        this.event = event {
-                            this.id = event.descriptorForType.fullName
-                            this.data = Any.pack(event)
-                            this.timestamp = Date().time
-                        }
-                        this.forwardToOtherNodes = broadcast
+            Node.instance.internalEventsService.publish(
+                publishRequest {
+                    this.event = event {
+                        this.id = event.descriptorForType.fullName
+                        this.data = Any.pack(event)
+                        this.timestamp = Date().time
                     }
-                )
-            }
+                    this.forwardToOtherNodes = broadcast
+                }
+            )
         }
 
         inline fun <reified T : Message> subscribe(crossinline handler: suspend (T) -> Unit): Job {
