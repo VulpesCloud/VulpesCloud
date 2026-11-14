@@ -16,9 +16,9 @@
 
 package org.vulpesstudios.vulpescloud.node.coordination
 
+import build.buf.gen.vulpescloud.services.v1.PrepareServiceOnTaskRequest
+import build.buf.gen.vulpescloud.services.v1.ServiceAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.services.v1.getAllServicesRequest
-import build.buf.gen.vulpescloud.tasks.v1.PrepareServiceOnTaskRequest
-import build.buf.gen.vulpescloud.tasks.v1.TasksAPIServiceGrpcKt
 import build.buf.gen.vulpescloud.tasks.v1.getAllTasksRequest
 import eu.vendeli.rethis.ReThis
 import org.slf4j.LoggerFactory
@@ -165,12 +165,12 @@ class ChronyxCoordinator {
                 "Preparing and starting service for task ${task.name} on Node ${bestNode.name}"
             )
             if (bestNode.name == Node.instance.configProvider.config.nodeName) {
-                Node.instance.localGrpcClient.tasksAPI.prepareServiceOnTask(request)
+                Node.instance.localGrpcClient.serviceAPI.prepareServiceOnTask(request)
             } else {
                 Node.instance.clusterProvider.remoteNodes
                     .find { it.endpoint.name == bestNode.name }
                     ?.let {
-                        TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub(it.channel!!)
+                        ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(it.channel!!)
                             .withInterceptors(AuthClientInterceptor(Node.instance.secret))
                             .prepareServiceOnTask(request)
                     }

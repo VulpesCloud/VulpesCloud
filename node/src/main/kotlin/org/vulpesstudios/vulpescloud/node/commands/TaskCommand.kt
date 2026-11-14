@@ -16,6 +16,7 @@
 
 package org.vulpesstudios.vulpescloud.node.commands
 
+import build.buf.gen.vulpescloud.services.v1.PrepareServiceOnTaskRequest
 import build.buf.gen.vulpescloud.tasks.v1.*
 import com.github.benmanes.caffeine.cache.Caffeine
 import kotlinx.coroutines.runBlocking
@@ -32,8 +33,8 @@ import org.vulpesstudios.vulpescloud.api.tasks.Task
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.cluster.ClusterHelper
 import org.vulpesstudios.vulpescloud.node.command.CommandSource
-import org.vulpesstudios.vulpescloud.node.command.ScopedCommandPermissions
 import org.vulpesstudios.vulpescloud.node.command.ConsoleCommandSource
+import org.vulpesstudios.vulpescloud.node.command.ScopedCommandPermissions
 import org.vulpesstudios.vulpescloud.node.command.annotation.Alias
 import org.vulpesstudios.vulpescloud.node.command.annotation.SpecificCommandSource
 import org.vulpesstudios.vulpescloud.node.grpc.security.AuthClientInterceptor
@@ -126,6 +127,7 @@ class TaskCommand {
         @Flag("node") node: String?,
         @Flag("memory") memory: Int?,
         @Flag("startOrderedId") startOrderedId: Int?,
+        prepareServiceOnTask: TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub.(Any) -> Unit,
     ) {
         runBlocking {
             val nodeSnapshots =

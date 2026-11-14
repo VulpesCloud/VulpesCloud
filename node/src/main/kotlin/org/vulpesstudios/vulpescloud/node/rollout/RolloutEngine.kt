@@ -19,17 +19,19 @@ package org.vulpesstudios.vulpescloud.node.rollout
 import build.buf.gen.vulpescloud.players.v1.connectPlayerRequest
 import build.buf.gen.vulpescloud.players.v1.getAllOnlinePlayersRequest
 import build.buf.gen.vulpescloud.services.v1.*
-import build.buf.gen.vulpescloud.tasks.v1.*
+import build.buf.gen.vulpescloud.tasks.v1.getAllTasksRequest
+import build.buf.gen.vulpescloud.tasks.v1.taskOrNull
+import build.buf.gen.vulpescloud.tasks.v1.updateTaskRequest
 import com.google.protobuf.Duration
 import com.google.protobuf.Timestamp
 import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.api.cluster.NodeSnapshot
 import org.vulpesstudios.vulpescloud.api.cluster.NodeState
+import org.vulpesstudios.vulpescloud.api.maintenance.NodeMaintenanceConfig
 import org.vulpesstudios.vulpescloud.api.rollout.RolloutProgress
 import org.vulpesstudios.vulpescloud.api.rollout.RolloutStatus
 import org.vulpesstudios.vulpescloud.api.rollout.RolloutStrategy
 import org.vulpesstudios.vulpescloud.api.services.*
-import org.vulpesstudios.vulpescloud.api.maintenance.NodeMaintenanceConfig
 import org.vulpesstudios.vulpescloud.api.tasks.Task
 import org.vulpesstudios.vulpescloud.api.tasks.rolloutId
 import org.vulpesstudios.vulpescloud.api.tasks.withoutRolloutId
@@ -595,7 +597,7 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
 
         val response =
             if (bestNode.name == Node.instance.configProvider.config.nodeName) {
-                Node.instance.localGrpcClient.tasksAPI.prepareServiceOnTask(request)
+                Node.instance.localGrpcClient.serviceAPI.prepareServiceOnTask(request)
             } else {
                 val channel =
                     Node.instance.clusterProvider.remoteNodes
@@ -607,7 +609,7 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
                     )
                     return null
                 }
-                TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineStub(channel)
+                ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(channel)
                     .withInterceptors(AuthClientInterceptor(Node.instance.secret))
                     .prepareServiceOnTask(request)
             }
@@ -650,7 +652,7 @@ class RolloutEngine(private val storage: RolloutStorage = RolloutStorage()) {
 
     private suspend fun getServicesOfTask(task: Task): List<Service> {
         return Node.instance.localGrpcClient.serviceAPI
-            .getByTask(getByTaskRequest { this.task = task.toDefinition() })
+            .getByTask(getByTaskRequest { this.taskName = task.name })
             .servicesList
             .map { Service.fromDefinition(it) }
     }

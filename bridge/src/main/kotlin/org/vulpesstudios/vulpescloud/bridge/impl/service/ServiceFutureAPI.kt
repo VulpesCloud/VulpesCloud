@@ -62,7 +62,7 @@ class ServiceFutureAPI : ServiceAPI.ServiceFutureAPI {
                     CompletableFuture.completedFuture(emptyList<Service>())
                 } else {
                     serviceStub
-                        .getByTask(getByTaskRequest { this.task = foundTask })
+                        .getByTask(getByTaskRequest { this.taskName = foundTask.name })
                         .toCompletableFuture()
                         .thenApply { response ->
                             response.servicesList.map { service -> Service.fromDefinition(service) }
@@ -73,7 +73,7 @@ class ServiceFutureAPI : ServiceAPI.ServiceFutureAPI {
 
     override fun getServicesByTask(task: Task): CompletableFuture<List<Service>> {
         return serviceStub
-            .getByTask(getByTaskRequest { this.task = task.toDefinition() })
+            .getByTask(getByTaskRequest { this.taskName = task.name })
             .toCompletableFuture()
             .thenApply { response ->
                 response.servicesList.map { service -> Service.fromDefinition(service) }

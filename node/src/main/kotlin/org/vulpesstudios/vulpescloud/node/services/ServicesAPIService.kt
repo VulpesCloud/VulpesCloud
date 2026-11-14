@@ -18,19 +18,28 @@ package org.vulpesstudios.vulpescloud.node.services
 
 import build.buf.gen.vulpescloud.events.v1.ServiceLogEvent
 import build.buf.gen.vulpescloud.services.v1.*
+import com.google.protobuf.Timestamp
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.api.cluster.NodeState
 import org.vulpesstudios.vulpescloud.api.services.Service
+import org.vulpesstudios.vulpescloud.api.services.ServiceStates
+import org.vulpesstudios.vulpescloud.api.tasks.Task
 import org.vulpesstudios.vulpescloud.node.Node
+import org.vulpesstudios.vulpescloud.node.NodeCoroutineScope
 import org.vulpesstudios.vulpescloud.node.cluster.ClusterHelper
 import org.vulpesstudios.vulpescloud.node.event.EventsService
 import org.vulpesstudios.vulpescloud.node.grpc.security.AuthClientInterceptor
 import org.vulpesstudios.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import org.vulpesstudios.vulpescloud.node.utils.PropertyUtils.isLoggingRedirects
+import java.util.*
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.time.DurationUnit
+import kotlin.time.toDuration
 
 @Suppress("LoggingSimilarMessage", "DuplicatedCode")
 class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImplBase() {
@@ -98,7 +107,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
 
     @RequiresPermission("services.getByTask", ["task=task.name"])
     override suspend fun getByTask(request: GetByTaskRequest): GetByTaskResponse {
-        val taskName = request.task.name
+        val taskName = request.taskName
         val services = getAllService().filter { it.task.name == taskName }
         return GetByTaskResponse.newBuilder().addAllServices(services).build()
     }
@@ -632,6 +641,71 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             .setSnapshot(
                 Node.instance.nodeServiceSnapshots.find { it.uuid == request.service.uuid }
             )
+            .build()
+    }
+
+    @RequiresPermission("tasks.prepareServiceOnTask", ["task=task.name", "node=nodeName"])
+    override suspend fun prepareServiceOnTask(
+        request: PrepareServiceOnTaskRequest
+    ): PrepareServiceOnTaskResponse {
+        if (request.nodeName != Node.instance.configProvider.config.nodeName) {
+            logger.error(
+                "Got request to prepare service on task ${request.task.name} for Node ${request.nodeName}!"
+            )
+            return PrepareServiceOnTaskResponse.newBuilder().build()
+        }
+        val services = mutableListOf<AbstractService>()
+
+        logger.info("Preparing ${request.amount} service(s) of task ${request.task.name}...")
+        for (i in 1..request.amount) {
+            logger.info("Preparing Service ${request.task.name}-$i...")
+            val factory =
+                Node.instance.serviceFactoryProvider.findServiceFactory(
+                    request.task.serviceFactoryName
+                )
+
+            if (factory == null) {
+                logger.error("Unable to find ServiceFactory ${request.task.serviceFactoryName}")
+                continue
+            }
+            services.add(
+                factory.prepareService(
+                    Service(
+                        Task.fromDefinition(request.task),
+                        UUID.randomUUID(),
+                        factory.findNextAvailableOrderedId(
+                            Task.fromDefinition(request.task),
+                            request.startId,
+                        ),
+                        factory.detectServicePort(Task.fromDefinition(request.task)),
+                        request.nodeName,
+                        0,
+                        Timestamp.newBuilder().build(),
+                        ServiceStates.UNKNOWN,
+                        Node.instance.configProvider.config.serviceBindAdress,
+                    )
+                )
+            )
+        }
+
+        logger.info("Prepared ${request.amount} service(s) of task ${request.task.name}!")
+        if (request.start) {
+            NodeCoroutineScope.launch {
+                logger.info("Starting ${request.amount} service(s) of task ${request.task.name}...")
+                services.forEach {
+                    it.start()
+                    delay(
+                        Node.instance.configProvider.config.serviceStartDelayMillis.toDuration(
+                            DurationUnit.MILLISECONDS
+                        )
+                    )
+                }
+                logger.info("Started ${request.amount} service(s) of task ${request.task.name}!")
+            }
+        }
+
+        return PrepareServiceOnTaskResponse.newBuilder()
+            .addAllServices(services.map { it.service.toDefinition() })
             .build()
     }
 

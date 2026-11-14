@@ -59,14 +59,14 @@ class ServiceCoroutineAPI : ServiceAPI.ServiceCoroutineAPI {
         }
 
         val serviceDefinition =
-            serviceStub.getByTask(getByTaskRequest { this.task = taskDefinition }).servicesList
+            serviceStub.getByTask(getByTaskRequest { this.taskName = taskDefinition.name }).servicesList
 
         return serviceDefinition.map { Service.fromDefinition(it) }
     }
 
     override suspend fun getServicesByTask(task: Task): List<Service> {
         val serviceDefinition =
-            serviceStub.getByTask(getByTaskRequest { this.task = task.toDefinition() }).servicesList
+            serviceStub.getByTask(getByTaskRequest { this.taskName = task.name }).servicesList
 
         return serviceDefinition.map { Service.fromDefinition(it) }
     }

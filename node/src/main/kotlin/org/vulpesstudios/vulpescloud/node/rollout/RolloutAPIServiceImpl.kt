@@ -28,6 +28,8 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import org.slf4j.LoggerFactory
+import org.vulpesstudios.vulpescloud.api.cluster.NodeState
+import org.vulpesstudios.vulpescloud.api.maintenance.NodeMaintenanceConfig
 import org.vulpesstudios.vulpescloud.api.rollout.*
 import org.vulpesstudios.vulpescloud.api.rollout.RolloutProgress
 import org.vulpesstudios.vulpescloud.api.rollout.RolloutStatus
@@ -36,8 +38,6 @@ import org.vulpesstudios.vulpescloud.api.services.Service
 import org.vulpesstudios.vulpescloud.api.services.ServiceStates
 import org.vulpesstudios.vulpescloud.api.services.isDraining
 import org.vulpesstudios.vulpescloud.api.services.rolloutId
-import org.vulpesstudios.vulpescloud.api.cluster.NodeState
-import org.vulpesstudios.vulpescloud.api.maintenance.NodeMaintenanceConfig
 import org.vulpesstudios.vulpescloud.api.tasks.Task
 import org.vulpesstudios.vulpescloud.api.tasks.withRolloutId
 import org.vulpesstudios.vulpescloud.node.Node
@@ -266,7 +266,7 @@ class RolloutAPIServiceImpl : RolloutAPIServiceGrpcKt.RolloutAPIServiceCoroutine
 
     private suspend fun getServicesOfTask(task: Task): List<Service> {
         return Node.instance.localGrpcClient.serviceAPI
-            .getByTask(getByTaskRequest { this.task = task.toDefinition() })
+            .getByTask(getByTaskRequest { this.taskName = task.name })
             .servicesList
             .map { Service.fromDefinition(it) }
     }
