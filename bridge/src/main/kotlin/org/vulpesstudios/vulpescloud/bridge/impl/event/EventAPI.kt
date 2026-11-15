@@ -35,11 +35,7 @@ class EventAPI {
             eventServiceStub.publish(
                 publishRequest {
                     this.event = event {
-                        this.id =
-                            T::class.qualifiedName
-                                ?: throw NullPointerException(
-                                    "Event class must have a qualified name!"
-                                )
+                        this.id = event.descriptorForType.fullName
                         this.data = Any.pack(event)
                         this.timestamp = Date().time
                     }
@@ -54,16 +50,16 @@ class EventAPI {
             eventServiceStub
                 .subscribe(
                     subscribeRequest {
-                        this.eventId =
-                            T::class.qualifiedName
-                                ?: throw NullPointerException(
-                                    "Event class must have a qualified name!"
-                                )
+                        this.eventId = eventName<T>()
                     }
                 )
                 .collect { handler(it.data.unpack(T::class.java)) }
         }
     }
+
+    inline fun <reified T : Message> eventName(): String =
+        T::class.java.getMethod("getDefaultInstance").invoke(null)
+            .let { (it as Message).descriptorForType.fullName }
 
     fun shutdown() {
         scope.cancel()
