@@ -28,8 +28,6 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -53,27 +51,9 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
             .expireAfterAccess(5, TimeUnit.MINUTES)
             .build<String, EventServiceGrpcKt.EventServiceCoroutineStub>()
 
-    private val publishChannel = Channel<PublishRequest>(Channel.UNLIMITED)
     private val nodeChannels: MutableMap<String, Channel<PublishRequest>> = ConcurrentHashMap()
-    private val nodeChannelsMutex = Mutex()
-
-    init {
-        NodeCoroutineScope.launch {
-            for (request in publishChannel) {
-                try {
-                    processPublish(request)
-                } catch (e: Exception) {
-                    if (e is CancellationException) {
-                        ensureActive()
-                    }
-                    logger.error("Failed to process event publish", e)
-                }
-            }
-        }
-    }
 
     fun shutdown() {
-        publishChannel.close()
         nodeChannels.values.forEach { it.close() }
         subscribers.forEach { (eventId, scopes) ->
             scopes.forEach { scope ->
@@ -91,10 +71,42 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
         awaitClose { subscribers[request.eventId]?.remove(this) }
     }
 
-    private suspend fun processPublish(request: PublishRequest) {
+    private fun getOrCreateNodeChannel(nodeName: String): Channel<PublishRequest> =
+        nodeChannels.computeIfAbsent(nodeName) {
+            val ch = Channel<PublishRequest>(Channel.UNLIMITED)
+            NodeCoroutineScope.launch {
+                for (req in ch) {
+                    try {
+                        val node = Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == nodeName }
+                            ?: continue
+                        val nodeChannel = node.channel ?: continue
+                        val stub =
+                            stubCache.get(nodeName) {
+                                EventServiceGrpcKt.EventServiceCoroutineStub(nodeChannel)
+                                    .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+                            }
+                        stub.publish(
+                            PublishRequest.newBuilder()
+                                .setEvent(req.event)
+                                .setForwardToOtherNodes(false)
+                                .build()
+                        )
+                    } catch (e: Exception) {
+                        if (e is CancellationException) {
+                            ensureActive()
+                        }
+                        logger.error("Failed to forward event to $nodeName", e)
+                    }
+                }
+            }
+            ch
+        }
+
+    @RequiresPermission("events.publish")
+    override suspend fun publish(request: PublishRequest): PublishResponse {
         val event = request.event
 
-        // Notify local subscribers immediately - don't wait for remote forwards
+        // Notify local subscribers immediately
         subscribers[event.id]?.forEach { scope -> scope.trySend(event) }
 
         // Forward to remote nodes via per-node channels to preserve order
@@ -103,49 +115,16 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
             Node.instance.clusterProvider.remoteNodes
                 .filter { it.endpoint.name != localNodeName && it.getSnapshot().state == NodeState.ONLINE }
                 .forEach { node ->
-                    val channel = getOrCreateNodeChannel(node.endpoint.name)
-                    channel.trySend(request)
-                }
-        }
-    }
-
-    private suspend fun getOrCreateNodeChannel(nodeName: String): Channel<PublishRequest> =
-        nodeChannelsMutex.withLock {
-            nodeChannels.getOrPut(nodeName) {
-                val ch = Channel<PublishRequest>(Channel.UNLIMITED)
-                NodeCoroutineScope.launch {
-                    for (req in ch) {
-                        try {
-                            val node = Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == nodeName }
-                                ?: continue
-                            val nodeChannel = node.channel ?: continue
-                            val stub =
-                                stubCache.get(nodeName) {
-                                    EventServiceGrpcKt.EventServiceCoroutineStub(nodeChannel)
-                                        .withInterceptors(AuthClientInterceptor(Node.instance.secret))
-                                }
-                            stub.publish(
-                                PublishRequest.newBuilder()
-                                    .setEvent(req.event)
-                                    .setForwardToOtherNodes(false)
-                                    .build()
-                            )
-                        } catch (e: Exception) {
-                            if (e is CancellationException) {
-                                ensureActive()
-                            }
-                            logger.error("Failed to forward event to $nodeName", e)
-                        }
+                    try {
+                        val channel = getOrCreateNodeChannel(node.endpoint.name)
+                        channel.trySend(request)
+                    } catch (e: Exception) {
+                        logger.error("Failed to queue event for ${node.endpoint.name}", e)
                     }
                 }
-                ch
-            }
         }
 
-    @RequiresPermission("events.publish")
-    override suspend fun publish(request: PublishRequest): PublishResponse {
-        publishChannel.send(request)
-        return PublishResponse.newBuilder().setId(request.event.id).setAccepted(true).build()
+        return PublishResponse.newBuilder().setId(event.id).setAccepted(true).build()
     }
 
     companion object {
