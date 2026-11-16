@@ -20,9 +20,12 @@ import build.buf.gen.vulpescloud.events.v1.*
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.google.protobuf.Any
 import com.google.protobuf.Message
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
@@ -48,7 +51,25 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
             .expireAfterAccess(5, TimeUnit.MINUTES)
             .build<String, EventServiceGrpcKt.EventServiceCoroutineStub>()
 
+    private val publishChannel = Channel<PublishRequest>(Channel.UNLIMITED)
+
+    init {
+        NodeCoroutineScope.launch {
+            for (request in publishChannel) {
+                try {
+                    processPublish(request)
+                } catch (e: Exception) {
+                    if (e is CancellationException) {
+                        ensureActive()
+                    }
+                    logger.error("Failed to process event publish", e)
+                }
+            }
+        }
+    }
+
     fun shutdown() {
+        publishChannel.close()
         subscribers.forEach { (eventId, scopes) ->
             scopes.forEach { scope ->
                 scope.close()
@@ -65,19 +86,20 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
         awaitClose { subscribers[request.eventId]?.remove(this) }
     }
 
-    @RequiresPermission("events.publish")
-    override suspend fun publish(request: PublishRequest): PublishResponse {
+    private suspend fun processPublish(request: PublishRequest) {
         val event = request.event
         val localNodeName = Node.instance.configProvider.config.nodeName
+
+        subscribers[event.id]?.forEach { scope -> scope.trySend(event) }
 
         if (request.forwardToOtherNodes) {
             Node.instance.clusterProvider.remoteNodes
                 .filter { it.endpoint.name != localNodeName && it.getSnapshot().state == NodeState.ONLINE }
                 .forEach { node ->
-                    val channel = node.channel ?: return@forEach
+                    val nodeChannel = node.channel ?: return@forEach
                     val stub =
                         stubCache.get(node.endpoint.name) {
-                            EventServiceGrpcKt.EventServiceCoroutineStub(channel)
+                            EventServiceGrpcKt.EventServiceCoroutineStub(nodeChannel)
                                 .withInterceptors(AuthClientInterceptor(Node.instance.secret))
                         }
                     stub.publish(
@@ -88,10 +110,12 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
                     )
                 }
         }
+    }
 
-        subscribers[event.id]?.forEach { scope -> scope.trySend(event) }
-
-        return PublishResponse.newBuilder().setId(event.id).setAccepted(true).build()
+    @RequiresPermission("events.publish")
+    override suspend fun publish(request: PublishRequest): PublishResponse {
+        publishChannel.send(request)
+        return PublishResponse.newBuilder().setId(request.event.id).setAccepted(true).build()
     }
 
     companion object {
