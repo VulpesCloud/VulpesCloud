@@ -28,6 +28,8 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -52,6 +54,8 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
             .build<String, EventServiceGrpcKt.EventServiceCoroutineStub>()
 
     private val publishChannel = Channel<PublishRequest>(Channel.UNLIMITED)
+    private val nodeChannels: MutableMap<String, Channel<PublishRequest>> = ConcurrentHashMap()
+    private val nodeChannelsMutex = Mutex()
 
     init {
         NodeCoroutineScope.launch {
@@ -70,6 +74,7 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
 
     fun shutdown() {
         publishChannel.close()
+        nodeChannels.values.forEach { it.close() }
         subscribers.forEach { (eventId, scopes) ->
             scopes.forEach { scope ->
                 scope.close()
@@ -88,29 +93,54 @@ class EventsService : EventServiceGrpcKt.EventServiceCoroutineImplBase() {
 
     private suspend fun processPublish(request: PublishRequest) {
         val event = request.event
-        val localNodeName = Node.instance.configProvider.config.nodeName
 
+        // Notify local subscribers immediately - don't wait for remote forwards
         subscribers[event.id]?.forEach { scope -> scope.trySend(event) }
 
+        // Forward to remote nodes via per-node channels to preserve order
         if (request.forwardToOtherNodes) {
+            val localNodeName = Node.instance.configProvider.config.nodeName
             Node.instance.clusterProvider.remoteNodes
                 .filter { it.endpoint.name != localNodeName && it.getSnapshot().state == NodeState.ONLINE }
                 .forEach { node ->
-                    val nodeChannel = node.channel ?: return@forEach
-                    val stub =
-                        stubCache.get(node.endpoint.name) {
-                            EventServiceGrpcKt.EventServiceCoroutineStub(nodeChannel)
-                                .withInterceptors(AuthClientInterceptor(Node.instance.secret))
-                        }
-                    stub.publish(
-                        PublishRequest.newBuilder()
-                            .setEvent(event)
-                            .setForwardToOtherNodes(false)
-                            .build()
-                    )
+                    val channel = getOrCreateNodeChannel(node.endpoint.name)
+                    channel.trySend(request)
                 }
         }
     }
+
+    private suspend fun getOrCreateNodeChannel(nodeName: String): Channel<PublishRequest> =
+        nodeChannelsMutex.withLock {
+            nodeChannels.getOrPut(nodeName) {
+                val ch = Channel<PublishRequest>(Channel.UNLIMITED)
+                NodeCoroutineScope.launch {
+                    for (req in ch) {
+                        try {
+                            val node = Node.instance.clusterProvider.remoteNodes.find { it.endpoint.name == nodeName }
+                                ?: continue
+                            val nodeChannel = node.channel ?: continue
+                            val stub =
+                                stubCache.get(nodeName) {
+                                    EventServiceGrpcKt.EventServiceCoroutineStub(nodeChannel)
+                                        .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+                                }
+                            stub.publish(
+                                PublishRequest.newBuilder()
+                                    .setEvent(req.event)
+                                    .setForwardToOtherNodes(false)
+                                    .build()
+                            )
+                        } catch (e: Exception) {
+                            if (e is CancellationException) {
+                                ensureActive()
+                            }
+                            logger.error("Failed to forward event to $nodeName", e)
+                        }
+                    }
+                }
+                ch
+            }
+        }
 
     @RequiresPermission("events.publish")
     override suspend fun publish(request: PublishRequest): PublishResponse {

@@ -21,7 +21,6 @@ import build.buf.gen.vulpescloud.events.v1.serviceStateChangedEvent
 import build.buf.gen.vulpescloud.services.v1.ServiceState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.api.services.Service
 import org.vulpesstudios.vulpescloud.api.services.ServiceStates
@@ -65,7 +64,7 @@ class LocalService(override var service: Service) : AbstractService {
         Thread {
                 process?.inputStream?.bufferedReader()?.use { reader ->
                     reader.forEachLine { line ->
-                        runBlocking {
+                        NodeCoroutineScope.launch {
                             EventsService.publish(
                                 serviceLogEvent {
                                     this.service = this@LocalService.service.toDefinition()
@@ -92,7 +91,7 @@ class LocalService(override var service: Service) : AbstractService {
 
                 Node.instance.nodeServices.removeIf { it.service.uuid == service.uuid }
 
-                runBlocking {
+                NodeCoroutineScope.launch {
                     EventsService.publish(
                         serviceStateChangedEvent {
                             this.service = this@LocalService.service.toDefinition()
@@ -131,9 +130,8 @@ class LocalService(override var service: Service) : AbstractService {
     }
 
     override fun stop() {
-        runBlocking {
-            command("stop")
-
+        command("stop")
+        NodeCoroutineScope.launch {
             delay(5.seconds)
 
             if (process != null) {
