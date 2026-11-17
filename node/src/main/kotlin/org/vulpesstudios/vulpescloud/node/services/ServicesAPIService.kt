@@ -19,11 +19,10 @@ package org.vulpesstudios.vulpescloud.node.services
 import build.buf.gen.vulpescloud.events.v1.ServiceLogEvent
 import build.buf.gen.vulpescloud.services.v1.*
 import com.google.protobuf.Timestamp
+import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.awaitClose
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.launch
 import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.api.cluster.NodeState
 import org.vulpesstudios.vulpescloud.api.services.Service
@@ -79,15 +78,23 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
                     it.getSnapshot().state == NodeState.DRAINING
             }
             .forEach { node ->
-                val stub =
-                    ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(node.channel!!)
-                        .withInterceptors(AuthClientInterceptor(Node.instance.secret))
-                services +=
-                    stub
-                        .getServicesOfNode(
-                            getServicesOfNodeRequest { nodeName = node.endpoint.name }
-                        )
-                        .servicesList
+                try {
+                    val stub =
+                        ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineStub(node.channel!!)
+                            .withInterceptors(AuthClientInterceptor(Node.instance.secret))
+                    services +=
+                        stub
+                            .getServicesOfNode(
+                                getServicesOfNodeRequest { nodeName = node.endpoint.name }
+                            )
+                            .servicesList
+                } catch (e: Throwable) {
+                    if (e is CancellationException) {
+                        currentCoroutineContext().ensureActive()
+                    }
+                    logger.error("Unable to fetch Services from Node ${node.endpoint.name}, skipping the node..")
+                    logger.debug("Exception: ", e)
+                }
             }
 
         services +=
