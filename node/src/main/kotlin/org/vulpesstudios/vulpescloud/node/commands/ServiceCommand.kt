@@ -22,9 +22,12 @@ import kotlinx.coroutines.runBlocking
 import org.incendo.cloud.annotation.specifier.Greedy
 import org.incendo.cloud.annotations.Argument
 import org.incendo.cloud.annotations.Command
+import org.incendo.cloud.annotations.Default
+import org.incendo.cloud.annotations.Flag
 import org.incendo.cloud.annotations.Permission
 import org.incendo.cloud.annotations.parser.Parser
 import org.incendo.cloud.annotations.suggestion.Suggestions
+import org.incendo.cloud.context.CommandContext
 import org.incendo.cloud.context.CommandInput
 import org.incendo.cloud.processors.confirmation.annotation.Confirmation
 import org.vulpesstudios.vulpescloud.api.services.Service
@@ -36,13 +39,50 @@ import org.vulpesstudios.vulpescloud.node.command.ScopedCommandPermissions
 import org.vulpesstudios.vulpescloud.node.command.annotation.Alias
 import org.vulpesstudios.vulpescloud.node.command.annotation.SpecificCommandSource
 import org.vulpesstudios.vulpescloud.node.services.ServiceLogHandler
+import org.vulpesstudios.vulpescloud.node.utils.TableUtils
+import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
+import kotlin.text.Regex
+import kotlin.text.RegexOption
+import kotlin.text.equals
+import kotlin.text.isNotEmpty
+import kotlin.text.lastIndexOf
+import kotlin.text.lowercase
+import kotlin.text.split
+import kotlin.text.substring
+import kotlin.text.trim
 import kotlin.time.DurationUnit
 import kotlin.time.toDuration
 
 @Alias(["ser"])
 class ServiceCommand {
+
+    private val allColumns = listOf(
+        "name",
+        "taskName",
+        "orderedId",
+        "port",
+        "node",
+        "playerCount",
+        "startTime",
+        "state",
+        "hostname"
+    )
+
+    private val defaultColumns = listOf(
+        "name",
+        "port",
+        "state",
+        "playerCount",
+        "node",
+        "startTime"
+    )
+
+    private val startTimeFormatter: DateTimeFormatter =
+        DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault())
 
     @Suggestions("service")
     fun serviceSuggestions(): Stream<String> {
@@ -60,19 +100,99 @@ class ServiceCommand {
             .filter { regex.matches(it.name()) }
     }
 
+    @Suggestions("service-columns")
+    fun serviceColumnSuggestions(
+        ctx: CommandContext<CommandSource>,
+        input: CommandInput,
+    ): List<String> {
+        val current = input.lastRemainingToken()
+        val prefix = current.substring(0, current.lastIndexOf(',') + 1)
+        val selected = prefix.split(',')
+            .filter { it.isNotEmpty() }
+            .map { it.lowercase() }
+            .toSet()
+
+        if ("all" in selected || "default" in selected) return emptyList()
+
+        val candidates = if (selected.isEmpty()) allColumns + listOf("all", "default") else allColumns
+
+        return candidates
+            .filter { it.lowercase() !in selected }
+            .map { prefix + it }
+    }
+
     @Permission("services.getAll")
-    @Command("services|ser list")
-    fun listServices(source: CommandSource) {
+    @Command("services|ser list [columns]")
+    fun listServices(
+        source: CommandSource,
+        @Argument("columns", suggestions = "service-columns") @Default("default") columns: String,
+        @Flag("all") all: Boolean,
+    ) {
+        val selected: List<String> =
+            when {
+                all || columns.equals("all", ignoreCase = true) -> allColumns
+                columns.equals("default", ignoreCase = true) -> defaultColumns
+                else -> {
+                    val requested = columns.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+
+                    val invalid = requested.filter { r ->
+                        allColumns.none { it.equals(r, ignoreCase = true) }
+                    }
+
+                    if (invalid.isNotEmpty()) {
+                        source.sendMessage("Unknown column(s): ${invalid.joinToString()}")
+                        source.sendMessage("Available: ${allColumns.joinToString()}")
+                        return
+                    }
+
+                    requested
+                        .map { r -> allColumns.first { it.equals(r, ignoreCase = true) } }
+                        .distinct()
+                }
+            }
+
         runBlocking {
-            source.sendMessage("<gray>Listing all services...</gray>")
-            Node.instance.localGrpcClient.serviceAPI
+            val services = Node.instance.localGrpcClient.serviceAPI
                 .getAllServices(GetAllServicesRequest.newBuilder().build())
                 .servicesList
-                .forEach {
-                    source.sendMessage(
-                        " <dark_gray>»</dark_gray> <white>${it.task.name}-${it.orderedId}</white> <dark_gray>| <gray>State:</gray> <white>${it.state.name}</white> <dark_gray>| <gray>Port:</gray> <white>${it.port}</white>"
+
+            val table = TableUtils.newTable().defaultStyle()
+
+            table.header(
+                mapOf(
+                    "name" to "Name",
+                    "taskName" to "Task",
+                    "orderedId" to "Ordered ID",
+                    "port" to "Port",
+                    "node" to "Node",
+                    "playerCount" to "Players",
+                    "startTime" to "Start Time",
+                    "state" to "State",
+                    "hostname" to "Hostname",
+                )
+            )
+
+            services.forEach { service ->
+                table.addContent(
+                    mapOf(
+                        "name" to "${service.task.name}-${service.orderedId}",
+                        "taskName" to service.task.name,
+                        "orderedId" to service.orderedId.toString(),
+                        "port" to service.port.toString(),
+                        "node" to service.node,
+                        "playerCount" to service.playerCount.toString(),
+                        "startTime" to startTimeFormatter.format(
+                            Instant.ofEpochSecond(service.startTime.seconds, service.startTime.nanos.toLong())
+                        ),
+                        "state" to service.state.name,
+                        "hostname" to service.hostname,
                     )
-                }
+                )
+            }
+
+            table.lines(selected).forEach { line ->
+                source.sendMessage(line)
+            }
         }
     }
 
@@ -282,7 +402,7 @@ class ServiceCommand {
 object ServiceCache {
     private val cache =
         Caffeine.newBuilder()
-            .expireAfterWrite(15, TimeUnit.SECONDS)
+            .expireAfterWrite(2, TimeUnit.SECONDS)
             .build<String, List<ServiceDefinition>>()
 
     fun getTasks(): List<ServiceDefinition> {

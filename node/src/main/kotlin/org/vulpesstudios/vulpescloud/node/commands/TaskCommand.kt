@@ -105,7 +105,28 @@ class TaskCommand {
     fun taskColumnSuggestions(
         ctx: CommandContext<CommandSource>,
         input: CommandInput,
-    ): List<String> = allColumns + listOf("all", "default")
+    ): List<String> {
+        val current = input.lastRemainingToken()
+
+        val prefix = current.substring(0, current.lastIndexOf(',') + 1)
+        val selected = prefix
+            .split(',')
+            .filter { it.isNotEmpty() }
+            .map { it.lowercase() }
+            .toSet()
+
+        if ("all" in selected || "default" in selected) return emptyList()
+
+        val candidates = if (selected.isEmpty()) {
+            allColumns + listOf("all", "default")
+        } else {
+            allColumns
+        }
+
+        return candidates
+            .filter { it.lowercase() !in selected }
+            .map { prefix + it }
+    }
 
     @Command("task|tasks setup")
     @SpecificCommandSource(ConsoleCommandSource::class)
@@ -842,7 +863,7 @@ class TaskCommand {
 object TaskCache {
     private val cache =
         Caffeine.newBuilder()
-            .expireAfterWrite(15, TimeUnit.SECONDS)
+            .expireAfterWrite(2, TimeUnit.SECONDS)
             .build<String, List<TaskDefinition>>()
 
     fun getTasks(): List<TaskDefinition> {
