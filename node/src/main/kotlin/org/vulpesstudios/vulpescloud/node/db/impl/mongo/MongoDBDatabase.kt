@@ -115,24 +115,25 @@ class MongoDBDatabase(
         value: JsonElement,
     ): Boolean =
         withContext(Dispatchers.IO) {
-            val filter =
-                if (expected == null) {
-                    Filters.eq("key", key)
-                } else {
-                    Filters.and(
-                        Filters.eq("key", key),
-                        Filters.eq("value", expected.toBsonValue()),
-                    )
+            if (expected == null) {
+                try {
+                    collection.insertOne(MongoKVModel(key, value))
+                    true
+                } catch (_: com.mongodb.MongoWriteException) {
+                    collection.find(Filters.eq("key", key)).firstOrNull()?.value == value
                 }
-
-            val result =
-                collection.replaceOne(
+            } else {
+                val filter = Filters.and(
+                    Filters.eq("key", key),
+                    Filters.eq("value", expected.toBsonValue()),
+                )
+                val result = collection.replaceOne(
                     filter,
                     MongoKVModel(key, value),
-                    ReplaceOptions().upsert(expected == null),
+                    ReplaceOptions().upsert(false),
                 )
-
-            result.modifiedCount > 0L || (expected == null && result.upsertedId != null)
+                result.matchedCount > 0L
+            }
         }
 
     override suspend fun get(key: String): JsonElement? {

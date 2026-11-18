@@ -19,6 +19,7 @@ package org.vulpesstudios.vulpescloud.node.db.impl.mariadb
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonElement
 import org.jetbrains.exposed.v1.core.eq
+import org.jetbrains.exposed.v1.core.and
 import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.vulpesstudios.vulpescloud.node.db.Database
@@ -62,14 +63,21 @@ class MariaDBDatabase(
 
     override suspend fun compareAndSet(key: String, expected: JsonElement?, value: JsonElement): Boolean =
         transaction(database) {
-            val current = table.selectAll().where { table.key eq key }.map { it[table.value] }.firstOrNull()
-                ?.let { json.decodeFromString(JsonElement.serializer(), it) }
-            if (current != expected) return@transaction false
-            table.upsert {
-                it[table.key] = key
-                it[table.value] = json.encodeToString(JsonElement.serializer(), value)
+            val encoded = json.encodeToString(JsonElement.serializer(), value)
+            if (expected == null) {
+                table.insertIgnore {
+                    it[table.key] = key
+                    it[table.value] = encoded
+                }
+                return@transaction table.selectAll().where { table.key eq key }
+                    .map { it[table.value] }.firstOrNull() == encoded
             }
-            true
+            val expectedEncoded = json.encodeToString(JsonElement.serializer(), expected)
+            val updated = table.update({ (table.key eq key) and (table.value eq expectedEncoded) }) {
+                it[table.value] = encoded
+            }
+            updated > 0 || table.selectAll().where { table.key eq key }
+                .map { it[table.value] }.firstOrNull() == expectedEncoded
         }
 
     override suspend fun delete(key: String) {

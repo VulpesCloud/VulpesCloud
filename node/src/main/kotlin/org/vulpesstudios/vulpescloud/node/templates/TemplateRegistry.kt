@@ -70,10 +70,12 @@ object TemplateRegistry {
         if (reference.name.isBlank()) return null
 
         val candidates = getAll().filter { it.name == reference.name }
-        if (candidates.size <= 1) return candidates.firstOrNull()
-
-        return candidates.firstOrNull { matchesLocation(it.location.toDefinition(), reference.location) }
-            ?: candidates.firstOrNull()
+        val locationMatches = candidates.filter {
+            matchesLocation(it.location.toDefinition(), reference.location)
+        }
+        // A name-only (or stale location) reference is ambiguous when templates with that name
+        // exist on multiple hosts/storages. Never silently route it to an arbitrary backend.
+        return locationMatches.singleOrNull()
     }
 
     fun matchesLocation(actual: TemplateLocation, filter: TemplateLocation): Boolean {

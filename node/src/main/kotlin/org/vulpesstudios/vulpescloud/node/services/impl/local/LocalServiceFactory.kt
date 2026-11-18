@@ -22,8 +22,7 @@ import build.buf.gen.vulpescloud.templates.v1.createTemplateRequest
 import com.electronwill.nightconfig.core.file.FileConfig
 import com.electronwill.nightconfig.toml.TomlFormat
 import com.electronwill.nightconfig.yaml.YamlFormat
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import org.vulpesstudios.vulpescloud.api.services.Service
 import org.vulpesstudios.vulpescloud.api.services.ServiceStates
 import org.vulpesstudios.vulpescloud.node.Node
@@ -31,6 +30,9 @@ import org.vulpesstudios.vulpescloud.node.event.EventsService
 import org.vulpesstudios.vulpescloud.node.serversoftware.impl.*
 import org.vulpesstudios.vulpescloud.node.services.AbstractServiceFactory
 import org.vulpesstudios.vulpescloud.node.templates.TemplateStorageRegistry
+import org.vulpesstudios.vulpescloud.node.templates.TemplateJobLockStorage
+import org.vulpesstudios.vulpescloud.node.templates.TemplateLockKey
+import java.util.UUID
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.*
@@ -58,12 +60,38 @@ class LocalServiceFactory : AbstractServiceFactory() {
             .sortedBy { it.weight }
             .forEach { template ->
                 TemplateStorageRegistry.getTemplateStorageByName(template.location.storageName)?.apply {
-                    createTemplate(template)
                     Node.instance.localGrpcClient.templateAPI.createTemplate(createTemplateRequest {
                         this.template = template.toDefinition()
                         this.destination = template.location.toDefinition()
                     }) // TODO: This is prob. only temporary as I am to lazy to manually re-create my templates
-                    copyTemplateToPath(template, localService.path())
+                    val lockStorage = TemplateJobLockStorage()
+                    val lockKey = TemplateLockKey.template(template.id)
+                    val interactionId = "service-preparation:${Node.instance.configProvider.config.nodeName}:${UUID.randomUUID()}"
+                    val leaseMillis = 30_000L
+                    check(lockStorage.acquire(
+                        setOf(lockKey),
+                        interactionId,
+                        "service preparation for ${service.task.name}",
+                        System.currentTimeMillis() + leaseMillis,
+                    )) { "Template '${template.name}' is locked by a template job" }
+                    coroutineScope {
+                        val renewal = launch {
+                            while (isActive) {
+                                delay(5_000)
+                                check(lockStorage.renew(
+                                    setOf(lockKey),
+                                    interactionId,
+                                    System.currentTimeMillis() + leaseMillis,
+                                )) { "Lost template access lock for '${template.name}'" }
+                            }
+                        }
+                        try {
+                            withContext(Dispatchers.IO) { copyTemplateToPath(template, localService.path()) }
+                        } finally {
+                            renewal.cancelAndJoin()
+                            lockStorage.release(setOf(lockKey), interactionId)
+                        }
+                    }
                 }
             }
 

@@ -19,18 +19,27 @@ package org.vulpesstudios.vulpescloud.node.templates
 import build.buf.gen.vulpescloud.templates.v1.*
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.google.protobuf.ByteString
+import com.google.protobuf.Empty
 import io.grpc.Status
 import io.grpc.StatusException
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.api.cluster.NodeState
-import org.vulpesstudios.vulpescloud.api.templates.Template
+import org.vulpesstudios.vulpescloud.api.templates.*
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.grpc.security.AuthClientInterceptor
 import org.vulpesstudios.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import java.util.*
 import java.util.concurrent.TimeUnit
+import build.buf.gen.vulpescloud.templates.v1.TemplateJobProgress as ProtoTemplateJobProgress
 import build.buf.gen.vulpescloud.templates.v1.TemplateLocation as TemplateLocationDefinition
 import build.buf.gen.vulpescloud.templates.v1.TemplateStorage as TemplateStorageDefinition
 import org.vulpesstudios.vulpescloud.api.templates.TemplateLocation as ApiTemplateLocation
@@ -39,10 +48,31 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
 
     private val logger = LoggerFactory.getLogger(TemplateServiceImpl::class.java)
 
+    private val jobStorage = TemplateJobStorage()
+    private val jobLockStorage = TemplateJobLockStorage()
+    private val jobEngine = TemplateJobEngine(jobStorage).also {
+        it.setTemplateService { this }
+    }
+    private var jobRecoveryLoop: Job? = null
+
     private val stubCache =
         Caffeine.newBuilder()
             .expireAfterAccess(5, TimeUnit.MINUTES)
             .build<String, TemplateServiceGrpcKt.TemplateServiceCoroutineStub>()
+
+    fun startJobRecoveryLoop() {
+        if (jobRecoveryLoop?.isActive == true) return
+        jobRecoveryLoop = org.vulpesstudios.vulpescloud.node.NodeCoroutineScope.launch {
+            while (isActive) {
+                try {
+                    jobEngine.reconcile()
+                } catch (e: Exception) {
+                    logger.error("Template job reconciliation failed", e)
+                }
+                delay(2_000)
+            }
+        }
+    }
 
     @RequiresPermission("templates.create")
     override suspend fun createTemplate(request: CreateTemplateRequest): CreateTemplateResponse {
@@ -50,6 +80,15 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         // node-local storages (such as LOCAL) look cluster-wide and loses the node affinity on
         // every create/upsert. Resolve it before both forwarding and persistence.
         val destination = resolveDestination(request.destination)
+
+        val requestedId = request.template.id
+        val templateLock = requestedId.takeIf { it.isNotBlank() }
+            ?.let { jobLockStorage.get(TemplateLockKey.template(it)) }
+        val reservationLock = jobLockStorage.get(
+            TemplateLockKey.reservation(request.template.name, destination.storageName, destination.nodeName)
+        )
+        val activeLock = listOfNotNull(templateLock, reservationLock).firstOrNull { !canUseJobLock(it) }
+        if (activeLock != null) throw templateLocked(activeLock)
 
         if (needsForwarding(destination)) {
             val stub = remoteStub(destination.nodeName) ?: throw unavailable(destination.nodeName)
@@ -79,6 +118,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
                     .build()
 
         val location = template.location.toDefinition()
+        lockedResponse(template)?.let { return DeleteTemplateResponse.newBuilder().setResult(it).build() }
         if (needsForwarding(location)) {
             val stub =
                 remoteStub(location.nodeName)
@@ -109,15 +149,17 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         val template =
             TemplateRegistry.findByReference(request.template)
                 ?: throw StatusException(Status.NOT_FOUND.withDescription("Template not found"))
+        ensureUnlocked(template)
         return GetTemplateResponse.newBuilder().setTemplate(template.toDefinition()).build()
     }
 
     @RequiresPermission("templates.list")
     override suspend fun listTemplates(request: ListTemplatesRequest): ListTemplatesResponse {
-        val templates =
-            TemplateRegistry.getAll().filter {
-                TemplateRegistry.matchesLocation(it.location.toDefinition(), request.location)
-            }
+        val templates = mutableListOf<Template>()
+        for (template in TemplateRegistry.getAll()) {
+            if (!TemplateRegistry.matchesLocation(template.location.toDefinition(), request.location)) continue
+            if (jobLockStorage.get(TemplateLockKey.template(template.id)) == null) templates += template
+        }
 
         val response = ListTemplatesResponse.newBuilder()
             .addAllTemplates(templates.map { it.toDefinition() })
@@ -127,125 +169,124 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
 
     @RequiresPermission("templates.copy")
     override suspend fun copyTemplate(request: CopyTemplateRequest): CopyTemplateResponse {
-        val result = performCopy(request.source, request.destination, request.overwrite)
-        return CopyTemplateResponse.newBuilder().setResult(result).build()
+        val conflictMode = TemplateJobConflictMode.fromDefinition(request.conflictMode)
+        val extraFilesMode = TemplateJobExtraFilesMode.fromDefinition(request.extraFilesMode)
+
+        val response = jobEngine.validateAndAccept(
+            jobType = TemplateJobType.COPY,
+            sourceRef = request.source,
+            destinationRef = request.destination,
+            conflictMode = conflictMode,
+            extraFilesMode = extraFilesMode,
+        )
+
+        if (response.status == TemplateJobAcceptStatus.ACCEPTED && response.job != null) {
+            jobEngine.execute(response.job)
+        }
+
+        return CopyTemplateResponse.newBuilder()
+            .setAcceptResult(response.toDefinition())
+            .build()
     }
 
     @RequiresPermission("templates.move")
     override suspend fun moveTemplate(request: MoveTemplateRequest): MoveTemplateResponse {
-        val copyResult = performCopy(request.source, request.destination, request.overwrite)
-        if (!copyResult.success) {
-            return MoveTemplateResponse.newBuilder().setResult(copyResult).build()
-        }
+        val conflictMode = TemplateJobConflictMode.fromDefinition(request.conflictMode)
+        val extraFilesMode = TemplateJobExtraFilesMode.fromDefinition(request.extraFilesMode)
 
-        val deleteResponse =
-            deleteTemplate(DeleteTemplateRequest.newBuilder().setTemplate(request.source).build())
-        if (!deleteResponse.result.success) {
-            return MoveTemplateResponse.newBuilder()
-                .setResult(
-                    operationResult(
-                        false,
-                        "Copied but failed to remove source: ${deleteResponse.result.message}",
-                    )
-                )
-                .build()
+        val response = jobEngine.validateAndAccept(
+            jobType = TemplateJobType.MOVE,
+            sourceRef = request.source,
+            destinationRef = request.destination,
+            conflictMode = conflictMode,
+            extraFilesMode = extraFilesMode,
+        )
+
+        if (response.status == TemplateJobAcceptStatus.ACCEPTED && response.job != null) {
+            jobEngine.execute(response.job)
         }
 
         return MoveTemplateResponse.newBuilder()
-            .setResult(operationResult(true, "Template moved"))
+            .setAcceptResult(response.toDefinition())
             .build()
     }
 
-    private suspend fun performCopy(
-        sourceRef: TemplateReference,
-        destinationRef: TemplateReference,
-        overwrite: Boolean,
-    ): TemplateOperationResult {
-        val sourceTemplate =
-            TemplateRegistry.findByReference(sourceRef)
-                ?: return operationResult(false, "Source template not found")
-
-        val existingDestination = TemplateRegistry.findByReference(destinationRef)
-        if (existingDestination != null && !overwrite) {
-            return operationResult(false, "Destination template already exists")
+    @RequiresPermission("templates.job.status")
+    override suspend fun getTemplateJob(request: GetTemplateJobRequest): ProtoTemplateJobProgress {
+        jobStorage.get(request.jobId)?.let { progress ->
+            return progress.toDefinition()
         }
-
-        val destinationLocation =
-            if (destinationRef.hasLocation()) {
-                ApiTemplateLocation.fromDefinition(destinationRef.location)
-            } else {
-                existingDestination?.location ?: sourceTemplate.location
-            }
-
-        val destinationTemplateDraft =
-            existingDestination
-                ?: sourceTemplate.copy(
-                    id = UUID.randomUUID().toString(),
-                    name = destinationRef.name.ifBlank { sourceTemplate.name },
-                    location = destinationLocation,
-                )
-
-        return try {
-            val createResponse =
-                createTemplate(
-                    CreateTemplateRequest.newBuilder()
-                        .setTemplate(destinationTemplateDraft.toDefinition())
-                        .setDestination(destinationLocation.toDefinition())
-                        .build()
-                )
-            val destinationTemplate = Template.fromDefinition(createResponse.template)
-
-            copyDirectoryRecursively(sourceTemplate, destinationTemplate, "")
-
-            operationResult(true, "Template copied")
-        } catch (e: Exception) {
-            logger.error("Failed to copy template '${sourceTemplate.name}'", e)
-            operationResult(false, e.message ?: "Unknown error")
-        }
+        throw StatusException(Status.NOT_FOUND.withDescription("Job not found: ${request.jobId}"))
     }
 
-    private suspend fun copyDirectoryRecursively(
-        source: Template,
-        destination: Template,
-        path: String,
-    ) {
-        val sourceRef = templateReferenceOf(source)
-        val destinationRef = templateReferenceOf(destination)
-
-        val entries =
-            listDirectory(
-                    ListDirectoryRequest.newBuilder().setTemplate(sourceRef).setPath(path).build()
-                )
-                .entriesList
-
-        for (entry in entries) {
-            if (entry.directory) {
-                createDirectory(
-                    CreateDirectoryRequest.newBuilder()
-                        .setTemplate(destinationRef)
-                        .setPath(entry.path)
-                        .build()
-                )
-                copyDirectoryRecursively(source, destination, entry.path)
-            } else {
-                val file =
-                    readFile(
-                            ReadFileRequest.newBuilder()
-                                .setTemplate(sourceRef)
-                                .setPath(entry.path)
-                                .build()
-                        )
-                        .file
-                updateFile(
-                    UpdateFileRequest.newBuilder()
-                        .setTemplate(destinationRef)
-                        .setPath(entry.path)
-                        .setContent(file.content)
-                        .build()
-                )
-            }
-        }
+    @RequiresPermission("templates.job.list")
+    override suspend fun listActiveTemplateJobs(request: Empty): ListActiveTemplateJobsResponse {
+        val jobs = jobStorage.getActive().map { it.toDefinition() }
+        return ListActiveTemplateJobsResponse.newBuilder().addAllJobs(jobs).build()
     }
+
+    @RequiresPermission("templates.job.cancel")
+    override suspend fun cancelTemplateJob(request: CancelTemplateJobRequest): CancelTemplateJobResponse {
+        val record = jobStorage.getRecord(request.jobId)
+            ?: return CancelTemplateJobResponse.newBuilder().setSuccess(false).setMessage("Job not found: ${request.jobId}").build()
+        if (!record.progress.status.isActive) {
+            return CancelTemplateJobResponse.newBuilder()
+                .setSuccess(false)
+                .setMessage("Job is already finished; use 'template job unlock ${request.jobId}' to release a manual lock")
+                .build()
+        }
+
+        val localNode = Node.instance.configProvider.config.nodeName
+        val workerNode = record.workerNodeName
+        if (workerNode.isNullOrBlank()) {
+            val success = jobEngine.cancelUnclaimed(request.jobId)
+            return CancelTemplateJobResponse.newBuilder()
+                .setSuccess(success)
+                .setMessage(if (success) "Job cancelled before a worker claimed it" else "Job worker has an active lease")
+                .build()
+        }
+        if (workerNode == localNode) {
+            val success = jobEngine.cancel(request.jobId)
+            return CancelTemplateJobResponse.newBuilder()
+                .setSuccess(success)
+                .setMessage(if (success) "Job cancellation requested" else "Job worker is not active")
+                .build()
+        }
+
+        val stub = remoteStub(workerNode)
+            ?: return CancelTemplateJobResponse.newBuilder().setSuccess(false).setMessage("Job owner '$workerNode' is not reachable").build()
+        return stub.cancelTemplateJob(request)
+    }
+
+    suspend fun unlockTemplateJobManually(jobId: String): Boolean =
+        jobEngine.unlockForManualRecovery(jobId)
+
+    @RequiresPermission("templates.job.stream")
+    override fun streamTemplateJobProgress(request: GetTemplateJobRequest): Flow<ProtoTemplateJobProgress> = callbackFlow {
+        // All nodes use the shared job database, so progress can be streamed locally.
+        val localJob = jobStorage.get(request.jobId)
+        if (localJob != null) {
+            // Stream from local job
+            suspend fun sendLatest() {
+                val value = jobStorage.get(request.jobId) ?: return
+                trySend(value.toDefinition())
+                if (!value.status.isActive) close()
+            }
+            sendLatest()
+            val job = launch {
+                while (true) {
+                    delay(500)
+                    sendLatest()
+                }
+            }
+            awaitClose { job.cancel() }
+            return@callbackFlow
+        }
+
+        logger.debug("Job {} not found in shared job storage", request.jobId)
+        close(StatusException(Status.NOT_FOUND.withDescription("Job not found: ${request.jobId}")))
+    }
+
 
     @RequiresPermission("templates.createDirectory")
     override suspend fun createDirectory(request: CreateDirectoryRequest): CreateDirectoryResponse {
@@ -254,6 +295,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
                 ?: return CreateDirectoryResponse.newBuilder()
                     .setResult(operationResult(false, "Template not found"))
                     .build()
+        lockedResponse(template)?.let { return CreateDirectoryResponse.newBuilder().setResult(it).build() }
 
         val location = template.location.toDefinition()
         if (needsForwarding(location)) {
@@ -288,6 +330,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
                 ?: return DeleteDirectoryResponse.newBuilder()
                     .setResult(operationResult(false, "Template not found"))
                     .build()
+        lockedResponse(template)?.let { return DeleteDirectoryResponse.newBuilder().setResult(it).build() }
 
         val location = template.location.toDefinition()
         if (needsForwarding(location)) {
@@ -320,6 +363,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         val template =
             TemplateRegistry.findByReference(request.template)
                 ?: throw StatusException(Status.NOT_FOUND.withDescription("Template not found"))
+        ensureUnlocked(template)
 
         val location = template.location.toDefinition()
         if (needsForwarding(location)) {
@@ -354,6 +398,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
                 ?: return CreateFileResponse.newBuilder()
                     .setResult(operationResult(false, "Template not found"))
                     .build()
+        lockedResponse(template)?.let { return CreateFileResponse.newBuilder().setResult(it).build() }
 
         val location = template.location.toDefinition()
         if (needsForwarding(location)) {
@@ -387,6 +432,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
                 ?: return UpdateFileResponse.newBuilder()
                     .setResult(operationResult(false, "Template not found"))
                     .build()
+        lockedResponse(template)?.let { return UpdateFileResponse.newBuilder().setResult(it).build() }
 
         val location = template.location.toDefinition()
         if (needsForwarding(location)) {
@@ -420,6 +466,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
                 ?: return DeleteFileResponse.newBuilder()
                     .setResult(operationResult(false, "Template not found"))
                     .build()
+        lockedResponse(template)?.let { return DeleteFileResponse.newBuilder().setResult(it).build() }
 
         val location = template.location.toDefinition()
         if (needsForwarding(location)) {
@@ -448,6 +495,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         val template =
             TemplateRegistry.findByReference(request.template)
                 ?: throw StatusException(Status.NOT_FOUND.withDescription("Template not found"))
+        ensureUnlocked(template)
 
         val location = template.location.toDefinition()
         if (needsForwarding(location)) {
@@ -545,17 +593,46 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         if (remoteNode.getSnapshot().state != NodeState.ONLINE) {
             return null
         }
-        return stubCache.get(nodeId) { _ ->
+        val stub = stubCache.get(nodeId) { _ ->
             TemplateServiceGrpcKt.TemplateServiceCoroutineStub(remoteNode.channel!!)
                 .withInterceptors(AuthClientInterceptor(Node.instance.secret))
         }
+        val identity = TemplateJobCallContext.currentIdentity()
+        return if (identity == null) stub else stub.withInterceptors(TemplateJobCallContext.clientInterceptor(identity))
     }
+
+    internal suspend fun remoteStubForRecovery(nodeId: String): TemplateServiceGrpcKt.TemplateServiceCoroutineStub? =
+        remoteStub(nodeId)
 
     private fun unavailable(nodeId: String): StatusException =
         StatusException(Status.UNAVAILABLE.withDescription("Node '$nodeId' is not reachable"))
 
     private fun operationResult(success: Boolean, message: String): TemplateOperationResult =
         TemplateOperationResult.newBuilder().setSuccess(success).setMessage(message).build()
+
+    private suspend fun lockedResponse(template: Template): TemplateOperationResult? {
+        val lock = jobLockStorage.get(TemplateLockKey.template(template.id)) ?: return null
+        if (canUseJobLock(lock)) return null
+        return operationResult(false, "Template is locked by job ${lock.jobId}: ${lock.description}")
+    }
+
+    private suspend fun ensureUnlocked(template: Template) {
+        val lock = jobLockStorage.get(TemplateLockKey.template(template.id)) ?: return
+        if (!canUseJobLock(lock)) throw templateLocked(lock)
+    }
+
+    private suspend fun canUseJobLock(lock: TemplateJobLock): Boolean {
+        val identity = TemplateJobCallContext.currentIdentity() ?: return false
+        if (identity.jobId != lock.jobId) return false
+        return jobStorage.getRecord(identity.jobId)?.workerToken == identity.token
+    }
+
+    private fun templateLocked(lock: TemplateJobLock): StatusException =
+        StatusException(
+            Status.FAILED_PRECONDITION.withDescription(
+                "Template is locked by job ${lock.jobId}: ${lock.description}"
+            )
+        )
 
     private fun templateReferenceOf(template: Template): TemplateReference =
         TemplateReference.newBuilder()

@@ -74,6 +74,7 @@ import org.vulpesstudios.vulpescloud.node.setup.setups.FirstSetup
 import org.vulpesstudios.vulpescloud.node.tasks.TasksAPIService
 import org.vulpesstudios.vulpescloud.node.templates.LocalTemplateStorage
 import org.vulpesstudios.vulpescloud.node.templates.TemplateServiceImpl
+import org.vulpesstudios.vulpescloud.node.templates.TemplateJobCallContext
 import org.vulpesstudios.vulpescloud.node.templates.TemplateStorageRegistry
 import org.vulpesstudios.vulpescloud.node.terminal.Terminal
 import org.vulpesstudios.vulpescloud.node.virtualconfig.VirtualConfigProvider
@@ -125,6 +126,7 @@ class Node {
     val virtualConfigServiceImpl = VirtualConfigServiceImpl()
     val serverSoftwareProvider = ServerSoftwareProvider()
     val chronyxCoordinator = ChronyxCoordinator()
+    val templateServiceImpl = TemplateServiceImpl()
 
     private val grpcServices = mutableListOf<BindableService>()
     private var allowGrpcServiceAdding = true
@@ -224,7 +226,7 @@ class Node {
                     ),
                     PlayerServiceImpl(),
                     PlayerActionServiceImpl(),
-                    TemplateServiceImpl(),
+                    templateServiceImpl,
                     RolloutAPIServiceImpl(),
                     NodeDrainAPIServiceImpl(),
                     NodeMaintenanceAPIServiceImpl(),
@@ -239,6 +241,7 @@ class Node {
                     services = grpcServices,
                     interceptors =
                         listOf(
+                            TemplateJobCallContext.serverInterceptor(),
                             PermissionInterceptor(),
                             AuthInterceptor(secret, configProvider.config.auth.jwtSecret),
                             LoggingServerInterceptor(),
@@ -334,6 +337,7 @@ class Node {
             }
 
             moduleProvider.startAllModules()
+            templateServiceImpl.startJobRecoveryLoop()
 
             clusterProvider.startupDone()
 

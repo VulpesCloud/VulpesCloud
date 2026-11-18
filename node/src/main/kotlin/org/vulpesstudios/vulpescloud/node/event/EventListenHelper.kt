@@ -25,6 +25,7 @@ import org.vulpesstudios.vulpescloud.node.drain.DrainEventListener
 import org.vulpesstudios.vulpescloud.node.maintenance.MaintenanceEventListener
 import org.vulpesstudios.vulpescloud.node.services.ServiceLogHandler
 import org.vulpesstudios.vulpescloud.node.services.impl.ServiceStateChangeEventListener
+import org.vulpesstudios.vulpescloud.node.templates.TemplateJobEventListener
 
 object EventListenHelper {
 
@@ -35,6 +36,7 @@ object EventListenHelper {
         RolloutEventListener.subscribe()
         DrainEventListener.subscribe()
         MaintenanceEventListener.subscribe()
+        TemplateJobEventListener.subscribe()
 
         PlayerQuitEventListener.subscribe()
         PlayerJoinEventListener.subscribe()
@@ -47,6 +49,7 @@ object EventListenHelper {
         RolloutEventListener.unsubscribe()
         DrainEventListener.unsubscribe()
         MaintenanceEventListener.unsubscribe()
+        TemplateJobEventListener.unsubscribe()
 
         PlayerQuitEventListener.unsubscribe()
         PlayerJoinEventListener.unsubscribe()
