@@ -120,7 +120,7 @@ class MongoDBDatabase(
                     collection.insertOne(MongoKVModel(key, value))
                     true
                 } catch (_: com.mongodb.MongoWriteException) {
-                    collection.find(Filters.eq("key", key)).firstOrNull()?.value == value
+                    false
                 }
             } else {
                 val filter = Filters.and(

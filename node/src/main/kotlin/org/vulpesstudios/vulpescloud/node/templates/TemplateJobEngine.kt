@@ -78,11 +78,34 @@ class TemplateJobEngine(
                 "Source template not found"
             )
 
+        val destinationById = destinationRef.templateId.takeIf { it.isNotBlank() }
+            ?.let { TemplateRegistry.getById(it) }
+        if (destinationById != null && !TemplateRegistry.matchesLocation(
+                destinationById.location.toDefinition(), destinationRef.location
+            )
+        ) {
+            return TemplateJobAcceptResult(
+                TemplateJobAcceptStatus.REJECTED_INVALID_CONFIGURATION,
+                "Destination template id '${destinationRef.templateId}' exists in a different storage/node"
+            )
+        }
+        val destinationCandidates = if (destinationRef.name.isBlank()) emptyList() else
+            TemplateRegistry.getAll().filter {
+                it.name == destinationRef.name &&
+                    TemplateRegistry.matchesLocation(it.location.toDefinition(), destinationRef.location)
+            }
+        if (destinationCandidates.size > 1) {
+            return TemplateJobAcceptResult(
+                TemplateJobAcceptStatus.REJECTED_INVALID_CONFIGURATION,
+                "Destination name '${destinationRef.name}' matches multiple templates in the selected storage/node"
+            )
+        }
         val existingDestination = TemplateRegistry.findByReference(destinationRef)
 
         if (destinationRef.templateId.isBlank() && destinationRef.name.isNotBlank() &&
             destinationRef.location.storageName.isBlank() && destinationRef.location.nodeName.isBlank() &&
-            existingDestination == null && TemplateRegistry.getAll().count { it.name == destinationRef.name } > 1
+            existingDestination == null && destinationCandidates.isEmpty() &&
+            TemplateRegistry.getAll().count { it.name == destinationRef.name } > 1
         ) {
             return TemplateJobAcceptResult(
                 TemplateJobAcceptStatus.REJECTED_INVALID_CONFIGURATION,
@@ -90,7 +113,7 @@ class TemplateJobEngine(
             )
         }
 
-        if (existingDestination?.id == sourceTemplate.id) {
+        if (destinationById?.id == sourceTemplate.id || existingDestination?.id == sourceTemplate.id) {
             return TemplateJobAcceptResult(
                 TemplateJobAcceptStatus.REJECTED_INVALID_CONFIGURATION,
                 "Source and destination resolve to the same template"
@@ -124,23 +147,36 @@ class TemplateJobEngine(
             existingDestination != null -> existingDestination.location
             else -> sourceTemplate.location
         }
-        val storageNode = TemplateStorageRegistry
-            .getTemplateStorageByName(requestedDestinationLocation.storageName)
-            ?.nodeName()
-            ?.takeIf { it.isNotBlank() }
-        val destinationLocation = requestedDestinationLocation.copy(
-            nodeName = requestedDestinationLocation.nodeName?.takeIf { it.isNotBlank() } ?: storageNode,
+        val destinationLocation = templateService.resolveLocation(
+            requestedDestinationLocation.storageName,
+            requestedDestinationLocation.nodeName,
         )
         val sourceData = TemplateReferenceData(
             sourceTemplate.id,
             sourceTemplate.name,
             sourceTemplate.location,
         )
+        val destinationName = destinationRef.name.ifBlank { sourceTemplate.name }
+        val proposedDestinationId = destinationRef.templateId.ifBlank { Template.normalizedId(destinationName) }
+        if (existingDestination == null && destinationRef.templateId.isBlank() && proposedDestinationId.isBlank()) {
+            return TemplateJobAcceptResult(
+                TemplateJobAcceptStatus.REJECTED_INVALID_CONFIGURATION,
+                "Destination name must contain at least one letter or number to generate an id"
+            )
+        }
+        if (existingDestination == null && destinationRef.templateId.isBlank() &&
+            TemplateRegistry.getById(proposedDestinationId) != null
+        ) {
+            return TemplateJobAcceptResult(
+                TemplateJobAcceptStatus.REJECTED_INVALID_CONFIGURATION,
+                "Generated destination id '$proposedDestinationId' is already in use; choose a different name or specify an id"
+            )
+        }
         val destData = existingDestination?.let {
             TemplateReferenceData(it.id, it.name, it.location)
         } ?: TemplateReferenceData(
-            destinationRef.templateId.ifBlank { UUID.randomUUID().toString() },
-            destinationRef.name.ifBlank { sourceTemplate.name },
+            proposedDestinationId,
+            destinationName,
             destinationLocation,
         )
         val now = System.currentTimeMillis()
@@ -157,10 +193,7 @@ class TemplateJobEngine(
         )
 
         val destinationLockKeys = if (existingDestination == null) {
-            setOf(
-                TemplateLockKey.template(destData.templateId),
-                TemplateLockKey.reservation(destData.name, destinationLocation.storageName, destinationLocation.nodeName),
-            )
+            setOf(TemplateLockKey.template(destData.templateId))
         } else {
             setOf(TemplateLockKey.template(existingDestination.id))
         }

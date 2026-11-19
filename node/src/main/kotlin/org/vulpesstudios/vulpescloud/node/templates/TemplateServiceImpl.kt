@@ -82,29 +82,50 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         val destination = resolveDestination(request.destination)
 
         val requestedId = request.template.id
-        val templateLock = requestedId.takeIf { it.isNotBlank() }
+        val templateId = requestedId.ifBlank { Template.normalizedId(request.template.name) }
+        if (!Template.isValidId(templateId)) {
+            throw StatusException(Status.INVALID_ARGUMENT.withDescription(
+                "Template id '$templateId' is invalid; use letters, numbers, dots, underscores, and hyphens"
+            ))
+        }
+        if (templateId.isBlank()) {
+            throw StatusException(Status.INVALID_ARGUMENT.withDescription(
+                "Template name must contain at least one letter or number to generate an id"
+            ))
+        }
+        val templateLock = templateId.takeIf { it.isNotBlank() }
             ?.let { jobLockStorage.get(TemplateLockKey.template(it)) }
-        val reservationLock = jobLockStorage.get(
-            TemplateLockKey.reservation(request.template.name, destination.storageName, destination.nodeName)
-        )
-        val activeLock = listOfNotNull(templateLock, reservationLock).firstOrNull { !canUseJobLock(it) }
+        val activeLock = templateLock?.takeUnless { canUseJobLock(it) }
         if (activeLock != null) throw templateLocked(activeLock)
 
         if (needsForwarding(destination)) {
             val stub = remoteStub(destination.nodeName) ?: throw unavailable(destination.nodeName)
-            return stub.createTemplate(request)
+            val forwarded = request.toBuilder()
+                .setTemplate(request.template.toBuilder().setId(templateId).build())
+                .setDestination(destination)
+                .build()
+            return stub.createTemplate(forwarded)
         }
 
         val locationApi = ApiTemplateLocation.fromDefinition(destination)
         val template =
             Template.fromDefinition(request.template)
                 .copy(
-                    id = request.template.id.ifBlank { UUID.randomUUID().toString() },
+                    id = templateId,
                     location = locationApi,
                 )
 
-        withContext(Dispatchers.IO) { storageFor(template).createTemplate(template) }
-        TemplateRegistry.save(template)
+        if (!TemplateRegistry.create(template)) {
+            throw StatusException(Status.ALREADY_EXISTS.withDescription(
+                "Template id '$templateId' is already in use"
+            ))
+        }
+        try {
+            withContext(Dispatchers.IO) { storageFor(template).createTemplate(template) }
+        } catch (e: Exception) {
+            TemplateRegistry.delete(template)
+            throw e
+        }
 
         return CreateTemplateResponse.newBuilder().setTemplate(template.toDefinition()).build()
     }
@@ -224,6 +245,9 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         val jobs = jobStorage.getActive().map { it.toDefinition() }
         return ListActiveTemplateJobsResponse.newBuilder().addAllJobs(jobs).build()
     }
+
+    internal suspend fun listAllTemplateJobs(): List<ProtoTemplateJobProgress> =
+        jobStorage.getAllRecords().map { it.progress.toDefinition() }
 
     @RequiresPermission("templates.job.cancel")
     override suspend fun cancelTemplateJob(request: CancelTemplateJobRequest): CancelTemplateJobResponse {
@@ -567,14 +591,35 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         TemplateStorageRegistry.getTemplateStorageByName(template.location.storageName)
             ?: throw IllegalArgumentException("Template not found")
 
-    private fun resolveDestination(
+    private suspend fun resolveDestination(
         location: TemplateLocationDefinition
     ): TemplateLocationDefinition {
-        if (location.nodeName.isNotBlank()) return location
+        val resolved = resolveLocation(location.storageName, location.nodeName.takeIf { it.isNotBlank() })
+        return location.toBuilder().setNodeName(resolved.nodeName.orEmpty()).build()
+    }
 
-        val storage = TemplateStorageRegistry.getTemplateStorageByName(location.storageName)
-        val nodeName = storage?.nodeName()
-        return if (nodeName.isNullOrBlank()) location else location.toBuilder().setNodeName(nodeName).build()
+    /** Resolves a node-affine storage when a caller selected only its storage name. */
+    internal suspend fun resolveLocation(storageName: String, requestedNode: String?): ApiTemplateLocation {
+        if (!requestedNode.isNullOrBlank()) return ApiTemplateLocation(storageName, requestedNode)
+        val localStorage = TemplateStorageRegistry.getTemplateStorageByName(storageName)
+        if (localStorage != null && localStorage.nodeName().isNullOrBlank()) {
+            return ApiTemplateLocation(storageName, null)
+        }
+        val candidates = mutableSetOf<String>()
+        localStorage?.nodeName()?.takeIf { it.isNotBlank() }?.let(candidates::add)
+        for (node in Node.instance.clusterProvider.remoteNodes) {
+            val stub = remoteStub(node.endpoint.name) ?: continue
+            val registered = runCatching {
+                stub.listLocalRegisteredStorages(listLocalRegisteredStoragesRequest {}).storageList
+            }.getOrDefault(emptyList())
+            if (registered.any { it.name == storageName }) candidates += node.endpoint.name
+        }
+        if (candidates.size > 1) {
+            throw StatusException(Status.INVALID_ARGUMENT.withDescription(
+                "Storage '$storageName' exists on multiple nodes; specify it as id@$storageName@<node>"
+            ))
+        }
+        return ApiTemplateLocation(storageName, candidates.singleOrNull())
     }
 
     private fun needsForwarding(location: TemplateLocationDefinition): Boolean =

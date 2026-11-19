@@ -215,7 +215,7 @@ class TaskSetup() : Setup {
                             Template(
                                 task.name,
                                 0,
-                                task.name,
+                                Template.normalizedId(task.name),
                                 TemplateLocation(
                                     "LOCAL",
                                     Node.instance.configProvider.config.nodeName,
@@ -229,7 +229,7 @@ class TaskSetup() : Setup {
                     template = templateDefinition {
                         name = task.name
                         weight = 0
-                        id = task.name
+                        id = Template.normalizedId(task.name)
                         location = templateLocation {
                             storageName = "LOCAL"
                             nodeName = Node.instance.configProvider.config.nodeName

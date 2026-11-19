@@ -42,6 +42,13 @@ object TemplateRegistry {
         templatesDatabase.upsert(template.id, Json.encodeToJsonElement(template))
     }
 
+    /** Inserts a new template without replacing an existing template with the same id. */
+    suspend fun create(template: Template): Boolean = templatesDatabase.compareAndSet(
+        template.id,
+        null,
+        Json.encodeToJsonElement(template),
+    )
+
     suspend fun delete(template: Template) {
         templatesDatabase.delete(template.id)
     }
@@ -65,7 +72,9 @@ object TemplateRegistry {
      */
     suspend fun findByReference(reference: TemplateReference): Template? {
         if (reference.templateId.isNotBlank()) {
-            getById(reference.templateId)?.let { return it }
+            return getById(reference.templateId)?.takeIf {
+                matchesLocation(it.location.toDefinition(), reference.location)
+            }
         }
         if (reference.name.isBlank()) return null
 

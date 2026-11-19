@@ -24,17 +24,70 @@ import org.incendo.cloud.annotations.Command
 import org.incendo.cloud.annotations.Flag
 import org.incendo.cloud.annotations.Permission
 import org.incendo.cloud.annotations.suggestion.Suggestions
+import org.incendo.cloud.context.CommandContext
+import org.incendo.cloud.context.CommandInput
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.command.CommandSource
 import org.vulpesstudios.vulpescloud.node.templates.TemplateRegistry
+import org.vulpesstudios.vulpescloud.node.utils.TableUtils
+import org.vulpesstudios.vulpescloud.api.templates.TemplateLocation as ApiTemplateLocation
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
 
 class TemplateCommand {
 
+    private val defaultTemplateColumns = listOf("id", "name", "storage", "node", "weight", "enabled")
+    private val allTemplateColumns = defaultTemplateColumns + "version"
+    private val storageColumns = listOf("name", "type", "node")
+    private val defaultJobColumns = listOf("id", "type", "status", "source", "destination", "files")
+    private val allJobColumns = defaultJobColumns + listOf("bytes", "started", "completed", "failure")
+
+    private data class TemplateSelector(val id: String, val storage: String? = null, val node: String? = null)
+    private data class StorageSelector(val name: String, val node: String? = null)
+
     @Suggestions("templateNames")
     fun templateNameSuggestions(): Stream<String> =
-        runBlocking { TemplateRegistry.getAll().map { it.name }.stream() }
+        runBlocking { TemplateRegistry.getAll().map { templateSelector(it.id, it.location.storageName, it.location.nodeName) }.stream() }
+
+    @Suggestions("template-columns")
+    fun templateColumnSuggestions(ctx: CommandContext<CommandSource>, input: CommandInput): List<String> {
+        val current = input.lastRemainingToken()
+        val prefix = current.substring(0, current.lastIndexOf(',') + 1)
+        val selected = prefix.split(',').filter { it.isNotEmpty() }.map { it.lowercase() }.toSet()
+        if ("all" in selected || "default" in selected) return emptyList()
+        val candidates = if (selected.isEmpty()) allTemplateColumns + listOf("all", "default") else allTemplateColumns
+        return candidates.filter { it.lowercase() !in selected }.map { prefix + it }
+    }
+
+    @Suggestions("template-storage-columns")
+    fun templateStorageColumnSuggestions(ctx: CommandContext<CommandSource>, input: CommandInput): List<String> {
+        val current = input.lastRemainingToken()
+        val prefix = current.substring(0, current.lastIndexOf(',') + 1)
+        val selected = prefix.split(',').filter { it.isNotEmpty() }.map { it.lowercase() }.toSet()
+        if ("all" in selected || "default" in selected) return emptyList()
+        val candidates = if (selected.isEmpty()) storageColumns + listOf("all", "default") else storageColumns
+        return candidates.filter { it.lowercase() !in selected }.map { prefix + it }
+    }
+
+    @Suggestions("template-destination-storages")
+    fun templateDestinationStorageSuggestions(): Stream<String> = runBlocking {
+        Node.instance.templateServiceImpl.listRegisteredStorages(listRegisteredStoragesRequest {})
+            .storageList
+            .map { storage -> if (storage.nodeName.isBlank()) storage.name else "${storage.name}@${storage.nodeName}" }
+            .distinct()
+            .sorted()
+            .stream()
+    }
+
+    @Suggestions("template-job-columns")
+    fun templateJobColumnSuggestions(ctx: CommandContext<CommandSource>, input: CommandInput): List<String> {
+        val current = input.lastRemainingToken()
+        val prefix = current.substring(0, current.lastIndexOf(',') + 1)
+        val selected = prefix.split(',').filter { it.isNotEmpty() }.map { it.lowercase() }.toSet()
+        if ("all" in selected || "default" in selected) return emptyList()
+        val candidates = if (selected.isEmpty()) allJobColumns + listOf("all", "default") else allJobColumns
+        return candidates.filter { it.lowercase() !in selected }.map { prefix + it }
+    }
 
     @Suggestions("activeTemplateJobIds")
     fun activeTemplateJobIdSuggestions(): Stream<String> =
@@ -42,9 +95,9 @@ class TemplateCommand {
 
     @Suggestions("templateJobTargets")
     fun templateJobTargetSuggestions(): Stream<String> {
-        val templateNames = runBlocking { TemplateRegistry.getAll().map { it.name } }
+        val templateIds = runBlocking { TemplateRegistry.getAll().map { it.id } }
         val jobIds = TemplateJobCache.getActiveJobs().map { it.jobId }
-        return (templateNames + jobIds).stream()
+        return (templateIds + jobIds).stream()
     }
 
     @Suggestions("templateConflictModes")
@@ -56,38 +109,96 @@ class TemplateCommand {
         Stream.of("keep", "purge")
 
     @Permission("templates.list")
-    @Command("template list")
-    fun listTemplates(source: CommandSource) {
-        runBlocking {
-            val templates = TemplateRegistry.getAll()
-            source.sendMessage("The following ${templates.size} template(s) are registered:")
-            templates.forEach { template ->
-                val additional = if (!template.location.nodeName.isNullOrBlank()) "-${template.location.nodeName}" else ""
-                source.sendMessage(" - ${template.name}@${template.location.storageName}$additional | Weight: ${template.weight} | Enabled: ${template.enabled}")
+    @Command("template list [columns]")
+    fun listTemplates(
+        source: CommandSource,
+        @Argument("columns", suggestions = "template-columns") @org.incendo.cloud.annotations.Default("default") columns: String,
+        @Flag("all") all: Boolean,
+    ) {
+        val selected = when {
+            all || columns.equals("all", ignoreCase = true) -> allTemplateColumns
+            columns.equals("default", ignoreCase = true) -> defaultTemplateColumns
+            else -> {
+                val requested = columns.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                val invalid = requested.filter { column -> allTemplateColumns.none { it.equals(column, true) } }
+                if (invalid.isNotEmpty()) {
+                    source.sendMessage("Unknown column(s): ${invalid.joinToString()}")
+                    source.sendMessage("Available: ${allTemplateColumns.joinToString()}")
+                    return
+                }
+                requested.map { column -> allTemplateColumns.first { it.equals(column, true) } }.distinct()
             }
+        }
+        runBlocking {
+            val templates = Node.instance.localGrpcClient.templateAPI
+                .listTemplates(listTemplatesRequest {})
+                .templatesList
+            val table = TableUtils.newTable().defaultStyle()
+            table.header(mapOf(
+                "id" to "ID", "name" to "Name", "storage" to "Storage", "node" to "Node",
+                "weight" to "Weight", "enabled" to "Enabled", "version" to "Version",
+            ))
+            templates.forEach { template ->
+                table.addContent(mapOf(
+                    "id" to template.id,
+                    "name" to template.name,
+                    "storage" to template.location.storageName,
+                    "node" to template.location.nodeName,
+                    "weight" to template.weight.toString(),
+                    "enabled" to template.enabled.toString(),
+                    "version" to template.version,
+                ))
+            }
+            source.sendMessage("The following ${templates.size} template(s) are registered:")
+            table.lines(selected).forEach(source::sendMessage)
         }
     }
 
     @Permission("templates.listRegisteredStorages")
-    @Command("template storages")
-    fun listStorages(source: CommandSource) {
+    @Command("template storages [columns]")
+    fun listStorages(
+        source: CommandSource,
+        @Argument("columns", suggestions = "template-storage-columns") @org.incendo.cloud.annotations.Default("default") columns: String,
+        @Flag("all") all: Boolean,
+    ) {
+        val selected = when {
+            all || columns.equals("all", ignoreCase = true) || columns.equals("default", ignoreCase = true) -> storageColumns
+            else -> {
+                val requested = columns.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                val invalid = requested.filter { column -> storageColumns.none { it.equals(column, true) } }
+                if (invalid.isNotEmpty()) {
+                    source.sendMessage("Unknown column(s): ${invalid.joinToString()}")
+                    source.sendMessage("Available: ${storageColumns.joinToString()}")
+                    return
+                }
+                requested.map { column -> storageColumns.first { it.equals(column, true) } }.distinct()
+            }
+        }
         runBlocking {
             val storages = Node.instance.localGrpcClient.templateAPI.listRegisteredStorages(
-                listRegisteredStoragesRequest {  }).storageList
-            source.sendMessage("The following ${storages.size} storages(s) are registered:")
+                listRegisteredStoragesRequest {}
+            ).storageList
+            val table = TableUtils.newTable().defaultStyle()
+            table.header(mapOf("name" to "Name", "type" to "Type", "node" to "Node"))
             storages.forEach { storage ->
-                val node = if (storage.nodeName != null) "@${storage.nodeName}" else ""
-                source.sendMessage(" - Type: ${storage.type.name} | Name:${storage.name}$node")
+                table.addContent(mapOf(
+                    "name" to storage.name,
+                    "type" to storage.type.name,
+                    "node" to storage.nodeName,
+                ))
             }
+            source.sendMessage("The following ${storages.size} storage(s) are registered:")
+            table.lines(selected).forEach(source::sendMessage)
         }
     }
 
     @Permission("templates.copy")
-    @Command("template copy <source> <destination>")
+    @Command("template copy <source> <destination> <destinationStorage>")
     fun copyTemplate(
         source: CommandSource,
-        @Argument("source") sourceName: String,
+        @Argument(value = "source", suggestions = "templateNames") sourceName: String,
         @Argument("destination") destinationName: String,
+        @Argument(value = "destinationStorage", suggestions = "template-destination-storages") destinationStorage: String,
         @Flag(value = "conflict", suggestions = "templateConflictModes") conflictMode: String?,
         @Flag(value = "extra-files", suggestions = "templateExtraFilesModes") extraFilesMode: String?,
     ) {
@@ -95,8 +206,16 @@ class TemplateCommand {
         val extra = extraFilesMode?.let { parseExtraFilesMode(it, source) } ?: TemplateJobExtraFilesMode.TEMPLATE_JOB_EXTRA_FILES_MODE_KEEP
 
         runBlocking {
-            val sourceTemplate = TemplateRegistry.getAll().find { it.name == sourceName }
-                ?: run { source.sendMessage("<red>Template not found: $sourceName</red>"); return@runBlocking }
+            val sourceSelector = parseTemplateSelector(sourceName)
+                ?: run { source.sendMessage("<red>Use template selectors in the form id@storage[@node]</red>"); return@runBlocking }
+            val sourceTemplate = TemplateRegistry.getById(sourceSelector.id)
+                ?: run { source.sendMessage("<red>Template id not found: ${sourceSelector.id}</red>"); return@runBlocking }
+            if (!sourceSelector.matches(sourceTemplate.id, sourceTemplate.location.storageName, sourceTemplate.location.nodeName)) {
+                source.sendMessage("<red>Template '$sourceName' does not exist in that storage/node</red>")
+                return@runBlocking
+            }
+            val destinationLocation = resolveDestinationStorage(destinationStorage, source)
+                ?: return@runBlocking
 
             val request = copyTemplateRequest {
                 this.source = templateReference {
@@ -106,6 +225,7 @@ class TemplateCommand {
                 }
                 this.destination = templateReference {
                     name = destinationName
+                    location = destinationLocation.toDefinition()
                 }
                 this.conflictMode = conflict
                 this.extraFilesMode = extra
@@ -129,11 +249,12 @@ class TemplateCommand {
     }
 
     @Permission("templates.move")
-    @Command("template move <source> <destination>")
+    @Command("template move <source> <destination> <destinationStorage>")
     fun moveTemplate(
         source: CommandSource,
-        @Argument("source") sourceName: String,
+        @Argument(value = "source", suggestions = "templateNames") sourceName: String,
         @Argument("destination") destinationName: String,
+        @Argument(value = "destinationStorage", suggestions = "template-destination-storages") destinationStorage: String,
         @Flag(value = "conflict", suggestions = "templateConflictModes") conflictMode: String?,
         @Flag(value = "extra-files", suggestions = "templateExtraFilesModes") extraFilesMode: String?,
     ) {
@@ -141,8 +262,16 @@ class TemplateCommand {
         val extra = extraFilesMode?.let { parseExtraFilesMode(it, source) } ?: TemplateJobExtraFilesMode.TEMPLATE_JOB_EXTRA_FILES_MODE_KEEP
 
         runBlocking {
-            val sourceTemplate = TemplateRegistry.getAll().find { it.name == sourceName }
-                ?: run { source.sendMessage("<red>Template not found: $sourceName</red>"); return@runBlocking }
+            val sourceSelector = parseTemplateSelector(sourceName)
+                ?: run { source.sendMessage("<red>Use template selectors in the form id@storage[@node]</red>"); return@runBlocking }
+            val sourceTemplate = TemplateRegistry.getById(sourceSelector.id)
+                ?: run { source.sendMessage("<red>Template id not found: ${sourceSelector.id}</red>"); return@runBlocking }
+            if (!sourceSelector.matches(sourceTemplate.id, sourceTemplate.location.storageName, sourceTemplate.location.nodeName)) {
+                source.sendMessage("<red>Template '$sourceName' does not exist in that storage/node</red>")
+                return@runBlocking
+            }
+            val destinationLocation = resolveDestinationStorage(destinationStorage, source)
+                ?: return@runBlocking
 
             val request = moveTemplateRequest {
                 this.source = templateReference {
@@ -152,6 +281,7 @@ class TemplateCommand {
                 }
                 this.destination = templateReference {
                     name = destinationName
+                    location = destinationLocation.toDefinition()
                 }
                 this.conflictMode = conflict
                 this.extraFilesMode = extra
@@ -189,29 +319,56 @@ class TemplateCommand {
     }
 
     @Permission("templates.job.list")
-    @Command("template job list")
-    fun listTemplateJobs(source: CommandSource) {
+    @Command("template job list [columns]")
+    fun listTemplateJobs(
+        source: CommandSource,
+        @Argument("columns", suggestions = "template-job-columns") @org.incendo.cloud.annotations.Default("default") columns: String,
+        @Flag("all") all: Boolean,
+    ) {
+        val selected = when {
+            all || columns.equals("all", ignoreCase = true) -> allJobColumns
+            columns.equals("default", ignoreCase = true) -> defaultJobColumns
+            else -> {
+                val requested = columns.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+                val invalid = requested.filter { column -> allJobColumns.none { it.equals(column, true) } }
+                if (invalid.isNotEmpty()) {
+                    source.sendMessage("Unknown column(s): ${invalid.joinToString()}")
+                    source.sendMessage("Available: ${allJobColumns.joinToString()}")
+                    return
+                }
+                requested.map { column -> allJobColumns.first { it.equals(column, true) } }.distinct()
+            }
+        }
         runBlocking {
-            val jobs = Node.instance.localGrpcClient.templateAPI
-                .listActiveTemplateJobs(com.google.protobuf.Empty.getDefaultInstance())
-                .jobsList
+            val jobs = Node.instance.templateServiceImpl.listAllTemplateJobs()
 
             if (jobs.isEmpty()) {
-                source.sendMessage("<gray>There are no active template jobs.</gray>")
+                source.sendMessage("<gray>There are no template jobs.</gray>")
                 return@runBlocking
             }
 
-            source.sendMessage(
-                "<gray>The following</gray> <gold>${jobs.size}</gold> <gray>template job(s) are active:</gray>"
-            )
-            jobs.forEach {
-                source.sendMessage(
-                    " <dark_gray>»</dark_gray> <gold>${it.jobId}</gold> <dark_gray>|</dark_gray> " +
-                        "<white>${it.source.name}</white> <gray>→</gray> <white>${it.destination.name}</white> " +
-                        "<dark_gray>|</dark_gray> <gray>status:</gray> ${jobStatusColor(it.status)}${it.status.name.removePrefix("TEMPLATE_JOB_STATUS_")}</${jobStatusColorName(it.status)}> " +
-                        "<dark_gray>|</dark_gray> <gray>files:</gray> <white>${it.filesProcessed}/${it.totalFiles}</white>"
-                )
+            val table = TableUtils.newTable().defaultStyle()
+            table.header(mapOf(
+                "id" to "Job ID", "type" to "Type", "status" to "Status", "source" to "Source",
+                "destination" to "Destination", "files" to "Files", "bytes" to "Bytes",
+                "started" to "Started", "completed" to "Completed", "failure" to "Failure",
+            ))
+            jobs.sortedByDescending { it.startedAt }.forEach { job ->
+                table.addContent(mapOf(
+                    "id" to job.jobId,
+                    "type" to job.type.name.removePrefix("TEMPLATE_JOB_TYPE_"),
+                    "status" to job.status.name.removePrefix("TEMPLATE_JOB_STATUS_"),
+                    "source" to formatJobTemplate(job.source),
+                    "destination" to formatJobTemplate(job.destination),
+                    "files" to "${job.filesProcessed}/${job.totalFiles} (copied ${job.filesCopied}, skipped ${job.filesSkipped})",
+                    "bytes" to "${formatBytes(job.bytesProcessed)}/${formatBytes(job.totalBytes)}",
+                    "started" to job.startedAt.toString(),
+                    "completed" to job.completedAt.takeIf { it > 0 }?.toString().orEmpty(),
+                    "failure" to job.failureReason,
+                ))
             }
+            source.sendMessage("The following ${jobs.size} template job(s) are registered:")
+            table.lines(selected).forEach(source::sendMessage)
         }
     }
 
@@ -285,17 +442,76 @@ class TemplateCommand {
             )
         }.getOrNull()?.let { return it }
 
-        // Otherwise treat it as a template name and search active jobs.
+        // Otherwise treat it as a template id and search active jobs.
         val jobs = Node.instance.localGrpcClient.templateAPI
             .listActiveTemplateJobs(com.google.protobuf.Empty.getDefaultInstance())
             .jobsList
 
-        // Otherwise treat as template name — find a job involving this template
-        jobs.find { it.source.name == target || it.destination.name == target }?.let { return it }
+        // Otherwise treat as template id — find a job involving this template.
+        jobs.find { it.source.templateId == target || it.destination.templateId == target }?.let { return it }
 
         source.sendMessage("<red>No active job found for</red> <white>$target</white><red>.</red>")
         return null
     }
+
+    private fun parseTemplateSelector(value: String): TemplateSelector? {
+        val parts = value.split('@')
+        if (parts.isEmpty() || parts.size > 3 || parts[0].isBlank()) return null
+        if (parts.size > 1 && parts[1].isBlank()) return null
+        if (parts.size > 2 && parts[2].isBlank()) return null
+        return TemplateSelector(
+            id = parts[0],
+            storage = parts.getOrNull(1),
+            node = parts.getOrNull(2),
+        )
+    }
+
+    private suspend fun resolveDestinationStorage(value: String, source: CommandSource): ApiTemplateLocation? {
+        val parts = value.split('@')
+        if (parts.isEmpty() || parts.size > 2 || parts[0].isBlank() || (parts.size == 2 && parts[1].isBlank())) {
+            source.sendMessage("<red>Use a destination storage in the form storage[@node]</red>")
+            return null
+        }
+        val selector = StorageSelector(parts[0], parts.getOrNull(1))
+        val candidates = Node.instance.templateServiceImpl
+            .listRegisteredStorages(listRegisteredStoragesRequest {})
+            .storageList
+            .filter { it.name.equals(selector.name, ignoreCase = true) }
+            .filter { selector.node == null || it.nodeName == selector.node }
+        if (candidates.isEmpty()) {
+            source.sendMessage("<red>Template storage '$value' is not registered</red>")
+            return null
+        }
+        val selected = if (selector.node != null) candidates.singleOrNull() else {
+            candidates.singleOrNull { it.nodeName.isBlank() } ?: candidates.singleOrNull()
+        }
+        if (selected == null) {
+            source.sendMessage("<red>Storage '${selector.name}' is registered on multiple nodes; select one of the suggested storage@node values</red>")
+            return null
+        }
+        return ApiTemplateLocation(selected.name, selected.nodeName.takeIf { it.isNotBlank() })
+    }
+
+    private fun templateSelector(id: String, storage: String, node: String?): String =
+        buildString {
+            append(id)
+            if (storage.isNotBlank()) {
+                append('@').append(storage)
+                if (!node.isNullOrBlank()) append('@').append(node)
+            }
+        }
+
+    private fun formatJobTemplate(reference: TemplateReference): String {
+        val location = buildString {
+            append(reference.location.storageName)
+            if (reference.location.nodeName.isNotBlank()) append('@').append(reference.location.nodeName)
+        }
+        return "${reference.name} (${reference.templateId})@$location"
+    }
+
+    private fun TemplateSelector.matches(id: String, storage: String, node: String?): Boolean =
+        this.id == id && (this.storage == null || this.storage.equals(storage, ignoreCase = true)) &&
+            (this.node == null || this.node == node)
 
     private fun printJobStatus(source: CommandSource, job: TemplateJobProgress) {
         val typeLabel = when (job.type) {
@@ -313,9 +529,9 @@ class TemplateCommand {
             "<gold>---------</gold> <white>${job.jobId}</white> <gold>---------</gold>\n" +
                 "<gray>Type<dark_gray>:</dark_gray> <white>$typeLabel</white> \n" +
                 "<gray>Status<dark_gray>:</dark_gray> ${jobStatusColor(job.status)}${job.status.name.removePrefix("TEMPLATE_JOB_STATUS_")}</${jobStatusColorName(job.status)}> \n" +
-                "<gray>Source<dark_gray>:</dark_gray> <white>${job.source.name}</white> " +
+                "<gray>Source<dark_gray>:</dark_gray> <white>${job.source.templateId}</white> <gray>(${job.source.name})</gray> " +
                 "<gray>@</gray> <white>${job.source.location.storageName}</white> \n" +
-                "<gray>Destination<dark_gray>:</dark_gray> <white>${job.destination.name}</white> " +
+                "<gray>Destination<dark_gray>:</dark_gray> <white>${job.destination.templateId}</white> <gray>(${job.destination.name})</gray> " +
                 "<gray>@</gray> <white>${job.destination.location.storageName}</white> \n" +
                 "<gray>Conflict mode<dark_gray>:</dark_gray> <white>${job.conflictMode.name.removePrefix("TEMPLATE_JOB_CONFLICT_MODE_")}</white> \n" +
                 "<gray>Extra files mode<dark_gray>:</dark_gray> <white>${job.extraFilesMode.name.removePrefix("TEMPLATE_JOB_EXTRA_FILES_MODE_")}</white> \n" +

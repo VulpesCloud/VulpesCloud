@@ -18,6 +18,7 @@ package org.vulpesstudios.vulpescloud.api.templates
 
 import build.buf.gen.vulpescloud.templates.v1.TemplateDefinition
 import kotlinx.serialization.Serializable
+import java.util.Locale
 
 @Serializable
 data class Template(
@@ -43,6 +44,15 @@ data class Template(
     }
 
     companion object {
+        /** Creates a stable, path-safe default id from a display name. */
+        fun normalizedId(name: String): String = name
+            .lowercase(Locale.ROOT)
+            .replace(Regex("[^a-z0-9]+"), "-")
+            .trim('-')
+
+        fun isValidId(id: String): Boolean =
+            id.matches(Regex("[A-Za-z0-9][A-Za-z0-9._-]*")) && id != "." && id != ".."
+
         fun fromDefinition(templateDefinition: TemplateDefinition): Template {
             return Template(
                 templateDefinition.name,
