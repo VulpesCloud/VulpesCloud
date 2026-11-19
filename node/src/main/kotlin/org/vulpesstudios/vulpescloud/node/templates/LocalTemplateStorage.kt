@@ -22,6 +22,9 @@ import org.vulpesstudios.vulpescloud.api.templates.Template
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.utils.FileUtils
 import java.nio.file.Files
+import java.nio.file.StandardCopyOption
+import java.nio.file.AtomicMoveNotSupportedException
+import java.io.OutputStream
 import java.nio.file.Path
 import kotlin.io.path.Path
 
@@ -34,9 +37,12 @@ class LocalTemplateStorage : TemplateStorage {
     override fun nodeName(): String = Node.instance.configProvider.config.nodeName
 
     private val templatesPath = Path("local/templates")
+    private val templateStagingPath = Path("local/template-staging")
 
     init {
         templatesPath.toFile().mkdirs()
+        FileUtils.deleteDir(templateStagingPath)
+        Files.createDirectories(templateStagingPath)
     }
 
     private fun rootOf(template: Template): Path = templatesPath.resolve(template.id)
@@ -129,6 +135,66 @@ class LocalTemplateStorage : TemplateStorage {
             mimeType = FileUtils.guessMimeType(target),
             modifiedAt = Files.getLastModifiedTime(target).toMillis(),
         )
+    }
+
+    override fun openFileRead(template: Template, path: String): TemplateFileReadSession {
+        val target = FileUtils.resolveSafe(rootOf(template), path)
+        require(Files.exists(target) && !Files.isDirectory(target)) { "File '$path' does not exist" }
+        return object : TemplateFileReadSession {
+            override val totalSize: Long = Files.size(target)
+            override val modifiedAt: Long = Files.getLastModifiedTime(target).toMillis()
+            private val input = Files.newInputStream(target)
+            override fun read(buffer: ByteArray): Int = input.read(buffer)
+            override fun close() = input.close()
+        }
+    }
+
+    override fun beginFileWrite(
+        template: Template,
+        path: String,
+        totalSize: Long,
+        modifiedAt: Long,
+    ): TemplateFileWriteSession {
+        require(totalSize >= 0) { "File size cannot be negative" }
+        val target = FileUtils.resolveSafe(rootOf(template), path)
+        val staging = Files.createTempFile(templateStagingPath, "template-", ".part")
+        var output: OutputStream? = Files.newOutputStream(staging)
+        var received = 0L
+        var finished = false
+
+        return object : TemplateFileWriteSession {
+            override fun write(content: ByteArray, offset: Int, length: Int) {
+                check(!finished) { "File write session is already finished" }
+                require(offset >= 0 && length >= 0 && offset + length <= content.size) { "Invalid chunk range" }
+                check(received + length <= totalSize) { "Received more than the declared file size" }
+                output!!.write(content, offset, length)
+                received += length
+            }
+
+            override fun commit() {
+                check(!finished) { "File write session is already finished" }
+                check(received == totalSize) { "Received $received bytes but expected $totalSize" }
+                output!!.close()
+                output = null
+                Files.createDirectories(target.parent)
+                try {
+                    Files.move(staging, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING)
+                } catch (_: AtomicMoveNotSupportedException) {
+                    Files.move(staging, target, StandardCopyOption.REPLACE_EXISTING)
+                }
+                finished = true
+            }
+
+            override fun abort() {
+                if (finished) return
+                finished = true
+                runCatching { output?.close() }
+                output = null
+                Files.deleteIfExists(staging)
+            }
+
+            override fun close() = abort()
+        }
     }
 
     override fun listDirectory(

@@ -25,6 +25,7 @@ data class TemplateJobProgress(
     val jobId: String,
     val type: TemplateJobType = TemplateJobType.COPY,
     val status: TemplateJobStatus = TemplateJobStatus.PENDING,
+    val phase: TemplateJobPhase = TemplateJobPhase.ACCEPTED,
     val source: TemplateReferenceData = TemplateReferenceData("", "", TemplateLocation("", null)),
     val destination: TemplateReferenceData = TemplateReferenceData("", "", TemplateLocation("", null)),
     val conflictMode: TemplateJobConflictMode = TemplateJobConflictMode.SKIP,
@@ -48,6 +49,7 @@ data class TemplateJobProgress(
                 .setJobId(jobId)
                 .setType(type.toDefinition())
                 .setStatus(status.toDefinition())
+                .setPhase(phase.toDefinition())
                 .setSource(source.toReference())
                 .setDestination(destination.toReference())
                 .setConflictMode(conflictMode.toDefinition())
@@ -75,6 +77,7 @@ data class TemplateJobProgress(
                 jobId = definition.jobId,
                 type = TemplateJobType.fromDefinition(definition.type),
                 status = TemplateJobStatus.fromDefinition(definition.status),
+                phase = TemplateJobPhase.fromDefinition(definition.phase),
                 source = TemplateReferenceData.fromReference(definition.source),
                 destination = TemplateReferenceData.fromReference(definition.destination),
                 conflictMode = TemplateJobConflictMode.fromDefinition(definition.conflictMode),

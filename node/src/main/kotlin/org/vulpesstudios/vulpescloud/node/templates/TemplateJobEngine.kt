@@ -17,6 +17,8 @@
 package org.vulpesstudios.vulpescloud.node.templates
 
 import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
 import io.grpc.StatusException
 import io.grpc.StatusRuntimeException
 import org.slf4j.LoggerFactory
@@ -34,17 +36,25 @@ import build.buf.gen.vulpescloud.templates.v1.DeleteFileRequest
 import build.buf.gen.vulpescloud.templates.v1.DeleteTemplateRequest
 import build.buf.gen.vulpescloud.templates.v1.ListDirectoryRequest
 import build.buf.gen.vulpescloud.templates.v1.ReadFileRequest
+import build.buf.gen.vulpescloud.templates.v1.StreamReadFileChunksRequest
+import build.buf.gen.vulpescloud.templates.v1.StreamWriteFileChunksRequest
 import build.buf.gen.vulpescloud.templates.v1.TemplateDirectoryEntry
-import build.buf.gen.vulpescloud.templates.v1.UpdateFileRequest
 
 class TemplateJobEngine(
     private val storage: TemplateJobStorage = TemplateJobStorage(),
     private val lockStorage: TemplateJobLockStorage = TemplateJobLockStorage(),
 ) {
+    private data class ScanProgress(
+        val jobId: String,
+        val label: String,
+        var lastPersistedAt: Long = 0,
+    )
+
     private companion object {
         const val WORKER_LEASE_MILLIS = 15_000L
         const val WORKER_RENEW_INTERVAL_MILLIS = 5_000L
         const val ORPHAN_LOCK_GRACE_MILLIS = 30_000L
+        const val TERMINAL_JOB_RETENTION_MILLIS = 30L * 24 * 60 * 60 * 1000
     }
 
     // Lazy reference to avoid circular dependency
@@ -388,6 +398,14 @@ class TemplateJobEngine(
             }
             execute(record.progress)
         }
+        val heldJobIds = lockStorage.getAll().mapTo(mutableSetOf()) { it.second.jobId }
+        for (record in storage.getAllRecords()) {
+            if (record.progress.status.isActive || record.progress.completedAt <= 0) continue
+            if (now - record.progress.completedAt < TERMINAL_JOB_RETENTION_MILLIS) continue
+            if (record.progress.jobId in heldJobIds) continue
+            storage.delete(record.progress.jobId)
+            logger.info("Expired terminal template job {} after {} days", record.progress.jobId, TERMINAL_JOB_RETENTION_MILLIS / (24 * 60 * 60 * 1000))
+        }
     }
 
     private fun hostsEitherLocation(progress: TemplateJobProgress, localNode: String): Boolean {
@@ -465,6 +483,11 @@ class TemplateJobEngine(
 
     private suspend fun runJob(progress: TemplateJobProgress) {
         var record = storage.getRecord(progress.jobId) ?: return
+        val checkpointCreatedNow = record.phase in setOf(
+            TemplateJobPhase.ACCEPTED,
+            TemplateJobPhase.SCANNING_SOURCE,
+            TemplateJobPhase.SCANNING_DESTINATION,
+        )
         val sourceTemplate = TemplateRegistry.findByReference(record.progress.source.toReference())
         if (sourceTemplate == null && record.phase == TemplateJobPhase.DELETING_SOURCE) {
             val destination = TemplateRegistry.findByReference(record.progress.destination.toReference())
@@ -477,23 +500,52 @@ class TemplateJobEngine(
         val destinationReference = record.progress.destination.toReference()
         var destination = TemplateRegistry.findByReference(destinationReference)
 
-        if (record.phase == TemplateJobPhase.ACCEPTED) {
-            val sourceInventory = snapshotFiles(source)
-            val initialDestination = destination?.let { snapshotFiles(it) } ?: emptyList()
+        if (record.phase in setOf(
+                TemplateJobPhase.ACCEPTED,
+                TemplateJobPhase.SCANNING_SOURCE,
+                TemplateJobPhase.SCANNING_DESTINATION,
+                TemplateJobPhase.PREPARING_DESTINATION,
+            )
+        ) {
             record = updateRecord(record.progress.jobId) {
                 it.copy(
-                    phase = TemplateJobPhase.COPYING,
+                    phase = TemplateJobPhase.SCANNING_SOURCE,
+                    progress = it.progress.copy(currentFile = "Scanning source"),
+                )
+            }
+            val sourceEntries = scanTemplate(source, record.progress.jobId, "Scanning source")
+            record = updateRecord(record.progress.jobId) {
+                it.copy(
+                    phase = TemplateJobPhase.SCANNING_DESTINATION,
+                    progress = it.progress.copy(currentFile = "Scanning destination"),
+                )
+            }
+            val destinationEntries = destination?.let {
+                scanTemplate(it, record.progress.jobId, "Scanning destination")
+            } ?: emptyList()
+            val sourceInventory = sourceEntries.filterNot { it.directory }
+                .map { TemplateFileSnapshot(it.path, false, it.size, it.modifiedAt) }
+                .sortedBy { it.path }
+            val sourceDirectories = sourceEntries.filter { it.directory }.map { it.path }.sorted()
+            val initialDestination = destinationEntries.filterNot { it.directory }
+                .map { TemplateFileSnapshot(it.path, false, it.size, it.modifiedAt) }
+                .sortedBy { it.path }
+            record = updateRecord(record.progress.jobId) {
+                it.copy(
+                    phase = TemplateJobPhase.PREPARING_DESTINATION,
                     sourceInventory = sourceInventory,
+                    sourceDirectoryInventory = sourceDirectories,
                     initialDestinationInventory = initialDestination,
                     expectedDestinationInventory = initialDestination,
                     progress = it.progress.copy(
                         totalFiles = sourceInventory.size,
                         totalBytes = sourceInventory.sumOf { file -> file.size },
+                        currentFile = "Preparing destination",
                     ),
                 )
             }
         } else {
-            val currentSource = snapshotFiles(source)
+            val currentSource = snapshotFiles(source, record.progress.jobId, "Checking source")
             if (record.phase == TemplateJobPhase.DELETING_SOURCE) {
                 if (currentSource.any { it !in record.sourceInventory }) {
                     throw unsafeRecovery("source contains files outside the saved move inventory")
@@ -530,11 +582,38 @@ class TemplateJobEngine(
             )
         }
 
-        validateRecoveryCheckpoint(record, source, destination)
+        if (!checkpointCreatedNow) {
+            record = updateRecord(progress.jobId) {
+                it.copy(
+                    phase = TemplateJobPhase.VERIFYING_CHECKPOINT,
+                    progress = it.progress.copy(currentFile = "Verifying recovery checkpoint"),
+                )
+            }
+            validateRecoveryCheckpoint(record, source, destination)
+        }
         record = storage.getRecord(progress.jobId) ?: return
 
-        val sourceEntries = mutableListOf<TemplateDirectoryEntry>()
-        scanDirectory(source, "", sourceEntries)
+        record = updateRecord(progress.jobId) {
+            it.copy(
+                phase = TemplateJobPhase.COPYING,
+                progress = it.progress.copy(currentFile = "Creating destination directories"),
+            )
+        }
+        val sourceEntries = buildList {
+            record.sourceDirectoryInventory.forEach { path ->
+                add(TemplateDirectoryEntry.newBuilder().setPath(path).setDirectory(true).build())
+            }
+            record.sourceInventory.forEach { file ->
+                add(
+                    TemplateDirectoryEntry.newBuilder()
+                        .setPath(file.path)
+                        .setDirectory(false)
+                        .setSize(file.size)
+                        .setModifiedAt(file.modifiedAt)
+                        .build()
+                )
+            }
+        }
         for (entry in sourceEntries.filter { it.directory }.sortedBy { it.path.count { c -> c == '/' } }) {
             val response = templateService.createDirectory(
                 CreateDirectoryRequest.newBuilder()
@@ -547,6 +626,9 @@ class TemplateJobEngine(
             }
         }
 
+        record = updateRecord(progress.jobId) {
+            it.copy(progress = it.progress.copy(currentFile = "Copying files"))
+        }
         val sourceFiles = sourceEntries.filterNot { it.directory }
         for (entry in sourceFiles) {
             record = storage.getRecord(progress.jobId) ?: return
@@ -581,25 +663,55 @@ class TemplateJobEngine(
                 continue
             }
 
-            record = updateRecord(progress.jobId) { it.copy(inFlightPath = entry.path) }
-            try {
-                val file = templateService.readFile(
-                    ReadFileRequest.newBuilder()
-                        .setTemplate(templateReferenceOf(source))
-                        .setPath(entry.path)
-                        .build()
-                ).file
-                check(file.size == entry.size && file.modifiedAt == entry.modifiedAt) {
-                    "Source file '${entry.path}' changed after the job checkpoint"
-                }
-                val response = templateService.updateFile(
-                    UpdateFileRequest.newBuilder()
-                        .setTemplate(templateReferenceOf(destination))
-                        .setPath(entry.path)
-                        .setContent(file.content)
-                        .build()
+            record = updateRecord(progress.jobId) {
+                it.copy(
+                    inFlightPath = entry.path,
+                    progress = it.progress.copy(currentFile = "Copying files: ${entry.path}"),
                 )
-                check(response.result.success) { "Failed to update '${entry.path}': ${response.result.message}" }
+            }
+            try {
+                var nextOffset = 0L
+                var sawFinalChunk = false
+                val chunks = flow {
+                    templateService.streamReadFileChunks(
+                        StreamReadFileChunksRequest.newBuilder()
+                            .setTemplate(templateReferenceOf(source))
+                            .setPath(entry.path)
+                            .setChunkSize(1024 * 1024)
+                            .build()
+                    ).collect { chunk ->
+                        check(!sawFinalChunk) { "Source sent data after its final chunk" }
+                        check(chunk.offset == nextOffset) {
+                            "Source file '${entry.path}' returned offset ${chunk.offset}; expected $nextOffset"
+                        }
+                        check(chunk.totalSize == entry.size && chunk.modifiedAt == entry.modifiedAt) {
+                            "Source file '${entry.path}' changed after the job checkpoint"
+                        }
+                        val afterChunk = nextOffset + chunk.content.size()
+                        check(afterChunk <= entry.size) { "Source file '${entry.path}' exceeded its checkpoint size" }
+                        check(chunk.finalChunk == (afterChunk == entry.size)) {
+                            "Source file '${entry.path}' returned an invalid final-chunk marker"
+                        }
+                        nextOffset = afterChunk
+                        sawFinalChunk = chunk.finalChunk
+                        emit(
+                            StreamWriteFileChunksRequest.newBuilder()
+                                .setTemplate(templateReferenceOf(destination))
+                                .setPath(entry.path)
+                                .setTotalSize(entry.size)
+                                .setOffset(chunk.offset)
+                                .setModifiedAt(entry.modifiedAt)
+                                .setContent(chunk.content)
+                                .setFinalChunk(chunk.finalChunk)
+                                .build()
+                        )
+                    }
+                    check(sawFinalChunk && nextOffset == entry.size) {
+                        "Source file '${entry.path}' ended at $nextOffset bytes; expected ${entry.size}"
+                    }
+                }
+                val response = templateService.streamWriteFileChunks(chunks)
+                check(response.success) { "Failed to update '${entry.path}': ${response.message}" }
 
                 val destinationSnapshot = snapshotFile(destination, entry.path)
                     ?: throw IllegalStateException("Destination file '${entry.path}' is missing after write")
@@ -612,7 +724,7 @@ class TemplateJobEngine(
                         inFlightPath = null,
                         progress = current.progress.copy(
                             filesProcessed = current.progress.filesProcessed + 1,
-                            bytesProcessed = current.progress.bytesProcessed + file.size,
+                            bytesProcessed = current.progress.bytesProcessed + entry.size,
                             filesCopied = current.progress.filesCopied + if (wasOverwrite) 0 else 1,
                             filesOverwritten = current.progress.filesOverwritten + if (wasOverwrite) 1 else 0,
                             currentFile = entry.path,
@@ -633,13 +745,23 @@ class TemplateJobEngine(
         }
 
         if (record.progress.extraFilesMode == TemplateJobExtraFilesMode.PURGE && record.destinationExisted) {
-            record = updateRecord(progress.jobId) { it.copy(phase = TemplateJobPhase.PURGING) }
+            record = updateRecord(progress.jobId) {
+                it.copy(
+                    phase = TemplateJobPhase.PURGING,
+                    progress = it.progress.copy(currentFile = "Purging destination files"),
+                )
+            }
             val sourcePaths = record.sourceInventory.map { it.path }.toSet()
             val extras = record.expectedDestinationInventory.filter { it.path !in sourcePaths }
             for (extra in extras) {
                 record = storage.getRecord(progress.jobId) ?: return
                 if (extra.path in record.purgedPaths) continue
-                record = updateRecord(progress.jobId) { it.copy(inFlightPurgePath = extra.path) }
+                record = updateRecord(progress.jobId) {
+                    it.copy(
+                        inFlightPurgePath = extra.path,
+                        progress = it.progress.copy(currentFile = "Purging: ${extra.path}"),
+                    )
+                }
                 val response = templateService.deleteFile(
                     DeleteFileRequest.newBuilder()
                         .setTemplate(templateReferenceOf(destination))
@@ -663,12 +785,20 @@ class TemplateJobEngine(
 
         record = storage.getRecord(progress.jobId) ?: return
         if (record.progress.type == TemplateJobType.MOVE) {
+            record = updateRecord(progress.jobId) {
+                it.copy(progress = it.progress.copy(currentFile = "Verifying destination before move"))
+            }
             validateDestinationInventory(record, destination)
             val destinationPaths = record.expectedDestinationInventory.map { it.path }.toSet()
             if (!record.sourceInventory.all { it.path in destinationPaths }) {
                 throw unsafeRecovery("destination is missing source files; source was retained")
             }
-            record = updateRecord(progress.jobId) { it.copy(phase = TemplateJobPhase.DELETING_SOURCE) }
+            record = updateRecord(progress.jobId) {
+                it.copy(
+                    phase = TemplateJobPhase.DELETING_SOURCE,
+                    progress = it.progress.copy(currentFile = "Deleting source"),
+                )
+            }
             val deleted = templateService.deleteTemplate(
                 DeleteTemplateRequest.newBuilder()
                     .setTemplate(templateReferenceOf(source))
@@ -688,15 +818,43 @@ class TemplateJobEngine(
         jobId: String,
         transform: (TemplateJobRecord) -> TemplateJobRecord,
     ): TemplateJobRecord = storage.updateRecord(jobId) { current ->
-        transform(current ?: throw IllegalStateException("Template job $jobId disappeared"))
+        val updated = transform(current ?: throw IllegalStateException("Template job $jobId disappeared"))
+        updated.copy(progress = updated.progress.copy(phase = updated.phase.toApiPhase()))
     } ?: throw IllegalStateException("Failed to persist template job $jobId")
 
-    private suspend fun snapshotFiles(template: Template): List<TemplateFileSnapshot> {
+    private fun TemplateJobPhase.toApiPhase(): org.vulpesstudios.vulpescloud.api.templates.TemplateJobPhase =
+        when (this) {
+            TemplateJobPhase.ACCEPTED -> org.vulpesstudios.vulpescloud.api.templates.TemplateJobPhase.ACCEPTED
+            TemplateJobPhase.SCANNING_SOURCE -> org.vulpesstudios.vulpescloud.api.templates.TemplateJobPhase.SCANNING_SOURCE
+            TemplateJobPhase.SCANNING_DESTINATION -> org.vulpesstudios.vulpescloud.api.templates.TemplateJobPhase.SCANNING_DESTINATION
+            TemplateJobPhase.PREPARING_DESTINATION -> org.vulpesstudios.vulpescloud.api.templates.TemplateJobPhase.PREPARING_DESTINATION
+            TemplateJobPhase.COPYING -> org.vulpesstudios.vulpescloud.api.templates.TemplateJobPhase.COPYING_FILES
+            TemplateJobPhase.PURGING -> org.vulpesstudios.vulpescloud.api.templates.TemplateJobPhase.PURGING_DESTINATION
+            TemplateJobPhase.VERIFYING_CHECKPOINT -> org.vulpesstudios.vulpescloud.api.templates.TemplateJobPhase.VERIFYING_CHECKPOINT
+            TemplateJobPhase.DELETING_SOURCE -> org.vulpesstudios.vulpescloud.api.templates.TemplateJobPhase.DELETING_SOURCE
+        }
+
+    private suspend fun snapshotFiles(
+        template: Template,
+        jobId: String? = null,
+        stage: String? = null,
+    ): List<TemplateFileSnapshot> {
         val entries = mutableListOf<TemplateDirectoryEntry>()
-        scanDirectory(template, "", entries)
+        val scanProgress = if (jobId != null && stage != null) ScanProgress(jobId, stage) else null
+        scanDirectory(template, "", entries, scanProgress)
         return entries.filterNot { it.directory }
             .map { TemplateFileSnapshot(it.path, false, it.size, it.modifiedAt) }
             .sortedBy { it.path }
+    }
+
+    private suspend fun scanTemplate(
+        template: Template,
+        jobId: String,
+        stage: String,
+    ): List<TemplateDirectoryEntry> {
+        val entries = mutableListOf<TemplateDirectoryEntry>()
+        scanDirectory(template, "", entries, ScanProgress(jobId, stage))
+        return entries
     }
 
     private suspend fun snapshotFile(template: Template, path: String): TemplateFileSnapshot? {
@@ -712,7 +870,7 @@ class TemplateJobEngine(
     }
 
     private suspend fun validateDestinationInventory(record: TemplateJobRecord, destination: Template) {
-        val actual = snapshotFiles(destination)
+        val actual = snapshotFiles(destination, record.progress.jobId, "Verifying destination")
         if (actual != record.expectedDestinationInventory.sortedBy { it.path }) {
             throw unsafeRecovery("destination path/size/modified-time inventory changed")
         }
@@ -724,7 +882,7 @@ class TemplateJobEngine(
         destination: Template,
     ) {
         var record = initial
-        val actualSource = snapshotFiles(source)
+        val actualSource = snapshotFiles(source, record.progress.jobId, "Verifying source")
         if (record.phase == TemplateJobPhase.DELETING_SOURCE) {
             if (actualSource.any { it !in record.sourceInventory }) {
                 throw unsafeRecovery("source contains unexpected files during move finalization")
@@ -733,7 +891,7 @@ class TemplateJobEngine(
             throw unsafeRecovery("source path/size/modified-time inventory changed")
         }
 
-        val actualDestination = snapshotFiles(destination)
+        val actualDestination = snapshotFiles(destination, record.progress.jobId, "Verifying destination")
         val expected = record.expectedDestinationInventory.associateBy { it.path }
         val actual = actualDestination.associateBy { it.path }
 
@@ -765,13 +923,9 @@ class TemplateJobEngine(
             val actualFile = actual[path]
             val expectedFile = expected[path]
             if (actualFile != expectedFile && actualFile != null) {
-                val sourceBytes = templateService.readFile(
-                    ReadFileRequest.newBuilder().setTemplate(templateReferenceOf(source)).setPath(path).build()
-                ).file.content
-                val destinationBytes = templateService.readFile(
-                    ReadFileRequest.newBuilder().setTemplate(templateReferenceOf(destination)).setPath(path).build()
-                ).file.content
-                if (sourceBytes != destinationBytes) throw unsafeRecovery("in-flight file '$path' differs from source")
+                if (!templateFilesEqual(source, destination, path)) {
+                    throw unsafeRecovery("in-flight file '$path' differs from source")
+                }
                 val sourceSnapshot = record.sourceInventory.firstOrNull { it.path == path }
                     ?: throw unsafeRecovery("in-flight file '$path' is outside source inventory")
                 val overwritten = record.initialDestinationInventory.any { it.path == path }
@@ -808,6 +962,40 @@ class TemplateJobEngine(
         }
     }
 
+    private suspend fun templateFilesEqual(source: Template, destination: Template, path: String): Boolean =
+        streamFileDigest(source, path).contentEquals(streamFileDigest(destination, path))
+
+    private suspend fun streamFileDigest(template: Template, path: String): ByteArray {
+        val digest = java.security.MessageDigest.getInstance("SHA-256")
+        var expectedOffset = 0L
+        var totalSize: Long? = null
+        var modifiedAt: Long? = null
+        var sawFinal = false
+        templateService.streamReadFileChunks(
+            StreamReadFileChunksRequest.newBuilder()
+                .setTemplate(templateReferenceOf(template))
+                .setPath(path)
+                .setChunkSize(1024 * 1024)
+                .build()
+        ).collect { chunk ->
+            check(!sawFinal && chunk.offset == expectedOffset) { "Invalid chunk sequence for '$path'" }
+            if (totalSize == null) {
+                totalSize = chunk.totalSize
+                modifiedAt = chunk.modifiedAt
+            }
+            check(chunk.totalSize == totalSize && chunk.modifiedAt == modifiedAt) {
+                "File metadata changed while reading '$path'"
+            }
+            expectedOffset += chunk.content.size()
+            check(expectedOffset <= (totalSize ?: 0L)) { "Stream exceeded declared size for '$path'" }
+            check(chunk.finalChunk == (expectedOffset == totalSize)) { "Invalid final chunk for '$path'" }
+            digest.update(chunk.content.toByteArray())
+            sawFinal = chunk.finalChunk
+        }
+        check(sawFinal && expectedOffset == totalSize) { "Incomplete file stream for '$path'" }
+        return digest.digest()
+    }
+
     private suspend fun completeJob(record: TemplateJobRecord) {
         val completed = updateRecord(record.progress.jobId) { current ->
             current.copy(
@@ -816,6 +1004,7 @@ class TemplateJobEngine(
                     status = TemplateJobStatus.COMPLETED,
                     completedAt = System.currentTimeMillis(),
                     filesProcessed = current.progress.totalFiles,
+                    currentFile = "Completed",
                 ),
             )
         }
@@ -853,6 +1042,7 @@ class TemplateJobEngine(
         template: Template,
         path: String,
         result: MutableList<TemplateDirectoryEntry>,
+        scanProgress: ScanProgress? = null,
     ) {
         val entries = templateService.listDirectory(
             ListDirectoryRequest.newBuilder()
@@ -861,10 +1051,22 @@ class TemplateJobEngine(
                 .build()
         ).entriesList
 
+        if (scanProgress != null) {
+            val now = System.currentTimeMillis()
+            if (scanProgress.lastPersistedAt == 0L || now - scanProgress.lastPersistedAt >= 1_000L) {
+                scanProgress.lastPersistedAt = now
+                updateRecord(scanProgress.jobId) { current ->
+                    current.copy(progress = current.progress.copy(
+                        currentFile = "${scanProgress.label}: ${result.size + entries.size} entries scanned"
+                    ))
+                }
+            }
+        }
+
         for (entry in entries) {
             result.add(entry)
             if (entry.directory) {
-                scanDirectory(template, entry.path, result)
+                scanDirectory(template, entry.path, result, scanProgress)
             }
         }
     }

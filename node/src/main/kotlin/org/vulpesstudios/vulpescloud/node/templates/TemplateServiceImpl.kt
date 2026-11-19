@@ -24,11 +24,18 @@ import io.grpc.Status
 import io.grpc.StatusException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.NonCancellable
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.produceIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.slf4j.LoggerFactory
@@ -45,6 +52,11 @@ import build.buf.gen.vulpescloud.templates.v1.TemplateStorage as TemplateStorage
 import org.vulpesstudios.vulpescloud.api.templates.TemplateLocation as ApiTemplateLocation
 
 class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBase() {
+
+    private companion object {
+        const val MAX_TEMPLATE_FILE_CHUNK_BYTES = 1024 * 1024
+        const val DEFAULT_TEMPLATE_FILE_CHUNK_BYTES = 1024 * 1024
+    }
 
     private val logger = LoggerFactory.getLogger(TemplateServiceImpl::class.java)
 
@@ -179,7 +191,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         val templates = mutableListOf<Template>()
         for (template in TemplateRegistry.getAll()) {
             if (!TemplateRegistry.matchesLocation(template.location.toDefinition(), request.location)) continue
-            if (jobLockStorage.get(TemplateLockKey.template(template.id)) == null) templates += template
+            templates += template
         }
 
         val response = ListTemplatesResponse.newBuilder()
@@ -246,8 +258,20 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
         return ListActiveTemplateJobsResponse.newBuilder().addAllJobs(jobs).build()
     }
 
-    internal suspend fun listAllTemplateJobs(): List<ProtoTemplateJobProgress> =
-        jobStorage.getAllRecords().map { it.progress.toDefinition() }
+    @RequiresPermission("templates.job.list")
+    override suspend fun listTemplateJobs(request: ListTemplateJobsRequest): ListTemplateJobsResponse {
+        val statusFilter = request.statusFilter
+        val jobs = jobStorage.getAll()
+            .asSequence()
+            .filter {
+                statusFilter == build.buf.gen.vulpescloud.templates.v1.TemplateJobStatus.TEMPLATE_JOB_STATUS_UNSPECIFIED ||
+                    it.status.toDefinition() == statusFilter
+            }
+            .sortedByDescending { it.startedAt }
+            .map { it.toDefinition() }
+            .toList()
+        return ListTemplateJobsResponse.newBuilder().addAllJobs(jobs).build()
+    }
 
     @RequiresPermission("templates.job.cancel")
     override suspend fun cancelTemplateJob(request: CancelTemplateJobRequest): CancelTemplateJobResponse {
@@ -537,6 +561,139 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
             throw StatusException(Status.NOT_FOUND.withDescription(e.message))
         } catch (e: Exception) {
             throw StatusException(Status.INTERNAL.withDescription(e.message))
+        }
+    }
+
+    @RequiresPermission("templates.readFile")
+    override fun streamReadFileChunks(request: StreamReadFileChunksRequest): Flow<TemplateFileChunk> = channelFlow {
+        val template = TemplateRegistry.findByReference(request.template)
+            ?: throw StatusException(Status.NOT_FOUND.withDescription("Template not found"))
+        ensureUnlocked(template)
+        val location = template.location.toDefinition()
+        if (needsForwarding(location)) {
+            val stub = remoteStub(location.nodeName) ?: throw unavailable(location.nodeName)
+            stub.streamReadFileChunks(request).collect { send(it) }
+            return@channelFlow
+        }
+
+        val requestedSize = request.chunkSize.takeIf { it > 0 } ?: DEFAULT_TEMPLATE_FILE_CHUNK_BYTES
+        val chunkSize = requestedSize.coerceIn(4 * 1024, MAX_TEMPLATE_FILE_CHUNK_BYTES)
+        val session = withContext(Dispatchers.IO) {
+            storageFor(template).openFileRead(template, request.path)
+        }
+        session.use { reader ->
+            val buffer = ByteArray(chunkSize)
+            var offset = 0L
+            if (reader.totalSize == 0L) {
+                send(
+                    TemplateFileChunk.newBuilder()
+                        .setOffset(0)
+                        .setTotalSize(0)
+                        .setModifiedAt(reader.modifiedAt)
+                        .setFinalChunk(true)
+                        .build()
+                )
+            } else {
+                while (offset < reader.totalSize) {
+                    val read = withContext(Dispatchers.IO) { reader.read(buffer) }
+                    if (read < 0) break
+                    if (read == 0) continue
+                    val nextOffset = offset + read
+                    check(nextOffset <= reader.totalSize) { "Storage returned more bytes than the declared file size" }
+                    send(
+                        TemplateFileChunk.newBuilder()
+                            .setOffset(offset)
+                            .setTotalSize(reader.totalSize)
+                            .setModifiedAt(reader.modifiedAt)
+                            .setContent(ByteString.copyFrom(buffer, 0, read))
+                            .setFinalChunk(nextOffset == reader.totalSize)
+                            .build()
+                    )
+                    offset = nextOffset
+                }
+                check(offset == reader.totalSize) {
+                    "Storage ended '${request.path}' at $offset bytes; expected ${reader.totalSize}"
+                }
+            }
+        }
+    }
+
+    @RequiresPermission("templates.updateFile")
+    override suspend fun streamWriteFileChunks(
+        requests: Flow<StreamWriteFileChunksRequest>
+    ): TemplateOperationResult = coroutineScope {
+        val incoming = requests.produceIn(this)
+        var writer: TemplateFileWriteSession? = null
+        try {
+            val first = incoming.receiveCatching().getOrNull()
+                ?: throw StatusException(Status.INVALID_ARGUMENT.withDescription("File stream contained no chunks"))
+            val template = TemplateRegistry.findByReference(first.template)
+                ?: throw StatusException(Status.NOT_FOUND.withDescription("Template not found"))
+            ensureUnlocked(template)
+            val location = template.location.toDefinition()
+            if (needsForwarding(location)) {
+                val stub = remoteStub(location.nodeName) ?: throw unavailable(location.nodeName)
+                val forwarded = flow {
+                    emit(first)
+                    for (chunk in incoming) emit(chunk)
+                }
+                return@coroutineScope stub.streamWriteFileChunks(forwarded)
+            }
+
+            val totalSize = first.totalSize
+            require(totalSize >= 0) { "File size cannot be negative" }
+            writer = withContext(Dispatchers.IO) {
+                storageFor(template).beginFileWrite(template, first.path, totalSize, first.modifiedAt)
+            }
+            var nextOffset = 0L
+            var sawFinalChunk = false
+
+            suspend fun accept(chunk: StreamWriteFileChunksRequest) {
+                check(!sawFinalChunk) { "Received data after the final file chunk" }
+                require(chunk.template == first.template) { "Template changed during file transfer" }
+                require(chunk.path == first.path) { "Path changed during file transfer" }
+                require(chunk.totalSize == totalSize && chunk.modifiedAt == first.modifiedAt) {
+                    "File metadata changed during transfer"
+                }
+                require(chunk.content.size() <= MAX_TEMPLATE_FILE_CHUNK_BYTES) {
+                    "File chunk exceeds ${MAX_TEMPLATE_FILE_CHUNK_BYTES} bytes"
+                }
+                require(chunk.offset == nextOffset) {
+                    "Unexpected chunk offset ${chunk.offset}; expected $nextOffset"
+                }
+                val next = nextOffset + chunk.content.size()
+                require(next <= totalSize) { "File stream exceeded its declared size" }
+                require(chunk.content.size() > 0 || (totalSize == 0L && chunk.finalChunk)) {
+                    "Empty non-final file chunks are not allowed"
+                }
+                require(chunk.finalChunk == (next == totalSize)) {
+                    "Invalid final-chunk marker at offset $next of $totalSize"
+                }
+                withContext(Dispatchers.IO) {
+                    writer!!.write(chunk.content.toByteArray())
+                }
+                nextOffset = next
+                if (chunk.finalChunk) {
+                    require(nextOffset == totalSize) {
+                        "Final chunk ended at $nextOffset bytes; expected $totalSize"
+                    }
+                    sawFinalChunk = true
+                }
+            }
+
+            accept(first)
+            for (chunk in incoming) accept(chunk)
+            check(sawFinalChunk) { "File stream ended without a final chunk" }
+            withContext(Dispatchers.IO) {
+                writer!!.commit()
+                writer!!.close()
+            }
+            operationResult(true, "File updated")
+        } catch (e: Throwable) {
+            withContext(NonCancellable + Dispatchers.IO) { writer?.abort() }
+            throw e
+        } finally {
+            incoming.cancel()
         }
     }
 

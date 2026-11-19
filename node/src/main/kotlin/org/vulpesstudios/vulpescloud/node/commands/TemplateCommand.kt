@@ -26,6 +26,7 @@ import org.incendo.cloud.annotations.Permission
 import org.incendo.cloud.annotations.suggestion.Suggestions
 import org.incendo.cloud.context.CommandContext
 import org.incendo.cloud.context.CommandInput
+import org.incendo.cloud.processors.confirmation.annotation.Confirmation
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.command.CommandSource
 import org.vulpesstudios.vulpescloud.node.templates.TemplateRegistry
@@ -39,7 +40,7 @@ class TemplateCommand {
     private val defaultTemplateColumns = listOf("id", "name", "storage", "node", "weight", "enabled")
     private val allTemplateColumns = defaultTemplateColumns + "version"
     private val storageColumns = listOf("name", "type", "node")
-    private val defaultJobColumns = listOf("id", "type", "status", "source", "destination", "files")
+    private val defaultJobColumns = listOf("id", "type", "status", "phase", "activity", "source", "destination", "files")
     private val allJobColumns = defaultJobColumns + listOf("bytes", "started", "completed", "failure")
 
     private data class TemplateSelector(val id: String, val storage: String? = null, val node: String? = null)
@@ -193,6 +194,7 @@ class TemplateCommand {
     }
 
     @Permission("templates.copy")
+    @Confirmation
     @Command("template copy <source> <destination> <destinationStorage>")
     fun copyTemplate(
         source: CommandSource,
@@ -249,6 +251,7 @@ class TemplateCommand {
     }
 
     @Permission("templates.move")
+    @Confirmation
     @Command("template move <source> <destination> <destinationStorage>")
     fun moveTemplate(
         source: CommandSource,
@@ -340,7 +343,9 @@ class TemplateCommand {
             }
         }
         runBlocking {
-            val jobs = Node.instance.templateServiceImpl.listAllTemplateJobs()
+            val jobs = Node.instance.localGrpcClient.templateAPI
+                .listTemplateJobs(ListTemplateJobsRequest.getDefaultInstance())
+                .jobsList
 
             if (jobs.isEmpty()) {
                 source.sendMessage("<gray>There are no template jobs.</gray>")
@@ -349,8 +354,8 @@ class TemplateCommand {
 
             val table = TableUtils.newTable().defaultStyle()
             table.header(mapOf(
-                "id" to "Job ID", "type" to "Type", "status" to "Status", "source" to "Source",
-                "destination" to "Destination", "files" to "Files", "bytes" to "Bytes",
+                "id" to "Job ID", "type" to "Type", "status" to "Status", "phase" to "Phase", "source" to "Source",
+                "activity" to "Activity", "destination" to "Destination", "files" to "Files", "bytes" to "Bytes",
                 "started" to "Started", "completed" to "Completed", "failure" to "Failure",
             ))
             jobs.sortedByDescending { it.startedAt }.forEach { job ->
@@ -358,6 +363,8 @@ class TemplateCommand {
                     "id" to job.jobId,
                     "type" to job.type.name.removePrefix("TEMPLATE_JOB_TYPE_"),
                     "status" to job.status.name.removePrefix("TEMPLATE_JOB_STATUS_"),
+                    "phase" to job.phase.name.removePrefix("TEMPLATE_JOB_PHASE_"),
+                    "activity" to job.currentFile,
                     "source" to formatJobTemplate(job.source),
                     "destination" to formatJobTemplate(job.destination),
                     "files" to "${job.filesProcessed}/${job.totalFiles} (copied ${job.filesCopied}, skipped ${job.filesSkipped})",
@@ -392,6 +399,7 @@ class TemplateCommand {
     }
 
     @Permission("templates.job.cancel")
+    @Confirmation
     @Command("template job unlock <jobId>")
     fun unlockTemplateJob(
         source: CommandSource,
@@ -529,6 +537,8 @@ class TemplateCommand {
             "<gold>---------</gold> <white>${job.jobId}</white> <gold>---------</gold>\n" +
                 "<gray>Type<dark_gray>:</dark_gray> <white>$typeLabel</white> \n" +
                 "<gray>Status<dark_gray>:</dark_gray> ${jobStatusColor(job.status)}${job.status.name.removePrefix("TEMPLATE_JOB_STATUS_")}</${jobStatusColorName(job.status)}> \n" +
+                "<gray>Phase<dark_gray>:</dark_gray> <white>${job.phase.name.removePrefix("TEMPLATE_JOB_PHASE_")}</white> \n" +
+                "<gray>Activity<dark_gray>:</dark_gray> <white>${job.currentFile}</white> \n" +
                 "<gray>Source<dark_gray>:</dark_gray> <white>${job.source.templateId}</white> <gray>(${job.source.name})</gray> " +
                 "<gray>@</gray> <white>${job.source.location.storageName}</white> \n" +
                 "<gray>Destination<dark_gray>:</dark_gray> <white>${job.destination.templateId}</white> <gray>(${job.destination.name})</gray> " +
@@ -585,6 +595,10 @@ object TemplateJobCache {
                 Node.instance.localGrpcClient.templateAPI
                     .listActiveTemplateJobs(com.google.protobuf.Empty.getDefaultInstance())
                     .jobsList
+                    .filter {
+                        it.status == TemplateJobStatus.TEMPLATE_JOB_STATUS_PENDING ||
+                            it.status == TemplateJobStatus.TEMPLATE_JOB_STATUS_IN_PROGRESS
+                    }
             }
         }
     }

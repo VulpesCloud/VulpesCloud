@@ -24,8 +24,12 @@ import org.vulpesstudios.vulpescloud.api.templates.TemplateJobProgress
 @Serializable
 enum class TemplateJobPhase {
     ACCEPTED,
+    SCANNING_SOURCE,
+    SCANNING_DESTINATION,
+    PREPARING_DESTINATION,
     COPYING,
     PURGING,
+    VERIFYING_CHECKPOINT,
     DELETING_SOURCE,
 }
 
@@ -43,6 +47,7 @@ data class TemplateJobRecord(
     val workerToken: String = UUID.randomUUID().toString(),
     val phase: TemplateJobPhase = TemplateJobPhase.ACCEPTED,
     val sourceInventory: List<TemplateFileSnapshot> = emptyList(),
+    val sourceDirectoryInventory: List<String> = emptyList(),
     val destinationExisted: Boolean = false,
     val initialDestinationInventory: List<TemplateFileSnapshot> = emptyList(),
     val expectedDestinationInventory: List<TemplateFileSnapshot> = emptyList(),

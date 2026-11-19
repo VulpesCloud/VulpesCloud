@@ -17,7 +17,7 @@ oshi = "7.7.3"
 protobuf = "4.36.2"
 grpc = "1.85.1"
 grpc-kotlin = "1.5.0"
-protospecs-grpc = "1.5.0.4.20261118172518.f9a7f518817e"
+protospecs-grpc = "1.5.0.4.20261119172350.75f90eaf3d0b"
 perfmark = "0.27.0"
 
 javaJWT = "4.6.2"
