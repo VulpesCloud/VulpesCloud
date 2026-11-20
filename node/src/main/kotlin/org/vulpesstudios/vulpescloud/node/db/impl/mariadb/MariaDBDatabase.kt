@@ -42,7 +42,8 @@ class MariaDBDatabase(
         val encoded = json.encodeToString(JsonElement.serializer(), value)
 
         transaction(database) {
-            table.upsert(table.namespace, table.key) {
+            // MariaDB uses ON DUPLICATE KEY and Exposed does not accept explicit conflict keys here.
+            table.upsert {
                 it[table.namespace] = name
                 it[table.key] = key
                 it[table.value] = encoded

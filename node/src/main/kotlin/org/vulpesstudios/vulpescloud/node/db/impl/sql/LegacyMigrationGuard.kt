@@ -21,16 +21,25 @@ object LegacyMigrationGuard {
         }
         if (legacyTables.isEmpty()) return
 
-        val migratedTables = mutableSetOf<String>()
+        val manifest = mutableMapOf<String, Pair<Long, Long>>()
         connection.createStatement().use { statement ->
-            statement.executeQuery("SELECT source_collection FROM vc_migration_manifest").use { result ->
-                while (result.next()) migratedTables += result.getString(1)
+            statement.executeQuery(
+                "SELECT source_collection, source_count, migrated_count FROM vc_migration_manifest"
+            ).use { result ->
+                while (result.next()) {
+                    manifest[result.getString(1)] = result.getLong(2) to result.getLong(3)
+                }
             }
         }
-        val missing = legacyTables - migratedTables
+        val missing = legacyTables - manifest.keys
         check(missing.isEmpty()) {
             "Manual SQL migration is incomplete. Stop the node and run docs/database-migration/<engine>.sql; " +
                 "these legacy tables are not recorded as migrated: ${missing.sorted().joinToString()}."
+        }
+        val mismatched = manifest.filter { (it.value.first != it.value.second) }.keys
+        check(mismatched.isEmpty()) {
+            "Manual SQL migration row counts do not match for: ${mismatched.sorted().joinToString()}. " +
+                "Inspect vc_migration_manifest before restarting."
         }
     }
 }
