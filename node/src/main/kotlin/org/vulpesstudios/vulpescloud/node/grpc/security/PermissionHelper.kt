@@ -16,7 +16,7 @@
 
 package org.vulpesstudios.vulpescloud.node.grpc.security
 
-import org.vulpesstudios.vulpescloud.node.utils.MongoUtils
+import org.vulpesstudios.vulpescloud.node.utils.PersistenceUtils
 
 object PermissionHelper {
 
@@ -27,8 +27,8 @@ object PermissionHelper {
     ): Boolean {
         val permissions = mutableListOf<String>()
 
-        val user = MongoUtils.getUserByName(username) ?: return false
-        val groups = user.groups.map { MongoUtils.getGroupByName(it) }
+        val user = PersistenceUtils.getUserByName(username) ?: return false
+        val groups = user.groups.map { PersistenceUtils.getGroupByName(it) }
 
         groups.forEach { it?.permissions?.let(permissions::addAll) }
         permissions.addAll(user.permissions)
@@ -69,8 +69,8 @@ object PermissionHelper {
 
     suspend fun getAllPermissionsOfUser(username: String): List<String> {
         val permissions = mutableListOf<String>()
-        val user = MongoUtils.getUserByName(username) ?: return emptyList()
-        val groups = user.groups.map { MongoUtils.getGroupByName(it) }
+        val user = PersistenceUtils.getUserByName(username) ?: return emptyList()
+        val groups = user.groups.map { PersistenceUtils.getGroupByName(it) }
         groups.forEach { it?.permissions?.let(permissions::addAll) }
         permissions.addAll(user.permissions)
         return permissions.distinct()

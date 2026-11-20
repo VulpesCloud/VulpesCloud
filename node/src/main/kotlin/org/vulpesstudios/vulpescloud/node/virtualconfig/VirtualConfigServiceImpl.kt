@@ -21,7 +21,7 @@ import kotlinx.serialization.json.Json
 import org.vulpesstudios.vulpescloud.api.virtualconfig.VirtualConfig
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.grpc.security.annotations.RequiresPermission
-import org.vulpesstudios.vulpescloud.node.utils.MongoUtils
+import org.vulpesstudios.vulpescloud.node.utils.PersistenceUtils
 
 class VirtualConfigServiceImpl :
     VirtualConfigServiceGrpcKt.VirtualConfigServiceCoroutineImplBase() {
@@ -71,7 +71,7 @@ class VirtualConfigServiceImpl :
             this.lastUpdatedAt = System.currentTimeMillis()
         }
 
-        MongoUtils.nothingOrInsertVirtualConfig(config)
+        PersistenceUtils.nothingOrInsertVirtualConfig(config)
 
         return createVirtualConfigResponse { this.config = config }
     }
@@ -83,7 +83,7 @@ class VirtualConfigServiceImpl :
 
         require(request.name.isNotEmpty()) { "Name must not be empty" }
 
-        MongoUtils.deleteVirtualConfig(virtualConfig { this.name = request.name })
+        PersistenceUtils.deleteVirtualConfig(virtualConfig { this.name = request.name })
 
         return deleteVirtualConfigResponse { this.success = true }
     }
@@ -102,7 +102,7 @@ class VirtualConfigServiceImpl :
             this.lastUpdatedAt = System.currentTimeMillis()
         }
 
-        MongoUtils.updateOrInsertVirtualConfig(config)
+        PersistenceUtils.updateOrInsertVirtualConfig(config)
 
         return updateVirtualConfigResponse { this.config = config }
     }

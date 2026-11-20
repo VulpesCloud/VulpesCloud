@@ -63,7 +63,7 @@ interface DatabaseProvider {
             mainDatabaseProvider =
                 availableDatabaseProviders[Node.instance.configProvider.config.databaseType]
                     ?: throw IllegalStateException(
-                        "Invalid database type: ${Node.instance.configProvider.config.databaseType}."
+                        "Unsupported database type '${Node.instance.configProvider.config.databaseType}'. Supported types are sqlite, mariadb, and postgresql. MongoDB is no longer a runtime provider. Migrate existing SQL tables using docs/database-migration/README.md."
                     )
             if (PropertyUtils.isMoreDBLogging()) logger.info("Initializing main Database Provider")
             mainDatabaseProvider!!.initialize()

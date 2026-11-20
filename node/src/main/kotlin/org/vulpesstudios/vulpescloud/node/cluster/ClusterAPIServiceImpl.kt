@@ -31,7 +31,7 @@ import org.vulpesstudios.vulpescloud.node.grpc.security.AuthClientInterceptor
 import org.vulpesstudios.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import org.vulpesstudios.vulpescloud.node.grpc.security.model.UserModel
 import org.vulpesstudios.vulpescloud.node.modules.ModuleStates
-import org.vulpesstudios.vulpescloud.node.utils.MongoUtils
+import org.vulpesstudios.vulpescloud.node.utils.PersistenceUtils
 import java.util.concurrent.CompletionException
 import java.util.concurrent.ExecutionException
 
@@ -166,7 +166,7 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
     }
 
     private suspend fun getPlayer(uuid: String): UserModel? {
-        return MongoUtils.getUserByName(
+        return PersistenceUtils.getUserByName(
             Node.instance.localGrpcClient.authAPI
                 .getUserByExtraData(
                     getUserByExtraDataRequest {

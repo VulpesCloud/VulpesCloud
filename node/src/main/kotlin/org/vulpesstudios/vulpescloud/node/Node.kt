@@ -41,8 +41,8 @@ import org.vulpesstudios.vulpescloud.node.config.ConfigProvider
 import org.vulpesstudios.vulpescloud.node.coordination.ChronyxCoordinator
 import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.mariadb.MariaDBDatabaseProvider
-import org.vulpesstudios.vulpescloud.node.db.impl.mongo.MongoDBDatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.sqlite.SQLiteDatabaseProvider
+import org.vulpesstudios.vulpescloud.node.db.impl.postgresql.PostgreSQLDatabaseProvider
 import org.vulpesstudios.vulpescloud.node.drain.DrainEngine
 import org.vulpesstudios.vulpescloud.node.drain.NodeDrainAPIServiceImpl
 import org.vulpesstudios.vulpescloud.node.event.EventListenHelper
@@ -190,7 +190,7 @@ class Node {
             DatabaseProvider.apply {
                 addDatabaseProvider("sqlite", SQLiteDatabaseProvider())
                 addDatabaseProvider("mariadb", MariaDBDatabaseProvider())
-                addDatabaseProvider("mongodb", MongoDBDatabaseProvider())
+                addDatabaseProvider("postgresql", PostgreSQLDatabaseProvider())
 
                 lockDatabaseProviderAdding()
                 setAndInitializeMainDatabaseProvider()

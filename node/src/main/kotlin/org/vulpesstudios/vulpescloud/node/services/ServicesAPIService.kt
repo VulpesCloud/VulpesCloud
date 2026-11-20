@@ -141,7 +141,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             if (correctNode?.endpoint?.name == ClusterHelper.getLocalNodeSnapshot().name) {
                 if (isLoggingRedirects()) {
                     logger.error(
-                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service; inspect and remove the stale record from the configured database (shutting down the cluster is recommended when doing this)."
                     )
                 }
             }
@@ -217,7 +217,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             if (correctNode?.endpoint?.name == ClusterHelper.getLocalNodeSnapshot().name) {
                 if (isLoggingRedirects()) {
                     logger.error(
-                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, inspect and remove the stale record from the configured database (shutting down the cluster is recommended when doing this)."
                     )
                 }
             }
@@ -276,7 +276,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             if (correctNode?.endpoint?.name == ClusterHelper.getLocalNodeSnapshot().name) {
                 if (isLoggingRedirects()) {
                     logger.error(
-                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, inspect and remove the stale record from the configured database (shutting down the cluster is recommended when doing this)."
                     )
                 }
             }
@@ -333,7 +333,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             if (correctNode?.endpoint?.name == ClusterHelper.getLocalNodeSnapshot().name) {
                 if (isLoggingRedirects()) {
                     logger.error(
-                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, inspect and remove the stale record from the configured database (shutting down the cluster is recommended when doing this)."
                     )
                 }
             }
@@ -390,7 +390,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             if (correctNode?.endpoint?.name == ClusterHelper.getLocalNodeSnapshot().name) {
                 if (isLoggingRedirects()) {
                     logger.error(
-                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, inspect and remove the stale record from the configured database (shutting down the cluster is recommended when doing this)."
                     )
                 }
             }
@@ -446,7 +446,7 @@ class ServicesAPIService : ServiceAPIServiceGrpcKt.ServiceAPIServiceCoroutineImp
             if (correctNode?.endpoint?.name == ClusterHelper.getLocalNodeSnapshot().name) {
                 if (isLoggingRedirects()) {
                     logger.error(
-                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, delete it manually in MongoDB (Shutting down the Cluster is recommended when doing this)!"
+                        "Service ${service.task.name}-${service.orderedId} is not registered on this node, but assigned to this node! This might happen if the Node shuts down without removing the service, inspect and remove the stale record from the configured database (shutting down the cluster is recommended when doing this)."
                     )
                 }
             }

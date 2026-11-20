@@ -25,7 +25,7 @@ import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.grpc.security.model.GroupModel
 import org.vulpesstudios.vulpescloud.node.grpc.security.model.UserModel
 
-object MongoUtils {
+object PersistenceUtils {
 
     private val tasksDatabase by lazy {
         Node.instance.getDatabaseProvider().getOrCreateDatabase("tasks")

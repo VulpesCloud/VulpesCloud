@@ -19,13 +19,16 @@ package org.vulpesstudios.vulpescloud.node.db.impl.mariadb
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotlinx.serialization.json.Json
+import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
-import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.*
+import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
 import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.vulpesstudios.vulpescloud.node.config.db.MariaDBConfig
 import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.sql.KeyValueTable
+import org.vulpesstudios.vulpescloud.node.db.impl.sql.LegacyMigrationGuard
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 
@@ -45,6 +48,15 @@ class MariaDBDatabaseProvider : DatabaseProvider {
         hikariConfig.password = options.password
 
         dataSource = HikariDataSource(hikariConfig)
+        val existingTables = dataSource.connection.use { connection ->
+            connection.metaData.getTables(connection.catalog, LegacyMigrationGuard.currentSchema(connection), "%", arrayOf("TABLE")).use { rs ->
+                buildSet { while (rs.next()) add(rs.getString("TABLE_NAME")) }
+            }
+        }
+        Flyway.configure().dataSource(dataSource).locations("classpath:db/migration/mariadb")
+            .baselineOnMigrate(existingTables.any { !it.equals("flyway_schema_history", true) })
+            .baselineVersion("0").load().migrate()
+        dataSource.connection.use(LegacyMigrationGuard::requireMigrationComplete)
         database = Database.connect(dataSource)
     }
 
@@ -58,18 +70,19 @@ class MariaDBDatabaseProvider : DatabaseProvider {
     }
 
     override fun hasDatabase(name: String): Boolean {
-        return transaction(database) { SchemaUtils.listTables().any { it == name } }
+        val records = KeyValueTable()
+        return transaction(database) { records.selectAll().any { it[records.namespace] == name } }
     }
 
-    override fun getDatabaseNames(): Set<String> =
-        transaction(database) { SchemaUtils.listTables().toSet() }
+    override fun getDatabaseNames(): Set<String> {
+        val records = KeyValueTable()
+        return transaction(database) { records.selectAll().map { it[records.namespace] }.toSet() }
+    }
 
     override fun deleteDatabase(name: String) {
-        if (hasDatabase(name)) {
-            val tableToDelete = databases[name]?.table ?: KeyValueTable(name)
-            transaction(database) { SchemaUtils.drop(tableToDelete) }
-            databases.remove(name)
-        }
+        val records = KeyValueTable()
+        transaction(database) { records.deleteWhere { records.namespace eq name } }
+        databases.remove(name)
     }
 
     private fun getMariaDBConfig(): MariaDBConfig {

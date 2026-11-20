@@ -27,8 +27,8 @@ import org.vulpesstudios.vulpescloud.node.command.ConsoleCommandSource
 import org.vulpesstudios.vulpescloud.node.command.annotation.SpecificCommandSource
 import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.mariadb.MariaDBDatabaseProvider
-import org.vulpesstudios.vulpescloud.node.db.impl.mongo.MongoDBDatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.sqlite.SQLiteDatabaseProvider
+import org.vulpesstudios.vulpescloud.node.db.impl.postgresql.PostgreSQLDatabaseProvider
 
 @Suppress("UNUSED")
 class MigrateCommand {
@@ -49,9 +49,9 @@ class MigrateCommand {
             )
             return
         }
-        val available = setOf("sqlite", "mariadb", "mongodb")
+        val available = setOf("sqlite", "mariadb", "postgresql")
         if (oldType !in available || newType !in available) {
-            source.sendMessage("<red>Supported database types: sqlite, mariadb, mongodb.</red>")
+            source.sendMessage("<red>Supported database types: sqlite, mariadb, postgresql. To upgrade existing per-table SQL data, follow docs/database-migration/README.md.</red>")
             return
         }
         try {
@@ -99,7 +99,7 @@ class MigrateCommand {
         when (type) {
             "sqlite" -> SQLiteDatabaseProvider()
             "mariadb" -> MariaDBDatabaseProvider()
-            "mongodb" -> MongoDBDatabaseProvider()
+            "postgresql" -> PostgreSQLDatabaseProvider()
             else -> error("Unsupported database provider: $type")
         }
 }

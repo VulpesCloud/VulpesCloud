@@ -18,9 +18,10 @@ package org.vulpesstudios.vulpescloud.node.db.impl.sql
 
 import org.jetbrains.exposed.v1.core.Table
 
-class KeyValueTable(name: String) : Table(name) {
-    val key = varchar("key", 255)
-    val value = text("value")
+class KeyValueTable : Table("vc_legacy_records") {
+    val namespace = varchar("source_collection", 255)
+    val key = varchar("record_key", 255)
+    val value = text("payload_json")
 
-    override val primaryKey = PrimaryKey(key)
+    override val primaryKey = PrimaryKey(namespace, key)
 }

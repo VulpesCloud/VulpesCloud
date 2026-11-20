@@ -31,9 +31,10 @@ docker-java = "3.7.1"
 
 # Database
 exposed = "1.6.1"
-mongodb = "5.14.0"
 sqlite = "3.54.1.0"
 mariadb = "4.0.0"
+postgresql = "42.7.8"
+flyway = "12.5.0"
 hikaricp = "7.1.0"
 rethis = "0.4.5"
 
@@ -109,10 +110,13 @@ javaJWT = { group = "com.auth0", name = "java-jwt", version.ref = "javaJWT" }
 # Database
 exposed-core = { group = "org.jetbrains.exposed", name = "exposed-core", version.ref = "exposed" }
 exposed-jdbc = { group = "org.jetbrains.exposed", name = "exposed-jdbc", version.ref = "exposed" }
-mongodb-driver-coroutine = { group = "org.mongodb", name = "mongodb-driver-kotlin-coroutine", version.ref = "mongodb" }
-mongodb-bson-kotlinx = { group = "org.mongodb", name = "bson-kotlinx", version.ref = "mongodb" }
 sqlite = { group = "org.xerial", name = "sqlite-jdbc", version.ref = "sqlite" }
 mariadb = { group = "org.mariadb.jdbc", name = "mariadb-java-client", version.ref = "mariadb" }
+postgresql = { group = "org.postgresql", name = "postgresql", version.ref = "postgresql" }
+flyway-core = { group = "org.flywaydb", name = "flyway-core", version.ref = "flyway" }
+flyway-postgresql = { group = "org.flywaydb", name = "flyway-database-postgresql", version.ref = "flyway" }
+flyway-mysql = { group = "org.flywaydb", name = "flyway-mysql", version.ref = "flyway" }
+flyway-sqlite = { group = "org.flywaydb", name = "flyway-database-nc-sqlite", version.ref = "flyway" }
 hikaricp = { group = "com.zaxxer", name = "HikariCP", version.ref = "hikaricp" }
 rethis = { group = "eu.vendeli", name = "rethis", version.ref = "rethis" }
 
@@ -192,8 +196,3 @@ kotlin = [
     "kotlinx-coroutines-reactive"
 ]
 
-mongo = [
-    "mongodb-driver-coroutine",
-    "mongodb-bson-kotlinx",
-    "reactor-core"
-]

@@ -23,7 +23,7 @@ import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.api.tasks.Task
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.grpc.security.annotations.RequiresPermission
-import org.vulpesstudios.vulpescloud.node.utils.MongoUtils
+import org.vulpesstudios.vulpescloud.node.utils.PersistenceUtils
 
 class TasksAPIService : TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineImplBase() {
 
@@ -85,7 +85,7 @@ class TasksAPIService : TasksAPIServiceGrpcKt.TasksAPIServiceCoroutineImplBase()
 
     @RequiresPermission("tasks.update", ["task=task.name"])
     override suspend fun updateTask(request: UpdateTaskRequest): UpdateTaskResponse {
-        MongoUtils.updateTask(Task.fromDefinition(request.task))
+        PersistenceUtils.updateTask(Task.fromDefinition(request.task))
         return UpdateTaskResponse.newBuilder().setTask(request.task).build()
     }
 }

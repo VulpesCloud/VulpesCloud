@@ -22,7 +22,7 @@ import com.auth0.jwt.algorithms.Algorithm
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.grpc.security.PermissionHelper
 import org.vulpesstudios.vulpescloud.node.grpc.security.annotations.RequiresPermission
-import org.vulpesstudios.vulpescloud.node.utils.MongoUtils
+import org.vulpesstudios.vulpescloud.node.utils.PersistenceUtils
 import java.util.*
 
 class AuthServiceImpl(private val jwtSecret: String, private val jwtRefreshSecret: String) :
@@ -37,12 +37,12 @@ class AuthServiceImpl(private val jwtSecret: String, private val jwtRefreshSecre
         val password = request.password
 
         val user =
-            MongoUtils.getUserByName(username)
+            PersistenceUtils.getUserByName(username)
                 ?: return AuthenticateResponse.newBuilder()
                     .setError(AuthError.AUTH_ERROR_INVALID_CREDENTIALS)
                     .build()
 
-        val validPassword = MongoUtils.checkUserPassword(username, password)
+        val validPassword = PersistenceUtils.checkUserPassword(username, password)
         if (!validPassword) {
             return AuthenticateResponse.newBuilder()
                 .setError(AuthError.AUTH_ERROR_INVALID_CREDENTIALS)
@@ -105,7 +105,7 @@ class AuthServiceImpl(private val jwtSecret: String, private val jwtRefreshSecre
                     .build()
 
         val user =
-            MongoUtils.getUserByName(username)
+            PersistenceUtils.getUserByName(username)
                 ?: return RefreshTokenResponse.newBuilder()
                     .setError(AuthError.AUTH_ERROR_INVALID_CREDENTIALS)
                     .build()
@@ -163,7 +163,7 @@ class AuthServiceImpl(private val jwtSecret: String, private val jwtRefreshSecre
     @RequiresPermission("auth.getUserByName")
     override suspend fun getUserByName(request: GetUserByNameRequest): GetUserByNameResponse {
         val user =
-            MongoUtils.getUserByName(request.username)
+            PersistenceUtils.getUserByName(request.username)
                 ?: return GetUserByNameResponse.newBuilder()
                     .setError(UserError.USER_ERROR_NOT_FOUND)
                     .build()
@@ -184,7 +184,7 @@ class AuthServiceImpl(private val jwtSecret: String, private val jwtRefreshSecre
     override suspend fun getUserByExtraData(
         request: GetUserByExtraDataRequest
     ): GetUserByExtraDataResponse {
-        val users = MongoUtils.getAllUsers()
+        val users = PersistenceUtils.getAllUsers()
         val user = users.find {
             it.extraData.contains(request.key) && it.extraData[request.key] == request.value
         }
