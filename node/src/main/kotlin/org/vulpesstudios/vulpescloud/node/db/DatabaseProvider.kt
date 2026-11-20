@@ -24,16 +24,9 @@ interface DatabaseProvider {
 
     fun initialize()
 
+    fun sqlDatabase(): org.jetbrains.exposed.v1.jdbc.Database
+
     fun close()
-
-    fun getOrCreateDatabase(name: String): Database
-
-    fun hasDatabase(name: String): Boolean
-
-    /** Names of VulpesCloud key/value databases currently present in this provider. */
-    fun getDatabaseNames(): Set<String>
-
-    fun deleteDatabase(name: String)
 
     companion object {
         private val logger = LoggerFactory.getLogger(DatabaseProvider::class.java)
@@ -50,6 +43,7 @@ interface DatabaseProvider {
             }
         }
 
+        @Suppress("UNUSED")
         fun getAvailableDatabaseProviders(): Map<String, DatabaseProvider> =
             availableDatabaseProviders
 
@@ -63,7 +57,7 @@ interface DatabaseProvider {
             mainDatabaseProvider =
                 availableDatabaseProviders[Node.instance.configProvider.config.databaseType]
                     ?: throw IllegalStateException(
-                        "Unsupported database type '${Node.instance.configProvider.config.databaseType}'. Supported types are sqlite, mariadb, and postgresql. MongoDB is no longer a runtime provider. Migrate existing SQL tables using docs/database-migration/README.md."
+                        "Unsupported database type '${Node.instance.configProvider.config.databaseType}'. Supported types are sqlite, mariadb, and postgresql."
                     )
             if (PropertyUtils.isMoreDBLogging()) logger.info("Initializing main Database Provider")
             mainDatabaseProvider!!.initialize()

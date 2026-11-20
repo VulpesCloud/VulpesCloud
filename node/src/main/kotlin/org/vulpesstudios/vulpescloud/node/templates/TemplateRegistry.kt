@@ -18,11 +18,8 @@ package org.vulpesstudios.vulpescloud.node.templates
 
 import build.buf.gen.vulpescloud.templates.v1.TemplateLocation
 import build.buf.gen.vulpescloud.templates.v1.TemplateReference
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.encodeToJsonElement
 import org.vulpesstudios.vulpescloud.api.templates.Template
-import org.vulpesstudios.vulpescloud.node.Node
+import org.vulpesstudios.vulpescloud.node.db.TemplateRepository
 
 /**
  * Cluster-wide metadata store for [Template]s (id/name/storage/location/version/enabled).
@@ -34,34 +31,22 @@ import org.vulpesstudios.vulpescloud.node.Node
  */
 object TemplateRegistry {
 
-    private val templatesDatabase by lazy {
-        Node.instance.getDatabaseProvider().getOrCreateDatabase("templates")
-    }
-
-    suspend fun save(template: Template) {
-        templatesDatabase.upsert(template.id, Json.encodeToJsonElement(template))
-    }
+    fun save(template: Template) { TemplateRepository.save(template) }
 
     /** Inserts a new template without replacing an existing template with the same id. */
-    suspend fun create(template: Template): Boolean = templatesDatabase.compareAndSet(
-        template.id,
-        null,
-        Json.encodeToJsonElement(template),
-    )
+    fun create(template: Template): Boolean = TemplateRepository.save(template, createOnly = true)
 
-    suspend fun delete(template: Template) {
-        templatesDatabase.delete(template.id)
+    fun delete(template: Template) {
+        TemplateRepository.delete(template.id)
     }
 
-    suspend fun getById(id: String): Template? {
+    fun getById(id: String): Template? {
         if (id.isBlank()) return null
-        return runCatching { templatesDatabase.get(id) }
-            .getOrNull()
-            ?.let { Json.decodeFromJsonElement<Template>(it) }
+        return runCatching { TemplateRepository.get(id) }.getOrNull()
     }
 
-    suspend fun getAll(): List<Template> {
-        return templatesDatabase.getAll().map { Json.decodeFromJsonElement<Template>(it) }
+    fun getAll(): List<Template> {
+        return TemplateRepository.getAll()
     }
 
     /**
@@ -70,7 +55,7 @@ object TemplateRegistry {
      * down further by [TemplateReference.location] fields, in case multiple templates share a name
      * across different storages/nodes).
      */
-    suspend fun findByReference(reference: TemplateReference): Template? {
+    fun findByReference(reference: TemplateReference): Template? {
         if (reference.templateId.isNotBlank()) {
             return getById(reference.templateId)?.takeIf {
                 matchesLocation(it.location.toDefinition(), reference.location)

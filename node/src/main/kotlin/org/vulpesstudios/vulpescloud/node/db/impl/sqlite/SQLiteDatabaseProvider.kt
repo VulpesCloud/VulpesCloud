@@ -17,59 +17,39 @@
 package org.vulpesstudios.vulpescloud.node.db.impl.sqlite
 
 import org.flywaydb.core.Flyway
-import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
-import org.vulpesstudios.vulpescloud.node.db.impl.sql.KeyValueTable
-import org.vulpesstudios.vulpescloud.node.db.impl.sql.LegacyMigrationGuard
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import java.sql.Connection
 import kotlin.io.path.Path
 
 class SQLiteDatabaseProvider : DatabaseProvider {
 
     lateinit var database: Database
-    private val databases = mutableMapOf<String, SQLiteDatabase>()
+    private lateinit var dataSource: HikariDataSource
+
+    override fun sqlDatabase(): Database = database
 
     override fun initialize() {
         Path("local/database").toFile().mkdirs()
         val jdbcUrl = "jdbc:sqlite:local/database/database.db"
-        val existingTables = java.sql.DriverManager.getConnection(jdbcUrl).use { connection ->
-            connection.metaData.getTables(null, null, "%", arrayOf("TABLE")).use { rs ->
-                buildSet { while (rs.next()) add(rs.getString("TABLE_NAME")) }
-            }
-        }
-        Flyway.configure().dataSource(jdbcUrl, null, null)
+        dataSource = HikariDataSource(HikariConfig().apply {
+            this.jdbcUrl = jdbcUrl
+            driverClassName = "org.sqlite.JDBC"
+            connectionInitSql = "PRAGMA foreign_keys=ON"
+        })
+        Flyway.configure().dataSource(dataSource)
             .locations("classpath:db/migration/sqlite")
-            .baselineOnMigrate(existingTables.any { !it.equals("flyway_schema_history", true) })
-            .baselineVersion("0").load().migrate()
-        java.sql.DriverManager.getConnection(jdbcUrl).use(LegacyMigrationGuard::requireMigrationComplete)
-        database = Database.connect(jdbcUrl, "org.sqlite.JDBC")
+            .load().migrate()
+        database = Database.connect(dataSource)
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     }
 
     override fun close() {
         TransactionManager.closeAndUnregister(database)
+        dataSource.close()
     }
 
-    override fun getOrCreateDatabase(name: String): SQLiteDatabase {
-        return databases.getOrPut(name) { SQLiteDatabase(name, database) }
-    }
-
-    override fun hasDatabase(name: String): Boolean {
-        val records = KeyValueTable()
-        return transaction(database) { records.selectAll().any { it[records.namespace] == name } }
-    }
-
-    override fun getDatabaseNames(): Set<String> {
-        val records = KeyValueTable()
-        return transaction(database) { records.selectAll().map { it[records.namespace] }.toSet() }
-    }
-
-    override fun deleteDatabase(name: String) {
-        val records = KeyValueTable()
-        transaction(database) { records.deleteWhere { records.namespace eq name } }
-        databases.remove(name)
-    }
 }

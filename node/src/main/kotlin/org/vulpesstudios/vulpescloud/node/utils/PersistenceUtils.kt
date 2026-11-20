@@ -17,157 +17,103 @@
 package org.vulpesstudios.vulpescloud.node.utils
 
 import at.favre.lib.crypto.bcrypt.BCrypt
-import build.buf.gen.vulpescloud.virtualconfig.v1.VirtualConfig
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.encodeToJsonElement
 import org.vulpesstudios.vulpescloud.api.tasks.Task
-import org.vulpesstudios.vulpescloud.node.Node
+import org.vulpesstudios.vulpescloud.api.virtualconfig.VirtualConfig
+import org.vulpesstudios.vulpescloud.node.db.AuthRepository
+import org.vulpesstudios.vulpescloud.node.db.TaskRepository
+import org.vulpesstudios.vulpescloud.node.db.VirtualConfigRepository
 import org.vulpesstudios.vulpescloud.node.grpc.security.model.GroupModel
 import org.vulpesstudios.vulpescloud.node.grpc.security.model.UserModel
+import build.buf.gen.vulpescloud.virtualconfig.v1.VirtualConfig as ProtoVirtualConfig
 
+@Suppress("UNUSED")
 object PersistenceUtils {
+    fun updateTask(task: Task) = TaskRepository.save(task)
 
-    private val tasksDatabase by lazy {
-        Node.instance.getDatabaseProvider().getOrCreateDatabase("tasks")
-    }
-    private val groupsDatabase by lazy {
-        Node.instance.getDatabaseProvider().getOrCreateDatabase("groups")
-    }
-    private val usersDatabase by lazy {
-        Node.instance.getDatabaseProvider().getOrCreateDatabase("users")
-    }
-    private val virtualConfigsDatabase by lazy {
-        Node.instance.getDatabaseProvider().getOrCreateDatabase("virtualconfigs")
+    fun deleteTask(task: Task) = TaskRepository.delete(task.name)
+
+    fun updateOrInsertVirtualConfig(config: ProtoVirtualConfig) =
+        VirtualConfigRepository.save(VirtualConfig.fromDefinition(config))
+
+    fun nothingOrInsertVirtualConfig(config: ProtoVirtualConfig) =
+        VirtualConfigRepository.save(VirtualConfig.fromDefinition(config), createOnly = true)
+
+    fun deleteVirtualConfig(config: ProtoVirtualConfig) =
+        VirtualConfigRepository.delete(config.name)
+
+    fun getUserByName(name: String): UserModel? = AuthRepository.getUser(name)
+
+    fun getGroupByName(name: String): GroupModel? = AuthRepository.getGroup(name)
+
+    fun createGroup(name: String, permissions: List<String> = emptyList()) =
+        AuthRepository.saveGroup(GroupModel(name, permissions), createOnly = true)
+
+    fun createUser(name: String, password: String) {
+        val hashed = BCrypt.withDefaults().hashToString(12, password.toCharArray())
+        AuthRepository.saveUser(UserModel(name, hashed))
     }
 
-    suspend fun updateTask(task: Task) {
-        tasksDatabase.upsert(task.name, Json.encodeToJsonElement(task))
-    }
+    fun deleteUser(name: String) = AuthRepository.deleteUser(name)
 
-    suspend fun deleteTask(task: Task) {
-        tasksDatabase.delete(task.name)
-    }
+    fun deleteGroup(name: String) = AuthRepository.deleteGroup(name)
 
-    suspend fun updateOrInsertVirtualConfig(config: VirtualConfig) {
-        virtualConfigsDatabase.upsert(
-            config.name,
-            Json.encodeToJsonElement(
-                org.vulpesstudios.vulpescloud.api.virtualconfig.VirtualConfig.fromDefinition(config)
-            ),
+    fun updateUserPassword(name: String, password: String) {
+        val old = AuthRepository.getUser(name) ?: return
+        AuthRepository.saveUser(
+            old.copy(password = BCrypt.withDefaults().hashToString(12, password.toCharArray())),
         )
     }
 
-    suspend fun nothingOrInsertVirtualConfig(config: VirtualConfig) {
-        virtualConfigsDatabase.insertIgnore(
-            config.name,
-            Json.encodeToJsonElement(
-                org.vulpesstudios.vulpescloud.api.virtualconfig.VirtualConfig.fromDefinition(config)
-            ),
-        )
-    }
+    fun updateUser(name: String, user: UserModel) = AuthRepository.saveUser(user)
 
-    suspend fun deleteVirtualConfig(config: VirtualConfig) {
-        virtualConfigsDatabase.delete(config.name)
-    }
-
-    suspend fun getUserByName(name: String): UserModel? {
-        return Json.decodeFromJsonElement(
-            UserModel.serializer(),
-            usersDatabase.get(name) ?: return null,
-        )
-    }
-
-    suspend fun getGroupByName(name: String): GroupModel? {
-        return Json.decodeFromJsonElement(
-            GroupModel.serializer(),
-            groupsDatabase.get(name) ?: return null,
-        )
-    }
-
-    suspend fun createGroup(name: String, permissions: List<String> = listOf()) {
-        groupsDatabase.insert(name, Json.encodeToJsonElement(GroupModel(name, permissions)))
-    }
-
-    suspend fun createUser(name: String, password: String) {
-        val hashedPassword = BCrypt.withDefaults().hashToString(12, password.toCharArray())
-        usersDatabase.insert(name, Json.encodeToJsonElement(UserModel(name, hashedPassword)))
-    }
-
-    suspend fun deleteUser(name: String) {
-        usersDatabase.delete(name)
-    }
-
-    suspend fun deleteGroup(name: String) {
-        groupsDatabase.delete(name)
-    }
-
-    suspend fun updateUserPassword(name: String, password: String) {
-        val hashedPassword = BCrypt.withDefaults().hashToString(12, password.toCharArray())
-        usersDatabase.upsert(name, Json.encodeToJsonElement(UserModel(name, hashedPassword)))
-    }
-
-    suspend fun updateUser(name: String, user: UserModel) {
-        usersDatabase.upsert(name, Json.encodeToJsonElement(user))
-    }
-
-    suspend fun addPermissionToUser(username: String, permission: String) {
-        val user = getUserByName(username) ?: return
-        val updatedPermissions =
-            user.permissions.toMutableList().apply { add(permission) }.distinct()
-        val updatedUser = user.copy(permissions = updatedPermissions)
-        usersDatabase.upsert(username, Json.encodeToJsonElement(updatedUser))
-    }
-
-    suspend fun removePermissionFromUser(username: String, permission: String) {
-        val user = getUserByName(username) ?: return
-        val updatedPermissions = user.permissions.filter { it != permission }.distinct()
-        val updatedUser = user.copy(permissions = updatedPermissions)
-        usersDatabase.upsert(username, Json.encodeToJsonElement(updatedUser))
-    }
-
-    suspend fun addPermissionToGroup(groupName: String, permission: String) {
-        val group = getGroupByName(groupName) ?: return
-        val updatedPermissions =
-            group.permissions.toMutableList().apply { add(permission) }.distinct()
-        val updatedGroup = group.copy(permissions = updatedPermissions)
-        groupsDatabase.upsert(groupName, Json.encodeToJsonElement(updatedGroup))
-    }
-
-    suspend fun removePermissionFromGroup(groupName: String, permission: String) {
-        val group = getGroupByName(groupName) ?: return
-        val updatedPermissions = group.permissions.filter { it != permission }.distinct()
-        val updatedGroup = group.copy(permissions = updatedPermissions)
-        groupsDatabase.upsert(groupName, Json.encodeToJsonElement(updatedGroup))
-    }
-
-    suspend fun checkUserPassword(username: String, password: String): Boolean {
-        val user = getUserByName(username) ?: return false
-
-        val result = BCrypt.verifyer().verify(password.toCharArray(), user.password)
-        return result.verified
-    }
-
-    suspend fun getAllUsers(): List<UserModel> {
-        return usersDatabase.getAll().map { Json.decodeFromJsonElement(UserModel.serializer(), it) }
-    }
-
-    suspend fun getAllGroups(): List<GroupModel> {
-        return groupsDatabase.getAll().map {
-            Json.decodeFromJsonElement(GroupModel.serializer(), it)
+    fun addPermissionToUser(username: String, permission: String) {
+        AuthRepository.getUser(username)?.let {
+            AuthRepository.saveUser(it.copy(permissions = (it.permissions + permission).distinct()))
         }
     }
 
-    suspend fun addUserToGroup(username: String, groupName: String) {
-        val user = getUserByName(username) ?: return
-        val updatedGroups = user.groups.toMutableList().apply { add(groupName) }.distinct()
-        val updatedUser = user.copy(groups = updatedGroups)
-        usersDatabase.upsert(username, Json.encodeToJsonElement(updatedUser))
+    fun removePermissionFromUser(username: String, permission: String) {
+        AuthRepository.getUser(username)?.let {
+            AuthRepository.saveUser(
+                it.copy(permissions = it.permissions.filterNot { p -> p == permission }),
+            )
+        }
     }
 
-    suspend fun removeUserFromGroup(username: String, groupName: String) {
-        val user = getUserByName(username) ?: return
-        val updatedGroups = user.groups.filter { it != groupName }.distinct()
-        val updatedUser = user.copy(groups = updatedGroups)
-        usersDatabase.upsert(username, Json.encodeToJsonElement(updatedUser))
+    fun addPermissionToGroup(groupName: String, permission: String) {
+        AuthRepository.getGroup(groupName)?.let {
+            AuthRepository.saveGroup(
+                it.copy(permissions = (it.permissions + permission).distinct()),
+            )
+        }
+    }
+
+    fun removePermissionFromGroup(groupName: String, permission: String) {
+        AuthRepository.getGroup(groupName)?.let {
+            AuthRepository.saveGroup(
+                it.copy(permissions = it.permissions.filterNot { p -> p == permission }),
+            )
+        }
+    }
+
+    fun checkUserPassword(username: String, password: String): Boolean =
+        AuthRepository.getUser(username)?.let {
+            BCrypt.verifyer().verify(password.toCharArray(), it.password).verified
+        } ?: false
+
+    fun getAllUsers(): List<UserModel> = AuthRepository.users()
+
+    fun getAllGroups(): List<GroupModel> = AuthRepository.groups()
+
+    fun addUserToGroup(username: String, groupName: String) {
+        AuthRepository.getUser(username)?.let {
+            AuthRepository.saveUser(it.copy(groups = (it.groups + groupName).distinct()))
+        }
+    }
+
+    fun removeUserFromGroup(username: String, groupName: String) {
+        AuthRepository.getUser(username)?.let {
+            AuthRepository.saveUser(it.copy(groups = it.groups.filterNot { g -> g == groupName }))
+        }
     }
 }

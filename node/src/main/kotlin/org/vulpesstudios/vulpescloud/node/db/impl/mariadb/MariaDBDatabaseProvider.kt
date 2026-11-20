@@ -19,24 +19,19 @@ package org.vulpesstudios.vulpescloud.node.db.impl.mariadb
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotlinx.serialization.json.Json
-import org.jetbrains.exposed.v1.core.eq
-import org.jetbrains.exposed.v1.jdbc.Database
-import org.jetbrains.exposed.v1.jdbc.*
+import org.jetbrains.exposed.v1.jdbc.Database as ExposedDatabase
 import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.vulpesstudios.vulpescloud.node.config.db.MariaDBConfig
 import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
-import org.vulpesstudios.vulpescloud.node.db.impl.sql.KeyValueTable
-import org.vulpesstudios.vulpescloud.node.db.impl.sql.LegacyMigrationGuard
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 
 class MariaDBDatabaseProvider : DatabaseProvider {
 
-    lateinit var database: Database
+    lateinit var database: ExposedDatabase
     lateinit var dataSource: HikariDataSource
-    private val databases = mutableMapOf<String, MariaDBDatabase>()
+    override fun sqlDatabase(): ExposedDatabase = database
 
     override fun initialize() {
         val options = getMariaDBConfig()
@@ -48,41 +43,14 @@ class MariaDBDatabaseProvider : DatabaseProvider {
         hikariConfig.password = options.password
 
         dataSource = HikariDataSource(hikariConfig)
-        val existingTables = dataSource.connection.use { connection ->
-            connection.metaData.getTables(connection.catalog, LegacyMigrationGuard.currentSchema(connection), "%", arrayOf("TABLE")).use { rs ->
-                buildSet { while (rs.next()) add(rs.getString("TABLE_NAME")) }
-            }
-        }
         Flyway.configure().dataSource(dataSource).locations("classpath:db/migration/mariadb")
-            .baselineOnMigrate(existingTables.any { !it.equals("flyway_schema_history", true) })
-            .baselineVersion("0").load().migrate()
-        dataSource.connection.use(LegacyMigrationGuard::requireMigrationComplete)
-        database = Database.connect(dataSource)
+            .load().migrate()
+        database = ExposedDatabase.connect(dataSource)
     }
 
     override fun close() {
         TransactionManager.closeAndUnregister(database)
         dataSource.close()
-    }
-
-    override fun getOrCreateDatabase(name: String): MariaDBDatabase {
-        return databases.getOrPut(name) { MariaDBDatabase(name, database) }
-    }
-
-    override fun hasDatabase(name: String): Boolean {
-        val records = KeyValueTable()
-        return transaction(database) { records.selectAll().any { it[records.namespace] == name } }
-    }
-
-    override fun getDatabaseNames(): Set<String> {
-        val records = KeyValueTable()
-        return transaction(database) { records.selectAll().map { it[records.namespace] }.toSet() }
-    }
-
-    override fun deleteDatabase(name: String) {
-        val records = KeyValueTable()
-        transaction(database) { records.deleteWhere { records.namespace eq name } }
-        databases.remove(name)
     }
 
     private fun getMariaDBConfig(): MariaDBConfig {

@@ -20,12 +20,11 @@ import build.buf.gen.vulpescloud.events.v1.PlayerJoinEvent
 import build.buf.gen.vulpescloud.events.v1.PlayerQuitEvent
 import build.buf.gen.vulpescloud.events.v1.PlayerSwitchServerEvent
 import kotlinx.coroutines.Job
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.encodeToJsonElement
 import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.api.players.OfflinePlayer
 import org.vulpesstudios.vulpescloud.api.players.toAPI
 import org.vulpesstudios.vulpescloud.node.Node
+import org.vulpesstudios.vulpescloud.node.db.OfflinePlayerRepository
 import org.vulpesstudios.vulpescloud.node.event.EventsService
 import org.vulpesstudios.vulpescloud.node.utils.PropertyUtils.isLoggingPlayerEvents
 import java.util.concurrent.CopyOnWriteArrayList
@@ -33,9 +32,6 @@ import java.util.concurrent.CopyOnWriteArrayList
 object PlayerJoinEventListener {
     private var job: Job? = null
     private val logger = LoggerFactory.getLogger(PlayerJoinEventListener::class.java)
-    private val offlinePlayerDatabase by lazy {
-        Node.instance.getDatabaseProvider().getOrCreateDatabase("offlinePlayers")
-    }
 
     fun subscribe() {
         job =
@@ -52,23 +48,19 @@ object PlayerJoinEventListener {
                         .add(event.player.toAPI())
                 }
 
-                if (offlinePlayerDatabase.get(event.player.uuid) == null) {
+                if (OfflinePlayerRepository.get(event.player.uuid) == null) {
                     if (isLoggingPlayerEvents()) {
                         logger.info(
                             "Player <aqua>${event.player.name}</aqua> <gray>joined the network for the first time!</gray>"
                         )
                     }
-                    offlinePlayerDatabase.insertIgnore(
-                        event.player.uuid,
-                        Json.encodeToJsonElement(
+                    OfflinePlayerRepository.save(
                             OfflinePlayer(
                                 event.player.name,
                                 event.player.uuid,
                                 System.currentTimeMillis(),
                                 System.currentTimeMillis(),
-                            )
-                        ),
-                    )
+                            ), insertOnly = true)
                 }
             }
     }
@@ -82,9 +74,6 @@ object PlayerJoinEventListener {
 object PlayerQuitEventListener {
     private var job: Job? = null
     private val logger = LoggerFactory.getLogger(PlayerQuitEventListener::class.java)
-    private val offlinePlayerDatabase by lazy {
-        Node.instance.getDatabaseProvider().getOrCreateDatabase("offlinePlayers")
-    }
 
     fun subscribe() {
         job =
@@ -99,10 +88,7 @@ object PlayerQuitEventListener {
                         .removeIf { it.uuid == event.player.uuid }
                 }
 
-                offlinePlayerDatabase.upsert(
-                    event.player.uuid,
-                    Json.encodeToJsonElement(event.player.toAPI()),
-                )
+                OfflinePlayerRepository.save(event.player.toAPI())
             }
     }
 

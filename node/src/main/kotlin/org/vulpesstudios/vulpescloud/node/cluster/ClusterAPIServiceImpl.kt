@@ -20,13 +20,12 @@ import build.buf.gen.vulpescloud.auth.v1.getUserByExtraDataRequest
 import build.buf.gen.vulpescloud.cluster.v2.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.json.Json
 import org.incendo.cloud.exception.InvalidSyntaxException
 import org.incendo.cloud.suggestion.Suggestion
 import org.slf4j.LoggerFactory
-import org.vulpesstudios.vulpescloud.api.cluster.NodeSnapshot
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.command.CommandSource
+import org.vulpesstudios.vulpescloud.node.db.NodeSnapshotRepository
 import org.vulpesstudios.vulpescloud.node.grpc.security.AuthClientInterceptor
 import org.vulpesstudios.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import org.vulpesstudios.vulpescloud.node.grpc.security.model.UserModel
@@ -37,10 +36,6 @@ import java.util.concurrent.ExecutionException
 
 class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutineImplBase() {
     private val logger = LoggerFactory.getLogger(ClusterAPIServiceImpl::class.java)
-    private val snapshotsDatabase by lazy {
-        Node.instance.getDatabaseProvider().getOrCreateDatabase("nodeSnapshots")
-    }
-    private val json = Json
 
     @RequiresPermission("cluster.getAll")
     override suspend fun getAllNodes(request: GetAllNodesRequest): GetAllNodesResponse {
@@ -65,11 +60,8 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
     @RequiresPermission("cluster.getSnapshot", ["node=name"])
     override suspend fun getNodeSnapshot(request: GetNodeSnapshotRequest): GetNodeSnapshotResponse {
         val snapshot =
-            json.decodeFromJsonElement(
-                NodeSnapshot.serializer(),
-                snapshotsDatabase.get(request.name)
-                    ?: return GetNodeSnapshotResponse.newBuilder().build(),
-            )
+            NodeSnapshotRepository.get(request.name)
+                ?: return GetNodeSnapshotResponse.newBuilder().build()
         return GetNodeSnapshotResponse.newBuilder().setSnapshot(snapshot.toDefinition()).build()
     }
 
@@ -97,7 +89,7 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
                                 e,
                             )
                             source.sendMessage(
-                                "An error occurred while executing command. Check Node-Logs for details."
+                                "An error occurred while executing command. Check Node-Logs for details.",
                             )
                         }
                     }
@@ -109,7 +101,7 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
 
     @RequiresPermission("cluster.tabComplete", [$$"node=$localNode"])
     override suspend fun commandTabComplete(
-        request: CommandTabCompleteRequest
+        request: CommandTabCompleteRequest,
     ): CommandTabCompleteResponse {
         val source = CommandSource.player(getPlayer(request.playerSource.playerUuid)!!)
         val suggestions =
@@ -126,7 +118,7 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
 
     @RequiresPermission("cluster.modulesOfNode", [$$"node=$nodeName"])
     override suspend fun getModulesOfNode(
-        request: GetModulesOfNodeRequest
+        request: GetModulesOfNodeRequest,
     ): GetModulesOfNodeResponse {
         if (Node.instance.configProvider.config.nodeName != request.nodeName) {
             val correctNode =
@@ -172,10 +164,10 @@ class ClusterAPIServiceImpl : ClusterAPIServiceGrpcKt.ClusterAPIServiceCoroutine
                     getUserByExtraDataRequest {
                         this.key = "minecraft-uuid"
                         this.value = uuid
-                    }
+                    },
                 )
                 .user
-                .name
+                .name,
         )
     }
 }

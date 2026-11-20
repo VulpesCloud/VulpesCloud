@@ -1,75 +1,60 @@
+/*
+ * Copyright 2024-2026 VulpesStudios & Contributers
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.vulpesstudios.vulpescloud.node.db.impl.postgresql
 
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotlinx.serialization.json.Json
 import org.flywaydb.core.Flyway
-import org.jetbrains.exposed.v1.core.eq
 import org.jetbrains.exposed.v1.jdbc.Database
-import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.vulpesstudios.vulpescloud.node.config.db.PostgreSQLConfig
 import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
-import org.vulpesstudios.vulpescloud.node.db.impl.sql.KeyValueTable
-import org.vulpesstudios.vulpescloud.node.db.impl.sql.LegacyMigrationGuard
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 
 class PostgreSQLDatabaseProvider : DatabaseProvider {
     lateinit var database: Database
     private lateinit var dataSource: HikariDataSource
-    private val databases = mutableMapOf<String, PostgreSQLDatabase>()
+
+    override fun sqlDatabase(): Database = database
 
     override fun initialize() {
         val options = readConfig()
-        val hikari = HikariConfig().apply {
-            jdbcUrl = options.jdbcUrl
-            driverClassName = "org.postgresql.Driver"
-            username = options.user
-            password = options.password
-        }
-        dataSource = HikariDataSource(hikari)
-        val existingTables = dataSource.connection.use { connection ->
-            connection.metaData.getTables(connection.catalog, LegacyMigrationGuard.currentSchema(connection), "%", arrayOf("TABLE")).use { rs ->
-                buildSet { while (rs.next()) add(rs.getString("TABLE_NAME")) }
+        val hikari =
+            HikariConfig().apply {
+                jdbcUrl = options.jdbcUrl
+                driverClassName = "org.postgresql.Driver"
+                username = options.user
+                password = options.password
             }
-        }
-        val flyway = Flyway.configure()
-            .dataSource(dataSource)
-            .locations("classpath:db/migration/postgresql")
-            .baselineOnMigrate(existingTables.any { !it.equals("flyway_schema_history", true) })
-            .baselineVersion("0")
-            .load()
+        dataSource = HikariDataSource(hikari)
+        val flyway =
+            Flyway.configure()
+                .dataSource(dataSource)
+                .locations("classpath:db/migration/postgresql")
+                .load()
         flyway.migrate()
-        dataSource.connection.use(LegacyMigrationGuard::requireMigrationComplete)
         database = Database.connect(dataSource)
     }
 
     override fun close() {
         if (::database.isInitialized) TransactionManager.closeAndUnregister(database)
         if (::dataSource.isInitialized) dataSource.close()
-    }
-
-    override fun getOrCreateDatabase(name: String): PostgreSQLDatabase =
-        databases.getOrPut(name) { PostgreSQLDatabase(name, database) }
-
-    override fun hasDatabase(name: String): Boolean {
-        val records = KeyValueTable()
-        return transaction(database) { records.selectAll().any { it[records.namespace] == name } }
-    }
-
-    override fun getDatabaseNames(): Set<String> {
-        val records = KeyValueTable()
-        return transaction(database) {
-            records.selectAll().map { it[records.namespace] }.toSet()
-        }
-    }
-
-    override fun deleteDatabase(name: String) {
-        val records = KeyValueTable()
-        transaction(database) { records.deleteWhere { records.namespace eq name } }
-        databases.remove(name)
     }
 
     private fun readConfig(): PostgreSQLConfig {
@@ -82,5 +67,4 @@ class PostgreSQLDatabaseProvider : DatabaseProvider {
         }
         return Json.decodeFromString(path.toFile().readText())
     }
-
 }

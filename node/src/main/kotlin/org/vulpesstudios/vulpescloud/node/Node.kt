@@ -41,8 +41,8 @@ import org.vulpesstudios.vulpescloud.node.config.ConfigProvider
 import org.vulpesstudios.vulpescloud.node.coordination.ChronyxCoordinator
 import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.mariadb.MariaDBDatabaseProvider
-import org.vulpesstudios.vulpescloud.node.db.impl.sqlite.SQLiteDatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.postgresql.PostgreSQLDatabaseProvider
+import org.vulpesstudios.vulpescloud.node.db.impl.sqlite.SQLiteDatabaseProvider
 import org.vulpesstudios.vulpescloud.node.drain.DrainEngine
 import org.vulpesstudios.vulpescloud.node.drain.NodeDrainAPIServiceImpl
 import org.vulpesstudios.vulpescloud.node.event.EventListenHelper
@@ -73,8 +73,8 @@ import org.vulpesstudios.vulpescloud.node.setup.SetupProvider
 import org.vulpesstudios.vulpescloud.node.setup.setups.FirstSetup
 import org.vulpesstudios.vulpescloud.node.tasks.TasksAPIService
 import org.vulpesstudios.vulpescloud.node.templates.LocalTemplateStorage
-import org.vulpesstudios.vulpescloud.node.templates.TemplateServiceImpl
 import org.vulpesstudios.vulpescloud.node.templates.TemplateJobCallContext
+import org.vulpesstudios.vulpescloud.node.templates.TemplateServiceImpl
 import org.vulpesstudios.vulpescloud.node.templates.TemplateStorageRegistry
 import org.vulpesstudios.vulpescloud.node.terminal.Terminal
 import org.vulpesstudios.vulpescloud.node.virtualconfig.VirtualConfigProvider
@@ -84,6 +84,7 @@ import java.util.concurrent.ConcurrentHashMap
 import kotlin.io.path.Path
 import kotlin.time.Duration.Companion.milliseconds
 
+@Suppress("UNUSED")
 class Node {
     private val logger = LoggerFactory.getLogger("Node")
 
@@ -180,7 +181,6 @@ class Node {
                     register(TlsCommand())
                     register(TemplateCommand())
                     register(RolloutCommand())
-                    register(MigrateCommand())
                 }
             } catch (e: Exception) {
                 logger.error("Failed to initialize commands: ${e.stackTraceToString()}")

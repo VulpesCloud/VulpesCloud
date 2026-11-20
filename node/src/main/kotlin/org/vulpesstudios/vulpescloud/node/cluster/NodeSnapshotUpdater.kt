@@ -19,11 +19,10 @@ package org.vulpesstudios.vulpescloud.node.cluster
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.encodeToJsonElement
 import org.vulpesstudios.vulpescloud.api.cluster.*
 import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.NodeCoroutineScope
+import org.vulpesstudios.vulpescloud.node.db.NodeSnapshotRepository
 import java.lang.management.ManagementFactory
 import kotlin.time.Duration.Companion.seconds
 
@@ -32,9 +31,6 @@ object NodeSnapshotUpdater {
     private var job: Job? = null
     private val osMXBean =
         ManagementFactory.getOperatingSystemMXBean() as com.sun.management.OperatingSystemMXBean
-    private val nodesDatabase by lazy {
-        Node.instance.getDatabaseProvider().getOrCreateDatabase("nodeSnapshots")
-    }
 
     fun start() {
         job = NodeCoroutineScope.launch {
@@ -59,32 +55,39 @@ object NodeSnapshotUpdater {
         val freeSystemMemory = osMXBean.freeMemorySize
         val usedSystemMemory = totalSystemMemory - freeSystemMemory
 
-        val systemSnapshot = SystemSnapshot(
-            cpu = CpuSnapshot(
-                cores = osMXBean.availableProcessors,
-                usage = osMXBean.cpuLoad,
-            ),
-            memory = MemorySnapshot(
-                totalMemory = totalSystemMemory,
-                usedMemory = usedSystemMemory,
-                availableMemory = freeSystemMemory,
-            ),
-        )
+        val systemSnapshot =
+            SystemSnapshot(
+                cpu =
+                    CpuSnapshot(
+                        cores = osMXBean.availableProcessors,
+                        usage = osMXBean.cpuLoad,
+                    ),
+                memory =
+                    MemorySnapshot(
+                        totalMemory = totalSystemMemory,
+                        usedMemory = usedSystemMemory,
+                        availableMemory = freeSystemMemory,
+                    ),
+            )
 
         val memoryLimit = config.maxMemory.toLong()
         val memoryReserved = nodeServices.sumOf { it.service.task.maxMemory }
-        val memoryUsed = serviceSnapshots
-            .filter { snapshot -> nodeServices.any { it.service.uuid.toString() == snapshot.uuid } }
-            .sumOf { it.memoryUsageBytes }
+        val memoryUsed =
+            serviceSnapshots
+                .filter { snapshot ->
+                    nodeServices.any { it.service.uuid.toString() == snapshot.uuid }
+                }
+                .sumOf { it.memoryUsageBytes }
         val memoryAvailable = (memoryLimit - memoryReserved).coerceAtLeast(0L)
 
-        val serviceSnapshot = NodeServiceSnapshot(
-            count = nodeServices.size,
-            memoryLimit = memoryLimit,
-            memoryUsed = memoryUsed,
-            memoryReserved = memoryReserved,
-            memoryAvailable = memoryAvailable,
-        )
+        val serviceSnapshot =
+            NodeServiceSnapshot(
+                count = nodeServices.size,
+                memoryLimit = memoryLimit,
+                memoryUsed = memoryUsed,
+                memoryReserved = memoryReserved,
+                memoryAvailable = memoryAvailable,
+            )
 
         return NodeSnapshot(
             name = config.nodeName,
@@ -99,10 +102,9 @@ object NodeSnapshotUpdater {
         )
     }
 
-    suspend fun updateLocalNodeSnapshot() {
-        val snapshot =
-            generateSnapshot()
+    fun updateLocalNodeSnapshot() {
+        val snapshot = generateSnapshot()
 
-        nodesDatabase.upsert(Node.instance.configProvider.config.nodeName, Json.encodeToJsonElement(snapshot))
+        NodeSnapshotRepository.save(snapshot)
     }
 }
