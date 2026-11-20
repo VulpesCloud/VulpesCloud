@@ -32,7 +32,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.channelFlow
+import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.produceIn
@@ -565,15 +565,15 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
     }
 
     @RequiresPermission("templates.readFile")
-    override fun streamReadFileChunks(request: StreamReadFileChunksRequest): Flow<TemplateFileChunk> = channelFlow {
+    override fun streamReadFileChunks(request: StreamReadFileChunksRequest): Flow<TemplateFileChunk> = flow {
         val template = TemplateRegistry.findByReference(request.template)
             ?: throw StatusException(Status.NOT_FOUND.withDescription("Template not found"))
         ensureUnlocked(template)
         val location = template.location.toDefinition()
         if (needsForwarding(location)) {
             val stub = remoteStub(location.nodeName) ?: throw unavailable(location.nodeName)
-            stub.streamReadFileChunks(request).collect { send(it) }
-            return@channelFlow
+            stub.streamReadFileChunks(request).collect { emit(it) }
+            return@flow
         }
 
         val requestedSize = request.chunkSize.takeIf { it > 0 } ?: DEFAULT_TEMPLATE_FILE_CHUNK_BYTES
@@ -585,7 +585,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
             val buffer = ByteArray(chunkSize)
             var offset = 0L
             if (reader.totalSize == 0L) {
-                send(
+                emit(
                     TemplateFileChunk.newBuilder()
                         .setOffset(0)
                         .setTotalSize(0)
@@ -600,7 +600,7 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
                     if (read == 0) continue
                     val nextOffset = offset + read
                     check(nextOffset <= reader.totalSize) { "Storage returned more bytes than the declared file size" }
-                    send(
+                    emit(
                         TemplateFileChunk.newBuilder()
                             .setOffset(offset)
                             .setTotalSize(reader.totalSize)
@@ -622,7 +622,10 @@ class TemplateServiceImpl : TemplateServiceGrpcKt.TemplateServiceCoroutineImplBa
     override suspend fun streamWriteFileChunks(
         requests: Flow<StreamWriteFileChunksRequest>
     ): TemplateOperationResult = coroutineScope {
-        val incoming = requests.produceIn(this)
+        // A buffered channel here can queue dozens of 1 MiB messages while a storage
+        // provider is blocked uploading a multipart part. Keep the stream rendezvous
+        // so storage write speed applies backpressure all the way to the gRPC sender.
+        val incoming = requests.buffer(0).produceIn(this)
         var writer: TemplateFileWriteSession? = null
         try {
             val first = incoming.receiveCatching().getOrNull()
