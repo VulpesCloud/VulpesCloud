@@ -33,7 +33,7 @@ import org.vulpesstudios.vulpescloud.node.command.CommandSource
 import org.vulpesstudios.vulpescloud.node.grpc.security.PermissionHelper
 import org.vulpesstudios.vulpescloud.node.grpc.security.model.GroupModel
 import org.vulpesstudios.vulpescloud.node.grpc.security.model.UserModel
-import org.vulpesstudios.vulpescloud.node.utils.MongoUtils
+import org.vulpesstudios.vulpescloud.node.utils.PersistenceUtils
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
 import java.util.stream.Stream
@@ -45,7 +45,7 @@ class AuthCommand {
     @Suggestions("users")
     fun userSuggestions(): Stream<String> {
         return CompletableFuture.supplyAsync {
-                runBlocking { MongoUtils.getAllUsers().map { it.name } }
+                runBlocking { PersistenceUtils.getAllUsers().map { it.name } }
             }
             .thenApply { it.stream() }
             .exceptionally { Stream.empty() }
@@ -56,7 +56,7 @@ class AuthCommand {
     fun users(input: CommandInput): UserModel {
         val userName = input.readString()
         return runBlocking {
-            val user = MongoUtils.getUserByName(userName)
+            val user = PersistenceUtils.getUserByName(userName)
             if (user == null) {
                 throw IllegalArgumentException("User '$userName' not found!")
             }
@@ -68,7 +68,7 @@ class AuthCommand {
     @Suggestions("groupParser")
     fun groupSuggestions(): Stream<String> {
         return CompletableFuture.supplyAsync {
-                runBlocking { MongoUtils.getAllGroups().map { it.name } }
+                runBlocking { PersistenceUtils.getAllGroups().map { it.name } }
             }
             .thenApply { it.stream() }
             .exceptionally { Stream.empty() }
@@ -79,7 +79,7 @@ class AuthCommand {
     fun groupParser(input: CommandInput): GroupModel {
         val groupName = input.readString()
         return runBlocking {
-            val group = MongoUtils.getGroupByName(groupName)
+            val group = PersistenceUtils.getGroupByName(groupName)
             if (group == null) {
                 throw IllegalArgumentException("Group '$groupName' not found!")
             }
@@ -124,7 +124,7 @@ class AuthCommand {
         @Argument("password") password: String,
     ) {
         runBlocking {
-            MongoUtils.createUser(name, password)
+            PersistenceUtils.createUser(name, password)
             source.sendMessage("<green>Created user</green> <white>$name</white><green>.</green>")
         }
     }
@@ -137,7 +137,7 @@ class AuthCommand {
         @Argument("password") password: String,
     ) {
         runBlocking {
-            MongoUtils.updateUserPassword(user.name, password)
+            PersistenceUtils.updateUserPassword(user.name, password)
             source.sendMessage(
                 "<green>Updated password for</green> <white>${user.name}</white><green>.</green>"
             )
@@ -153,11 +153,11 @@ class AuthCommand {
         @Argument("value") value: String,
     ) {
         runBlocking {
-            MongoUtils.updateUser(
+            PersistenceUtils.updateUser(
                 user.name,
-                MongoUtils.getUserByName(user.name)!!.copy(
+                PersistenceUtils.getUserByName(user.name)!!.copy(
                     extraData =
-                        MongoUtils.getUserByName(user.name)!!.extraData.toMutableMap().also {
+                        PersistenceUtils.getUserByName(user.name)!!.extraData.toMutableMap().also {
                             it[key] = value
                         }
                 ),
@@ -176,7 +176,7 @@ class AuthCommand {
         @Argument("key") key: String,
     ) {
         runBlocking {
-            val userObj = MongoUtils.getUserByName(user.name)!!
+            val userObj = PersistenceUtils.getUserByName(user.name)!!
             if (userObj.extraData.containsKey(key)) {
                 source.sendMessage(
                     "<green>ExtraData for</green> <white>${user.name}</white> <green>has key</green> <gold>$key</gold> <green>with value</green> <white>${userObj.extraData[key]}</white><green>.</green>"
@@ -197,13 +197,13 @@ class AuthCommand {
         @Argument("key") key: String,
     ) {
         runBlocking {
-            val userObj = MongoUtils.getUserByName(user.name)!!
+            val userObj = PersistenceUtils.getUserByName(user.name)!!
             if (userObj.extraData.containsKey(key)) {
-                MongoUtils.updateUser(
+                PersistenceUtils.updateUser(
                     user.name,
-                    MongoUtils.getUserByName(user.name)!!.copy(
+                    PersistenceUtils.getUserByName(user.name)!!.copy(
                         extraData =
-                            MongoUtils.getUserByName(user.name)!!.extraData.toMutableMap().also {
+                            PersistenceUtils.getUserByName(user.name)!!.extraData.toMutableMap().also {
                                 it.remove(key)
                             }
                     ),
@@ -220,8 +220,8 @@ class AuthCommand {
         @Argument("url") url: String,
     ) {
         runBlocking {
-            val userObj = MongoUtils.getUserByName(user.name)!!
-            MongoUtils.updateUser(
+            val userObj = PersistenceUtils.getUserByName(user.name)!!
+            PersistenceUtils.updateUser(
                 user.name,
                 userObj.copy(
                     extraData = userObj.extraData.toMutableMap().also { it["avatarURL"] = url }
@@ -238,8 +238,8 @@ class AuthCommand {
         @Argument("displayName") displayName: String,
     ) {
         runBlocking {
-            val userObj = MongoUtils.getUserByName(user.name)!!
-            MongoUtils.updateUser(
+            val userObj = PersistenceUtils.getUserByName(user.name)!!
+            PersistenceUtils.updateUser(
                 user.name,
                 userObj.copy(
                     extraData =
@@ -257,8 +257,8 @@ class AuthCommand {
         @Argument("player") player: OfflinePlayer,
     ) {
         runBlocking {
-            val userObj = MongoUtils.getUserByName(user.name)!!
-            MongoUtils.updateUser(
+            val userObj = PersistenceUtils.getUserByName(user.name)!!
+            PersistenceUtils.updateUser(
                 user.name,
                 userObj.copy(
                     extraData =
@@ -279,7 +279,7 @@ class AuthCommand {
         @Argument("permission") permission: String,
     ) {
         runBlocking {
-            MongoUtils.addPermissionToUser(user.name, permission)
+            PersistenceUtils.addPermissionToUser(user.name, permission)
             source.sendMessage(
                 "<green>Added permission</green> <gold>$permission</gold> <green>to user</green> <white>${user.name}</white><green>.</green>"
             )
@@ -294,7 +294,7 @@ class AuthCommand {
         @Argument("permission") permission: String,
     ) {
         runBlocking {
-            MongoUtils.removePermissionFromUser(user.name, permission)
+            PersistenceUtils.removePermissionFromUser(user.name, permission)
             source.sendMessage(
                 "<red>Removed permission</red> <gold>$permission</gold> <red>from user</red> <white>${user.name}</white><red>.</red>"
             )
@@ -309,7 +309,7 @@ class AuthCommand {
         @Argument("group") group: GroupModel,
     ) {
         runBlocking {
-            MongoUtils.addUserToGroup(user.name, group.name)
+            PersistenceUtils.addUserToGroup(user.name, group.name)
             source.sendMessage(
                 "<green>Added user</green> <white>${user.name}</white> <green>to group</green> <gold>${group.name}</gold><green>.</green>"
             )
@@ -324,7 +324,7 @@ class AuthCommand {
         @Argument("group") group: GroupModel,
     ) {
         runBlocking {
-            MongoUtils.removeUserFromGroup(user.name, group.name)
+            PersistenceUtils.removeUserFromGroup(user.name, group.name)
             source.sendMessage(
                 "<red>Removed user</red> <white>${user.name}</white> <red>from group</red> <gold>${group.name}</gold><red>.</red>"
             )
@@ -335,7 +335,7 @@ class AuthCommand {
     @Command("auth user list")
     fun listUsers(source: CommandSource) {
         runBlocking {
-            val users = MongoUtils.getAllUsers()
+            val users = PersistenceUtils.getAllUsers()
             if (users.isEmpty()) {
                 source.sendMessage("<red>No users found.</red>")
                 return@runBlocking
@@ -357,7 +357,7 @@ class AuthCommand {
         @Argument("password") password: String,
     ) {
         runBlocking {
-            val valid = MongoUtils.checkUserPassword(user.name, password)
+            val valid = PersistenceUtils.checkUserPassword(user.name, password)
             if (valid)
                 source.sendMessage(
                     "<green>Password for</green> <white>${user.name}</white> <green>is valid.</green>"
@@ -411,7 +411,7 @@ class AuthCommand {
     @Command("auth user <user> info")
     fun getUserInfo(source: CommandSource, @Argument("user") user: UserModel) {
         runBlocking {
-            val userObj = MongoUtils.getUserByName(user.name)!!
+            val userObj = PersistenceUtils.getUserByName(user.name)!!
             source.sendMessage(
                 "<gold>---------</gold> <white>${userObj.name}</white> <gold>---------</gold>"
             )
@@ -438,7 +438,7 @@ class AuthCommand {
     @Permission("auth.group.create")
     fun createGroup(source: CommandSource, @Argument("name") name: String) {
         runBlocking {
-            MongoUtils.createGroup(name)
+            PersistenceUtils.createGroup(name)
             source.sendMessage("<green>Created group</green> <gold>$name</gold><green>.</green>")
         }
     }
@@ -451,7 +451,7 @@ class AuthCommand {
         @Argument("permission") permission: String,
     ) {
         runBlocking {
-            MongoUtils.addPermissionToGroup(group.name, permission)
+            PersistenceUtils.addPermissionToGroup(group.name, permission)
             source.sendMessage(
                 "<green>Added permission</green> <gold>$permission</gold> <green>to group</green> <white>${group.name}</white><green>.</green>"
             )
@@ -466,7 +466,7 @@ class AuthCommand {
         @Argument("permission") permission: String,
     ) {
         runBlocking {
-            MongoUtils.removePermissionFromGroup(group.name, permission)
+            PersistenceUtils.removePermissionFromGroup(group.name, permission)
             source.sendMessage(
                 "<red>Removed permission</red> <gold>$permission</gold> <red>from group</red> <white>${group.name}</white><red>.</red>"
             )
@@ -477,7 +477,7 @@ class AuthCommand {
     @Permission("auth.group.list")
     fun listGroups(source: CommandSource) {
         runBlocking {
-            val groups = MongoUtils.getAllGroups()
+            val groups = PersistenceUtils.getAllGroups()
             if (groups.isEmpty()) {
                 source.sendMessage("<red>No groups found.</red>")
                 return@runBlocking
@@ -498,7 +498,7 @@ class AuthCommand {
         @Argument("group") group: GroupModel,
     ) {
         runBlocking {
-            val groupObj = MongoUtils.getGroupByName(group.name)!!
+            val groupObj = PersistenceUtils.getGroupByName(group.name)!!
             if (groupObj.permissions.isEmpty()) {
                 source.sendMessage("<gold>${group.name}</gold> <gray>has no permissions.</gray>")
             } else {

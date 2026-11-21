@@ -17,11 +17,8 @@
 package org.vulpesstudios.vulpescloud.node.cluster.tls
 
 import kotlinx.serialization.Serializable
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.encodeToJsonElement
 import org.slf4j.LoggerFactory
-import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
+import org.vulpesstudios.vulpescloud.node.db.ClusterTlsRepository
 import org.vulpesstudios.vulpescloud.node.utils.AddressUtils
 import java.io.File
 import java.security.KeyPair
@@ -46,17 +43,15 @@ class TlsManager(
     private val nodeId: String,
 ) {
     private val logger = LoggerFactory.getLogger(TlsManager::class.java)
-    private val database =
-        DatabaseProvider.getMainDatabaseProvider().getOrCreateDatabase("cluster_tls")
     private val certDir = File("launcher/.secret/certs")
 
     @Volatile private var currentBundle: NodeCertBundle? = null
 
-    suspend fun isClusterInitialized(): Boolean {
-        return database.get("ca") != null
+    fun isClusterInitialized(): Boolean {
+        return ClusterTlsRepository.getCa() != null
     }
 
-    suspend fun initCluster() {
+    fun initCluster() {
         if (isClusterInitialized()) {
             logger.info("Cluster TLS already initialized.")
             return
@@ -70,11 +65,11 @@ class TlsManager(
         val encryptedKey = CaKeyEncryption.encrypt(caKeyPem, clusterSecret)
         val storedCa = StoredCa(caCertPem, encryptedKey)
 
-        database.upsert("ca", Json.encodeToJsonElement(storedCa))
+        ClusterTlsRepository.saveCa(storedCa)
         logger.info("Cluster TLS CA initialized and stored in database.")
     }
 
-    suspend fun bootstrapNode(): NodeCertBundle {
+    fun bootstrapNode(): NodeCertBundle {
         if (hasLocalCertBundle(certDir)) {
             val local = loadLocalBundle(certDir)
             val cert = ClusterCertificateAuthority.certificateFromPem(local.nodeCertPem)
@@ -97,14 +92,14 @@ class TlsManager(
         return issueNewBundle()
     }
 
-    private suspend fun issueNewBundle(): NodeCertBundle {
+    private fun issueNewBundle(): NodeCertBundle {
         if (!isClusterInitialized()) {
             initCluster()
         }
 
-        val storedCaElement =
-            database.get("ca") ?: throw IllegalStateException("Cluster CA not found in database!")
-        val storedCa = Json.decodeFromJsonElement<StoredCa>(storedCaElement)
+        val storedCa =
+            ClusterTlsRepository.getCa()
+                ?: throw IllegalStateException("Cluster CA not found in database!")
 
         val caKeyPem = CaKeyEncryption.decrypt(storedCa.encryptedKey, clusterSecret)
         val caCert = ClusterCertificateAuthority.certificateFromPem(storedCa.caCertPem)

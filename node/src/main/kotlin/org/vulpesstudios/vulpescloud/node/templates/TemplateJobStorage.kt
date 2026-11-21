@@ -16,40 +16,42 @@
 
 package org.vulpesstudios.vulpescloud.node.templates
 
-import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.decodeFromJsonElement
-import kotlinx.serialization.json.encodeToJsonElement
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.api.templates.TemplateJobProgress
-import org.vulpesstudios.vulpescloud.node.Node
-import org.vulpesstudios.vulpescloud.node.db.Database
+import org.vulpesstudios.vulpescloud.node.db.TemplateJobLockRepository
+import org.vulpesstudios.vulpescloud.node.db.TemplateJobRepository
+import kotlin.time.Duration.Companion.milliseconds
 
-/** Shared database-backed job records. compareAndSet protects worker claims and checkpoints. */
+/**
+ * Shared relational job records. Database locks serialize checkpoint updates; conditional row
+ * updates claim workers.
+ */
+@Suppress("UNUSED")
 class TemplateJobStorage {
-    private val database: Database by lazy {
-        Node.instance.getDatabaseProvider().getOrCreateDatabase(DATABASE_NAME)
-    }
-    private val json = Json { ignoreUnknownKeys = true }
+    private val mutex = Mutex()
 
-    suspend fun get(jobId: String): TemplateJobProgress? = getRecord(jobId)?.progress
+    fun get(jobId: String): TemplateJobProgress? = getRecord(jobId)?.progress
 
-    suspend fun getRecord(jobId: String): TemplateJobRecord? = decode(jobId, database.get(jobId))
+    fun getRecord(jobId: String): TemplateJobRecord? = TemplateJobRepository.get(jobId)
 
-    suspend fun getAllRecords(): List<TemplateJobRecord> =
-        database.getAllEntries().mapNotNull { (key, value) -> decode(key, value) }
+    fun getAllRecords(): List<TemplateJobRecord> = TemplateJobRepository.getAll()
 
-    suspend fun getAll(): List<TemplateJobProgress> = getAllRecords().map { it.progress }
+    fun getAll(): List<TemplateJobProgress> = getAllRecords().map { it.progress }
 
-    suspend fun getActive(): List<TemplateJobProgress> =
+    fun getActive(): List<TemplateJobProgress> =
         getAllRecords().map { it.progress }.filter { it.status.isActive }
 
-    suspend fun create(record: TemplateJobRecord) {
-        database.insert(record.progress.jobId, json.encodeToJsonElement(record))
+    fun create(record: TemplateJobRecord) {
+        check(TemplateJobRepository.save(record, createOnly = true)) {
+            "Template job ${record.progress.jobId} already exists"
+        }
     }
 
     suspend fun saveRecord(record: TemplateJobRecord) {
-        database.upsert(record.progress.jobId, json.encodeToJsonElement(record))
+        updateRecord(record.progress.jobId) { record }
     }
 
     suspend fun save(progress: TemplateJobProgress) {
@@ -63,79 +65,71 @@ class TemplateJobStorage {
         maxRetries: Int = 20,
         transform: (TemplateJobRecord?) -> TemplateJobRecord,
     ): TemplateJobRecord? {
-        repeat(maxRetries) {
-            val old = database.get(jobId)
-            val current = old?.let { runCatching { json.decodeFromJsonElement<TemplateJobRecord>(it) }.getOrNull() }
-            if (old != null && current == null) {
-                logger.error("Failed to decode template job record {}", jobId)
-                return null
+        return mutex.withLock {
+            val key = "job-update:$jobId"
+            val owner = "update:${java.util.UUID.randomUUID()}"
+            val acquiredAt = System.currentTimeMillis()
+            var acquired = false
+            for (attempt in 0 until maxRetries) {
+                if (
+                    TemplateJobLockRepository.tryAcquire(
+                        key,
+                        TemplateJobLock(
+                            owner,
+                            acquiredAt,
+                            "Template job checkpoint",
+                            acquiredAt + 30_000,
+                        ),
+                        acquiredAt,
+                    )
+                ) {
+                    acquired = true
+                    break
+                }
+                delay(10.milliseconds)
             }
-            val updated = transform(current)
-            if (database.compareAndSet(jobId, old, json.encodeToJsonElement(updated))) return updated
+            if (!acquired) {
+                logger.warn("Could not acquire persistence lock for template job {}", jobId)
+                return@withLock null
+            }
+            try {
+                val updated = transform(TemplateJobRepository.get(jobId))
+                TemplateJobRepository.save(updated)
+                updated
+            } finally {
+                TemplateJobLockRepository.deleteOwned(key, owner)
+            }
         }
-        logger.warn("Could not update template job {} after {} compare-and-set attempts", jobId, maxRetries)
-        return null
     }
 
-    suspend fun claim(jobId: String, nodeName: String, now: Long, leaseMillis: Long): TemplateJobRecord? {
-        repeat(20) {
-            val old = database.get(jobId) ?: return null
-            val current = runCatching { json.decodeFromJsonElement<TemplateJobRecord>(old) }.getOrNull()
-                ?: return null
-            if (!current.progress.status.isActive || current.workerLeaseUntil > now) return null
-            val claimed = current.copy(
-                workerNodeName = nodeName,
-                workerLeaseUntil = now + leaseMillis,
-                workerToken = java.util.UUID.randomUUID().toString(),
-            )
-            if (database.compareAndSet(jobId, old, json.encodeToJsonElement(claimed))) return claimed
-        }
-        return null
+    fun claim(jobId: String, nodeName: String, now: Long, leaseMillis: Long): TemplateJobRecord? {
+        return TemplateJobRepository.claim(jobId, nodeName, now, leaseMillis)
     }
 
-    suspend fun delete(jobId: String) {
-        database.delete(jobId)
-    }
-
-    private fun decode(key: String, value: JsonElement?): TemplateJobRecord? {
-        if (value == null) return null
-        return try {
-            json.decodeFromJsonElement<TemplateJobRecord>(value)
-        } catch (e: Exception) {
-            logger.error("Failed to decode template job record {}", key, e)
-            null
-        }
+    fun delete(jobId: String) {
+        TemplateJobRepository.delete(jobId)
     }
 
     companion object {
-        const val DATABASE_NAME = "vc_template_jobs"
         private val logger = LoggerFactory.getLogger(TemplateJobStorage::class.java)
     }
 }
 
 /** Durable lock slots are keyed by template ID or by a reservation for a not-yet-created target. */
 class TemplateJobLockStorage {
-    private val database: Database by lazy {
-        Node.instance.getDatabaseProvider().getOrCreateDatabase(DATABASE_NAME)
-    }
-    private val json = Json { ignoreUnknownKeys = true }
+    private val mutex = Mutex()
 
-    suspend fun get(key: String): TemplateJobLock? {
-        repeat(20) {
-            val old = database.get(key) ?: return null
-            val lock = decode(old)?.takeIf { it.jobId.isNotBlank() } ?: return null
-            if (lock.leaseUntil == 0L || lock.leaseUntil > System.currentTimeMillis()) return lock
-            if (database.compareAndSet(key, old, json.encodeToJsonElement(TemplateJobLock("", 0, "")))) return null
-        }
-        val current = database.get(key)?.let(::decode) ?: return null
-        return current.takeIf { it.jobId.isNotBlank() && (it.leaseUntil == 0L || it.leaseUntil > System.currentTimeMillis()) }
+    fun get(key: String): TemplateJobLock? {
+        val lock = TemplateJobLockRepository.get(key) ?: return null
+        if (lock.leaseUntil == 0L || lock.leaseUntil > System.currentTimeMillis()) return lock
+        TemplateJobLockRepository.deleteOwned(key, lock.jobId)
+        return null
     }
 
-    suspend fun getAll(): List<Pair<String, TemplateJobLock>> =
-        database.getAllEntries().mapNotNull { (key, value) ->
-            decode(value)?.takeIf {
-                it.jobId.isNotBlank() && (it.leaseUntil == 0L || it.leaseUntil > System.currentTimeMillis())
-            }?.let { key to it }
+    fun getAll(): List<Pair<String, TemplateJobLock>> =
+        TemplateJobLockRepository.getAll().filter { (_, it) ->
+            it.jobId.isNotBlank() &&
+                (it.leaseUntil == 0L || it.leaseUntil > System.currentTimeMillis())
         }
 
     suspend fun acquire(
@@ -144,71 +138,37 @@ class TemplateJobLockStorage {
         description: String,
         leaseUntil: Long = 0,
     ): Boolean {
-        val acquiredNow = mutableListOf<String>()
-        for (key in keys.sorted()) {
-            var acquired = false
-            var newlyAcquired = false
-            repeat(20) {
-                if (acquired) return@repeat
-                val old = database.get(key)
-                val current = decode(old)
-                if (current?.jobId == jobId) {
-                    acquired = true
-                } else if (current != null && current.jobId.isNotBlank() &&
-                    (current.leaseUntil == 0L || current.leaseUntil > System.currentTimeMillis())
+        return mutex.withLock {
+            val acquired = mutableListOf<String>()
+            val now = System.currentTimeMillis()
+            for (key in keys.sorted()) {
+                if (
+                    !TemplateJobLockRepository.tryAcquire(
+                        key,
+                        TemplateJobLock(jobId, now, description, leaseUntil),
+                        now,
+                    )
                 ) {
-                    return@repeat
-                } else {
-                    val lock = TemplateJobLock(jobId, System.currentTimeMillis(), description, leaseUntil)
-                    acquired = database.compareAndSet(key, old, json.encodeToJsonElement(lock))
-                    newlyAcquired = acquired
+                    acquired.forEach { TemplateJobLockRepository.deleteOwned(it, jobId) }
+                    return@withLock false
                 }
+                acquired += key
             }
-            if (!acquired) {
-                release(acquiredNow.toSet(), jobId)
-                return false
-            }
-            if (newlyAcquired) acquiredNow += key
+            true
         }
-        return true
     }
 
     suspend fun release(keys: Set<String>, jobId: String) {
-        for (key in keys) {
-            repeat(20) {
-                val old = database.get(key) ?: return@repeat
-                val current = decode(old) ?: return@repeat
-                if (current.jobId != jobId) return@repeat
-                val free = TemplateJobLock("", 0, "", 0)
-                if (database.compareAndSet(key, old, json.encodeToJsonElement(free))) return@repeat
-            }
-        }
+        mutex.withLock { keys.forEach { key -> TemplateJobLockRepository.deleteOwned(key, jobId) } }
     }
 
     suspend fun renew(keys: Set<String>, jobId: String, leaseUntil: Long): Boolean {
-        var renewed = true
-        for (key in keys) {
-            var updated = false
-            repeat(20) {
-                if (updated) return@repeat
-                val old = database.get(key) ?: return@repeat
-                val current = decode(old) ?: return@repeat
-                if (current.jobId != jobId) return@repeat
-                updated = database.compareAndSet(
-                    key,
-                    old,
-                    json.encodeToJsonElement(current.copy(leaseUntil = leaseUntil)),
-                )
+        return mutex.withLock {
+            var renewed = true
+            keys.forEach { key ->
+                if (!TemplateJobLockRepository.renewOwned(key, jobId, leaseUntil)) renewed = false
             }
-            if (!updated) renewed = false
+            renewed
         }
-        return renewed
-    }
-
-    private fun decode(value: JsonElement?): TemplateJobLock? =
-        if (value == null) null else runCatching { json.decodeFromJsonElement<TemplateJobLock>(value) }.getOrNull()
-
-    companion object {
-        const val DATABASE_NAME = "vc_template_locks"
     }
 }

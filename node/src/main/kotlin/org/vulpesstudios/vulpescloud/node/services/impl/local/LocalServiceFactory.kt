@@ -18,7 +18,6 @@ package org.vulpesstudios.vulpescloud.node.services.impl.local
 
 import build.buf.gen.vulpescloud.events.v1.serviceStateChangedEvent
 import build.buf.gen.vulpescloud.services.v1.ServiceState
-import build.buf.gen.vulpescloud.templates.v1.createTemplateRequest
 import com.electronwill.nightconfig.core.file.FileConfig
 import com.electronwill.nightconfig.toml.TomlFormat
 import com.electronwill.nightconfig.yaml.YamlFormat
@@ -29,15 +28,15 @@ import org.vulpesstudios.vulpescloud.node.Node
 import org.vulpesstudios.vulpescloud.node.event.EventsService
 import org.vulpesstudios.vulpescloud.node.serversoftware.impl.*
 import org.vulpesstudios.vulpescloud.node.services.AbstractServiceFactory
-import org.vulpesstudios.vulpescloud.node.templates.TemplateStorageRegistry
 import org.vulpesstudios.vulpescloud.node.templates.TemplateJobLockStorage
 import org.vulpesstudios.vulpescloud.node.templates.TemplateLockKey
-import java.util.UUID
+import org.vulpesstudios.vulpescloud.node.templates.TemplateStorageRegistry
 import java.nio.file.Files
 import java.nio.file.StandardCopyOption
 import java.util.*
 import kotlin.io.path.Path
 import kotlin.io.path.copyTo
+import kotlin.time.Duration.Companion.milliseconds
 
 class LocalServiceFactory : AbstractServiceFactory() {
 
@@ -60,10 +59,6 @@ class LocalServiceFactory : AbstractServiceFactory() {
             .sortedBy { it.weight }
             .forEach { template ->
                 TemplateStorageRegistry.getTemplateStorageByName(template.location.storageName)?.apply {
-                    Node.instance.localGrpcClient.templateAPI.createTemplate(createTemplateRequest {
-                        this.template = template.toDefinition()
-                        this.destination = template.location.toDefinition()
-                    }) // TODO: This is prob. only temporary as I am to lazy to manually re-create my templates
                     val lockStorage = TemplateJobLockStorage()
                     val lockKey = TemplateLockKey.template(template.id)
                     val interactionId = "service-preparation:${Node.instance.configProvider.config.nodeName}:${UUID.randomUUID()}"
@@ -77,7 +72,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
                     coroutineScope {
                         val renewal = launch {
                             while (isActive) {
-                                delay(5_000)
+                                delay(5_000.milliseconds)
                                 check(lockStorage.renew(
                                     setOf(lockKey),
                                     interactionId,
@@ -255,26 +250,25 @@ class LocalServiceFactory : AbstractServiceFactory() {
                 certDir.resolve("ca.crt"),
                 StandardCopyOption.REPLACE_EXISTING
             )
+            Node.instance.moduleProvider
+                .getAllModules()
+                .filter { module ->
+                    module.moduleInfo.copyToServices &&
+                            module.moduleInfo.platforms
+                                .map { it.lowercase() }
+                                .contains(service.task.software.name.lowercase())
+                }
+                .forEach {
+                    Files.copy(
+                        Node.instance.moduleProvider.moduleFolder.resolve("${it.moduleInfo.name}.jar"),
+                        localService
+                            .path()
+                            .resolve(service.task.software.pluginDir)
+                            .resolve("${it.moduleInfo.name}.jar"),
+                        StandardCopyOption.REPLACE_EXISTING,
+                    )
+                }
         }
-
-        Node.instance.moduleProvider
-            .getAllModules()
-            .filter { module ->
-                module.moduleInfo.copyToServices &&
-                    module.moduleInfo.platforms
-                        .map { it.lowercase() }
-                        .contains(service.task.software.name.lowercase())
-            }
-            .forEach {
-                Files.copy(
-                    Node.instance.moduleProvider.moduleFolder.resolve("${it.moduleInfo.name}.jar"),
-                    localService
-                        .path()
-                        .resolve(service.task.software.pluginDir)
-                        .resolve("${it.moduleInfo.name}.jar"),
-                    StandardCopyOption.REPLACE_EXISTING,
-                )
-            }
 
         localService.processBuilder = processBuilder
 
@@ -373,6 +367,7 @@ class LocalServiceFactory : AbstractServiceFactory() {
     companion object {
         private val servicePrepareSyncHooks = mutableListOf<suspend (LocalService) -> Unit>()
 
+        @Suppress("UNUSED")
         fun addServicePrepareSyncHook(hook: suspend (LocalService) -> Unit) {
             servicePrepareSyncHooks.add(hook)
         }

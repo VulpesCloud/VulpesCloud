@@ -19,21 +19,19 @@ package org.vulpesstudios.vulpescloud.node.db.impl.mariadb
 import com.zaxxer.hikari.HikariConfig
 import com.zaxxer.hikari.HikariDataSource
 import kotlinx.serialization.json.Json
-import org.jetbrains.exposed.v1.jdbc.Database
-import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.jetbrains.exposed.v1.jdbc.Database as ExposedDatabase
+import org.flywaydb.core.Flyway
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.vulpesstudios.vulpescloud.node.config.db.MariaDBConfig
 import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
-import org.vulpesstudios.vulpescloud.node.db.impl.sql.KeyValueTable
 import kotlin.io.path.Path
 import kotlin.io.path.exists
 
 class MariaDBDatabaseProvider : DatabaseProvider {
 
-    lateinit var database: Database
+    lateinit var database: ExposedDatabase
     lateinit var dataSource: HikariDataSource
-    private val databases = mutableMapOf<String, MariaDBDatabase>()
+    override fun sqlDatabase(): ExposedDatabase = database
 
     override fun initialize() {
         val options = getMariaDBConfig()
@@ -45,31 +43,14 @@ class MariaDBDatabaseProvider : DatabaseProvider {
         hikariConfig.password = options.password
 
         dataSource = HikariDataSource(hikariConfig)
-        database = Database.connect(dataSource)
+        Flyway.configure().dataSource(dataSource).locations("classpath:db/migration/mariadb")
+            .load().migrate()
+        database = ExposedDatabase.connect(dataSource)
     }
 
     override fun close() {
         TransactionManager.closeAndUnregister(database)
         dataSource.close()
-    }
-
-    override fun getOrCreateDatabase(name: String): MariaDBDatabase {
-        return databases.getOrPut(name) { MariaDBDatabase(name, database) }
-    }
-
-    override fun hasDatabase(name: String): Boolean {
-        return transaction(database) { SchemaUtils.listTables().any { it == name } }
-    }
-
-    override fun getDatabaseNames(): Set<String> =
-        transaction(database) { SchemaUtils.listTables().toSet() }
-
-    override fun deleteDatabase(name: String) {
-        if (hasDatabase(name)) {
-            val tableToDelete = databases[name]?.table ?: KeyValueTable(name)
-            transaction(database) { SchemaUtils.drop(tableToDelete) }
-            databases.remove(name)
-        }
     }
 
     private fun getMariaDBConfig(): MariaDBConfig {

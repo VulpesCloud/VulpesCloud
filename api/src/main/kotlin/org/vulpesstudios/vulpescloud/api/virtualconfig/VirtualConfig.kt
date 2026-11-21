@@ -17,9 +17,6 @@
 package org.vulpesstudios.vulpescloud.api.virtualconfig
 
 import kotlinx.serialization.Serializable
-import org.bson.BsonDocument
-import org.bson.BsonInt64
-import org.bson.BsonString
 import org.json.JSONObject
 import org.vulpesstudios.vulpescloud.api.serializer.JSONObjectSerializer
 
@@ -40,25 +37,7 @@ data class VirtualConfig(
             .build()
     }
 
-    fun toDocument(): BsonDocument {
-        return BsonDocument().apply {
-            put("name", BsonString(name))
-            put("createdAt", BsonInt64(createdAt))
-            put("lastUpdatedAt", BsonInt64(lastUpdatedAt))
-            put("config", BsonString(config.toString(4)))
-        }
-    }
-
     companion object {
-        fun fromDocument(document: BsonDocument): VirtualConfig {
-            return VirtualConfig(
-                document.getString("name").value,
-                document.getInt64("createdAt").value,
-                document.getInt64("lastUpdatedAt").value,
-                JSONObject(document.getString("config").value),
-            )
-        }
-
         fun fromDefinition(
             definition: build.buf.gen.vulpescloud.virtualconfig.v1.VirtualConfig
         ): VirtualConfig {

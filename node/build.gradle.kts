@@ -58,7 +58,6 @@ dependencies {
     compileOnly(libs.adventure.text.minimessage)
     compileOnly(libs.guava)
     compileOnly(libs.bundles.proto)
-    compileOnly(libs.bundles.mongo)
     compileOnly(libs.bundles.kotlin)
     compileOnly(libs.bouncy.castle)
     compileOnly(libs.okio)
@@ -71,6 +70,11 @@ dependencies {
 
     compileOnly(libs.sqlite)
     compileOnly(libs.mariadb)
+    compileOnly(libs.postgresql)
+    compileOnly(libs.flyway.core)
+    compileOnly(libs.flyway.postgresql)
+    compileOnly(libs.flyway.mysql)
+    compileOnly(libs.flyway.sqlite)
 
     compileOnly(libs.exposed.core)
     compileOnly(libs.exposed.jdbc)

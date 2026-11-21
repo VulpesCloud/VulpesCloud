@@ -34,8 +34,8 @@ import org.vulpesstudios.vulpescloud.node.cluster.ClusterHelper
 import org.vulpesstudios.vulpescloud.node.config.chronyx.ChronyxRedisConfig
 import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.mariadb.MariaDBDatabaseProvider
-import org.vulpesstudios.vulpescloud.node.db.impl.mongo.MongoDBDatabaseProvider
 import org.vulpesstudios.vulpescloud.node.db.impl.sqlite.SQLiteDatabaseProvider
+import org.vulpesstudios.vulpescloud.node.db.impl.postgresql.PostgreSQLDatabaseProvider
 import org.vulpesstudios.vulpescloud.node.grpc.security.AuthClientInterceptor
 import org.vulpesstudios.vulpescloud.node.rollout.RolloutEngine
 
@@ -77,7 +77,7 @@ class ChronyxCoordinator {
                 when (val provider = DatabaseProvider.getMainDatabaseProvider()) {
                     is SQLiteDatabaseProvider,
                     is MariaDBDatabaseProvider,
-                    is MongoDBDatabaseProvider ->
+                    is PostgreSQLDatabaseProvider ->
                         StoreTaskManager("vulpescloud", VulpesChronyxStore())
                     else ->
                         error(

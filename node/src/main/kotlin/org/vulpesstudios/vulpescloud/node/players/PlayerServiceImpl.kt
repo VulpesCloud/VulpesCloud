@@ -18,20 +18,16 @@ package org.vulpesstudios.vulpescloud.node.players
 
 import build.buf.gen.vulpescloud.players.v1.*
 import com.github.benmanes.caffeine.cache.Caffeine
-import kotlinx.serialization.json.Json
 import org.slf4j.LoggerFactory
 import org.vulpesstudios.vulpescloud.api.cluster.NodeState
-import org.vulpesstudios.vulpescloud.api.players.OfflinePlayer
 import org.vulpesstudios.vulpescloud.node.Node
+import org.vulpesstudios.vulpescloud.node.db.OfflinePlayerRepository
 import org.vulpesstudios.vulpescloud.node.grpc.security.AuthClientInterceptor
 import org.vulpesstudios.vulpescloud.node.grpc.security.annotations.RequiresPermission
 import java.util.concurrent.TimeUnit
 
 class PlayerServiceImpl : PlayersServiceGrpcKt.PlayersServiceCoroutineImplBase() {
 
-    private val offlinePlayerDatabase by lazy {
-        Node.instance.getDatabaseProvider().getOrCreateDatabase("offlinePlayers")
-    }
     private val stubCache =
         Caffeine.newBuilder()
             .expireAfterAccess(5, TimeUnit.MINUTES)
@@ -40,16 +36,16 @@ class PlayerServiceImpl : PlayersServiceGrpcKt.PlayersServiceCoroutineImplBase()
 
     @RequiresPermission("players.getAllOnline")
     override suspend fun getAllOnlinePlayers(
-        request: GetAllOnlinePlayersRequest
+        request: GetAllOnlinePlayersRequest,
     ): GetAllOnlinePlayersResponse {
-        val onlinePlayers = mutableListOf<build.buf.gen.vulpescloud.players.v1.OnlinePlayer>()
+        val onlinePlayers = mutableListOf<OnlinePlayer>()
         onlinePlayers.addAll(
             getAllOnlinePlayerOfNode(
-                getAllOnlinePlayerOfNodeRequest {
-                    this.name = Node.instance.configProvider.config.nodeName
-                }
-            )
-                .playersList
+                    getAllOnlinePlayerOfNodeRequest {
+                        this.name = Node.instance.configProvider.config.nodeName
+                    },
+                )
+                .playersList,
         )
         Node.instance.clusterProvider.remoteNodes
             .filter { it.getSnapshot().state == NodeState.ONLINE }
@@ -63,9 +59,9 @@ class PlayerServiceImpl : PlayersServiceGrpcKt.PlayersServiceCoroutineImplBase()
                 onlinePlayers.addAll(
                     stub
                         .getAllOnlinePlayerOfNode(
-                            getAllOnlinePlayerOfNodeRequest { this.name = it.endpoint.name }
+                            getAllOnlinePlayerOfNodeRequest { this.name = it.endpoint.name },
                         )
-                        .playersList
+                        .playersList,
                 )
             }
 
@@ -74,11 +70,11 @@ class PlayerServiceImpl : PlayersServiceGrpcKt.PlayersServiceCoroutineImplBase()
 
     @RequiresPermission("players.getAllOnlineOfNode")
     override suspend fun getAllOnlinePlayerOfNode(
-        request: GetAllOnlinePlayerOfNodeRequest
+        request: GetAllOnlinePlayerOfNodeRequest,
     ): GetAllOnlinePlayerOfNodeResponse {
         val nodeName = request.name
         if (nodeName == Node.instance.configProvider.config.nodeName) {
-            val onlinePlayers = mutableListOf<build.buf.gen.vulpescloud.players.v1.OnlinePlayer>()
+            val onlinePlayers = mutableListOf<OnlinePlayer>()
             Node.instance.nodeProxyPlayers.values.forEach {
                 it.forEach { player -> onlinePlayers.add(player.toProto()) }
             }
@@ -92,7 +88,7 @@ class PlayerServiceImpl : PlayersServiceGrpcKt.PlayersServiceCoroutineImplBase()
             ?.let {
                 if (it.getSnapshot().state != NodeState.ONLINE) {
                     logger.error(
-                        "Received request to get all online players of node $nodeName but node is not online!"
+                        "Received request to get all online players of node $nodeName but node is not online!",
                     )
                     return GetAllOnlinePlayerOfNodeResponse.newBuilder().build()
                 }
@@ -104,19 +100,19 @@ class PlayerServiceImpl : PlayersServiceGrpcKt.PlayersServiceCoroutineImplBase()
                 return stub.getAllOnlinePlayerOfNode(request)
             }
         logger.error(
-            "Received request to get all online players of node $nodeName wich could not be found!"
+            "Received request to get all online players of node $nodeName wich could not be found!",
         )
         return GetAllOnlinePlayerOfNodeResponse.newBuilder().build()
     }
 
     @RequiresPermission("players.getAllOffline")
     override suspend fun getAllOfflinePlayers(
-        request: GetOfflinePlayersRequest
+        request: GetOfflinePlayersRequest,
     ): GetOfflinePlayersResponse {
-        val players = offlinePlayerDatabase.getAll()
+        val players = OfflinePlayerRepository.getAll()
         return getOfflinePlayersResponse {
             this.offlinePlayers.addAll(
-                players.map { Json.decodeFromJsonElement(OfflinePlayer.serializer(), it).toProto() }
+                players.map { it.toProto() },
             )
         }
     }

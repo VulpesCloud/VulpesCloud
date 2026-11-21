@@ -16,46 +16,40 @@
 
 package org.vulpesstudios.vulpescloud.node.db.impl.sqlite
 
-import org.jetbrains.exposed.v1.jdbc.Database
-import org.jetbrains.exposed.v1.jdbc.SchemaUtils
+import org.flywaydb.core.Flyway
+import org.jetbrains.exposed.v1.jdbc.*
 import org.jetbrains.exposed.v1.jdbc.transactions.TransactionManager
-import org.jetbrains.exposed.v1.jdbc.transactions.transaction
 import org.vulpesstudios.vulpescloud.node.db.DatabaseProvider
-import org.vulpesstudios.vulpescloud.node.db.impl.sql.KeyValueTable
+import com.zaxxer.hikari.HikariConfig
+import com.zaxxer.hikari.HikariDataSource
 import java.sql.Connection
 import kotlin.io.path.Path
 
 class SQLiteDatabaseProvider : DatabaseProvider {
 
     lateinit var database: Database
-    private val databases = mutableMapOf<String, SQLiteDatabase>()
+    private lateinit var dataSource: HikariDataSource
+
+    override fun sqlDatabase(): Database = database
 
     override fun initialize() {
         Path("local/database").toFile().mkdirs()
-        database = Database.connect("jdbc:sqlite:local/database/database.db", "org.sqlite.JDBC")
+        val jdbcUrl = "jdbc:sqlite:local/database/database.db"
+        dataSource = HikariDataSource(HikariConfig().apply {
+            this.jdbcUrl = jdbcUrl
+            driverClassName = "org.sqlite.JDBC"
+            connectionInitSql = "PRAGMA foreign_keys=ON"
+        })
+        Flyway.configure().dataSource(dataSource)
+            .locations("classpath:db/migration/sqlite")
+            .load().migrate()
+        database = Database.connect(dataSource)
         TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     }
 
     override fun close() {
         TransactionManager.closeAndUnregister(database)
+        dataSource.close()
     }
 
-    override fun getOrCreateDatabase(name: String): SQLiteDatabase {
-        return databases.getOrPut(name) { SQLiteDatabase(name, database) }
-    }
-
-    override fun hasDatabase(name: String): Boolean {
-        return transaction(database) { SchemaUtils.listTables().any { it == name } }
-    }
-
-    override fun getDatabaseNames(): Set<String> =
-        transaction(database) { SchemaUtils.listTables().toSet() }
-
-    override fun deleteDatabase(name: String) {
-        if (hasDatabase(name)) {
-            val tableToDelete = databases[name]?.table ?: KeyValueTable(name)
-            transaction(database) { SchemaUtils.drop(tableToDelete) }
-            databases.remove(name)
-        }
-    }
 }

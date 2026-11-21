@@ -17,26 +17,16 @@
 package org.vulpesstudios.vulpescloud.node.virtualconfig
 
 import build.buf.gen.vulpescloud.virtualconfig.v1.*
-import kotlinx.serialization.json.Json
-import org.vulpesstudios.vulpescloud.api.virtualconfig.VirtualConfig
-import org.vulpesstudios.vulpescloud.node.Node
+import org.vulpesstudios.vulpescloud.node.db.VirtualConfigRepository
 import org.vulpesstudios.vulpescloud.node.grpc.security.annotations.RequiresPermission
-import org.vulpesstudios.vulpescloud.node.utils.MongoUtils
+import org.vulpesstudios.vulpescloud.node.utils.PersistenceUtils
 
 class VirtualConfigServiceImpl :
     VirtualConfigServiceGrpcKt.VirtualConfigServiceCoroutineImplBase() {
 
-    private val virtualConfigDatabase by lazy {
-        Node.instance.getDatabaseProvider().getOrCreateDatabase("virtualconfigs")
-    }
-
     @RequiresPermission("virtualconfig.list")
     override suspend fun getAll(request: GetAllRequest): GetAllResponse {
-        val configs =
-            virtualConfigDatabase
-                .getAll()
-                .map { Json.decodeFromJsonElement(VirtualConfig.serializer(), it) }
-                .map { it.toDefinition() }
+        val configs = VirtualConfigRepository.getAll().map { it.toDefinition() }
 
         return getAllResponse { this.configs.addAll(configs) }
     }
@@ -47,18 +37,15 @@ class VirtualConfigServiceImpl :
         require(request.name.isNotEmpty()) { "Name must not be empty" }
 
         val config =
-            Json.decodeFromJsonElement(
-                    VirtualConfig.serializer(),
-                    virtualConfigDatabase.get(request.name)
-                        ?: return GetByNameResponse.newBuilder().build(),
-                )
+            (VirtualConfigRepository.get(request.name)
+                    ?: return GetByNameResponse.newBuilder().build())
                 .toDefinition()
         return getByNameResponse { this.config = config }
     }
 
     @RequiresPermission("virtualconfig.create", ["virtualconfig=name"])
     override suspend fun createVirtualConfig(
-        request: CreateVirtualConfigRequest
+        request: CreateVirtualConfigRequest,
     ): CreateVirtualConfigResponse {
 
         require(request.name.isNotEmpty()) { "Name must not be empty" }
@@ -71,26 +58,26 @@ class VirtualConfigServiceImpl :
             this.lastUpdatedAt = System.currentTimeMillis()
         }
 
-        MongoUtils.nothingOrInsertVirtualConfig(config)
+        PersistenceUtils.nothingOrInsertVirtualConfig(config)
 
         return createVirtualConfigResponse { this.config = config }
     }
 
     @RequiresPermission("virtualconfig.delete", ["virtualconfig=name"])
     override suspend fun deleteVirtualConfig(
-        request: DeleteVirtualConfigRequest
+        request: DeleteVirtualConfigRequest,
     ): DeleteVirtualConfigResponse {
 
         require(request.name.isNotEmpty()) { "Name must not be empty" }
 
-        MongoUtils.deleteVirtualConfig(virtualConfig { this.name = request.name })
+        PersistenceUtils.deleteVirtualConfig(virtualConfig { this.name = request.name })
 
         return deleteVirtualConfigResponse { this.success = true }
     }
 
     @RequiresPermission("virtualconfig.update", ["virtualconfig=name"])
     override suspend fun updateVirtualConfig(
-        request: UpdateVirtualConfigRequest
+        request: UpdateVirtualConfigRequest,
     ): UpdateVirtualConfigResponse {
 
         require(request.name.isNotEmpty()) { "Name must not be empty" }
@@ -102,9 +89,8 @@ class VirtualConfigServiceImpl :
             this.lastUpdatedAt = System.currentTimeMillis()
         }
 
-        MongoUtils.updateOrInsertVirtualConfig(config)
+        PersistenceUtils.updateOrInsertVirtualConfig(config)
 
         return updateVirtualConfigResponse { this.config = config }
     }
-
 }
